@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using ConsoleFramework.Controls;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework
@@ -27,18 +28,15 @@ namespace ConsoleFramework
         private IntPtr stdInputHandle;
         private IntPtr stdOutputHandle;
         private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-        private readonly ConsoleDispatcher dispatcher = new ConsoleDispatcher();
-        public ConsoleDispatcher Dispatcher {
-            get {
-                return dispatcher;
-            }
-        }
 
         public void Exit() {
             exitWaitHandle.Set();
         }
 
-        public void Run() {
+        private Control mainControl;
+
+        public void Run(Control control) {
+            this.mainControl = control;
             //
             stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
@@ -46,23 +44,13 @@ namespace ConsoleFramework
                 exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
                 stdInputHandle
             };
-            // small test of physical canvas, todo : remove after tests
+            
+            // todo : introduce settings instead hardcode 80x25
             PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
-            for (int x = 0; x < 80; x++ ) {
-                for (int y = 0; y < 25; y++) {
-                    if (x == 40) {
-                        canvas[x][y].UnicodeChar = '8';
-                        canvas[x][y].Attributes = CHAR_ATTRIBUTES.BACKGROUND_RED;
-                    }
-                    else {
-                        canvas[x][y].AsciiChar = '0';
-                        canvas[x][y].Attributes = CHAR_ATTRIBUTES.FOREGROUND_BLUE | CHAR_ATTRIBUTES.FOREGROUND_GREEN;
-                    }
-                    
-                }
-            }
+            this.mainControl.canvas = new VirtualCanvas(control, canvas, 0, 0);
+            this.mainControl.Draw(0, 0, 80, 25);
             canvas.Flush();
-
+            
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
                 if (waitResult == 0) {
@@ -99,7 +87,8 @@ namespace ConsoleFramework
                 }
             }
             //
-            dispatcher.DispatchInputEvent(inputRecord);
+            //dispatcher.DispatchInputEvent(inputRecord);
+            mainControl.HandleEvent(inputRecord);
         }
 
         private void dispose(bool isDisposing) {

@@ -41,17 +41,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\BackgroundControl.cs" />
+    <Compile Include="Controls\Control.cs" />
+    <Compile Include="Controls\Panel.cs" />
+    <Compile Include="Controls\WindowsHost.cs" />
     <Compile Include="IElementsVisibilityAware.cs" />
     <Compile Include="PhysicalCanvas.cs" />
     <Compile Include="VirtualCanvas.cs" />
     <Compile Include="ConsoleApplication.cs" />
-    <Compile Include="FrameworkElement.cs" />
     <Compile Include="ConsoleDispatcher.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\Structures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Window.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\" />
