@@ -1,4 +1,5 @@
 ﻿using System;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
@@ -27,12 +28,7 @@ namespace ConsoleFramework.Controls
             canvas = new VirtualCanvas(this);
         }
 
-        public int ActualLeft {
-            get;
-            private set;
-        }
-
-        public int ActualTop {
+        public Point ActualOffset {
             get;
             private set;
         }
@@ -47,6 +43,44 @@ namespace ConsoleFramework.Controls
             private set;
         }
 
+        public int Width {
+            get;
+            set;
+        }
+
+        public int Height {
+            get;
+            set;
+        }
+
+        public Thickness Margin {
+            get;
+            set;
+        }
+
+        public bool Visible {
+            get;
+            set;
+        }
+
+        internal Size DesiredSize {
+            get;
+            private set;
+        }
+
+        internal void Measure(Size availableSize) {
+            DesiredSize = availableSize;
+        }
+
+        protected virtual Size MeasureOverride(Size availableSize) {
+            return Size.Empty;
+        }
+
+        internal void Arrange(Size finalSize) {
+            ActualWidth = finalSize.width;
+            ActualHeight = finalSize.height;
+        }
+
         public virtual void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
             //
             if (null == canvas) {
@@ -54,8 +88,8 @@ namespace ConsoleFramework.Controls
                                                     " or set this control as main application control.");
             }
             //
-            ActualLeft = actualLeft;
-            ActualTop = actualTop;
+            //ActualLeft = actualLeft;
+            //ActualTop = actualTop;
             ActualWidth = actualWidth;
             ActualHeight = actualHeight;
         }

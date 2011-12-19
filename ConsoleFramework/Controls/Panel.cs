@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
@@ -13,9 +14,19 @@ namespace ConsoleFramework.Controls
     /// Может быть самым первым контролом программы (окно не может, к примеру, оно может существовать
     /// только в рамках хоста окон).
     /// </summary>
-    public class Panel
-    {
-        public virtual void Draw() {
+    public class Panel : Control {
+        private readonly List<Control> children = new List<Control>();
+
+        public CHAR_ATTRIBUTES Background {
+            get;
+            set;
+        }
+
+        public void AddChild(Control control) {
+            children.Add(control);
+        }
+
+        public override void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
             //
         }
     }

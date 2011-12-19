@@ -36,5 +36,13 @@ namespace ConsoleFramework
                 control.Parent.canvas.SetPixel(x + control.ActualLeft, y + control.ActualTop, character, attributes);
             }
         }
+
+        public void SetPixel(int x, int y, char character) {
+            if (physicalCanvas != null) {
+                physicalCanvas[x + initialX][y + initialY].AsciiChar = character;
+            } else {
+                control.Parent.canvas.SetPixel(x, y, character);
+            }
+        }
     }
 }

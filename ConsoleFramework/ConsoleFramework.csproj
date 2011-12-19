@@ -42,22 +42,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\BackgroundControl.cs" />
+    <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Control.cs" />
     <Compile Include="Controls\Panel.cs" />
+    <Compile Include="Controls\TextBlock.cs" />
     <Compile Include="Controls\WindowsHost.cs" />
-    <Compile Include="IElementsVisibilityAware.cs" />
+    <Compile Include="Core\Point.cs" />
+    <Compile Include="Core\Size.cs" />
+    <Compile Include="Core\Thickness.cs" />
+    <Compile Include="Core\Vector.cs" />
     <Compile Include="PhysicalCanvas.cs" />
     <Compile Include="VirtualCanvas.cs" />
     <Compile Include="ConsoleApplication.cs" />
-    <Compile Include="ConsoleDispatcher.cs" />
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\Structures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
