@@ -35,12 +35,12 @@ namespace ConsoleFramework.Controls
 
         public int ActualWidth {
             get;
-            private set;
+            protected set;
         }
 
         public int ActualHeight {
             get;
-            private set;
+            protected set;
         }
 
         public int Width {
@@ -79,6 +79,12 @@ namespace ConsoleFramework.Controls
         internal void Arrange(Size finalSize) {
             ActualWidth = finalSize.width;
             ActualHeight = finalSize.height;
+            //
+            ArrangeOverride(finalSize);
+        }
+
+        protected virtual void ArrangeOverride(Size finalSize) {
+            //
         }
 
         public virtual void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
@@ -88,14 +94,14 @@ namespace ConsoleFramework.Controls
                                                     " or set this control as main application control.");
             }
             //
-            //ActualLeft = actualLeft;
-            //ActualTop = actualTop;
-            ActualWidth = actualWidth;
-            ActualHeight = actualHeight;
         }
 
         public virtual void HandleEvent(INPUT_RECORD inputRecord) {
             //
+        }
+
+        public virtual Point GetChildPoint(Control control) {
+            throw new NotImplementedException();
         }
     }
 }

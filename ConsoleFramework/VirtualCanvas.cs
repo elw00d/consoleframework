@@ -1,4 +1,5 @@
 ﻿using ConsoleFramework.Controls;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework
@@ -33,7 +34,8 @@ namespace ConsoleFramework
                 physicalCanvas[x + initialX][y + initialY].AsciiChar = character;
                 physicalCanvas[x + initialX][y + initialY].Attributes = attributes;
             } else {
-                control.Parent.canvas.SetPixel(x + control.ActualLeft, y + control.ActualTop, character, attributes);
+                Point point = control.Parent.GetChildPoint(control);
+                control.Parent.canvas.SetPixel(x + point.X, y + point.Y, character, attributes);
             }
         }
 
@@ -41,7 +43,8 @@ namespace ConsoleFramework
             if (physicalCanvas != null) {
                 physicalCanvas[x + initialX][y + initialY].AsciiChar = character;
             } else {
-                control.Parent.canvas.SetPixel(x, y, character);
+                Point point = control.Parent.GetChildPoint(control);
+                control.Parent.canvas.SetPixel(x + point.X, y + point.Y, character);
             }
         }
     }
