@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
@@ -89,9 +90,34 @@ namespace ConsoleFramework
                 }
             }
             //
-            //dispatcher.DispatchInputEvent(inputRecord);
-            mainControl.HandleEvent(inputRecord);
+            if (inputCaptureStack.Count != 0) {
+                inputCaptureStack.Peek().HandleEvent(inputRecord);
+            } else {
+                // todo : think about make mainControl first item in capturing controls stack
+                mainControl.HandleEvent(inputRecord);
+            }
         }
+
+        public void BeginCaptureInput(Control control) {
+            if (null == control) {
+                throw new ArgumentNullException("control");
+            }
+            //
+            inputCaptureStack.Push(control);
+        }
+
+        public void EndCaptureInput(Control control) {
+            if (null == control) {
+                throw new ArgumentNullException("control");
+            }
+            //
+            if (inputCaptureStack.Peek() != control) {
+                throw new InvalidOperationException("Last control captured the input differs from specified in argument.");
+            }
+            inputCaptureStack.Pop();
+        }
+
+        private Stack<Control> inputCaptureStack = new Stack<Control>();
 
         private void dispose(bool isDisposing) {
             if (isDisposing) {

@@ -4,6 +4,13 @@ namespace ConsoleFramework.Controls
 {
     public class TextBlock : Control {
         private string text;
+
+        public TextBlock(PhysicalCanvas canvas) : base(canvas) {
+        }
+
+        public TextBlock(Control parent) : base(parent) {
+        }
+
         public string Text {
             get {
                 return text;
@@ -14,6 +21,9 @@ namespace ConsoleFramework.Controls
                     // todo : invalidate graphical representation
                 }
             }
+        }
+
+        public TextBlock() {
         }
 
         public override void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {

@@ -17,6 +17,15 @@ namespace ConsoleFramework.Controls
         private readonly List<Control> children = new List<Control>();
         private readonly Dictionary<Control, Point> childrenPositions = new Dictionary<Control, Point>();
 
+        public Panel() {
+        }
+
+        public Panel(PhysicalCanvas canvas) : base(canvas) {
+        }
+
+        public Panel(Control parent) : base(parent) {
+        }
+
         public CHAR_ATTRIBUTES Background {
             get;
             set;
@@ -79,7 +88,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public override Point GetChildPoint(Control control) {
+        public override Point GetChildOffset(Control control) {
             return childrenPositions[control];
         }
     }
