@@ -5,6 +5,25 @@ using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
+    public enum HorizontalAlignment
+    {
+        Left,
+        Center,
+        Right,
+        Stretch
+    }
+
+
+    public enum VerticalAlignment
+    {
+        Top,
+        Center,
+        Bottom,
+        Stretch
+    }
+
+
+
     /// <summary>
     /// Base class for all controls.
     /// </summary>
@@ -37,10 +56,9 @@ namespace ConsoleFramework.Controls
             canvas = new VirtualCanvas(this);
         }
 
-        public Point ActualOffset {
-            get {
-                return Parent != null ? Parent.GetChildOffset(this) : new Point(0, 0);
-            }
+        public Vector ActualOffset {
+            get;
+            private set;
         }
 
         public bool LayoutIsValid {
@@ -234,14 +252,181 @@ namespace ConsoleFramework.Controls
         public void Arrange(Rect finalRect) {
             if (LayoutIsValid)
                 return;
-            //
-            Size returnedSize = ArrangeOverride(m_unclippedDesiredSize);
-            //
-            ActualWidth = Math.Min(finalRect.Width, returnedSize.Width);
-            ActualHeight = Math.Min(finalRect.Height, returnedSize.Height);
-            //
+
+            // If LayoutConstrained==true (parent wins in layout),
+            // we might get finalRect.Size smaller then UnclippedDesiredSize. 
+            // Stricltly speaking, this may be the case even if LayoutConstrained==false (child wins),
+            // since who knows what a particualr parent panel will try to do in error.
+            // In this case we will not actually arrange a child at a smaller size,
+            // since the logic of the child does not expect to receive smaller size 
+            // (if it coudl deal with smaller size, it probably would accept it in MeasureOverride)
+            // so lets replace the smaller arreange size with UnclippedDesiredSize 
+            // and then clip the guy later. 
+            // We will use at least UnclippedDesiredSize to compute arrangeSize of the child, and
+            // we will use layoutSlotSize to compute alignments - so the bigger child can be aligned within 
+            // smaller slot.
+
+            // This is computed on every ArrangeCore. Depending on LayoutConstrained, actual clip may apply or not
+            // todo : introduce a property ?
+            bool NeedsClipBounds = false;
+
+            // Start to compute arrange size for the child. 
+            // It starts from layout slot or deisred size if layout slot is smaller then desired, 
+            // and then we reduce it by margins, apply Width/Height etc, to arrive at the size
+            // that child will get in its ArrangeOverride. 
+            Size arrangeSize = finalRect.Size;
+
+            Thickness margin = Margin;
+            int marginWidth = margin.Left + margin.Right;
+            int marginHeight = margin.Top + margin.Bottom;
+
+            arrangeSize.Width = Math.Max(0, arrangeSize.Width - marginWidth);
+            arrangeSize.Height = Math.Max(0, arrangeSize.Height - marginHeight);
+            
+            // Next, compare against unclipped, transformed size.
+            Size unclippedDesiredSize = m_unclippedDesiredSize;
+
+            if (arrangeSize.Width < unclippedDesiredSize.Width) {
+                NeedsClipBounds = true;
+                arrangeSize.Width = unclippedDesiredSize.Width;
+            }
+
+            if (arrangeSize.Height < unclippedDesiredSize.Height) {
+                NeedsClipBounds = true;
+                arrangeSize.Height = unclippedDesiredSize.Height;
+            }
+
+            // Alignment==Stretch --> arrange at the slot size minus margins
+            // Alignment!=Stretch --> arrange at the unclippedDesiredSize 
+            if (HorizontalAlignment != HorizontalAlignment.Stretch) {
+                arrangeSize.Width = unclippedDesiredSize.Width;
+            }
+
+            if (VerticalAlignment != VerticalAlignment.Stretch) {
+                arrangeSize.Height = unclippedDesiredSize.Height;
+            }
+
+            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Height, Width);
+
+            //we have to choose max between UnclippedDesiredSize and Max here, because
+            //otherwise setting of max property could cause arrange at less then unclippedDS.
+            //Clipping by Max is needed to limit stretch here 
+            int effectiveMaxWidth = Math.Max(unclippedDesiredSize.Width, mm.maxWidth);
+            if (effectiveMaxWidth < arrangeSize.Width) {
+                NeedsClipBounds = true;
+                arrangeSize.Width = effectiveMaxWidth;
+            }
+
+            int effectiveMaxHeight = Math.Max(unclippedDesiredSize.Height, mm.maxHeight);
+            if (effectiveMaxHeight < arrangeSize.Height) {
+                NeedsClipBounds = true;
+                arrangeSize.Height = effectiveMaxHeight;
+            }
+            
+            //Size oldRenderSize = RenderSize;
+            Size innerInkSize = ArrangeOverride(arrangeSize);
+
+            //Here we use un-clipped InkSize because element does not know that it is
+            //clipped by layout system and it shoudl have as much space to render as
+            //it returned from its own ArrangeOverride 
+            RenderSize = innerInkSize;
+
+            //clippedInkSize differs from InkSize only what MaxWidth/Height explicitly clip the
+            //otherwise good arrangement. For ex, DS<clientSize but DS>MaxWidth - in this
+            //case we should initiate clip at MaxWidth and only show Top-Left portion 
+            //of the element limited by Max properties. It is Top-left because in case when we
+            //are clipped by container we also degrade to Top-Left, so we are consistent. 
+            Size clippedInkSize = new Size(Math.Min(innerInkSize.Width, mm.maxWidth),
+                                           Math.Min(innerInkSize.Height, mm.maxHeight));
+
+            //remember we have to clip if Max properties limit the inkSize 
+            NeedsClipBounds |=
+                    (clippedInkSize.Width < innerInkSize.Width)
+                || (clippedInkSize.Height < innerInkSize.Height);
+
+            //Note that inkSize now can be bigger then layoutSlotSize-margin (because of layout 
+            //squeeze by the parent or LayoutConstrained=true, which clips desired size in Measure). 
+
+            // The client size is the size of layout slot decreased by margins. 
+            // This is the "window" through which we see the content of the child.
+            // Alignments position ink of the child in this "window".
+            // Max with 0 is neccessary because layout slot may be smaller then unclipped desired size.
+            Size clientSize = new Size(Math.Max(0, finalRect.Width - marginWidth),
+                                    Math.Max(0, finalRect.Height - marginHeight));
+
+            //remember we have to clip if clientSize limits the inkSize
+            NeedsClipBounds |=
+                    (clientSize.Width < clippedInkSize.Width)
+                || (clientSize.Height < clippedInkSize.Height);
+
+            Vector offset = ComputeAlignmentOffset(clientSize, clippedInkSize);
+
+            offset.X += finalRect.X + margin.Left;
+            offset.Y += finalRect.Y + margin.Top;
+
+            //SetLayoutOffset(offset, oldRenderSize);
+            if (!this.ActualOffset.Equals(offset)) {
+                this.ActualOffset = offset;
+            }
+
             LayoutIsValid = true;
         }
+
+        public HorizontalAlignment HorizontalAlignment {
+            get;
+            set;
+        }
+
+        public VerticalAlignment VerticalAlignment {
+            get;
+            set;
+        }
+
+        public Size RenderSize {
+            get;
+            private set;
+        }
+
+        private Vector ComputeAlignmentOffset(Size clientSize, Size inkSize) {
+            Vector vector = new Vector();
+            HorizontalAlignment horizontalAlignment = this.HorizontalAlignment;
+            VerticalAlignment verticalAlignment = this.VerticalAlignment;
+            if ((horizontalAlignment == HorizontalAlignment.Stretch) && (inkSize.Width > clientSize.Width)) {
+                horizontalAlignment = HorizontalAlignment.Left;
+            }
+            if ((verticalAlignment == VerticalAlignment.Stretch) && (inkSize.Height > clientSize.Height)) {
+                verticalAlignment = VerticalAlignment.Top;
+            }
+            switch (horizontalAlignment) {
+                case HorizontalAlignment.Center:
+                case HorizontalAlignment.Stretch:
+                    vector.X = (clientSize.Width - inkSize.Width) / 2;
+                    break;
+
+                default:
+                    if (horizontalAlignment == HorizontalAlignment.Right) {
+                        vector.X = clientSize.Width - inkSize.Width;
+                    } else {
+                        vector.X = 0;
+                    }
+                    break;
+            }
+            switch (verticalAlignment) {
+                case VerticalAlignment.Center:
+                case VerticalAlignment.Stretch:
+                    vector.Y = (clientSize.Height - inkSize.Height) / 2;
+                    return vector;
+
+                case VerticalAlignment.Bottom:
+                    vector.Y = clientSize.Height - inkSize.Height;
+                    return vector;
+            }
+            vector.Y = 0;
+            return vector;
+        }
+
+ 
+
 
         protected virtual Size ArrangeOverride(Size finalSize) {
             return finalSize;
@@ -274,7 +459,7 @@ namespace ConsoleFramework.Controls
                     // translating raw point (absolute coords) into relative to dest control point
                     Control currentControl = dest;
                     for (;;) {
-                        Point offset = currentControl.ActualOffset;
+                        Vector offset = currentControl.ActualOffset;
                         point.Offset(-offset.X, -offset.Y);
                         if (currentControl.Parent == null) {
                             break;
@@ -289,7 +474,7 @@ namespace ConsoleFramework.Controls
                     // translating point relative to source into absolute coords
                     Control currentControl = source;
                     for (;;) {
-                        Point offset = currentControl.ActualOffset;
+                        Vector offset = currentControl.ActualOffset;
                         point.Offset(offset.X, offset.Y);
                         if (currentControl.Parent == null)
                             break;
@@ -308,14 +493,14 @@ namespace ConsoleFramework.Controls
                 // traverse back from source to common ancestor
                 Control currentControl = source;
                 while (currentControl != ancestor) {
-                    Point offset = currentControl.ActualOffset;
+                    Vector offset = currentControl.ActualOffset;
                     point.Offset(offset.X, offset.Y);
                     currentControl = currentControl.Parent;
                 }
                 // traverse back from dest to common ancestor
                 currentControl = dest;
                 while (currentControl != ancestor) {
-                    Point offset = currentControl.ActualOffset;
+                    Vector offset = currentControl.ActualOffset;
                     point.Offset(-offset.X, -offset.Y);
                     currentControl = currentControl.Parent;
                 }
