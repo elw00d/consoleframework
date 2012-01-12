@@ -89,7 +89,7 @@ namespace TestProject1
             Control textblock2 = new TextBlock() {Name = "textblock2", Text = "fff"};
             panel.AddChild(textblock1);
             panel.AddChild(textblock2);
-            panel.Arrange(new Size(80, 25));
+            panel.Arrange(new Rect(0, 0, 80, 25));
             //
             Assert.AreEqual(new Point(0, 0), Control.TranslatePoint(panel, new Point(0, 0), null));
             Assert.AreEqual(new Point(0, 0), Control.TranslatePoint(null, new Point(0, 0), textblock1));

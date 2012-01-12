@@ -48,6 +48,7 @@
     <Compile Include="Controls\TextBlock.cs" />
     <Compile Include="Controls\WindowsHost.cs" />
     <Compile Include="Core\Point.cs" />
+    <Compile Include="Core\Rect.cs" />
     <Compile Include="Core\Size.cs" />
     <Compile Include="Core\Thickness.cs" />
     <Compile Include="Core\Vector.cs" />

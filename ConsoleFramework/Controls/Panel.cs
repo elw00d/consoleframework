@@ -39,10 +39,11 @@ namespace ConsoleFramework.Controls
             recalculateChildrenPositions();
         }
 
-        protected override void ArrangeOverride(Size finalSize) {
+        protected override Size ArrangeOverride(Size finalSize) {
             base.ArrangeOverride(finalSize);
             //
             recalculateChildrenPositions();
+            return finalSize;
         }
 
         private void recalculateChildrenPositions() {
@@ -59,7 +60,7 @@ namespace ConsoleFramework.Controls
                     height = this.ActualHeight - heightUsed;
                 }
                 Size finalSize = new Size(this.ActualWidth, height);
-                child.Arrange(finalSize);
+                child.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
                 //
                 if (!childrenPositions.ContainsKey(child)) {
                     childrenPositions.Add(child, new Point(0, heightUsed));
