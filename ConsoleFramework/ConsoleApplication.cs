@@ -51,7 +51,7 @@ namespace ConsoleFramework
             PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
             this.mainControl.canvas = new VirtualCanvas(control, canvas, 0, 0);
             this.mainControl.Arrange(new Rect(0, 0, 80, 25));
-            this.mainControl.Draw(0, 0, 80, 25);
+            this.mainControl.Draw();
             canvas.Flush();
             
             while (true) {

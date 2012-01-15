@@ -26,10 +26,10 @@ namespace ConsoleFramework.Controls
         public TextBlock() {
         }
 
-        public override void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
+        public override void Draw() {
             //
-            for (int x = 0; x < actualWidth; ++x) {
-                for (int y = 0; y < actualHeight; ++y) {
+            for (int x = 0; x < ActualWidth; ++x) {
+                for (int y = 0; y < ActualHeight; ++y) {
                     if (y == 0 && x < text.Length) {
                         canvas.SetPixel(x, y, text[x], CHAR_ATTRIBUTES.FOREGROUND_BLUE);
                     }

@@ -109,5 +109,9 @@ namespace ConsoleFramework.Core {
         static Size() {
             s_empty = CreateEmptySize();
         }
+
+        public override string ToString() {
+            return string.Format("Size: {0};{1}", Width, Height);
+        }
     }
 }

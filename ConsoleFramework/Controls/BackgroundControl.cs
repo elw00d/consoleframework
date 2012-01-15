@@ -30,10 +30,10 @@ namespace ConsoleFramework.Controls
             
         }
 
-        public override void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
-            for (int x = 0; x < actualWidth; ++x) {
-                for (int y = 0; y < actualHeight; ++y) {
-                    canvas.SetPixel(x + actualLeft, y + actualTop, FillCharacter, FillAttributes);
+        public override void Draw() {
+            for (int x = 0; x < ActualWidth; ++x) {
+                for (int y = 0; y < ActualHeight; ++y) {
+                    canvas.SetPixel(x + ActualOffset.X, y + ActualOffset.Y, FillCharacter, FillAttributes);
                 }
             }
         }

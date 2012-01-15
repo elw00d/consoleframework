@@ -56,6 +56,10 @@ namespace ConsoleFramework.Controls
             canvas = new VirtualCanvas(this);
         }
 
+        /// <summary>
+        /// Смещение виртуального холста контрола отн-но слота родительского элемента управления.
+        /// Учитывает <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
+        /// </summary>
         public Vector ActualOffset {
             get;
             private set;
@@ -67,13 +71,15 @@ namespace ConsoleFramework.Controls
         }
 
         public int ActualWidth {
-            get;
-            protected set;
+            get {
+                return RenderSize.Width;
+            }
         }
 
         public int ActualHeight {
-            get;
-            protected set;
+            get {
+                return RenderSize.Height;
+            }
         }
 
         public int MinWidth {
@@ -169,11 +175,21 @@ namespace ConsoleFramework.Controls
             internal readonly int minHeight;
             internal readonly int maxHeight;
         }
+
+        /// <summary>
+        /// Just for debug.
+        /// </summary>
+        public Size? LastMeasureArgument {
+            get;
+            private set;
+        }
         
         public void Measure(Size availableSize) {
             if (LayoutIsValid)
                 // nothing to do
                 return;
+
+            LastMeasureArgument = availableSize;
 
             // apply margin
             Thickness margin = Margin;
@@ -186,7 +202,7 @@ namespace ConsoleFramework.Controls
                 Math.Max(availableSize.Height - marginHeight, 0));
 
             // apply min/max/currentvalue constraints
-            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Height, Width);
+            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Width, Height);
 
             frameworkAvailableSize.Width = Math.Max(mm.minWidth, Math.Min(frameworkAvailableSize.Width, mm.maxWidth));
             frameworkAvailableSize.Height = Math.Max(mm.minHeight, Math.Min(frameworkAvailableSize.Height, mm.maxHeight));
@@ -250,8 +266,11 @@ namespace ConsoleFramework.Controls
         }
 
         public void Arrange(Rect finalRect) {
-            if (LayoutIsValid)
+            if (LayoutIsValid) {
                 return;
+            }
+
+            RenderSlotRect = finalRect;
 
             // If LayoutConstrained==true (parent wins in layout),
             // we might get finalRect.Size smaller then UnclippedDesiredSize. 
@@ -265,10 +284,6 @@ namespace ConsoleFramework.Controls
             // We will use at least UnclippedDesiredSize to compute arrangeSize of the child, and
             // we will use layoutSlotSize to compute alignments - so the bigger child can be aligned within 
             // smaller slot.
-
-            // This is computed on every ArrangeCore. Depending on LayoutConstrained, actual clip may apply or not
-            // todo : introduce a property ?
-            bool NeedsClipBounds = false;
 
             // Start to compute arrange size for the child. 
             // It starts from layout slot or deisred size if layout slot is smaller then desired, 
@@ -287,12 +302,10 @@ namespace ConsoleFramework.Controls
             Size unclippedDesiredSize = m_unclippedDesiredSize;
 
             if (arrangeSize.Width < unclippedDesiredSize.Width) {
-                NeedsClipBounds = true;
                 arrangeSize.Width = unclippedDesiredSize.Width;
             }
 
             if (arrangeSize.Height < unclippedDesiredSize.Height) {
-                NeedsClipBounds = true;
                 arrangeSize.Height = unclippedDesiredSize.Height;
             }
 
@@ -306,72 +319,23 @@ namespace ConsoleFramework.Controls
                 arrangeSize.Height = unclippedDesiredSize.Height;
             }
 
-            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Height, Width);
-
-            //we have to choose max between UnclippedDesiredSize and Max here, because
-            //otherwise setting of max property could cause arrange at less then unclippedDS.
-            //Clipping by Max is needed to limit stretch here 
-            int effectiveMaxWidth = Math.Max(unclippedDesiredSize.Width, mm.maxWidth);
-            if (effectiveMaxWidth < arrangeSize.Width) {
-                NeedsClipBounds = true;
-                arrangeSize.Width = effectiveMaxWidth;
-            }
-
-            int effectiveMaxHeight = Math.Max(unclippedDesiredSize.Height, mm.maxHeight);
-            if (effectiveMaxHeight < arrangeSize.Height) {
-                NeedsClipBounds = true;
-                arrangeSize.Height = effectiveMaxHeight;
-            }
-            
-            //Size oldRenderSize = RenderSize;
-            Size innerInkSize = ArrangeOverride(arrangeSize);
-
             //Here we use un-clipped InkSize because element does not know that it is
             //clipped by layout system and it shoudl have as much space to render as
             //it returned from its own ArrangeOverride 
-            RenderSize = innerInkSize;
+            RenderSize = ArrangeOverride(arrangeSize);
 
-            //clippedInkSize differs from InkSize only what MaxWidth/Height explicitly clip the
-            //otherwise good arrangement. For ex, DS<clientSize but DS>MaxWidth - in this
-            //case we should initiate clip at MaxWidth and only show Top-Left portion 
-            //of the element limited by Max properties. It is Top-left because in case when we
-            //are clipped by container we also degrade to Top-Left, so we are consistent. 
-            Size clippedInkSize = new Size(Math.Min(innerInkSize.Width, mm.maxWidth),
-                                           Math.Min(innerInkSize.Height, mm.maxHeight));
-
-            //remember we have to clip if Max properties limit the inkSize 
-            NeedsClipBounds |=
-                    (clippedInkSize.Width < innerInkSize.Width)
-                || (clippedInkSize.Height < innerInkSize.Height);
-
-            //Note that inkSize now can be bigger then layoutSlotSize-margin (because of layout 
-            //squeeze by the parent or LayoutConstrained=true, which clips desired size in Measure). 
-
-            // The client size is the size of layout slot decreased by margins. 
-            // This is the "window" through which we see the content of the child.
-            // Alignments position ink of the child in this "window".
-            // Max with 0 is neccessary because layout slot may be smaller then unclipped desired size.
-            Size clientSize = new Size(Math.Max(0, finalRect.Width - marginWidth),
-                                    Math.Max(0, finalRect.Height - marginHeight));
-
-            //remember we have to clip if clientSize limits the inkSize
-            NeedsClipBounds |=
-                    (clientSize.Width < clippedInkSize.Width)
-                || (clientSize.Height < clippedInkSize.Height);
-
-            Vector offset = ComputeAlignmentOffset(clientSize, clippedInkSize);
+            Vector offset = computeAlignmentOffset();
 
             offset.X += finalRect.X + margin.Left;
             offset.Y += finalRect.Y + margin.Top;
 
-            //SetLayoutOffset(offset, oldRenderSize);
             if (!this.ActualOffset.Equals(offset)) {
                 this.ActualOffset = offset;
             }
-
+            
             LayoutIsValid = true;
         }
-
+        
         public HorizontalAlignment HorizontalAlignment {
             get;
             set;
@@ -382,57 +346,120 @@ namespace ConsoleFramework.Controls
             set;
         }
 
+        /// <summary>
+        /// Размер, под который контрол будет рендерить свое содержимое.
+        /// Может быть больше ClippedRenderSize из-за случаев, когда контрол не влезает в рамки,
+        /// отведенные методом Arrange. Контрол будет обрезан лайаут-системой в соответствии с ClippedRenderSize.
+        /// </summary>
         public Size RenderSize {
             get;
             private set;
         }
 
-        private Vector ComputeAlignmentOffset(Size clientSize, Size inkSize) {
-            Vector vector = new Vector();
-            HorizontalAlignment horizontalAlignment = this.HorizontalAlignment;
-            VerticalAlignment verticalAlignment = this.VerticalAlignment;
-            if ((horizontalAlignment == HorizontalAlignment.Stretch) && (inkSize.Width > clientSize.Width)) {
-                horizontalAlignment = HorizontalAlignment.Left;
+        /// <summary>
+        /// Отведенный родительским элементом управления слот для отрисовки.
+        /// Задается аргументом при вызове <see cref="Arrange"/>.
+        /// </summary>
+        public Rect RenderSlotRect {
+            get;
+            private set;
+        }
+        
+        /// <summary>
+        /// Прямоугольник внутри виртуального холста контрола, в которое будет выведена графика.
+        /// Все остальное будет обрезано в соответствии с установленными значениями свойств
+        /// <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
+        /// </summary>
+        public Rect LayoutClip {
+            get {
+                return getLayoutClip();
             }
-            if ((verticalAlignment == VerticalAlignment.Stretch) && (inkSize.Height > clientSize.Height)) {
-                verticalAlignment = VerticalAlignment.Top;
-            }
-            switch (horizontalAlignment) {
-                case HorizontalAlignment.Center:
-                case HorizontalAlignment.Stretch:
-                    vector.X = (clientSize.Width - inkSize.Width) / 2;
-                    break;
-
-                default:
-                    if (horizontalAlignment == HorizontalAlignment.Right) {
-                        vector.X = clientSize.Width - inkSize.Width;
-                    } else {
-                        vector.X = 0;
-                    }
-                    break;
-            }
-            switch (verticalAlignment) {
-                case VerticalAlignment.Center:
-                case VerticalAlignment.Stretch:
-                    vector.Y = (clientSize.Height - inkSize.Height) / 2;
-                    return vector;
-
-                case VerticalAlignment.Bottom:
-                    vector.Y = clientSize.Height - inkSize.Height;
-                    return vector;
-            }
-            vector.Y = 0;
-            return vector;
         }
 
- 
+        private Rect getLayoutClip() {
+            Vector offset = computeAlignmentOffset();
+            Size clientSize = getClientSize();
+            return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+        }
 
+        private Vector computeAlignmentOffset() {
+            //
+            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Height, Width);
+
+            Size renderSize = RenderSize;
+
+            //clippedInkSize differs from InkSize only what MaxWidth/Height explicitly clip the
+            //otherwise good arrangement. For ex, DS<clientSize but DS>MaxWidth - in this
+            //case we should initiate clip at MaxWidth and only show Top-Left portion 
+            //of the element limited by Max properties. It is Top-left because in case when we
+            //are clipped by container we also degrade to Top-Left, so we are consistent. 
+            Size clippedInkSize = new Size(Math.Min(renderSize.Width, mm.maxWidth),
+                                           Math.Min(renderSize.Height, mm.maxHeight));
+            Size clientSize = getClientSize();
+
+            return computeAlignmentOffsetCore(clientSize, clippedInkSize);
+        }
+
+        // The client size is the size of layout slot decreased by margins. 
+        // This is the "window" through which we see the content of the child.
+        // Alignments position ink of the child in this "window".
+        // Max with 0 is neccessary because layout slot may be smaller then unclipped desired size.
+        private Size getClientSize() {
+            Thickness margin = Margin;
+            int marginWidth = margin.Left + margin.Right;
+            int marginHeight = margin.Top + margin.Bottom;
+
+            Rect renderSlotRect = RenderSlotRect;
+
+            return new Size(Math.Max(0, renderSlotRect.Width - marginWidth),
+                            Math.Max(0, renderSlotRect.Height - marginHeight));
+        }
+
+        private Vector computeAlignmentOffsetCore(Size clientSize, Size inkSize) {
+            Vector offset = new Vector();
+
+            HorizontalAlignment ha = HorizontalAlignment;
+            VerticalAlignment va = VerticalAlignment;
+
+            //this is to degenerate Stretch to Top-Left in case when clipping is about to occur
+            //if we need it to be Center instead, simply remove these 2 ifs
+            if (ha == HorizontalAlignment.Stretch
+                && inkSize.Width > clientSize.Width) {
+                ha = HorizontalAlignment.Left;
+            }
+
+            if (va == VerticalAlignment.Stretch
+                && inkSize.Height > clientSize.Height) {
+                va = VerticalAlignment.Top;
+            }
+            //end of degeneration of Stretch to Top-Left 
+
+            if (ha == HorizontalAlignment.Center
+                || ha == HorizontalAlignment.Stretch) {
+                offset.X = (clientSize.Width - inkSize.Width)/2;
+            } else if (ha == HorizontalAlignment.Right) {
+                offset.X = clientSize.Width - inkSize.Width;
+            } else {
+                offset.X = 0;
+            }
+
+            if (va == VerticalAlignment.Center
+                || va == VerticalAlignment.Stretch) {
+                offset.Y = (clientSize.Height - inkSize.Height)/2;
+            } else if (va == VerticalAlignment.Bottom) {
+                offset.Y = clientSize.Height - inkSize.Height;
+            } else {
+                offset.Y = 0;
+            }
+
+            return offset;
+        }
 
         protected virtual Size ArrangeOverride(Size finalSize) {
             return finalSize;
         }
 
-        public virtual void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
+        public virtual void Draw() {
             //
             if (null == canvas) {
                 throw new InvalidOperationException("Control doesn't linked to any canvas. Set the parent control" +

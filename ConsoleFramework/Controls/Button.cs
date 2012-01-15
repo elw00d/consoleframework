@@ -26,7 +26,7 @@ namespace ConsoleFramework.Controls
             return new Size(10, 2);
         }
         
-        public override void Draw(int actualLeft, int actualTop, int actualWidth, int actualHeight) {
+        public override void Draw() {
             if (pressed) {
                 canvas.SetPixel(0, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
                 canvas.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
