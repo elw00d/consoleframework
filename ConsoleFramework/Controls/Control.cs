@@ -384,7 +384,7 @@ namespace ConsoleFramework.Controls
 
         private Vector computeAlignmentOffset() {
             //
-            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Height, Width);
+            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Width, Height);
 
             Size renderSize = RenderSize;
 
@@ -486,7 +486,7 @@ namespace ConsoleFramework.Controls
                     // translating raw point (absolute coords) into relative to dest control point
                     Control currentControl = dest;
                     for (;;) {
-                        Vector offset = currentControl.ActualOffset;
+                        Point offset = currentControl.RenderSlotRect.Location;
                         point.Offset(-offset.X, -offset.Y);
                         if (currentControl.Parent == null) {
                             break;
@@ -501,7 +501,7 @@ namespace ConsoleFramework.Controls
                     // translating point relative to source into absolute coords
                     Control currentControl = source;
                     for (;;) {
-                        Vector offset = currentControl.ActualOffset;
+                        Point offset = currentControl.RenderSlotRect.Location;
                         point.Offset(offset.X, offset.Y);
                         if (currentControl.Parent == null)
                             break;
@@ -520,14 +520,14 @@ namespace ConsoleFramework.Controls
                 // traverse back from source to common ancestor
                 Control currentControl = source;
                 while (currentControl != ancestor) {
-                    Vector offset = currentControl.ActualOffset;
+                    Point offset = currentControl.RenderSlotRect.Location;
                     point.Offset(offset.X, offset.Y);
                     currentControl = currentControl.Parent;
                 }
                 // traverse back from dest to common ancestor
                 currentControl = dest;
                 while (currentControl != ancestor) {
-                    Vector offset = currentControl.ActualOffset;
+                    Point offset = currentControl.RenderSlotRect.Location;
                     point.Offset(-offset.X, -offset.Y);
                     currentControl = currentControl.Parent;
                 }
