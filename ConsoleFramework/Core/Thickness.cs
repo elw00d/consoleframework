@@ -93,5 +93,9 @@ namespace ConsoleFramework.Core
                 return result;
             }
         }
+
+        public override string ToString() {
+            return string.Format("{0},{1},{2},{3}", left, top, right, bottom);
+        }
     }
 }

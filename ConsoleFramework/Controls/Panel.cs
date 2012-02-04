@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -14,7 +13,6 @@ namespace ConsoleFramework.Controls
     /// только в рамках хоста окон).
     /// </summary>
     public class Panel : Control {
-        private readonly List<Control> children = new List<Control>();
         private readonly Dictionary<Control, Point> childrenPositions = new Dictionary<Control, Point>();
 
         public Panel() {
@@ -31,48 +29,38 @@ namespace ConsoleFramework.Controls
             set;
         }
 
-        public void AddChild(Control control) {
-            children.Add(control);
-            control.canvas = new VirtualCanvas(control);
-            control.Parent = this;
-            //
-            recalculateChildrenPositions();
+        public new void AddChild(Control control) {
+            base.AddChild(control);
         }
 
-        protected override Size ArrangeOverride(Size finalSize) {
-            base.ArrangeOverride(finalSize);
-            //
-            recalculateChildrenPositions();
-            return finalSize;
-        }
-
-        private void recalculateChildrenPositions() {
+        /// <summary>
+        /// Размещает элементы вертикально, самым простым методом.
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
+        protected override Size MeasureOverride(Size availableSize) {
+            int totalHeight = 0;
+            int maxWidth = 0;
             foreach (Control child in children) {
-                child.Measure(new Size(this.ActualWidth / children.Count, this.ActualHeight / children.Count));
-                //
-            }
-            //
-            int heightUsed = 0;
-            for (int i = 0; i < children.Count; i++) {
-                Control child = children[i];
-                int height = this.ActualHeight/children.Count;
-                if (height + heightUsed > this.ActualHeight || i + 1 == children.Count) {
-                    height = this.ActualHeight - heightUsed;
+                child.Measure(new Size(int.MaxValue, int.MaxValue));
+                totalHeight += child.DesiredSize.Height;
+                if (child.DesiredSize.Width > maxWidth) {
+                    maxWidth = child.DesiredSize.Width;
                 }
-                Size finalSize = new Size(this.ActualWidth, height);
-                child.Arrange(new Rect(0, 0, finalSize.Width, finalSize.Height));
-                //
-                if (!childrenPositions.ContainsKey(child)) {
-                    childrenPositions.Add(child, new Point(0, heightUsed));
-                } else {
-                    childrenPositions[child] = new Point(0, heightUsed);
-                }
-                heightUsed += height;
             }
-            //
-            if (heightUsed != this.ActualHeight) {
-                throw new InvalidOperationException("Not all available height is used in panel.");
+            return new Size(maxWidth, totalHeight);
+        }
+        
+        protected override Size ArrangeOverride(Size finalSize) {
+            int totalHeight = 0;
+            foreach (Control child in children) {
+                int y = totalHeight;
+                int width = child.DesiredSize.Width;
+                int height = child.DesiredSize.Height;
+                child.Arrange(new Rect(0, y, width, height));
+                totalHeight += height;
             }
+            return finalSize;
         }
 
         public override void Draw() {

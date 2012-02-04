@@ -34,6 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlRenderingBuffer.cs" />
     <Compile Include="Controls\BackgroundControl.cs" />
     <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Control.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="Core\Thickness.cs" />
     <Compile Include="Core\Vector.cs" />
     <Compile Include="PhysicalCanvas.cs" />
+    <Compile Include="Renderer.cs" />
     <Compile Include="VirtualCanvas.cs" />
     <Compile Include="ConsoleApplication.cs" />
     <Compile Include="Native\NativeMethods.cs" />

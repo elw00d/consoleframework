@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Native;
+﻿using ConsoleFramework.Core;
+using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
@@ -11,6 +12,9 @@ namespace ConsoleFramework.Controls
         public TextBlock(Control parent) : base(parent) {
         }
 
+        public TextBlock() {
+        }
+
         public string Text {
             get {
                 return text;
@@ -18,12 +22,15 @@ namespace ConsoleFramework.Controls
             set {
                 if (text != value) {
                     text = value;
-                    // todo : invalidate graphical representation
+                    this.Invalidate();
                 }
             }
         }
 
-        public TextBlock() {
+        protected override Size MeasureOverride(Size availableSize) {
+            if (null != text)
+                return new Size(text.Length, 1);
+            return new Size(0, 0);
         }
 
         public override void Draw() {

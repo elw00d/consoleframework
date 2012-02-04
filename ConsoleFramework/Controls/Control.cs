@@ -35,9 +35,32 @@ namespace ConsoleFramework.Controls
             set;
         }
 
+        internal readonly List<Control> children = new List<Control>();
+
         public Control Parent {
             get;
-            set;
+            protected set;
+        }
+
+        protected void AddChild(Control child) {
+            if (null == child)
+                throw new ArgumentNullException("child");
+            if (null != child.Parent)
+                throw new ArgumentException("Specified child already has parent.");
+            children.Add(child);
+            child.Parent = this;
+        }
+
+        protected void RemoveChild(Control child) {
+            if (null == child)
+                throw new ArgumentNullException("child");
+            if (child.Parent != this)
+                throw new InvalidOperationException("Specified control is not a child.");
+            else {
+                if (!this.children.Remove(child))
+                    throw new InvalidOperationException("Assertion failed.");
+                child.Parent = null;
+            }
         }
 
         public Control() {
@@ -348,8 +371,8 @@ namespace ConsoleFramework.Controls
 
         /// <summary>
         /// Размер, под который контрол будет рендерить свое содержимое.
-        /// Может быть больше ClippedRenderSize из-за случаев, когда контрол не влезает в рамки,
-        /// отведенные методом Arrange. Контрол будет обрезан лайаут-системой в соответствии с ClippedRenderSize.
+        /// Может быть больше RenderSlotRect из-за случаев, когда контрол не влезает в рамки,
+        /// отведенные методом Arrange. Контрол будет обрезан лайаут-системой в соответствии с RenderSlotRect.
         /// </summary>
         public Size RenderSize {
             get;
@@ -372,14 +395,10 @@ namespace ConsoleFramework.Controls
         /// </summary>
         public Rect LayoutClip {
             get {
-                return getLayoutClip();
+                Vector offset = computeAlignmentOffset();
+                Size clientSize = getClientSize();
+                return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
             }
-        }
-
-        private Rect getLayoutClip() {
-            Vector offset = computeAlignmentOffset();
-            Size clientSize = getClientSize();
-            return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
         }
 
         private Vector computeAlignmentOffset() {
@@ -455,6 +474,9 @@ namespace ConsoleFramework.Controls
             return offset;
         }
 
+        /// <summary>
+        /// Default <see cref="ArrangeOverride"/> implementation.
+        /// </summary>
         protected virtual Size ArrangeOverride(Size finalSize) {
             return finalSize;
         }
@@ -477,7 +499,7 @@ namespace ConsoleFramework.Controls
         }
 
         public void Invalidate() {
-            //
+            LayoutIsValid = false;
         }
 
         public static Point TranslatePoint(Control source, Point point, Control dest) {
@@ -578,6 +600,9 @@ namespace ConsoleFramework.Controls
 
         public override string ToString() {
             return string.Format("Control: {0}", Name);
+        }
+
+        public virtual void Render(ControlRenderingBuffer buffer) {
         }
     }
 }

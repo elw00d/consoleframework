@@ -117,7 +117,7 @@ namespace ConsoleFramework
             inputCaptureStack.Pop();
         }
 
-        private Stack<Control> inputCaptureStack = new Stack<Control>();
+        private readonly Stack<Control> inputCaptureStack = new Stack<Control>();
 
         private void dispose(bool isDisposing) {
             if (isDisposing) {
