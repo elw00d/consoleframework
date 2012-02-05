@@ -12,10 +12,15 @@ namespace ConsoleFramework.Native
         public char AsciiChar;
         [FieldOffset(2)] //2 bytes seems to work properly
         public CHAR_ATTRIBUTES Attributes;
+
+        public override string ToString() {
+            return string.Format("CHAR_INFO : '{0}' ({1})", AsciiChar, Attributes);
+        }
     }
 
     [Flags]
     public enum CHAR_ATTRIBUTES : ushort {
+        NO_ATTRIBUTES = 0x0000,
         /// <summary>
         /// Text color contains blue.
         /// </summary>

@@ -49,9 +49,10 @@ namespace ConsoleFramework
             
             // todo : introduce settings instead hardcode 80x25
             PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
-            this.mainControl.canvas = new VirtualCanvas(control, canvas, 0, 0);
-            this.mainControl.Arrange(new Rect(0, 0, 80, 25));
-            this.mainControl.Draw();
+            mainControl.Measure(new Size(80, 25));
+            mainControl.Arrange(new Rect(0, 0, 80, 25));
+            Renderer renderer = new Renderer();
+            renderer.Render(mainControl, canvas, new Rect(0, 0, 80, 25));
             canvas.Flush();
             
             while (true) {

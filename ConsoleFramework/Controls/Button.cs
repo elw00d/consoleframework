@@ -26,25 +26,25 @@ namespace ConsoleFramework.Controls
             return new Size(10, 2);
         }
         
-        public override void Draw() {
+        public override void Render(RenderingBuffer buffer) {
             if (pressed) {
-                canvas.SetPixel(0, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(0, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
             } else {
-                canvas.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                canvas.SetPixel(8, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.SetPixel(8, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
             }
         }
 

@@ -1,38 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
 using ConsoleFramework.Controls;
+using ConsoleFramework.Core;
 
 namespace ConsoleFramework
 {
     public sealed class Renderer
     {
-        private readonly Dictionary<Control, ControlRenderingBuffer> buffers = new Dictionary<Control, ControlRenderingBuffer>();
+        // buffers containing only control rendering representation itself
+        private readonly Dictionary<Control, RenderingBuffer> buffers = new Dictionary<Control, RenderingBuffer>();
+        // buffers containing full control render (with children render applied)
+        private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
 
-        public void Render(Control rootElement) {
-            if (null == rootElement)
-                throw new ArgumentNullException("rootElement");
-            //
-            if (rootElement.LayoutIsValid)
-                return;
-            rootElement.Draw();
-            //
-            int count = rootElement.children.Count;
-            for (int i = 0; i < count; ++i) {
-                Control child = rootElement.children[i];
-                Render(child);
+        private RenderingBuffer getOrCreateBufferForControl(Control control) {
+            RenderingBuffer value;
+            if (buffers.TryGetValue(control, out value)) {
+                return value;
+            } else {
+                RenderingBuffer buffer = new RenderingBuffer(control.ActualWidth, control.ActualHeight);
+                buffers.Add(control, buffer);
+                return buffer;
             }
         }
 
-        public ControlRenderingBuffer GetControlRenderingBuffer(Control control) {
-            if (null == control) {
-                throw new ArgumentNullException("control");
+        private RenderingBuffer getOrCreateFullBufferForControl(Control control) {
+            RenderingBuffer value;
+            if (fullBuffers.TryGetValue(control, out value)) {
+                return value;
+            } else {
+                RenderingBuffer buffer = new RenderingBuffer(control.ActualWidth, control.ActualHeight);
+                fullBuffers.Add(control, buffer);
+                return buffer;
             }
-            ControlRenderingBuffer res;
-            if (!buffers.TryGetValue(control, out res)) {
-                res = new ControlRenderingBuffer(control, this);
-                buffers.Add(control, res);
+        }
+
+        public void Render(Control rootElement, PhysicalCanvas canvas, Rect rect) {
+            if (!rootElement.LayoutIsValid) {
+                // measuring all visual elements tree
+                rootElement.Measure(rect.Size);
+                rootElement.Arrange(rect);
             }
-            return res;
+            //
+            RenderingBuffer buffer = UpdateRender(rootElement);
+            buffer.CopyToPhysicalCanvas(canvas, rect);
+        }
+
+        /// <summary>
+        /// Updates the rendering buffers for specified control if need, and returns
+        /// buffer with full rendered control content (including its children).
+        /// </summary>
+        public RenderingBuffer UpdateRender(Control control) {
+            RenderingBuffer buffer = getOrCreateBufferForControl(control);
+            RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
+            //
+            if (!control.RenderingCalled) {
+                if (!control.LayoutIsValid) {
+                    throw new NotSupportedException("You should invalidate a layout state of control before call render.");
+                }
+                control.Render(buffer);
+                //
+                fullBuffer.CopyFrom(buffer);
+                foreach (Control child in control.children) {
+                    RenderingBuffer fullChildBuffer = UpdateRender(child);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect);
+                }
+                //
+                control.RenderingCalled = true;
+            }
+            return fullBuffer;
         }
     }
 }

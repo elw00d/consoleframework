@@ -20,7 +20,7 @@ namespace TestProject1
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestControlsParentDoesntLinkedToCanvas() {
-            Control a = new Control(new PhysicalCanvas(0, 0, IntPtr.Zero));
+            Control a = new Control();
             Control b = new Control();
             Control aa = new Control(a);
             Control bb = new Control(b);
@@ -30,7 +30,7 @@ namespace TestProject1
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void TestControlsParentDoesntLinkedToCanvas2() {
-            Control a = new Control(new PhysicalCanvas(0, 0, IntPtr.Zero));
+            Control a = new Control();
             Control b = new Control();
             Control aa = new Control(a);
             Control bb = new Control(b);
@@ -39,9 +39,8 @@ namespace TestProject1
 
         [TestMethod]
         public void TestRootCanvasIsCommonAncestor() {
-            PhysicalCanvas physicalCanvas = new PhysicalCanvas(0, 0, IntPtr.Zero);
-            Control a = new Control(physicalCanvas);
-            Control b = new Control(physicalCanvas);
+            Control a = new Control();
+            Control b = new Control();
             Control aa = new Control(a);
             Control bb = new Control(b);
             Control commonAncestor = Control.FindCommonAncestor(aa, bb);
@@ -52,8 +51,7 @@ namespace TestProject1
 
         [TestMethod]
         public void TestSelfIsCommonAncestor() {
-            PhysicalCanvas physicalCanvas = new PhysicalCanvas(0, 0, IntPtr.Zero);
-            Control a = new Control(physicalCanvas);
+            Control a = new Control();
             Control commonAncestor = Control.FindCommonAncestor(a, a);
             Assert.AreEqual(commonAncestor, a);
         }
@@ -61,8 +59,7 @@ namespace TestProject1
         [TestMethod]
         public void TestNormalSituation() {
             //
-            PhysicalCanvas physicalCanvas = new PhysicalCanvas(0, 0, IntPtr.Zero);
-            Control x = new Control(physicalCanvas) { Name = "x" };
+            Control x = new Control() { Name = "x" };
             Control ancestor = new Control(x) { Name = "ancestor"};
             Control a = new Control(ancestor) { Name = "a" };
             Control aa = new Control(a) { Name = "aa" };
@@ -87,8 +84,7 @@ namespace TestProject1
         [TestMethod]
         [Ignore]
         public void TestPointTranslation() {
-            PhysicalCanvas physicalCanvas = new PhysicalCanvas(80, 25, IntPtr.Zero);
-            Panel panel = new Panel(physicalCanvas) { Name = "panel" };
+            Panel panel = new Panel() { Name = "panel" };
             Control textblock1 = new TextBlock() { Name = "textblock1", Text = "ff"};
             Control textblock2 = new TextBlock() {Name = "textblock2", Text = "fff"};
             panel.AddChild(textblock1);

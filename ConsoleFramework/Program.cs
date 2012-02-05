@@ -9,7 +9,7 @@ namespace ConsoleFramework {
                     Text = "Label1"
                 });
                 panel.AddChild(new TextBlock() {
-                    Text = "Label2"
+                    Text = "Label2_____"
                 });
                 application.Run(panel);
             }

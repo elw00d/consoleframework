@@ -28,8 +28,6 @@ namespace ConsoleFramework.Controls
     /// Base class for all controls.
     /// </summary>
     public class Control {
-        internal VirtualCanvas canvas;
-
         public string Name {
             get;
             set;
@@ -66,17 +64,10 @@ namespace ConsoleFramework.Controls
         public Control() {
             MinWidth = 0;
         }
-
-        public Control(PhysicalCanvas canvas) {
-            MinWidth = 0;
-            //
-            this.canvas = new VirtualCanvas(this, canvas, 0, 0);
-        }
-
+        
         public Control(Control parent) {
             MinWidth = 0;
             Parent = parent;
-            canvas = new VirtualCanvas(this);
         }
 
         /// <summary>
@@ -88,7 +79,25 @@ namespace ConsoleFramework.Controls
             private set;
         }
 
+        private bool layoutIsValid;
         public bool LayoutIsValid {
+            get {
+                return layoutIsValid;
+            }
+            set {
+                layoutIsValid = value;
+                if (!layoutIsValid) {
+                    RenderingCalled = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Показывает, была ли произведена отрисовка, соответствующая последнему изменению
+        /// layout'a. Автоматически устанавливается в false при установке LayoutIsValid = false.
+        /// Выставляется в true классом Renderer, отвечающим за вызов метода Render.
+        /// </summary>
+        internal bool RenderingCalled {
             get;
             set;
         }
@@ -480,24 +489,11 @@ namespace ConsoleFramework.Controls
         protected virtual Size ArrangeOverride(Size finalSize) {
             return finalSize;
         }
-
-        public virtual void Draw() {
-            //
-            if (null == canvas) {
-                throw new InvalidOperationException("Control doesn't linked to any canvas. Set the parent control" +
-                                                    " or set this control as main application control.");
-            }
-            //
-        }
-
+        
         public virtual void HandleEvent(INPUT_RECORD inputRecord) {
             //
         }
-
-        public virtual Point GetChildOffset(Control control) {
-            throw new NotImplementedException();
-        }
-
+        
         public void Invalidate() {
             LayoutIsValid = false;
         }
@@ -515,9 +511,6 @@ namespace ConsoleFramework.Controls
                         }
                         currentControl = currentControl.Parent;
                     }
-                    if (currentControl.canvas == null) {
-                        throw new InvalidOperationException("Root of dest control doesn't linked to canvas.");
-                    }
                     return point;
                 } else if (source != null && dest == null) {
                     // translating point relative to source into absolute coords
@@ -529,8 +522,6 @@ namespace ConsoleFramework.Controls
                             break;
                         currentControl = currentControl.Parent;
                     }
-                    if (currentControl.canvas == null)
-                        throw new InvalidOperationException("Root of source control doesn't linked to canvas.");
                     return point;
                 } else {
                     // both source and dest are null - we shouldn't to do anything
@@ -573,8 +564,6 @@ namespace ConsoleFramework.Controls
             Control refB = b;
             bool f = true;
             for (;;) {
-                if (null == refA.canvas || null == refB.canvas)
-                    throw new InvalidOperationException("Found control that doesn't linked to canvas.");
                 if (refA == refB)
                     return refA;
                 if (visited.Contains(refB))
@@ -602,7 +591,7 @@ namespace ConsoleFramework.Controls
             return string.Format("Control: {0}", Name);
         }
 
-        public virtual void Render(ControlRenderingBuffer buffer) {
+        public virtual void Render(RenderingBuffer buffer) {
         }
     }
 }

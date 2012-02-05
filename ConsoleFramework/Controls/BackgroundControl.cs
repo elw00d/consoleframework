@@ -22,18 +22,10 @@ namespace ConsoleFramework.Controls
             FillCharacter = ' ';
         }
 
-        public BackgroundControl(Control underlyingControl) : base(underlyingControl) {
-            //
-        }
-
-        public BackgroundControl(PhysicalCanvas pcanvas) : base(pcanvas) {
-            
-        }
-
-        public override void Draw() {
+        public override void Render(RenderingBuffer buffer) {
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
-                    canvas.SetPixel(x + ActualOffset.X, y + ActualOffset.Y, FillCharacter, FillAttributes);
+                    buffer.SetPixel(x + ActualOffset.X, y + ActualOffset.Y, FillCharacter, FillAttributes);
                 }
             }
         }
