@@ -22,12 +22,64 @@ namespace ConsoleFramework.Controls
         Stretch
     }
 
+    internal enum LayoutValidity {
+        Nothing = 1,
+        MeasureAndArrange = 2,
+        Render = 3,
+        FullRender = 4
+    }
 
+    /// <summary>
+    /// Полностью описывает состояние лайаута контрола.
+    /// </summary>
+    internal class LayoutInfo {
+        public Size measureArgument;
+        public Size desiredSize;
+        // по сути это arrangeArgument
+        public Rect renderSlotRect;
+        public Size renderSize;
+        public Rect layoutClip;
+        public Vector actualOffset;
+        public LayoutValidity validity = LayoutValidity.Nothing;
+
+        public void CopyValuesFrom(LayoutInfo layoutInfo) {
+            this.measureArgument = layoutInfo.measureArgument;
+            this.desiredSize = layoutInfo.desiredSize;
+            this.renderSlotRect = layoutInfo.renderSlotRect;
+            this.renderSize = layoutInfo.renderSize;
+            this.layoutClip = layoutInfo.layoutClip;
+            this.actualOffset = layoutInfo.actualOffset;
+            this.validity = layoutInfo.validity;
+        }
+
+        public void ClearValues() {
+            this.measureArgument = new Size();
+            this.desiredSize = new Size();
+            this.renderSlotRect = new Rect();
+            this.renderSize = new Size();
+            this.layoutClip = new Rect();
+            this.actualOffset = new Vector();
+            this.validity = LayoutValidity.Nothing;
+        }
+    }
 
     /// <summary>
     /// Base class for all controls.
     /// </summary>
     public class Control {
+
+        internal LayoutInfo layoutInfo = new LayoutInfo();
+        internal LayoutInfo lastLayoutInfo = new LayoutInfo();
+
+        /// <summary>
+        /// Just for debug.
+        /// </summary>
+        public Size? MeasureArgument {
+            get {
+                return layoutInfo.validity != LayoutValidity.Nothing ? (Size?)layoutInfo.measureArgument : null;
+            }
+        }
+        
         public string Name {
             get;
             set;
@@ -75,31 +127,22 @@ namespace ConsoleFramework.Controls
         /// Учитывает <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
         /// </summary>
         public Vector ActualOffset {
-            get;
-            private set;
+            get {
+                return layoutInfo.actualOffset;
+            }
+            private set {
+                layoutInfo.actualOffset = value;
+            }
         }
 
-        private bool layoutIsValid;
-        public bool LayoutIsValid {
+        internal LayoutValidity LayoutValidity {
             get {
-                return layoutIsValid;
+                return layoutInfo.validity;
             }
             set {
-                layoutIsValid = value;
-                if (!layoutIsValid) {
-                    RenderingCalled = false;
-                }
+                // todo : mb refactor this to disallow external access
+                layoutInfo.validity = value;
             }
-        }
-
-        /// <summary>
-        /// Показывает, была ли произведена отрисовка, соответствующая последнему изменению
-        /// layout'a. Автоматически устанавливается в false при установке LayoutIsValid = false.
-        /// Выставляется в true классом Renderer, отвечающим за вызов метода Render.
-        /// </summary>
-        internal bool RenderingCalled {
-            get;
-            set;
         }
 
         public int ActualWidth {
@@ -165,8 +208,12 @@ namespace ConsoleFramework.Controls
         }
 
         public Size DesiredSize {
-            get;
-            private set;
+            get {
+                return layoutInfo.desiredSize;
+            }
+            private set {
+                layoutInfo.desiredSize = value;
+            }
         }
 
         private struct MinMax
@@ -208,20 +255,14 @@ namespace ConsoleFramework.Controls
             internal readonly int maxHeight;
         }
 
-        /// <summary>
-        /// Just for debug.
-        /// </summary>
-        public Size? LastMeasureArgument {
-            get;
-            private set;
-        }
+        
         
         public void Measure(Size availableSize) {
-            if (LayoutIsValid)
+            if (layoutInfo.validity != LayoutValidity.Nothing)
                 // nothing to do
                 return;
 
-            LastMeasureArgument = availableSize;
+            layoutInfo.measureArgument = availableSize;
 
             // apply margin
             Thickness margin = Margin;
@@ -298,7 +339,7 @@ namespace ConsoleFramework.Controls
         }
 
         public void Arrange(Rect finalRect) {
-            if (LayoutIsValid) {
+            if (layoutInfo.validity != LayoutValidity.Nothing) {
                 return;
             }
 
@@ -364,8 +405,10 @@ namespace ConsoleFramework.Controls
             if (!this.ActualOffset.Equals(offset)) {
                 this.ActualOffset = offset;
             }
-            
-            LayoutIsValid = true;
+
+            layoutInfo.layoutClip = calculateLayoutClip();
+
+            layoutInfo.validity = LayoutValidity.MeasureAndArrange;
         }
         
         public HorizontalAlignment HorizontalAlignment {
@@ -384,8 +427,12 @@ namespace ConsoleFramework.Controls
         /// отведенные методом Arrange. Контрол будет обрезан лайаут-системой в соответствии с RenderSlotRect.
         /// </summary>
         public Size RenderSize {
-            get;
-            private set;
+            get {
+                return layoutInfo.renderSize;
+            }
+            private set {
+                layoutInfo.renderSize = value;
+            }
         }
 
         /// <summary>
@@ -393,20 +440,30 @@ namespace ConsoleFramework.Controls
         /// Задается аргументом при вызове <see cref="Arrange"/>.
         /// </summary>
         public Rect RenderSlotRect {
-            get;
-            private set;
+            get {
+                return layoutInfo.renderSlotRect;
+            }
+            private set {
+                layoutInfo.renderSlotRect = value;
+            }
         }
-        
+
         /// <summary>
         /// Прямоугольник внутри виртуального холста контрола, в которое будет выведена графика.
         /// Все остальное будет обрезано в соответствии с установленными значениями свойств
         /// <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
         /// </summary>
+        /// todo : mb rename to innerSlotRect
+        private Rect calculateLayoutClip() {
+            Vector offset = computeAlignmentOffset();
+            Size clientSize = getClientSize();
+            return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+        }
+
+        
         public Rect LayoutClip {
             get {
-                Vector offset = computeAlignmentOffset();
-                Size clientSize = getClientSize();
-                return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+                return layoutInfo.layoutClip;
             }
         }
 
@@ -495,7 +552,12 @@ namespace ConsoleFramework.Controls
         }
         
         public void Invalidate() {
-            LayoutIsValid = false;
+            // copy all calculated layout info into lastLayoutInfo
+            if (layoutInfo.validity != LayoutValidity.Nothing) {
+                lastLayoutInfo.CopyValuesFrom(layoutInfo);
+            }
+            // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
+            layoutInfo.ClearValues();
         }
 
         public static Point TranslatePoint(Control source, Point point, Control dest) {

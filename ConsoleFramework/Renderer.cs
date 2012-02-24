@@ -35,7 +35,7 @@ namespace ConsoleFramework
         }
 
         public void Render(Control rootElement, PhysicalCanvas canvas, Rect rect) {
-            if (!rootElement.LayoutIsValid) {
+            if ((uint) rootElement.LayoutValidity < (uint) LayoutValidity.MeasureAndArrange) {
                 // measuring all visual elements tree
                 rootElement.Measure(rect.Size);
                 rootElement.Arrange(rect);
@@ -53,8 +53,8 @@ namespace ConsoleFramework
             RenderingBuffer buffer = getOrCreateBufferForControl(control);
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
             //
-            if (!control.RenderingCalled) {
-                if (!control.LayoutIsValid) {
+            if ((uint) control.LayoutValidity < (uint) LayoutValidity.Render) {
+                if ((uint)control.LayoutValidity < (uint)LayoutValidity.MeasureAndArrange) {
                     throw new NotSupportedException("You should invalidate a layout state of control before call render.");
                 }
                 control.Render(buffer);
@@ -62,10 +62,11 @@ namespace ConsoleFramework
                 fullBuffer.CopyFrom(buffer);
                 foreach (Control child in control.children) {
                     RenderingBuffer fullChildBuffer = UpdateRender(child);
+                    // todo : учесть LayoutClip
                     fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect);
                 }
                 //
-                control.RenderingCalled = true;
+                control.LayoutValidity = LayoutValidity.FullRender;
             }
             return fullBuffer;
         }

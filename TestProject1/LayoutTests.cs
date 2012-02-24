@@ -113,7 +113,7 @@ namespace TestProject1
             Assert.AreEqual(new Size(100, 100), finalControl.RenderSize);
             Assert.AreEqual(new Size(80, 80), finalControl.DesiredSize);
             Assert.AreEqual(new Rect(25, 0, 50, 80), finalControl.LayoutClip);
-            Assert.AreEqual(new Size(80, 80), finalControl.LastMeasureArgument);
+            Assert.AreEqual(new Size(80, 80), finalControl.MeasureArgument);
             Assert.AreEqual(new Size(100, 100), finalControl.LastMeasureOverrideArgument); // because Width/Height
             Assert.AreEqual(new Size(0, 0), finalControl.LastMeasureOverrideResult);
             Assert.AreEqual(new Size(100, 100), finalControl.LastArrangeOverrideArgument);
@@ -140,7 +140,7 @@ namespace TestProject1
             Assert.AreEqual(new Size(100, 20), finalControl.RenderSize);
             Assert.AreEqual(new Size(80, 20), finalControl.DesiredSize);
             Assert.AreEqual(new Rect(25, 0, 50, 20), finalControl.LayoutClip);
-            Assert.AreEqual(new Size(80, 80), finalControl.LastMeasureArgument);
+            Assert.AreEqual(new Size(80, 80), finalControl.MeasureArgument);
             Assert.AreEqual(new Size(100, 20), finalControl.LastMeasureOverrideArgument); // because Width/Height
             Assert.AreEqual(new Size(0, 0), finalControl.LastMeasureOverrideResult);
             Assert.AreEqual(new Size(100, 20), finalControl.LastArrangeOverrideArgument);
@@ -168,7 +168,7 @@ namespace TestProject1
             Assert.AreEqual(new Size(100, 20), finalControl.RenderSize);
             Assert.AreEqual(new Size(70, 17), finalControl.DesiredSize);
             Assert.AreEqual(new Rect(60, -31, 40, 83), finalControl.LayoutClip);
-            Assert.AreEqual(new Size(70, 80), finalControl.LastMeasureArgument);
+            Assert.AreEqual(new Size(70, 80), finalControl.MeasureArgument);
             Assert.AreEqual(new Size(100, 20), finalControl.LastMeasureOverrideArgument); // because Width/Height
             Assert.AreEqual(new Size(0, 0), finalControl.LastMeasureOverrideResult);
             Assert.AreEqual(new Size(100, 20), finalControl.LastArrangeOverrideArgument);
