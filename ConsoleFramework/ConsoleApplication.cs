@@ -35,6 +35,13 @@ namespace ConsoleFramework
             exitWaitHandle.Set();
         }
 
+        private Renderer renderer = new Renderer();
+        public Renderer Renderer {
+            get {
+                return renderer;
+            }
+        }
+
         private Control mainControl;
 
         public void Run(Control control) {
@@ -51,7 +58,6 @@ namespace ConsoleFramework
             PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
             mainControl.Measure(new Size(80, 25));
             mainControl.Arrange(new Rect(0, 0, 80, 25));
-            Renderer renderer = new Renderer();
             renderer.Render(mainControl, canvas, new Rect(0, 0, 80, 25));
             canvas.Flush();
             

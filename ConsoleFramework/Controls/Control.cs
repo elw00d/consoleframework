@@ -255,8 +255,6 @@ namespace ConsoleFramework.Controls
             internal readonly int maxHeight;
         }
 
-        
-        
         public void Measure(Size availableSize) {
             if (layoutInfo.validity != LayoutValidity.Nothing)
                 // nothing to do
@@ -448,19 +446,17 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        /// <summary>
-        /// Прямоугольник внутри виртуального холста контрола, в которое будет выведена графика.
-        /// Все остальное будет обрезано в соответствии с установленными значениями свойств
-        /// <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
-        /// </summary>
-        /// todo : mb rename to innerSlotRect
         private Rect calculateLayoutClip() {
             Vector offset = computeAlignmentOffset();
             Size clientSize = getClientSize();
             return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
         }
 
-        
+        /// <summary>
+        /// Прямоугольник внутри виртуального холста контрола, в которое будет выведена графика.
+        /// Все остальное будет обрезано в соответствии с установленными значениями свойств
+        /// <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
+        /// </summary>
         public Rect LayoutClip {
             get {
                 return layoutInfo.layoutClip;
@@ -558,6 +554,8 @@ namespace ConsoleFramework.Controls
             }
             // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
             layoutInfo.ClearValues();
+            // add self to renderer invalidation queue
+            ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
         }
 
         public static Point TranslatePoint(Control source, Point point, Control dest) {

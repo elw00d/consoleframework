@@ -33,17 +33,20 @@ namespace ConsoleFramework
         /// Накладывает буфер дочернего элемента на текущий. Дочерний буфер виртуально накладывается на текущий
         /// в соответствии с переданным actualOffset, а потом та часть дочернего буфера, которая попадает в 
         /// renderSlotRect, прорисовывается. renderSlotRect определен отн-но текущего буфера (а не дочернего).
+        /// layoutClip определяет, какая часть дочернего буфера будет прорисована в текущий буфер (клиппинг,
+        /// возникающий при применении Margin и Alignment'ов).
         /// </summary>
         /// <param name="childBuffer"></param>
         /// <param name="actualOffset">Смещение буфера дочернего элемента относительно текущего.</param>
         /// <param name="renderSlotRect">Размер и положение слота, выделенного дочернему элементу.</param>
-        public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset, Rect renderSlotRect) {
+        /// <param name="layoutClip">Часть дочернего буфера, которая будет отрисована.</param>
+        public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset, Rect renderSlotRect, Rect layoutClip) {
             //
             for (int x = 0; x < childBuffer.width; x++) {
                 int parentX = x + actualOffset.x;
                 for (int y = 0; y < childBuffer.height; y++) {
                     int parentY = y + actualOffset.y;
-                    if (renderSlotRect.Contains(parentX, parentY)) {
+                    if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
                         CHAR_INFO charInfo = childBuffer.buffer[x, y];
                         // skip empty pixels (considering it as transparent pixels)
                         if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {

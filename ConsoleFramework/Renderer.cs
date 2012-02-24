@@ -12,6 +12,37 @@ namespace ConsoleFramework
         // buffers containing full control render (with children render applied)
         private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
 
+        private readonly Queue<Control> invalidatedControls = new Queue<Control>();
+
+        public void AddControlToInvalidationQueue(Control control) {
+            if (null == control) {
+                throw new ArgumentNullException("control");
+            }
+            invalidatedControls.Enqueue(control);
+        }
+
+        public void InvalidateLayout() {
+            Control control;
+            while ((control = invalidatedControls.Dequeue()) != null) {
+                updateLayout(control);
+            }
+        }
+
+        private void updateLayout(Control control) {
+            LayoutInfo lastLayoutInfo = control.lastLayoutInfo;
+            bool needUpdateParentLayout = true;
+            if (lastLayoutInfo.validity != LayoutValidity.Nothing) {
+                control.Measure(lastLayoutInfo.measureArgument);
+                if (lastLayoutInfo.desiredSize == control.DesiredSize) {
+                    needUpdateParentLayout = false;
+                }
+            }
+            if (needUpdateParentLayout && control.Parent != null) {
+                // mark the parent control for invalidation too
+                control.Parent.Invalidate();
+            }
+        }
+
         private RenderingBuffer getOrCreateBufferForControl(Control control) {
             RenderingBuffer value;
             if (buffers.TryGetValue(control, out value)) {
@@ -62,8 +93,7 @@ namespace ConsoleFramework
                 fullBuffer.CopyFrom(buffer);
                 foreach (Control child in control.children) {
                     RenderingBuffer fullChildBuffer = UpdateRender(child);
-                    // todo : учесть LayoutClip
-                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
                 }
                 //
                 control.LayoutValidity = LayoutValidity.FullRender;
