@@ -100,8 +100,8 @@ namespace ConsoleFramework.Core {
 
         private static Size CreateEmptySize() {
             Size size = new Size {
-                width = -1,
-                height = -1
+                width = 0,
+                height = 0
             };
             return size;
         }

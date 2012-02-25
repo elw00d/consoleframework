@@ -225,7 +225,7 @@ namespace ConsoleFramework.Core {
         public int Right {
             get {
                 if (this.IsEmpty) {
-                    return int.MinValue;
+                    return 0;
                 }
                 return (this.x + this.width);
             }
@@ -234,7 +234,7 @@ namespace ConsoleFramework.Core {
         public int Bottom {
             get {
                 if (this.IsEmpty) {
-                    return int.MinValue;
+                    return 0;
                 }
                 return (this.y + this.height);
             }

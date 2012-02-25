@@ -5,6 +5,9 @@ using ConsoleFramework.Core;
 
 namespace ConsoleFramework
 {
+    /// <summary>
+    /// Central point of the console framework layout system.
+    /// </summary>
     public sealed class Renderer {
         public Rect Rect {
             get;
@@ -20,20 +23,37 @@ namespace ConsoleFramework
             get;
             set;
         }
-        
+
+        // buffers containing only control rendering representation itself
+        private readonly Dictionary<Control, RenderingBuffer> buffers = new Dictionary<Control, RenderingBuffer>();
+        // buffers containing full control render (with children render applied)
+        private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
+        // queue of controls marked for layout invalidation
+        private readonly Queue<Control> invalidatedControls = new Queue<Control>();
+
+        // список контролов, у которых обновилось содержимое full render buffer
+        // актуален только при вызове UpdateRender, после вызова очищается
         private readonly List<Control> renderingUpdatedControls = new List<Control>();
 
+        /// <summary>
+        /// Пересчитывает лайаут для всех контролов, добавленных в очередь ревалидации.
+        /// Определяет, какие контролы необходимо перерисовать, вызывает Render у них.
+        /// Определяет, какие области экрана необходимо обновить и выполняет перерисовку
+        /// экрана консоли.
+        /// </summary>
         public void UpdateRender() {
             renderingUpdatedControls.Clear();
             // invalidate layout and fill renderingUpdatedControls list
             InvalidateLayout();
-            // propagate renderingUpdatedControls to parent elements
+            // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
             foreach (Control control in renderingUpdatedControls) {
                 Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
                 affectedRect.Union(currentAffectedRect);
             }
-            Canvas.Flush(affectedRect);
+            if (!affectedRect.IsEmpty) {
+                Canvas.Flush(affectedRect);
+            }
         }
 
         /// <summary>
@@ -72,6 +92,13 @@ namespace ConsoleFramework
             }
         }
 
+        /// <summary>
+        /// Пересчитывает лайаут для всех контролов, добавленных в очередь ревалидации.
+        /// После того, как лайаут контрола рассчитан, выполняется рендеринг.
+        /// Рендеринг производится только тогда, когда размеры контрола изменились или
+        /// контрол явно помечен как изменивший свое изображение. В остальных случаях
+        /// используются кешированные буферы, содержащие уже отрендеренные изображения.
+        /// </summary>
         internal void InvalidateLayout() {
             while (invalidatedControls.Count != 0) {
                 Control control = invalidatedControls.Dequeue();
@@ -197,13 +224,6 @@ namespace ConsoleFramework
             return fullBuffer;
         }
 
-        // buffers containing only control rendering representation itself
-        private readonly Dictionary<Control, RenderingBuffer> buffers = new Dictionary<Control, RenderingBuffer>();
-        // buffers containing full control render (with children render applied)
-        private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
-
-        private readonly Queue<Control> invalidatedControls = new Queue<Control>();
-
         public void AddControlToInvalidationQueue(Control control) {
             if (null == control) {
                 throw new ArgumentNullException("control");
@@ -234,41 +254,5 @@ namespace ConsoleFramework
                 return buffer;
             }
         }
-
-        //private void Render(Control rootElement, PhysicalCanvas canvas, Rect rect) {
-        //    if ((uint) rootElement.LayoutValidity < (uint) LayoutValidity.MeasureAndArrange) {
-        //        // measuring all visual elements tree
-        //        rootElement.Measure(rect.Size);
-        //        rootElement.Arrange(rect);
-        //    }
-        //    //
-        //    RenderingBuffer buffer = UpdateRender(rootElement);
-        //    buffer.CopyToPhysicalCanvas(canvas, rect);
-        //}
-
-        ///// <summary>
-        ///// Updates the rendering buffers for specified control if need, and returns
-        ///// buffer with full rendered control content (including its children).
-        ///// </summary>
-        //private RenderingBuffer UpdateRender(Control control) {
-        //    RenderingBuffer buffer = getOrCreateBufferForControl(control);
-        //    RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
-        //    //
-        //    if ((uint) control.LayoutValidity < (uint) LayoutValidity.Render) {
-        //        if ((uint)control.LayoutValidity < (uint)LayoutValidity.MeasureAndArrange) {
-        //            throw new NotSupportedException("You should invalidate a layout state of control before call render.");
-        //        }
-        //        control.Render(buffer);
-        //        //
-        //        fullBuffer.CopyFrom(buffer);
-        //        foreach (Control child in control.children) {
-        //            RenderingBuffer fullChildBuffer = UpdateRender(child);
-        //            fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
-        //        }
-        //        //
-        //        control.LayoutValidity = LayoutValidity.Render;
-        //    }
-        //    return fullBuffer;
-        //}
     }
 }
