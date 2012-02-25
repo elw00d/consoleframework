@@ -154,23 +154,14 @@ namespace ConsoleFramework
         /// Writes collected data to console screen buffer.
         /// </summary>
         public void Flush() {
-            SMALL_RECT rect = new SMALL_RECT(0, 0, (short) width , (short) height);
-            if (!NativeMethods.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height), new COORD(0, 0), ref rect)) {
-                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", NativeMethods.GetLastErrorMessage()));
-            }
-        }
-
-        public void InvalidateRegion() {
-            // todo :
-        }
-
-        public void InvalidateAll() {
-            // todo :
+            Flush(new Rect(0, 0, width, height));
         }
 
         public void Flush(Rect affectedRect) {
-            // todo : implement this
-            Flush();
+            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y, (short) affectedRect.width, (short) affectedRect.height);
+            if (!NativeMethods.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height), new COORD(0, 0), ref rect)) {
+                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", NativeMethods.GetLastErrorMessage()));
+            }
         }
     }
 }

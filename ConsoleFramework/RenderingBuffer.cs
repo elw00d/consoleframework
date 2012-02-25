@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Core;
+﻿using System;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework
@@ -127,8 +128,11 @@ namespace ConsoleFramework
         /// <param name="canvas"></param>
         /// <param name="rect"></param>
         public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            int minWidth = Math.Min(width, rect.width);
+            int minHeight = Math.Min(height, rect.height);
+            //
+            for (int x = 0; x < minWidth; x++) {
+                for (int y = 0; y < minHeight; y++) {
                     CHAR_INFO charInfo = buffer[x, y];
                     if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
                         canvas[x + rect.X][y + rect.Y].Assign(charInfo);
@@ -145,11 +149,11 @@ namespace ConsoleFramework
         /// <param name="rect"></param>
         /// <param name="affectedRect"></param>
         public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect, Rect affectedRect) {
-            // todo : fix bug when affectedRect > rect
-            int right = affectedRect.x + affectedRect.width;
-            int bottom = affectedRect.y + affectedRect.height;
-            for (int x = affectedRect.x; x < right; x++) {
-                for (int y = affectedRect.y; y < bottom; y++) {
+            Rect rectToCopy = affectedRect;
+            rectToCopy.Intersect(new Rect(new Point(0, 0), rect.Size));
+            //
+            for (int x = 0; x < rectToCopy.width; x++) {
+                for (int y = 0; y < rectToCopy.height; y++) {
                     CHAR_INFO charInfo = buffer[x, y];
                     if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
                         canvas[x + rect.X][y + rect.Y].Assign(charInfo);

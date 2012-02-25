@@ -208,7 +208,9 @@ namespace ConsoleFramework
             if (null == control) {
                 throw new ArgumentNullException("control");
             }
-            invalidatedControls.Enqueue(control);
+            if (!invalidatedControls.Contains(control)) {
+                invalidatedControls.Enqueue(control);
+            }
         }
 
         private RenderingBuffer getOrCreateBufferForControl(Control control) {
