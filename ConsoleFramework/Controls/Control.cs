@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -25,15 +26,16 @@ namespace ConsoleFramework.Controls
     internal enum LayoutValidity {
         Nothing = 1,
         MeasureAndArrange = 2,
-        Render = 3,
-        FullRender = 4
+        Render = 3
     }
 
     /// <summary>
     /// Полностью описывает состояние лайаута контрола.
     /// </summary>
-    internal class LayoutInfo {
+    internal class LayoutInfo : IEquatable<LayoutInfo> {
         public Size measureArgument;
+        // если это поле не изменилось, то можно считать, что контрол не поменял своего размера
+        public Size unclippedDesiredSize;
         public Size desiredSize;
         // по сути это arrangeArgument
         public Rect renderSlotRect;
@@ -44,6 +46,7 @@ namespace ConsoleFramework.Controls
 
         public void CopyValuesFrom(LayoutInfo layoutInfo) {
             this.measureArgument = layoutInfo.measureArgument;
+            this.unclippedDesiredSize = layoutInfo.unclippedDesiredSize;
             this.desiredSize = layoutInfo.desiredSize;
             this.renderSlotRect = layoutInfo.renderSlotRect;
             this.renderSize = layoutInfo.renderSize;
@@ -54,6 +57,7 @@ namespace ConsoleFramework.Controls
 
         public void ClearValues() {
             this.measureArgument = new Size();
+            this.unclippedDesiredSize = new Size();
             this.desiredSize = new Size();
             this.renderSlotRect = new Rect();
             this.renderSize = new Size();
@@ -61,12 +65,29 @@ namespace ConsoleFramework.Controls
             this.actualOffset = new Vector();
             this.validity = LayoutValidity.Nothing;
         }
+
+        public bool Equals(LayoutInfo other) {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.measureArgument.Equals(measureArgument) && other.unclippedDesiredSize.Equals(unclippedDesiredSize) && other.desiredSize.Equals(desiredSize) && other.renderSlotRect.Equals(renderSlotRect) && other.renderSize.Equals(renderSize) && other.layoutClip.Equals(layoutClip) && other.actualOffset.Equals(actualOffset);
+        }
+
+        public override bool Equals(object obj) {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (LayoutInfo)) return false;
+            return Equals((LayoutInfo) obj);
+        }
     }
 
     /// <summary>
     /// Base class for all controls.
     /// </summary>
     public class Control {
+
+        public Control FindChildByName(string name) {
+            return children.FirstOrDefault(control => control.Name == name);
+        }
 
         internal LayoutInfo layoutInfo = new LayoutInfo();
         internal LayoutInfo lastLayoutInfo = new LayoutInfo();
@@ -325,13 +346,11 @@ namespace ConsoleFramework.Controls
             //  because due to the layout protocol, arrange should be called 
             //  with constraints greater or equal to child's desired size
             //  returned from MeasureOverride.
-            m_unclippedDesiredSize = unclippedDesiredSize;
+            layoutInfo.unclippedDesiredSize = unclippedDesiredSize;
 
-            DesiredSize = new Size(Math.Max(0, clippedDesiredWidth), Math.Max(0, clippedDesiredHeight)); 
+            DesiredSize = new Size(Math.Max(0, clippedDesiredWidth), Math.Max(0, clippedDesiredHeight));
         }
-
-        private Size m_unclippedDesiredSize;
-
+        
         protected virtual Size MeasureOverride(Size availableSize) {
             return new Size(0, 0);
         }
@@ -370,7 +389,7 @@ namespace ConsoleFramework.Controls
             arrangeSize.Height = Math.Max(0, arrangeSize.Height - marginHeight);
             
             // Next, compare against unclipped, transformed size.
-            Size unclippedDesiredSize = m_unclippedDesiredSize;
+            Size unclippedDesiredSize = layoutInfo.unclippedDesiredSize;
 
             if (arrangeSize.Width < unclippedDesiredSize.Width) {
                 arrangeSize.Width = unclippedDesiredSize.Width;
@@ -547,14 +566,20 @@ namespace ConsoleFramework.Controls
             //
         }
         
-        public void Invalidate() {
+        internal void ResetValidity() {
             // copy all calculated layout info into lastLayoutInfo
             if (layoutInfo.validity != LayoutValidity.Nothing) {
                 lastLayoutInfo.CopyValuesFrom(layoutInfo);
             }
             // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
             layoutInfo.ClearValues();
-            // add self to renderer invalidation queue
+            // recursively invalidate children, but without add them to queue
+            foreach (Control child in children) {
+                child.ResetValidity();
+            }
+        }
+        
+        public void Invalidate() {
             ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
         }
 

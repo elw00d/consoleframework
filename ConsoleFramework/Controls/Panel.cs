@@ -58,6 +58,13 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
 
+        public override void HandleEvent(INPUT_RECORD inputRecord) {
+            if (inputRecord.EventType == EventType.KEY_EVENT) {
+                TextBlock textBlock = ((TextBlock) this.FindChildByName("label1"));
+                textBlock.Text = textBlock.Text + "5";
+            }
+        }
+
         /// <summary>
         /// Рисует исключительно себя - просто фон.
         /// </summary>

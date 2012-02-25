@@ -56,10 +56,14 @@ namespace ConsoleFramework
             
             // todo : introduce settings instead hardcode 80x25
             PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
-            mainControl.Measure(new Size(80, 25));
-            mainControl.Arrange(new Rect(0, 0, 80, 25));
-            renderer.Render(mainControl, canvas, new Rect(0, 0, 80, 25));
-            canvas.Flush();
+            //renderer = new Renderer(canvas, new Rect(0, 0, 80, 25), mainControl);
+            renderer.Canvas = canvas;
+            renderer.Rect = new Rect(0, 0, 80, 25);
+            renderer.RootElement = mainControl;
+            //
+            mainControl.Invalidate();
+            renderer.UpdateRender();
+            //canvas.Flush();
             
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
@@ -68,6 +72,8 @@ namespace ConsoleFramework
                 }
                 if (waitResult == 1) {
                     processInput();
+                    // update 
+                    renderer.UpdateRender();
                     continue;
                 }
                 // if we received WAIT_TIMEOUT or WAIT_FAILED

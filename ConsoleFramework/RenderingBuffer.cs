@@ -8,6 +8,18 @@ namespace ConsoleFramework
         private int width;
         private int height;
 
+        public int Width {
+            get {
+                return width;
+            }
+        }
+
+        public int Height {
+            get {
+                return height;
+            }
+        }
+
         public RenderingBuffer() {
         }
 
@@ -41,11 +53,41 @@ namespace ConsoleFramework
         /// <param name="renderSlotRect">Размер и положение слота, выделенного дочернему элементу.</param>
         /// <param name="layoutClip">Часть дочернего буфера, которая будет отрисована.</param>
         public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset, Rect renderSlotRect, Rect layoutClip) {
-            //
+            // todo : optimize this
+            // для уменьшения количества итераций необходимо двигаться не по всему childBuffer'у, а
+            // по renderSlotRect'у, поскольку как правило renderSlotRect существенно меньше размера childBuffer
             for (int x = 0; x < childBuffer.width; x++) {
                 int parentX = x + actualOffset.x;
                 for (int y = 0; y < childBuffer.height; y++) {
                     int parentY = y + actualOffset.y;
+                    if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
+                        CHAR_INFO charInfo = childBuffer.buffer[x, y];
+                        // skip empty pixels (considering it as transparent pixels)
+                        if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                            this.buffer[parentX, parentY] = charInfo;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Оверлоад для оптимизированного наложения в случае, когда известно, что в дочернем
+        /// контроле поменялась лишь часть, идентифицируемая параметром affectedRect.
+        /// Будет обработана только эта часть дочернего контрола, и количество операций уменьшится.
+        /// </summary>
+        /// <param name="childBuffer"></param>
+        /// <param name="actualOffset"></param>
+        /// <param name="renderSlotRect"></param>
+        /// <param name="layoutClip"></param>
+        /// <param name="affectedRect">Прямоугольник в дочернем контроле, который был изменен.</param>
+        public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset, Rect renderSlotRect,
+                               Rect layoutClip, Rect affectedRect) {
+            //
+            for (int x = 0; x < affectedRect.width; x++) {
+                int parentX = x + actualOffset.x + affectedRect.x;
+                for (int y = 0; y < affectedRect.height; y++) {
+                    int parentY = y + actualOffset.y + affectedRect.y;
                     if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
                         CHAR_INFO charInfo = childBuffer.buffer[x, y];
                         // skip empty pixels (considering it as transparent pixels)
@@ -78,9 +120,36 @@ namespace ConsoleFramework
             }
         }
 
+        /// <summary>
+        /// Копирует содержимое буфера на экран консоли, при этом точка (0, 0) буфера
+        /// будет скопирована на экран в место, определяемое (rect.x, rect.y).
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="rect"></param>
         public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
+                    CHAR_INFO charInfo = buffer[x, y];
+                    if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                        canvas[x + rect.X][y + rect.Y].Assign(charInfo);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overload для частичного копирования буфера.
+        /// AffectedRect определяет, какая часть буфера будет скопирована на экран.
+        /// </summary>
+        /// <param name="canvas"></param>
+        /// <param name="rect"></param>
+        /// <param name="affectedRect"></param>
+        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect, Rect affectedRect) {
+            // todo : fix bug when affectedRect > rect
+            int right = affectedRect.x + affectedRect.width;
+            int bottom = affectedRect.y + affectedRect.height;
+            for (int x = affectedRect.x; x < right; x++) {
+                for (int y = affectedRect.y; y < bottom; y++) {
                     CHAR_INFO charInfo = buffer[x, y];
                     if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
                         canvas[x + rect.X][y + rect.Y].Assign(charInfo);

@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Controls;
+﻿using System;
+using ConsoleFramework.Controls;
 
 namespace ConsoleFramework {
     internal class Program {
@@ -6,9 +7,11 @@ namespace ConsoleFramework {
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();
                 panel.AddChild(new TextBlock() {
+                    Name = "label1",
                     Text = "Label1"
                 });
                 panel.AddChild(new TextBlock() {
+                    Name = "label2",
                     Text = "Label2_____"
                 });
                 application.Run(panel);

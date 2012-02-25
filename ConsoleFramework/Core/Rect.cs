@@ -119,7 +119,7 @@ namespace ConsoleFramework.Core {
 
         public bool IsEmpty {
             get {
-                return (this.width < 0.0);
+                return this.width == 0 && this.height == 0;
             }
         }
 
@@ -408,10 +408,10 @@ namespace ConsoleFramework.Core {
 
         private static Rect CreateEmptyRect() {
             Rect rect = new Rect {
-                x = int.MaxValue,
-                y = int.MaxValue,
-                width = int.MinValue,
-                height = int.MinValue
+                x = 0,
+                y = 0,
+                width = 0,
+                height = 0
             };
             return rect;
         }

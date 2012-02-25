@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework
@@ -165,6 +166,11 @@ namespace ConsoleFramework
 
         public void InvalidateAll() {
             // todo :
+        }
+
+        public void Flush(Rect affectedRect) {
+            // todo : implement this
+            Flush();
         }
     }
 }
