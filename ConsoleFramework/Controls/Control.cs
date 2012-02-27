@@ -563,7 +563,9 @@ namespace ConsoleFramework.Controls
         }
         
         public virtual void HandleEvent(INPUT_RECORD inputRecord) {
-            //
+            foreach (var child in children) {
+                child.HandleEvent(inputRecord);
+            }
         }
         
         internal void ResetValidity() {

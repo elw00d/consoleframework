@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -23,28 +20,17 @@ namespace ConsoleFramework.Controls
         private bool pressed;
 
         protected override Size MeasureOverride(Size availableSize) {
-            return new Size(10, 2);
+            Size minButtonSize = new Size(caption.Length + 3, 2);
+            return minButtonSize;
+            //return new Size(Math.Max(minButtonSize.width, availableSize.width - 1), Math.Max(minButtonSize.height, availableSize.height - 1));
         }
         
         public override void Render(RenderingBuffer buffer) {
+            // todo : print caption at center
             if (pressed) {
-                buffer.SetPixel(0, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN | CHAR_ATTRIBUTES.BACKGROUND_INTENSITY);
             } else {
-                buffer.SetPixel(1, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(2, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(3, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(4, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(5, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(6, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(7, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
-                buffer.SetPixel(8, 0, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, 'b', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
             }
         }
 
@@ -55,6 +41,7 @@ namespace ConsoleFramework.Controls
                 if (!pressed) {
                     pressed = true;
                     ConsoleApplication.Instance.BeginCaptureInput(this);
+                    this.Invalidate();
                 }
             }
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
@@ -63,6 +50,7 @@ namespace ConsoleFramework.Controls
                 if (pressed) {
                     pressed = false;
                     ConsoleApplication.Instance.EndCaptureInput(this);
+                    this.Invalidate();
                 }
             }
         }

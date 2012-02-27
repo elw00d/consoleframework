@@ -38,6 +38,7 @@ namespace ConsoleFramework.Controls
             int maxWidth = 0;
             foreach (Control child in children) {
                 child.Measure(new Size(int.MaxValue, int.MaxValue));
+                // todo : fix if child returns big size > availableSize
                 totalHeight += child.DesiredSize.Height;
                 if (child.DesiredSize.Width > maxWidth) {
                     maxWidth = child.DesiredSize.Width;
@@ -63,6 +64,8 @@ namespace ConsoleFramework.Controls
                 TextBlock textBlock = ((TextBlock) this.FindChildByName("label1"));
                 textBlock.Text = textBlock.Text + "5";
             }
+            //
+            base.HandleEvent(inputRecord);
         }
 
         /// <summary>

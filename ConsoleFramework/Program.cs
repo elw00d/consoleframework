@@ -14,6 +14,11 @@ namespace ConsoleFramework {
                     Name = "label2",
                     Text = "Label2_____"
                 });
+                Button button = new Button() {
+                    Name = "button1",
+                    Caption = "button !"
+                };
+                panel.AddChild(button);
                 application.Run(panel);
             }
         }

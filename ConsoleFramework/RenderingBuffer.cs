@@ -122,39 +122,29 @@ namespace ConsoleFramework
         }
 
         /// <summary>
-        /// Копирует содержимое буфера на экран консоли, при этом точка (0, 0) буфера
-        /// будет скопирована на экран в место, определяемое (rect.x, rect.y).
-        /// </summary>
-        /// <param name="canvas"></param>
-        /// <param name="rect"></param>
-        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect) {
-            int minWidth = Math.Min(width, rect.width);
-            int minHeight = Math.Min(height, rect.height);
-            //
-            for (int x = 0; x < minWidth; x++) {
-                for (int y = 0; y < minHeight; y++) {
-                    CHAR_INFO charInfo = buffer[x, y];
-                    if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
-                        canvas[x + rect.X][y + rect.Y].Assign(charInfo);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Overload для частичного копирования буфера.
+        /// Копирует часть изображения из буфера на экран консоли так, что точка (rect.x, rect.y) на canvas'e
+        /// совмещается с точкой (affectedRect.x, affectedRect.y) буфера.
         /// AffectedRect определяет, какая часть буфера будет скопирована на экран.
+        /// Rect определяет часть Canvas'a, в которую будет произведено копирование (обычно - канвас целиком то есть
+        /// (0, 0, canvas.Width, canvas.Height) ).
         /// </summary>
         /// <param name="canvas"></param>
-        /// <param name="rect"></param>
+        /// <param name="rect">Canvas rectangle.</param>
         /// <param name="affectedRect"></param>
         public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect, Rect affectedRect) {
+            // проверяем, что rect влезает в canvas целиком
+            if (rect.x + rect.width > canvas.Width || rect.y + rect.height > canvas.Height) {
+                throw new ArgumentException("Assertion failed: rect should not be out of canvas bounds.", "rect");
+            }
+            // определяем Rect относительно буфера, по размеру не превышающий переданного rect
+            // (если этого не сделать, то возможна ситуация, когда мы пытаемся большой прямоугольник, заданный affectedRect,
+            // впихнуть в маленький rect на canvas'e
             Rect rectToCopy = affectedRect;
-            rectToCopy.Intersect(new Rect(new Point(0, 0), rect.Size));
+            rectToCopy.Intersect(new Rect(new Point(affectedRect.x, affectedRect.y), rect.Size));
             //
             for (int x = 0; x < rectToCopy.width; x++) {
                 for (int y = 0; y < rectToCopy.height; y++) {
-                    CHAR_INFO charInfo = buffer[x, y];
+                    CHAR_INFO charInfo = buffer[x + rectToCopy.x, y + rectToCopy.y];
                     if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
                         canvas[x + rect.X][y + rect.Y].Assign(charInfo);
                     }

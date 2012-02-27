@@ -87,7 +87,10 @@ namespace ConsoleFramework
                 return applyChangesToCanvas(control.Parent, parentAffectedRect);
             } else {
                 // мы добрались до экрана консоли
-                fullBuffer.CopyToPhysicalCanvas(Canvas, Rect, affectedRect);
+                fullBuffer.CopyToPhysicalCanvas(Canvas, new Rect(affectedRect.x, affectedRect.y,
+                                                                 Math.Min(Canvas.Width - affectedRect.x, affectedRect.width),
+                                                                 Math.Min(Canvas.Height - affectedRect.y, affectedRect.height)),
+                                                                 affectedRect);
                 return affectedRect;
             }
         }
