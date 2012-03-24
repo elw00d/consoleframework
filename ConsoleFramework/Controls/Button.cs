@@ -42,6 +42,8 @@ namespace ConsoleFramework.Controls
                     pressed = true;
                     ConsoleApplication.Instance.BeginCaptureInput(this);
                     this.Invalidate();
+                    //this.Parent.Invalidate();
+                    //this.Parent.Parent.Invalidate();
                 }
             }
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
@@ -51,6 +53,8 @@ namespace ConsoleFramework.Controls
                     pressed = false;
                     ConsoleApplication.Instance.EndCaptureInput(this);
                     this.Invalidate();
+                    //this.Parent.Invalidate();
+                    //this.Parent.Parent.Invalidate();
                 }
             }
         }

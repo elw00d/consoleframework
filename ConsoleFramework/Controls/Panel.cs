@@ -75,7 +75,7 @@ namespace ConsoleFramework.Controls
         public override void Render(RenderingBuffer buffer) {
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
-                    buffer.SetPixel(x + ActualOffset.X, y + ActualOffset.Y, 'x', CHAR_ATTRIBUTES.BACKGROUND_BLUE |
+                    buffer.SetPixel(x, y, 'x', CHAR_ATTRIBUTES.BACKGROUND_BLUE |
                         CHAR_ATTRIBUTES.BACKGROUND_GREEN | CHAR_ATTRIBUTES.BACKGROUND_RED | CHAR_ATTRIBUTES.FOREGROUND_BLUE |
                         CHAR_ATTRIBUTES.FOREGROUND_GREEN | CHAR_ATTRIBUTES.FOREGROUND_RED | CHAR_ATTRIBUTES.FOREGROUND_INTENSITY);
                 }

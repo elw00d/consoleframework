@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\Window.cs" />
     <Compile Include="RenderingBuffer.cs" />
     <Compile Include="Controls\BackgroundControl.cs" />
     <Compile Include="Controls\Button.cs" />

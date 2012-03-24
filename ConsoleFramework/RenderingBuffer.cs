@@ -54,18 +54,24 @@ namespace ConsoleFramework
         /// <param name="renderSlotRect">Размер и положение слота, выделенного дочернему элементу.</param>
         /// <param name="layoutClip">Часть дочернего буфера, которая будет отрисована.</param>
         public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset, Rect renderSlotRect, Rect layoutClip) {
-            // todo : optimize this
-            // для уменьшения количества итераций необходимо двигаться не по всему childBuffer'у, а
-            // по renderSlotRect'у, поскольку как правило renderSlotRect существенно меньше размера childBuffer
-            for (int x = 0; x < childBuffer.width; x++) {
-                int parentX = x + actualOffset.x;
-                for (int y = 0; y < childBuffer.height; y++) {
-                    int parentY = y + actualOffset.y;
-                    if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
-                        CHAR_INFO charInfo = childBuffer.buffer[x, y];
-                        // skip empty pixels (considering it as transparent pixels)
-                        if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
-                            this.buffer[parentX, parentY] = charInfo;
+            for (int x = 0; x < renderSlotRect.width; x++) {
+                int parentX = x + renderSlotRect.x;
+                int childX = parentX - actualOffset.x;
+                // поскольку renderSlotRect может выходить за рамки буфера родительского контрола
+                // (если родительский контрол вызвал Arrange и указал в качестве аргумента большой Rect),
+                // то мы должны обработать этот случай и предотвратить переполнение буфера
+                if (parentX >= 0 && parentX < this.width && childX >= 0 && childX < childBuffer.width) {
+                    for (int y = 0; y < renderSlotRect.height; y++) {
+                        int parentY = y + renderSlotRect.y;
+                        int childY = parentY - actualOffset.y;
+                        if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
+                            if (layoutClip.Contains(childX, childY)) {
+                                CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
+                                // skip empty pixels (considering it as transparent pixels)
+                                if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                                    this.buffer[parentX, parentY] = charInfo;
+                                }
+                            }
                         }
                     }
                 }
@@ -86,14 +92,20 @@ namespace ConsoleFramework
                                Rect layoutClip, Rect affectedRect) {
             //
             for (int x = 0; x < affectedRect.width; x++) {
-                int parentX = x + actualOffset.x + affectedRect.x;
-                for (int y = 0; y < affectedRect.height; y++) {
-                    int parentY = y + actualOffset.y + affectedRect.y;
-                    if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
-                        CHAR_INFO charInfo = childBuffer.buffer[x, y];
-                        // skip empty pixels (considering it as transparent pixels)
-                        if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
-                            this.buffer[parentX, parentY] = charInfo;
+                int childX = x + affectedRect.x;
+                int parentX = childX + actualOffset.x;
+                if (parentX >= 0 && parentX < this.width && childX >= 0 && childX < childBuffer.width) {
+                    for (int y = 0; y < affectedRect.height; y++) {
+                        int childY = y + affectedRect.y;
+                        int parentY = childY + actualOffset.y;
+                        if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
+                            if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
+                                CHAR_INFO charInfo = childBuffer.buffer[x + affectedRect.x, y + affectedRect.y];
+                                // skip empty pixels (considering it as transparent pixels)
+                                if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                                    this.buffer[parentX, parentY] = charInfo;
+                                }
+                            }
                         }
                     }
                 }

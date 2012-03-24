@@ -585,6 +585,21 @@ namespace ConsoleFramework.Controls
             ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
         }
 
+        public virtual Control GetTopChildAtPoint(Point point) {
+            return (from child in children
+                    where child.RenderSlotRect.Contains(point)
+                    select child).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Переводит точку point из системы координат source в систему координат dest.
+        /// В качестве source и dest можно указывать null, в этом случае за систему координат будет
+        /// взята система координат экрана консоли.
+        /// </summary>
+        /// <param name="source">Контрол, относительно которого задан point или null если координата глобальная.</param>
+        /// <param name="point">Координаты точки относительно source.</param>
+        /// <param name="dest">Контрол, относительно которого необходимо вычислить координаты точки.</param>
+        /// <returns></returns>
         public static Point TranslatePoint(Control source, Point point, Control dest) {
             if (source == null || dest == null) {
                 if (source == null && dest != null) {

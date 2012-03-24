@@ -19,7 +19,30 @@ namespace ConsoleFramework {
                     Caption = "button !"
                 };
                 panel.AddChild(button);
-                application.Run(panel);
+                //application.Run(panel);
+                WindowsHost windowsHost = new WindowsHost()
+                                              {
+                                                  Name = "WindowsHost"
+                                              };
+                Window window1 = new Window {
+                    X = 10,
+                    Y = 6,
+                    Height = 100,
+                    Width = 100,
+                    C = '1',
+                    Name = "Window1",
+                    Content = panel
+                };
+                windowsHost.AddWindow(window1);
+                windowsHost.AddWindow(new Window() {
+                    X = 10,
+                    Y = 6,
+                    Height = 10,
+                    Width = 10,
+                    C = '2',
+                    Name = "Window2"
+                });
+                application.Run(windowsHost);
             }
         }
     }
