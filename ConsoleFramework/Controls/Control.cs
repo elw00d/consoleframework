@@ -695,5 +695,9 @@ namespace ConsoleFramework.Controls
 
         public virtual void Render(RenderingBuffer buffer) {
         }
+
+        internal virtual List<Control> GetChildrenOrderedByZIndex() {
+            return children;
+        }
     }
 }

@@ -25,8 +25,8 @@ namespace ConsoleFramework {
                                                   Name = "WindowsHost"
                                               };
                 Window window1 = new Window {
-                    X = 10,
-                    Y = 6,
+                    X = 3,
+                    Y = 4,
                     Height = 100,
                     Width = 100,
                     C = '1',
@@ -40,7 +40,10 @@ namespace ConsoleFramework {
                     Height = 10,
                     Width = 10,
                     C = '2',
-                    Name = "Window2"
+                    Name = "Window2",
+                    Content = new TextBlock() {
+                        Text = "window2 window2"
+                    }
                 });
                 application.Run(windowsHost);
             }

@@ -59,8 +59,9 @@ namespace ConsoleFramework
         /// <summary>
         /// Получает для указанного контрола full render buffer и применяет его последовательно
         /// ко всем родительским элементам управления, вплоть до изображения на экране.
-        /// Возвращает прямоугольник, необходимый для ревалидации на экране
-        /// (affected rect).
+        /// Возвращает прямоугольник, необходимый для ревалидации на экране (affected rect).
+        /// Учитывает Z-Order контролов-соседей (если родительский контрол имеет несколько дочерних, они могут перекрывать
+        /// друг друга).
         /// Первый вызов производится с affectedRect = control.RenderSize.
         /// </summary>
         /// <returns>Affected rectangle in canvas should be copyied to console screen.</returns>
@@ -68,12 +69,23 @@ namespace ConsoleFramework
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
             if (control.Parent != null) {
                 RenderingBuffer fullParentBuffer = getOrCreateFullBufferForControl(control.Parent);
+                // определим соседей контрола, которые могут перекрывать его
+                List<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
+                int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
+                // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
                 if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
                     fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
                                                 control.LayoutClip);
                 } else {
                     fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
                                                 control.LayoutClip, affectedRect);
+                }
+                // восстанавливаем изображение поверх обновленного контрола, если
+                // имеются контролы, лежащие выше по z-order
+                for (int i = controlIndex + 1; i < neighbors.Count; i++) {
+                    Control neighbor = neighbors[i];
+                    fullParentBuffer.ApplyChild(getOrCreateFullBufferForControl(neighbor), neighbor.ActualOffset,
+                        neighbor.RenderSlotRect, neighbor.LayoutClip);
                 }
                 Rect parentAffectedRect = control.RenderSlotRect;
                 parentAffectedRect.Intersect(new Rect(affectedRect.x + control.ActualOffset.x,
