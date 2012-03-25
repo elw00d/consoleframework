@@ -60,7 +60,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void HandleEvent(INPUT_RECORD inputRecord) {
-            if (inputRecord.EventType == EventType.KEY_EVENT) {
+            if (inputRecord.EventType == EventType.KEY_EVENT && inputRecord.KeyEvent.bKeyDown) {
                 TextBlock textBlock = ((TextBlock) this.FindChildByName("label1"));
                 textBlock.Text = textBlock.Text + "5";
             }

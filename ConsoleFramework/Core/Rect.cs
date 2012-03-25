@@ -403,7 +403,10 @@ namespace ConsoleFramework.Core {
 
 
         private bool ContainsInternal(int _x, int _y) {
-            return ((((_x >= this.x) && ((_x - this.width) <= this.x)) && (_y >= this.y)) && ((_y - this.height) <= this.y));
+            // исправлено нестрогое условие на строгое
+            // чтобы в rect(1;1;1;1) попадал только 1 пиксель (1;1) а не 4 пикселя (1;1)-(2;2)
+            return ((((_x >= this.x) && ((_x - this.width) < this.x)) && (_y >= this.y)) && ((_y - this.height) < this.y));
+            //return ((((_x >= this.x) && ((_x - this.width) <= this.x)) && (_y >= this.y)) && ((_y - this.height) <= this.y));
         }
 
         private static Rect CreateEmptyRect() {
