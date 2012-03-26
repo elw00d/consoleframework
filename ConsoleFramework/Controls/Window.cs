@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -57,7 +53,19 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer)
         {
-            buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, C, CHAR_ATTRIBUTES.FOREGROUND_BLUE | CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+            ushort borderAttrs = Color.Attr(Color.White, Color.Gray);
+            // background
+            buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
+            // corners
+            buffer.SetPixel(0, 0, UnicodeTable.DoubleFrameTopLeftCorner, (CHAR_ATTRIBUTES) borderAttrs);
+            buffer.SetPixel(ActualWidth - 1, ActualHeight - 1, UnicodeTable.DoubleFrameBottomRightCorner, (CHAR_ATTRIBUTES) borderAttrs);
+            buffer.SetPixel(0, ActualHeight - 1, UnicodeTable.DoubleFrameBottomLeftCorner, (CHAR_ATTRIBUTES)borderAttrs);
+            buffer.SetPixel(ActualWidth - 1, 0, UnicodeTable.DoubleFrameTopRightCorner, (CHAR_ATTRIBUTES)borderAttrs);
+            // horizontal & vertical frames
+            buffer.FillRectangle(1, 0, ActualWidth - 2, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
+            buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 2, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
+            buffer.FillRectangle(0, 1, 1, ActualHeight - 2, UnicodeTable.DoubleFrameVertical, borderAttrs);
+            buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 2, UnicodeTable.DoubleFrameVertical, borderAttrs);
         }
 
         public override void HandleEvent(INPUT_RECORD inputRecord)

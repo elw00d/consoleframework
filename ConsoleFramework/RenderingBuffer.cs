@@ -113,7 +113,7 @@ namespace ConsoleFramework
         }
 
         public void SetPixel(int x, int y, char c) {
-            buffer[x, y].AsciiChar = c;
+            buffer[x, y].UnicodeChar = c;
         }
 
         public void SetPixel(int x, int y, CHAR_ATTRIBUTES attr) {
@@ -121,8 +121,12 @@ namespace ConsoleFramework
         }
 
         public void SetPixel(int x, int y, char c, CHAR_ATTRIBUTES attr) {
-            buffer[x, y].AsciiChar = c;
+            buffer[x, y].UnicodeChar = c;
             buffer[x, y].Attributes = attr;
+        }
+
+        public void FillRectangle(int x, int y, int w, int h, char c, ushort attrs) {
+            FillRectangle(x, y, w, h, c, (CHAR_ATTRIBUTES)attrs);
         }
 
         public void FillRectangle(int x, int y, int w, int h, char c, CHAR_ATTRIBUTES attributes) {

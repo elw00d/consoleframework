@@ -1,5 +1,6 @@
 ﻿using System;
 using ConsoleFramework.Controls;
+using ConsoleFramework.Native;
 
 namespace ConsoleFramework {
     internal class Program {

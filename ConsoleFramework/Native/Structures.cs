@@ -3,7 +3,10 @@ using System.Runtime.InteropServices;
 
 namespace ConsoleFramework.Native
 {
-    [StructLayout(LayoutKind.Explicit)]
+    /// <summary>
+    /// CharSet.Unicode is required for proper marshaling.
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
     public struct CHAR_INFO
     {
         [FieldOffset(0)]

@@ -43,6 +43,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\Window.cs" />
+    <Compile Include="Native\Color.cs" />
+    <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
     <Compile Include="Controls\BackgroundControl.cs" />
     <Compile Include="Controls\Button.cs" />
