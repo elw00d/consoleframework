@@ -165,6 +165,7 @@ namespace ConsoleFramework.Native
         RIGHTMOST_BUTTON_PRESSED = 0x0002
     }
 
+    [Flags]
     public enum MouseEventFlags {
         DOUBLE_CLICK = 0x0002,
         MOUSE_HWHEELED = 0x0008,

@@ -199,10 +199,17 @@ namespace ConsoleFramework
             rectToCopy.Intersect(new Rect(new Point(affectedRect.x, affectedRect.y), rect.Size));
             //
             for (int x = 0; x < rectToCopy.width; x++) {
-                for (int y = 0; y < rectToCopy.height; y++) {
-                    CHAR_INFO charInfo = buffer[x + rectToCopy.x, y + rectToCopy.y];
-                    if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
-                        canvas[x + rect.X][y + rect.Y].Assign(charInfo);
+                int canvasX = x + rectToCopy.x;
+                // todo : убрать проверки, сделать это с помощью intersect необходимых rect'ов
+                if (canvasX >= 0 && canvasX < width) {
+                    for (int y = 0; y < rectToCopy.height; y++) {
+                        int canvasY = y + rectToCopy.y;
+                        if (canvasY >= 0 && canvasY < height) {
+                            CHAR_INFO charInfo = buffer[x + rectToCopy.x, y + rectToCopy.y];
+                            if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                                canvas[x + rect.X][y + rect.Y].Assign(charInfo);
+                            }
+                        }
                     }
                 }
             }

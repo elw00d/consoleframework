@@ -75,6 +75,11 @@ namespace ConsoleFramework.Controls
             buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
         }
 
+        private bool resizing = false;
+        private int resizingStartX;
+        private int resizingStartY;
+        private Point resizingStartPoint;
+
         public override void HandleEvent(INPUT_RECORD inputRecord)
         {
             base.HandleEvent(inputRecord);
@@ -83,6 +88,35 @@ namespace ConsoleFramework.Controls
                 COORD pos = inputRecord.MouseEvent.dwMousePosition;
                 Point translatedPoint = TranslatePoint(null, new Point(pos.X, pos.Y), this);
                 Debug.WriteLine("MOUSE_EVENT at {0}:{1} -> {2}:{3} window : {4}", pos.X, pos.Y, translatedPoint.x, translatedPoint.y, Name);
+            }
+            // resizing
+            if (inputRecord.EventType == EventType.MOUSE_EVENT) {
+                MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
+                if (!resizing) {
+                    if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
+                            resizing = true;
+                            resizingStartPoint = new Point(mousePosition.X, mousePosition.Y);
+                            resizingStartX = X;
+                            resizingStartY = Y;
+                            ConsoleApplication.Instance.BeginCaptureInput(this);
+                        }
+                    }
+                } else {
+                    if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        Vector vector = new Vector(mousePosition.X - resizingStartPoint.x, mousePosition.Y - resizingStartPoint.y);
+                        X = resizingStartX + vector.X;
+                        Y = resizingStartY + vector.Y;
+                        Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", resizingStartX, resizingStartY, X, Y);
+                        getWindowsHost().Invalidate();
+                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                        resizing = false;
+                        ConsoleApplication.Instance.EndCaptureInput(this);
+                    }
+                }
             }
         }
     }
