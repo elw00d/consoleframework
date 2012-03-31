@@ -38,15 +38,15 @@ namespace ConsoleFramework.Controls
         {
             if (Content == null)
                 return base.MeasureOverride(availableSize);
-            // reserve 2 pixels for frame
-            Content.Measure(new Size(availableSize.width - 2, availableSize.height - 2));
-            return new Size(Content.DesiredSize.width + 2, Content.DesiredSize.height + 2);
+            // reserve 2 pixels for frame and 2/1 pixels for shadow
+            Content.Measure(new Size(availableSize.width - 4, availableSize.height - 3));
+            return new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
         }
 
         protected override Size ArrangeOverride(Size finalSize)
         {
             if (Content != null) {
-                Content.Arrange(new Rect(1, 1, finalSize.width - 2, finalSize.height - 2));
+                Content.Arrange(new Rect(1, 1, finalSize.width - 4, finalSize.height - 3));
             }
             return finalSize;
         }
@@ -58,14 +58,21 @@ namespace ConsoleFramework.Controls
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
             // corners
             buffer.SetPixel(0, 0, UnicodeTable.DoubleFrameTopLeftCorner, (CHAR_ATTRIBUTES) borderAttrs);
-            buffer.SetPixel(ActualWidth - 1, ActualHeight - 1, UnicodeTable.DoubleFrameBottomRightCorner, (CHAR_ATTRIBUTES) borderAttrs);
-            buffer.SetPixel(0, ActualHeight - 1, UnicodeTable.DoubleFrameBottomLeftCorner, (CHAR_ATTRIBUTES)borderAttrs);
-            buffer.SetPixel(ActualWidth - 1, 0, UnicodeTable.DoubleFrameTopRightCorner, (CHAR_ATTRIBUTES)borderAttrs);
+            buffer.SetPixel(ActualWidth - 3, ActualHeight - 2, UnicodeTable.DoubleFrameBottomRightCorner, (CHAR_ATTRIBUTES) borderAttrs);
+            buffer.SetPixel(0, ActualHeight - 2, UnicodeTable.DoubleFrameBottomLeftCorner, (CHAR_ATTRIBUTES)borderAttrs);
+            buffer.SetPixel(ActualWidth - 3, 0, UnicodeTable.DoubleFrameTopRightCorner, (CHAR_ATTRIBUTES)borderAttrs);
             // horizontal & vertical frames
-            buffer.FillRectangle(1, 0, ActualWidth - 2, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
-            buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 2, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
-            buffer.FillRectangle(0, 1, 1, ActualHeight - 2, UnicodeTable.DoubleFrameVertical, borderAttrs);
-            buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 2, UnicodeTable.DoubleFrameVertical, borderAttrs);
+            buffer.FillRectangle(1, 0, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
+            buffer.FillRectangle(1, ActualHeight - 2, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
+            buffer.FillRectangle(0, 1, 1, ActualHeight - 3, UnicodeTable.DoubleFrameVertical, borderAttrs);
+            buffer.FillRectangle(ActualWidth - 3, 1, 1, ActualHeight -3 , UnicodeTable.DoubleFrameVertical, borderAttrs);
+            //
+            buffer.SetOpacity(0, ActualHeight - 1, 2);
+            buffer.SetOpacity(1, ActualHeight - 1, 2);
+            buffer.SetOpacity(ActualWidth - 1, 0, 2);
+            buffer.SetOpacity(ActualWidth - 2, 0, 2);
+            buffer.SetOpacityRect(2, ActualHeight - 1, ActualWidth - 2, 1, 1);
+            buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
         }
 
         public override void HandleEvent(INPUT_RECORD inputRecord)

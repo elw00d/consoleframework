@@ -4,8 +4,19 @@ using ConsoleFramework.Native;
 
 namespace ConsoleFramework
 {
+    /// <summary>
+    /// Stores rendered control content.
+    /// Supports impositioning and opacity.
+    /// </summary>
     public sealed class RenderingBuffer {
         private CHAR_INFO[,] buffer;
+        /// <summary>
+        /// 0 - непрозрачный пиксель
+        /// 1 - полупрозрачный (отображается как тень)
+        /// 2 - полностью прозрачный (при наложении на другой буфер будет проигнорирован)
+        /// </summary>
+        private int[,] opacityMatrix;
+        // todo : add bool hasOpacityAttributes and optimize this
         private int width;
         private int height;
 
@@ -26,18 +37,21 @@ namespace ConsoleFramework
 
         public RenderingBuffer(int width, int height) {
             buffer = new CHAR_INFO[width, height];
+            opacityMatrix = new int[width, height];
             this.width = width;
             this.height = height;
         }
 
         public void CopyFrom(RenderingBuffer renderingBuffer) {
             this.buffer = new CHAR_INFO[renderingBuffer.width, renderingBuffer.height];
+            this.opacityMatrix = new int[renderingBuffer.width, renderingBuffer.height];
             this.width = renderingBuffer.width;
             this.height = renderingBuffer.height;
             //
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     buffer[x, y] = renderingBuffer.buffer[x, y];
+                    opacityMatrix[x, y] = renderingBuffer.opacityMatrix[x, y];
                 }
             }
         }
@@ -67,9 +81,13 @@ namespace ConsoleFramework
                         if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
                             if (layoutClip.Contains(childX, childY)) {
                                 CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
-                                // skip empty pixels (considering it as transparent pixels)
-                                if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                                int opacity = childBuffer.opacityMatrix[childX, childY];
+                                if (opacity == 0) {
                                     this.buffer[parentX, parentY] = charInfo;
+                                } else if (opacity == 1) {
+                                    charInfo.Attributes = (CHAR_ATTRIBUTES) Color.Attr(Color.DarkGray, Color.Black);
+                                    charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
+                                    buffer[parentX, parentY] = charInfo;
                                 }
                             }
                         }
@@ -100,10 +118,14 @@ namespace ConsoleFramework
                         int parentY = childY + actualOffset.y;
                         if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
                             if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
-                                CHAR_INFO charInfo = childBuffer.buffer[x + affectedRect.x, y + affectedRect.y];
-                                // skip empty pixels (considering it as transparent pixels)
-                                if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
+                                CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
+                                int opacity = childBuffer.opacityMatrix[childX, childY];
+                                if (opacity == 0) {
                                     this.buffer[parentX, parentY] = charInfo;
+                                } else if (opacity == 1) {
+                                    charInfo.Attributes = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkGray, Color.Black);
+                                    charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
+                                    buffer[parentX, parentY] = charInfo;
                                 }
                             }
                         }
@@ -123,6 +145,24 @@ namespace ConsoleFramework
         public void SetPixel(int x, int y, char c, CHAR_ATTRIBUTES attr) {
             buffer[x, y].UnicodeChar = c;
             buffer[x, y].Attributes = attr;
+        }
+
+        public void SetOpacity(int x, int y, int opacity) {
+            if (opacity != 0 && opacity != 1 && opacity != 2)
+                throw new ArgumentException("opacity");
+            //
+            opacityMatrix[x, y] = opacity;
+        }
+
+        public void SetOpacityRect(int x, int y, int w, int h, int opacity) {
+            if (opacity != 0 && opacity != 1 && opacity != 2)
+                throw new ArgumentException("opacity");
+            for (int i = 0; i < w; i++) {
+                int _x = x + i;
+                for (int j = 0; j < h; j++) {
+                    opacityMatrix[_x, y + j] = opacity;
+                }
+            }
         }
 
         public void FillRectangle(int x, int y, int w, int h, char c, ushort attrs) {
