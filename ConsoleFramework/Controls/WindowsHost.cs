@@ -76,12 +76,12 @@ namespace ConsoleFramework.Controls
                 base.HandleEvent(inputRecord);
         }
 
-        public void AddWindow(Window window)
-        {
-            // todo : определить, нужно ли вызывать Invalidate при добавлении дочерних элементов
-            // может быть, следует это делать автоматически при вызове base.AddChild() ?
+        public void AddWindow(Window window) {
             AddChild(window);
-            //Invalidate();
+        }
+
+        public void RemoveWindow(Window window) {
+            RemoveChild(window);
         }
     }
 }

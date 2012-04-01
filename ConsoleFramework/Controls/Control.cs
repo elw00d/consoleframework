@@ -120,6 +120,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Add(child);
             child.Parent = this;
+            Invalidate();
         }
 
         protected void RemoveChild(Control child) {
@@ -131,6 +132,7 @@ namespace ConsoleFramework.Controls
                 if (!this.children.Remove(child))
                     throw new InvalidOperationException("Assertion failed.");
                 child.Parent = null;
+                Invalidate();
             }
         }
 

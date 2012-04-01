@@ -52,7 +52,7 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer)
         {
-            ushort borderAttrs = Color.Attr(Color.White, Color.Gray);
+            ushort borderAttrs = moving ? Color.Attr(Color.Green, Color.Gray) : Color.Attr(Color.White, Color.Gray);
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
             // corners
@@ -65,6 +65,13 @@ namespace ConsoleFramework.Controls
             buffer.FillRectangle(1, ActualHeight - 2, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
             buffer.FillRectangle(0, 1, 1, ActualHeight - 3, UnicodeTable.DoubleFrameVertical, borderAttrs);
             buffer.FillRectangle(ActualWidth - 3, 1, 1, ActualHeight -3 , UnicodeTable.DoubleFrameVertical, borderAttrs);
+            // close button
+            if (ActualWidth > 4) {
+                buffer.SetPixel(2, 0, '[');
+                buffer.SetPixel(3, 0, showClosingGlyph ? UnicodeTable.WindowClosePressedSymbol : UnicodeTable.WindowCloseSymbol,
+                    (CHAR_ATTRIBUTES) Color.Attr(Color.Green, Color.Gray));
+                buffer.SetPixel(4, 0, ']');
+            }
             //
             buffer.SetOpacity(0, ActualHeight - 1, 2);
             buffer.SetOpacity(1, ActualHeight - 1, 2);
@@ -73,6 +80,9 @@ namespace ConsoleFramework.Controls
             buffer.SetOpacityRect(2, ActualHeight - 1, ActualWidth - 2, 1, 1);
             buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
         }
+
+        private bool closing = false;
+        private bool showClosingGlyph = false;
 
         private bool moving = false;
         private int movingStartX;
@@ -95,6 +105,38 @@ namespace ConsoleFramework.Controls
             // moving & resizing
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
+                if (closing) {
+                    if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        bool anyChanged = false;
+                        if (translatedPoint.x == 3 && translatedPoint.y == 0) {
+                            if (!showClosingGlyph) {
+                                showClosingGlyph = true;
+                                anyChanged = true;
+                            }
+                        } else {
+                            if (showClosingGlyph) {
+                                showClosingGlyph = false;
+                                anyChanged = true;
+                            }
+                        }
+                        if (anyChanged)
+                            Invalidate();
+                        eventHandled = true;
+                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        if (translatedPoint.x == 3 && translatedPoint.y == 0) {
+                            getWindowsHost().RemoveWindow(this);
+                        }
+                        closing = false;
+                        showClosingGlyph = false;
+                        ConsoleApplication.Instance.EndCaptureInput(this);
+                        Invalidate();
+                        eventHandled = true;
+                    }
+                }
                 if (moving) {
                     if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
@@ -107,6 +149,7 @@ namespace ConsoleFramework.Controls
                     } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         moving = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
+                        Invalidate();
                         eventHandled = true;
                     }
                 }
@@ -133,28 +176,39 @@ namespace ConsoleFramework.Controls
                     } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         resizing = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
+                        Invalidate();
                         eventHandled = true;
                     }
                 }
                 // перемещение можно начинать только когда окно не ресайзится и наоборот
-                if (!moving && !resizing) {
+                if (!moving && !resizing && !closing) {
                     if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
                         Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
-                        if (translatedPoint.y == 0) {
+                        if (translatedPoint.y == 0 && translatedPoint.x == 3) {
+                            closing = true;
+                            showClosingGlyph = true;
+                            ConsoleApplication.Instance.BeginCaptureInput(this);
+                            // closing is started, we should redraw the border
+                            Invalidate();
+                            eventHandled = true;
+                        } else if (translatedPoint.y == 0) {
                             moving = true;
                             movingStartPoint = new Point(mousePosition.X, mousePosition.Y);
                             movingStartX = X;
                             movingStartY = Y;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
+                            // moving is started, we should redraw the border
+                            Invalidate();
                             eventHandled = true;
-                        }
-                        if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
+                        } else if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
                             resizing = true;
                             resizingStartPoint = new Point(mousePosition.X, mousePosition.Y);
                             resizingStartWidth = ActualWidth;
                             resizingStartHeight = ActualHeight;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
+                            // resizing is started, we should redraw the border
+                            Invalidate();
                             eventHandled = true;
                         }
                     }

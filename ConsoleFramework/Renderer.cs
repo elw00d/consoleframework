@@ -247,7 +247,10 @@ namespace ConsoleFramework
                 throw new ArgumentNullException("control");
             }
             if (!invalidatedControls.Contains(control)) {
-                invalidatedControls.Enqueue(control);
+                // add to queue only if it has parent or it is root element
+                if (control.Parent != null || control == RootElement) {
+                    invalidatedControls.Enqueue(control);
+                }
             }
         }
 
