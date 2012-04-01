@@ -178,6 +178,7 @@ namespace ConsoleFramework
         }
 
         /// <summary>
+        /// todo :
         /// Копирует часть изображения из буфера на экран консоли так, что точка (rect.x, rect.y) на canvas'e
         /// совмещается с точкой (affectedRect.x, affectedRect.y) буфера.
         /// AffectedRect определяет, какая часть буфера будет скопирована на экран.
@@ -185,32 +186,23 @@ namespace ConsoleFramework
         /// (0, 0, canvas.Width, canvas.Height) ).
         /// </summary>
         /// <param name="canvas"></param>
-        /// <param name="rect">Canvas rectangle.</param>
-        /// <param name="affectedRect"></param>
-        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect rect, Rect affectedRect) {
-            // проверяем, что rect влезает в canvas целиком
-            if (rect.x + rect.width > canvas.Width || rect.y + rect.height > canvas.Height) {
-                throw new ArgumentException("Assertion failed: rect should not be out of canvas bounds.", "rect");
-            }
-            // определяем Rect относительно буфера, по размеру не превышающий переданного rect
-            // (если этого не сделать, то возможна ситуация, когда мы пытаемся большой прямоугольник, заданный affectedRect,
-            // впихнуть в маленький rect на canvas'e
+        /// <param name="affectedRect">Измененная область относительно this.</param>
+        /// <param name="topLeft">В какой точке экрана размещен контрол (см <see cref="Renderer.Rect"/>).</param>
+        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect affectedRect, Point topLeft) {
             Rect rectToCopy = affectedRect;
-            rectToCopy.Intersect(new Rect(new Point(affectedRect.x, affectedRect.y), rect.Size));
+            Rect bufferRect = new Rect(new Point(0, 0), new Size(this.width, this.height));
+            Rect canvasRect = new Rect(new Point(-topLeft.X, -topLeft.Y), new Size(canvas.Width, canvas.Height));
+            rectToCopy.Intersect(canvasRect);
+            rectToCopy.Intersect(bufferRect);
             //
             for (int x = 0; x < rectToCopy.width; x++) {
-                int canvasX = x + rectToCopy.x;
-                // todo : убрать проверки, сделать это с помощью intersect необходимых rect'ов
-                if (canvasX >= 0 && canvasX < width) {
-                    for (int y = 0; y < rectToCopy.height; y++) {
-                        int canvasY = y + rectToCopy.y;
-                        if (canvasY >= 0 && canvasY < height) {
-                            CHAR_INFO charInfo = buffer[x + rectToCopy.x, y + rectToCopy.y];
-                            if (charInfo.AsciiChar != '\0' || charInfo.Attributes != CHAR_ATTRIBUTES.NO_ATTRIBUTES) {
-                                canvas[x + rect.X][y + rect.Y].Assign(charInfo);
-                            }
-                        }
-                    }
+                int bufferX = x + rectToCopy.x;
+                int canvasX = x + rectToCopy.x + topLeft.x;
+                for (int y = 0; y < rectToCopy.height; y++) {
+                    int bufferY = y + rectToCopy.y;
+                    int canvasY = y + rectToCopy.y + topLeft.y;
+                    CHAR_INFO charInfo = buffer[bufferX, bufferY];
+                    canvas[canvasX][canvasY].Assign(charInfo);
                 }
             }
         }

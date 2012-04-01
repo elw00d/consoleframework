@@ -9,6 +9,9 @@ namespace ConsoleFramework
     /// Central point of the console framework layout system.
     /// </summary>
     public sealed class Renderer {
+        /// <summary>
+        /// Прямоугольная область относительно экрана консоли, в которой будет размещён Root Element.
+        /// </summary>
         public Rect Rect {
             get;
             set;
@@ -52,7 +55,8 @@ namespace ConsoleFramework
                 affectedRect.Union(currentAffectedRect);
             }
             if (!affectedRect.IsEmpty) {
-                Canvas.Flush(affectedRect);
+                // flush stored image (with this.Rect offset)
+                Canvas.Flush(new Rect(affectedRect.x + Rect.x, affectedRect.y + Rect.y, affectedRect.width, affectedRect.height));
             }
         }
 
@@ -99,10 +103,7 @@ namespace ConsoleFramework
                 return applyChangesToCanvas(control.Parent, parentAffectedRect);
             } else {
                 // мы добрались до экрана консоли
-                fullBuffer.CopyToPhysicalCanvas(Canvas, new Rect(affectedRect.x, affectedRect.y,
-                                                                 Math.Min(Canvas.Width - affectedRect.x, affectedRect.width),
-                                                                 Math.Min(Canvas.Height - affectedRect.y, affectedRect.height)),
-                                                                 affectedRect);
+                fullBuffer.CopyToPhysicalCanvas(Canvas, affectedRect, Rect.TopLeft);
                 return affectedRect;
             }
         }

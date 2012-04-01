@@ -80,9 +80,8 @@ namespace ConsoleFramework.Controls
         private int resizingStartY;
         private Point resizingStartPoint;
 
-        public override void HandleEvent(INPUT_RECORD inputRecord)
-        {
-            base.HandleEvent(inputRecord);
+        public override void HandleEvent(INPUT_RECORD inputRecord) {
+            bool eventHandled = false;
             if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED)
             {
                 COORD pos = inputRecord.MouseEvent.dwMousePosition;
@@ -102,6 +101,7 @@ namespace ConsoleFramework.Controls
                             resizingStartX = X;
                             resizingStartY = Y;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
+                            eventHandled = true;
                         }
                     }
                 } else {
@@ -112,11 +112,17 @@ namespace ConsoleFramework.Controls
                         Y = resizingStartY + vector.Y;
                         Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", resizingStartX, resizingStartY, X, Y);
                         getWindowsHost().Invalidate();
+                        eventHandled = true;
                     } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         resizing = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
+                        eventHandled = true;
                     }
                 }
+            }
+            //
+            if (!eventHandled) {
+                base.HandleEvent(inputRecord);
             }
         }
     }

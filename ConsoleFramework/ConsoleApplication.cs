@@ -55,15 +55,13 @@ namespace ConsoleFramework
             };
             
             // todo : introduce settings instead hardcode 80x25
-            PhysicalCanvas canvas = new PhysicalCanvas(80, 25, stdOutputHandle);
-            //renderer = new Renderer(canvas, new Rect(0, 0, 80, 25), mainControl);
+            PhysicalCanvas canvas = new PhysicalCanvas(100, 35, stdOutputHandle);
             renderer.Canvas = canvas;
-            renderer.Rect = new Rect(0, 0, 80, 25);
+            renderer.Rect = new Rect(5, 5, 80, 25);
             renderer.RootElement = mainControl;
             //
             mainControl.Invalidate();
             renderer.UpdateRender();
-            //canvas.Flush();
             
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
