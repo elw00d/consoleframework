@@ -13,7 +13,6 @@ namespace ConsoleFramework.Controls
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public int Z { get; set; }
 
         public char C { get; set; }
 
@@ -75,9 +74,14 @@ namespace ConsoleFramework.Controls
             buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
         }
 
+        private bool moving = false;
+        private int movingStartX;
+        private int movingStartY;
+        private Point movingStartPoint;
+
         private bool resizing = false;
-        private int resizingStartX;
-        private int resizingStartY;
+        private int resizingStartWidth;
+        private int resizingStartHeight;
         private Point resizingStartPoint;
 
         public override void HandleEvent(INPUT_RECORD inputRecord) {
@@ -88,35 +92,71 @@ namespace ConsoleFramework.Controls
                 Point translatedPoint = TranslatePoint(null, new Point(pos.X, pos.Y), this);
                 Debug.WriteLine("MOUSE_EVENT at {0}:{1} -> {2}:{3} window : {4}", pos.X, pos.Y, translatedPoint.x, translatedPoint.y, Name);
             }
-            // resizing
+            // moving & resizing
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
-                if (!resizing) {
-                    if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
-                        COORD mousePosition = mouseEvent.dwMousePosition;
-                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
-                        if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
-                            resizing = true;
-                            resizingStartPoint = new Point(mousePosition.X, mousePosition.Y);
-                            resizingStartX = X;
-                            resizingStartY = Y;
-                            ConsoleApplication.Instance.BeginCaptureInput(this);
-                            eventHandled = true;
-                        }
-                    }
-                } else {
+                if (moving) {
                     if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        Vector vector = new Vector(mousePosition.X - resizingStartPoint.x, mousePosition.Y - resizingStartPoint.y);
-                        X = resizingStartX + vector.X;
-                        Y = resizingStartY + vector.Y;
-                        Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", resizingStartX, resizingStartY, X, Y);
+                        Vector vector = new Vector(mousePosition.X - movingStartPoint.x, mousePosition.Y - movingStartPoint.y);
+                        X = movingStartX + vector.X;
+                        Y = movingStartY + vector.Y;
+                        Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
                         getWindowsHost().Invalidate();
+                        eventHandled = true;
+                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                        moving = false;
+                        ConsoleApplication.Instance.EndCaptureInput(this);
+                        eventHandled = true;
+                    }
+                }
+                if (resizing) {
+                    if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        int deltaWidth = mousePosition.X - resizingStartPoint.x;
+                        int deltaHeight = mousePosition.Y - resizingStartPoint.y;
+                        int width = resizingStartWidth + deltaWidth;
+                        int height = resizingStartHeight + deltaHeight;
+                        bool anyChanged = false;
+                        if (width >= 4) {
+                            this.Width = width;
+                            anyChanged = true;
+                        }
+                        if (height >= 3) {
+                            this.Height = height;
+                            anyChanged = true;
+                        }
+                        if (anyChanged)
+                            Invalidate();
+                        //
                         eventHandled = true;
                     } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         resizing = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
                         eventHandled = true;
+                    }
+                }
+                // перемещение можно начинать только когда окно не ресайзится и наоборот
+                if (!moving && !resizing) {
+                    if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                        COORD mousePosition = mouseEvent.dwMousePosition;
+                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        if (translatedPoint.y == 0) {
+                            moving = true;
+                            movingStartPoint = new Point(mousePosition.X, mousePosition.Y);
+                            movingStartX = X;
+                            movingStartY = Y;
+                            ConsoleApplication.Instance.BeginCaptureInput(this);
+                            eventHandled = true;
+                        }
+                        if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
+                            resizing = true;
+                            resizingStartPoint = new Point(mousePosition.X, mousePosition.Y);
+                            resizingStartWidth = ActualWidth;
+                            resizingStartHeight = ActualHeight;
+                            ConsoleApplication.Instance.BeginCaptureInput(this);
+                            eventHandled = true;
+                        }
                     }
                 }
             }

@@ -57,7 +57,7 @@ namespace ConsoleFramework
             // todo : introduce settings instead hardcode 80x25
             PhysicalCanvas canvas = new PhysicalCanvas(100, 35, stdOutputHandle);
             renderer.Canvas = canvas;
-            renderer.Rect = new Rect(5, 5, 80, 25);
+            renderer.RootElementRect = new Rect(5, 5, 80, 25);
             renderer.RootElement = mainControl;
             //
             mainControl.Invalidate();

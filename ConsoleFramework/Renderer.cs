@@ -12,7 +12,7 @@ namespace ConsoleFramework
         /// <summary>
         /// Прямоугольная область относительно экрана консоли, в которой будет размещён Root Element.
         /// </summary>
-        public Rect Rect {
+        public Rect RootElementRect {
             get;
             set;
         }
@@ -55,8 +55,8 @@ namespace ConsoleFramework
                 affectedRect.Union(currentAffectedRect);
             }
             if (!affectedRect.IsEmpty) {
-                // flush stored image (with this.Rect offset)
-                Canvas.Flush(new Rect(affectedRect.x + Rect.x, affectedRect.y + Rect.y, affectedRect.width, affectedRect.height));
+                // flush stored image (with this.RootElementRect offset)
+                Canvas.Flush(new Rect(affectedRect.x + RootElementRect.x, affectedRect.y + RootElementRect.y, affectedRect.width, affectedRect.height));
             }
         }
 
@@ -103,7 +103,7 @@ namespace ConsoleFramework
                 return applyChangesToCanvas(control.Parent, parentAffectedRect);
             } else {
                 // мы добрались до экрана консоли
-                fullBuffer.CopyToPhysicalCanvas(Canvas, affectedRect, Rect.TopLeft);
+                fullBuffer.CopyToPhysicalCanvas(Canvas, affectedRect, RootElementRect.TopLeft);
                 return affectedRect;
             }
         }
@@ -158,8 +158,8 @@ namespace ConsoleFramework
                 if (control != RootElement) {
                     throw new InvalidOperationException("Control has no parent but is not known rootElement.");
                 }
-                control.Measure(Rect.Size);
-                control.Arrange(Rect);
+                control.Measure(RootElementRect.Size);
+                control.Arrange(RootElementRect);
             } else {
                 control.Measure(lastLayoutInfo.measureArgument);
                 control.Arrange(lastLayoutInfo.renderSlotRect);
@@ -175,6 +175,7 @@ namespace ConsoleFramework
                 buffers[control] = buffer;
                 fullBuffers[control] = fullBuffer;
             }
+            buffer.Clear();
             control.Render(buffer);
             // проверяем дочерние контролы - если их layoutInfo не изменился по сравнению с последним,
             // то мы можем взять их последний renderBuffer без обновления и применить к текущему контролу
@@ -225,6 +226,7 @@ namespace ConsoleFramework
                 fullBuffers[control] = fullBuffer;
             }
             // otherwise we should assemble full rendered buffer using childs
+            buffer.Clear();
             control.Render(buffer);
             //
             fullBuffer.CopyFrom(buffer);

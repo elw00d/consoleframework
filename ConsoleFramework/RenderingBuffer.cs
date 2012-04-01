@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -178,32 +180,50 @@ namespace ConsoleFramework
         }
 
         /// <summary>
-        /// todo :
-        /// Копирует часть изображения из буфера на экран консоли так, что точка (rect.x, rect.y) на canvas'e
-        /// совмещается с точкой (affectedRect.x, affectedRect.y) буфера.
-        /// AffectedRect определяет, какая часть буфера будет скопирована на экран.
-        /// Rect определяет часть Canvas'a, в которую будет произведено копирование (обычно - канвас целиком то есть
-        /// (0, 0, canvas.Width, canvas.Height) ).
+        /// Копирует affectedRect из буфера на экран консоли с учетом того, что буфер
+        /// находится на экране консоли по смещению offset.
         /// </summary>
         /// <param name="canvas"></param>
         /// <param name="affectedRect">Измененная область относительно this.</param>
-        /// <param name="topLeft">В какой точке экрана размещен контрол (см <see cref="Renderer.Rect"/>).</param>
-        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect affectedRect, Point topLeft) {
+        /// <param name="offset">В какой точке экрана размещен контрол (см <see cref="Renderer.RootElementRect"/>).</param>
+        public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect affectedRect, Point offset) {
             Rect rectToCopy = affectedRect;
             Rect bufferRect = new Rect(new Point(0, 0), new Size(this.width, this.height));
-            Rect canvasRect = new Rect(new Point(-topLeft.X, -topLeft.Y), new Size(canvas.Width, canvas.Height));
+            Rect canvasRect = new Rect(new Point(-offset.X, -offset.Y), new Size(canvas.Width, canvas.Height));
             rectToCopy.Intersect(canvasRect);
             rectToCopy.Intersect(bufferRect);
             //
             for (int x = 0; x < rectToCopy.width; x++) {
                 int bufferX = x + rectToCopy.x;
-                int canvasX = x + rectToCopy.x + topLeft.x;
+                int canvasX = x + rectToCopy.x + offset.x;
                 for (int y = 0; y < rectToCopy.height; y++) {
                     int bufferY = y + rectToCopy.y;
-                    int canvasY = y + rectToCopy.y + topLeft.y;
+                    int canvasY = y + rectToCopy.y + offset.y;
                     CHAR_INFO charInfo = buffer[bufferX, bufferY];
                     canvas[canvasX][canvasY].Assign(charInfo);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Renderer should call this method before any control render.
+        /// </summary>
+        public void Clear() {
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    buffer[x, y] = new CHAR_INFO();
+                    opacityMatrix[x, y] = 0;
+                }
+            }
+        }
+
+        public void DumpOpacityMatrix() {
+            for (int y = 0; y < height; y++) {
+                StringBuilder sb = new StringBuilder();
+                for (int x = 0; x < width; x++) {
+                    sb.Append(opacityMatrix[x, y]);
+                }
+                Debug.WriteLine(sb);
             }
         }
     }
