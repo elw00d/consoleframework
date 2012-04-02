@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 
@@ -33,6 +34,7 @@ namespace ConsoleFramework
         private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
         // queue of controls marked for layout invalidation
         private readonly Queue<Control> invalidatedControls = new Queue<Control>();
+        private readonly List<Control> currentLayoutPassInvalidatedControls = new List<Control>();
 
         // список контролов, у которых обновилось содержимое full render buffer
         // актуален только при вызове UpdateRender, после вызова очищается
@@ -46,10 +48,14 @@ namespace ConsoleFramework
         /// </summary>
         public void UpdateRender() {
             renderingUpdatedControls.Clear();
+            currentLayoutPassInvalidatedControls.Clear();
             // invalidate layout and fill renderingUpdatedControls list
             InvalidateLayout();
             // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
+            if (renderingUpdatedControls.Count > 0) {
+                Debug.WriteLine("Rendering updated controls : {0}.", renderingUpdatedControls.Count);
+            }
             foreach (Control control in renderingUpdatedControls) {
                 Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
                 affectedRect.Union(currentAffectedRect);
@@ -118,6 +124,7 @@ namespace ConsoleFramework
         internal void InvalidateLayout() {
             while (invalidatedControls.Count != 0) {
                 Control control = invalidatedControls.Dequeue();
+                currentLayoutPassInvalidatedControls.Add(control);
                 // set previous results of layout passes dirty
                 control.ResetValidity();
                 //
@@ -197,10 +204,46 @@ namespace ConsoleFramework
         /// являющийся дочерним для текущего контрола, то список не изменяется. Таким образом, в списке
         /// всегда находится лишь минимально необходимый набор контролов, буферы которых необходимо
         /// применить ко всем родительским контролам впроть до rootElement, чтобы обновить ситуацию на
-        /// экране.
+        /// экране. Но такая оптимизация может применяться только для тех контролов, которые за прошедший
+        /// layout pass не побывали в invalidatedControlsQueue. В противном случае мы вынуждены обновить их
+        /// целиком.
         /// </summary>
         private void addControlToRenderingUpdatedList(Control control) {
-            // todo : add optimization logic
+            //if (renderingUpdatedControls.Contains(control)) {
+            //    return;
+            //}
+            //Control controlToReplace = null;
+            //bool dontAddControl = false;
+            //foreach (Control c in renderingUpdatedControls) {
+            //    // check if c is parent of control
+            //    Control current = control;
+            //    do {
+            //        if (current == c) {
+            //            // c is parent of control, we should replace c with control
+            //            controlToReplace = c;
+            //            break;
+            //        }
+            //        current = current.Parent;
+            //    } while (current != null);
+            //    // check if control is parent of c
+            //    current = c;
+            //    do {
+            //        if (current == control) {
+            //            // control is parent of c, we should do nothing with list
+            //            dontAddControl = true;
+            //            break;
+            //        }
+            //        current = current.Parent;
+            //    } while (current != null);
+            //}
+            //if (null != controlToReplace) {
+            //    if (!currentLayoutPassInvalidatedControls.Contains(controlToReplace)) {
+            //        renderingUpdatedControls.Remove(controlToReplace);
+            //    }
+            //}
+            //if (!dontAddControl || currentLayoutPassInvalidatedControls.Contains(control)) {
+            //    renderingUpdatedControls.Add(control);
+            //}
             renderingUpdatedControls.Add(control);
         }
 
