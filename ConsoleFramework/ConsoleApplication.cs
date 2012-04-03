@@ -43,9 +43,11 @@ namespace ConsoleFramework
         }
 
         private Control mainControl;
+        private EventManager eventManager;
 
         public void Run(Control control) {
             this.mainControl = control;
+            eventManager = new EventManager();
             //
             stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
@@ -94,41 +96,16 @@ namespace ConsoleFramework
         }
 
         private void processInputEvent(INPUT_RECORD inputRecord) {
-            // todo : remove after tests
-            if (inputRecord.EventType == EventType.MOUSE_EVENT) {
-                if (inputRecord.MouseEvent.dwButtonState == MouseButtonState.RIGHTMOST_BUTTON_PRESSED && inputRecord.MouseEvent.dwEventFlags == MouseEventFlags.DOUBLE_CLICK) {
-                    this.Exit();
-                }
-            }
-            //
-            if (inputCaptureStack.Count != 0) {
-                inputCaptureStack.Peek().HandleEvent(inputRecord);
-            } else {
-                // todo : think about make mainControl first item in capturing controls stack
-                mainControl.HandleEvent(inputRecord);
-            }
+            eventManager.ProcessEvent(inputRecord, mainControl, renderer.RootElementRect);
         }
 
         public void BeginCaptureInput(Control control) {
-            if (null == control) {
-                throw new ArgumentNullException("control");
-            }
-            //
-            inputCaptureStack.Push(control);
+            eventManager.BeginCaptureInput(control);
         }
 
         public void EndCaptureInput(Control control) {
-            if (null == control) {
-                throw new ArgumentNullException("control");
-            }
-            //
-            if (inputCaptureStack.Peek() != control) {
-                throw new InvalidOperationException("Last control captured the input differs from specified in argument.");
-            }
-            inputCaptureStack.Pop();
+            eventManager.EndCaptureInput(control);
         }
-
-        private readonly Stack<Control> inputCaptureStack = new Stack<Control>();
 
         private void dispose(bool isDisposing) {
             if (isDisposing) {

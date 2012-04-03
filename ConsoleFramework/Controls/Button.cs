@@ -34,7 +34,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public override void HandleEvent(INPUT_RECORD inputRecord) {
+        public override bool HandleEvent(INPUT_RECORD inputRecord) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
                 (inputRecord.MouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) ==
                 MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
@@ -44,6 +44,7 @@ namespace ConsoleFramework.Controls
                     this.Invalidate();
                     //this.Parent.Invalidate();
                     //this.Parent.Parent.Invalidate();
+                    return true;
                 }
             }
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
@@ -55,8 +56,10 @@ namespace ConsoleFramework.Controls
                     this.Invalidate();
                     //this.Parent.Invalidate();
                     //this.Parent.Parent.Invalidate();
+                    return true;
                 }
             }
+            return false;
         }
     }
 }

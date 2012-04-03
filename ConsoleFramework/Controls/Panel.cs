@@ -59,13 +59,15 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
 
-        public override void HandleEvent(INPUT_RECORD inputRecord) {
+        public override bool HandleEvent(INPUT_RECORD inputRecord) {
+            // todo : remove after tests
             if (inputRecord.EventType == EventType.KEY_EVENT && inputRecord.KeyEvent.bKeyDown) {
                 TextBlock textBlock = ((TextBlock) this.FindChildByName("label1"));
                 textBlock.Text = textBlock.Text + "5";
+                return true;
             }
             //
-            base.HandleEvent(inputRecord);
+            return false;
         }
 
         /// <summary>

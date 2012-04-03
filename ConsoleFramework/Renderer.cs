@@ -53,9 +53,9 @@ namespace ConsoleFramework
             InvalidateLayout();
             // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
-            if (renderingUpdatedControls.Count > 0) {
-                Debug.WriteLine("Rendering updated controls : {0}.", renderingUpdatedControls.Count);
-            }
+            //if (renderingUpdatedControls.Count > 0) {
+            //    Debug.WriteLine("Rendering updated controls : {0}.", renderingUpdatedControls.Count);
+            //}
             foreach (Control control in renderingUpdatedControls) {
                 Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
                 affectedRect.Union(currentAffectedRect);

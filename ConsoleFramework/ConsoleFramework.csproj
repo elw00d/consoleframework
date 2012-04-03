@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\Window.cs" />
+    <Compile Include="EventManager.cs" />
     <Compile Include="Native\Color.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />

@@ -94,12 +94,13 @@ namespace ConsoleFramework.Controls
         private int resizingStartHeight;
         private Point resizingStartPoint;
 
-        public override void HandleEvent(INPUT_RECORD inputRecord) {
+        public override bool HandleEvent(INPUT_RECORD inputRecord) {
             bool eventHandled = false;
             if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED)
             {
                 COORD pos = inputRecord.MouseEvent.dwMousePosition;
-                Point translatedPoint = TranslatePoint(null, new Point(pos.X, pos.Y), this);
+                //Point translatedPoint = TranslatePoint(null, new Point(pos.X, pos.Y), this);
+                Point translatedPoint = new Point(pos.X, pos.Y);
                 Debug.WriteLine("MOUSE_EVENT at {0}:{1} -> {2}:{3} window : {4}", pos.X, pos.Y, translatedPoint.x, translatedPoint.y, Name);
             }
             // moving & resizing
@@ -108,9 +109,10 @@ namespace ConsoleFramework.Controls
                 if (closing) {
                     if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        //Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        Point point = new Point(mousePosition.X, mousePosition.Y);
                         bool anyChanged = false;
-                        if (translatedPoint.x == 3 && translatedPoint.y == 0) {
+                        if (point.x == 3 && point.y == 0) {
                             if (!showClosingGlyph) {
                                 showClosingGlyph = true;
                                 anyChanged = true;
@@ -126,8 +128,9 @@ namespace ConsoleFramework.Controls
                         eventHandled = true;
                     } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
-                        if (translatedPoint.x == 3 && translatedPoint.y == 0) {
+                        //Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
+                        Point point = new Point(mousePosition.X, mousePosition.Y);
+                        if (point.x == 3 && point.y == 0) {
                             getWindowsHost().RemoveWindow(this);
                         }
                         closing = false;
@@ -140,7 +143,8 @@ namespace ConsoleFramework.Controls
                 if (moving) {
                     if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        Vector vector = new Vector(mousePosition.X - movingStartPoint.x, mousePosition.Y - movingStartPoint.y);
+                        Point parentPoint = TranslatePoint(this, new Point(mousePosition.X, mousePosition.Y), getWindowsHost());
+                        Vector vector = new Vector(parentPoint.X - movingStartPoint.x, parentPoint.Y - movingStartPoint.y);
                         X = movingStartX + vector.X;
                         Y = movingStartY + vector.Y;
                         Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
@@ -156,8 +160,9 @@ namespace ConsoleFramework.Controls
                 if (resizing) {
                     if ((mouseEvent.dwEventFlags & MouseEventFlags.MOUSE_MOVED) == MouseEventFlags.MOUSE_MOVED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        int deltaWidth = mousePosition.X - resizingStartPoint.x;
-                        int deltaHeight = mousePosition.Y - resizingStartPoint.y;
+                        Point parentPoint = TranslatePoint(this, new Point(mousePosition.X, mousePosition.Y), getWindowsHost());
+                        int deltaWidth = parentPoint.X - resizingStartPoint.x;
+                        int deltaHeight = parentPoint.Y - resizingStartPoint.y;
                         int width = resizingStartWidth + deltaWidth;
                         int height = resizingStartHeight + deltaHeight;
                         bool anyChanged = false;
@@ -184,26 +189,28 @@ namespace ConsoleFramework.Controls
                 if (!moving && !resizing && !closing) {
                     if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
-                        Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
-                        if (translatedPoint.y == 0 && translatedPoint.x == 3) {
+                        //Point translatedPoint = TranslatePoint(this, new Point(mousePosition.X, mousePosition.Y), getWindowsHost());
+                        Point point = new Point(mousePosition.X, mousePosition.Y);
+                        Point parentPoint = TranslatePoint(this, new Point(mousePosition.X, mousePosition.Y), getWindowsHost());
+                        if (point.y == 0 && point.x == 3) {
                             closing = true;
                             showClosingGlyph = true;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
                             // closing is started, we should redraw the border
                             Invalidate();
                             eventHandled = true;
-                        } else if (translatedPoint.y == 0) {
+                        } else if (point.y == 0) {
                             moving = true;
-                            movingStartPoint = new Point(mousePosition.X, mousePosition.Y);
+                            movingStartPoint = parentPoint;
                             movingStartX = X;
                             movingStartY = Y;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
                             // moving is started, we should redraw the border
                             Invalidate();
                             eventHandled = true;
-                        } else if (translatedPoint.x == ActualWidth - 3 && translatedPoint.y == ActualHeight - 2) {
+                        } else if (point.x == ActualWidth - 3 && point.y == ActualHeight - 2) {
                             resizing = true;
-                            resizingStartPoint = new Point(mousePosition.X, mousePosition.Y);
+                            resizingStartPoint = parentPoint;
                             resizingStartWidth = ActualWidth;
                             resizingStartHeight = ActualHeight;
                             ConsoleApplication.Instance.BeginCaptureInput(this);
@@ -215,9 +222,10 @@ namespace ConsoleFramework.Controls
                 }
             }
             //
-            if (!eventHandled) {
-                base.HandleEvent(inputRecord);
-            }
+            //if (!eventHandled) {
+            //    base.HandleEvent(inputRecord);
+            //}
+            return true;
         }
     }
 }
