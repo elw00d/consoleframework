@@ -32,6 +32,7 @@ namespace ConsoleFramework {
                     MaxWidth = 30,
                     C = '1',
                     Name = "Window1",
+                    Title = "Window1",
                     Content = panel
                 };
                 windowsHost.AddWindow(window1);
@@ -42,6 +43,7 @@ namespace ConsoleFramework {
                     MinWidth = 10,
                     C = '2',
                     Name = "Window2",
+                    Title = "Очень длинное название окна",
                     Content = new TextBlock() {
                         Text = "window2 window2"
                     }

@@ -28,6 +28,11 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public string Title {
+            get;
+            set;
+        }
+
         private WindowsHost getWindowsHost()
         {
             return (WindowsHost) Parent;
@@ -72,13 +77,43 @@ namespace ConsoleFramework.Controls
                     (CHAR_ATTRIBUTES) Color.Attr(Color.Green, Color.Gray));
                 buffer.SetPixel(4, 0, ']');
             }
-            //
+            // shadows
             buffer.SetOpacity(0, ActualHeight - 1, 2);
             buffer.SetOpacity(1, ActualHeight - 1, 2);
             buffer.SetOpacity(ActualWidth - 1, 0, 2);
             buffer.SetOpacity(ActualWidth - 2, 0, 2);
             buffer.SetOpacityRect(2, ActualHeight - 1, ActualWidth - 2, 1, 1);
             buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
+            // title
+            if (!string.IsNullOrEmpty(Title)) {
+                int titleStartX = 7;
+                bool renderTitle = false;
+                string renderTitleString = null;
+                int availablePixelsCount = ActualWidth - titleStartX*2;
+                if (availablePixelsCount > 0) {
+                    renderTitle = true;
+                    if (Title.Length <= availablePixelsCount) {
+                        // dont truncate title
+                        titleStartX += (availablePixelsCount - Title.Length)/2;
+                        renderTitleString = Title;
+                    } else {
+                        renderTitleString = Title.Substring(0, availablePixelsCount);
+                        if (renderTitleString.Length > 2) {
+                            renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
+                        } else {
+                            renderTitle = false;
+                        }
+                    }
+                }
+                if (renderTitle) {
+                    // assert !string.IsNullOrEmpty(renderingTitleString);
+                    buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES) borderAttrs);
+                    for (int i = 0; i < renderTitleString.Length; i++) {
+                        buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES) borderAttrs);
+                    }
+                    buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)borderAttrs);
+                }
+            }
         }
 
         private bool closing = false;
