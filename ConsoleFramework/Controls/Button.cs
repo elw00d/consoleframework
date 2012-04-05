@@ -5,6 +5,12 @@ using ConsoleFramework.Native;
 namespace ConsoleFramework.Controls
 {
     public class Button : Control {
+
+        public Button() {
+            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown), false);
+            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp), false);
+        }
+
         private string caption;
         public string Caption {
             get {
@@ -34,10 +40,28 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public void Button_OnMouseDown(object sender, MouseButtonEventArgs args) {
+            if (!pressed) {
+                pressed = true;
+                ConsoleApplication.Instance.BeginCaptureInput(this);
+                this.Invalidate();
+                args.Handled = true;
+            }
+        }
+
+        public void Button_OnMouseUp(object sender, MouseButtonEventArgs args) {
+            if (pressed) {
+                pressed = false;
+                ConsoleApplication.Instance.EndCaptureInput(this);
+                this.Invalidate();
+                args.Handled = true;
+            }
+        }
+
         public override bool HandleEvent(INPUT_RECORD inputRecord) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
-                (inputRecord.MouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) ==
-                MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                (inputRecord.MouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) ==
+                MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                 if (!pressed) {
                     pressed = true;
                     ConsoleApplication.Instance.BeginCaptureInput(this);
@@ -48,8 +72,8 @@ namespace ConsoleFramework.Controls
                 }
             }
             if (inputRecord.EventType == EventType.MOUSE_EVENT &&
-                (inputRecord.MouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) !=
-                MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                (inputRecord.MouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) !=
+                MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                 if (pressed) {
                     pressed = false;
                     ConsoleApplication.Instance.EndCaptureInput(this);

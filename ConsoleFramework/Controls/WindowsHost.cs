@@ -12,6 +12,10 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class WindowsHost : Control
     {
+        public WindowsHost() {
+            EventManager.AddHandler(this, MouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDown), true);
+        }
+
         protected override Size MeasureOverride(Size availableSize)
         {
             // дочерние окна могут занимать сколько угодно пространства
@@ -58,10 +62,22 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public void WindowsHost_MouseDown(object sender, MouseButtonEventArgs args) {
+            Point position = args.GetPosition(this);
+            List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
+            for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
+                Control topChild = childrenOrderedByZIndex[i];
+                if (topChild.RenderSlotRect.Contains(position)) {
+                    ActivateWindow((Window)topChild);
+                    break;
+                }
+            }
+        }
+
         public override bool HandleEvent(INPUT_RECORD inputRecord)
         {
             // todo : add another event types support
-            if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+            if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
                 COORD position = mouseEvent.dwMousePosition;
                 List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
@@ -70,7 +86,7 @@ namespace ConsoleFramework.Controls
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control topChild = childrenOrderedByZIndex[i];
                     if (topChild.RenderSlotRect.Contains(translatedPoint)) {
-                        if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED &&
+                        if (mouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED &&
                             i != childrenOrderedByZIndex.Count - 1) {
                             //
                             ActivateWindow((Window)topChild);

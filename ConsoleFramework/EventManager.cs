@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
@@ -195,17 +196,251 @@ namespace ConsoleFramework {
             inputCaptureStack.Pop();
         }
 
+        private readonly Queue<RoutedEventArgs> eventsQueue = new Queue<RoutedEventArgs>();
+
+        private MouseButtonState getLeftButtonState(MOUSE_BUTTON_STATE rawState) {
+            return (rawState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) ==
+                   MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED
+                       ? MouseButtonState.Pressed
+                       : MouseButtonState.Released;
+        }
+
+        private MouseButtonState getMiddleButtonState(MOUSE_BUTTON_STATE rawState) {
+            return (rawState & MOUSE_BUTTON_STATE.FROM_LEFT_2ND_BUTTON_PRESSED) ==
+                   MOUSE_BUTTON_STATE.FROM_LEFT_2ND_BUTTON_PRESSED
+                       ? MouseButtonState.Pressed
+                       : MouseButtonState.Released;
+        }
+
+        private MouseButtonState getRightButtonState(MOUSE_BUTTON_STATE rawState) {
+            return (rawState & MOUSE_BUTTON_STATE.RIGHTMOST_BUTTON_PRESSED) ==
+                   MOUSE_BUTTON_STATE.RIGHTMOST_BUTTON_PRESSED
+                       ? MouseButtonState.Pressed
+                       : MouseButtonState.Released;
+        }
+
+        private MouseButtonState lastLeftMouseButtonState = MouseButtonState.Released;
+        private MouseButtonState lastMiddleMouseButtonState = MouseButtonState.Released;
+        private MouseButtonState lastRightMouseButtonState = MouseButtonState.Released;
+
         public void ProcessEvent(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
-            //ban all input except mouse clicking
-            //if (inputRecord.EventType != EventType.MOUSE_EVENT || (inputRecord.MouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)) {
-            //    return;
-            //}
-            if (inputCaptureStack.Count != 0) {
-                Control capturingControl = inputCaptureStack.Peek();
-                capturingControl.HandleEvent(translateInputRecord(inputRecord, capturingControl));
-            } else {
-                doProcessEvent(inputRecord, rootElement);
+            if (inputRecord.EventType == EventType.MOUSE_EVENT) {
+                MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
+                if (mouseEvent.dwEventFlags != MouseEventFlags.PRESSED_OR_RELEASED &&
+                    mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_MOVED &&
+                    mouseEvent.dwEventFlags != MouseEventFlags.DOUBLE_CLICK &&
+                    mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_WHEELED &&
+                    mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_HWHEELED) {
+                    //
+                    throw new InvalidOperationException("Flags combination in mouse event was not expected.");
+                }
+                Point rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
+                Control source = findSource(rawPosition, rootElement);
+                //
+                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
+                    MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
+                    MouseButtonState middleMouseButtonState = getMiddleButtonState(mouseEvent.dwButtonState);
+                    MouseButtonState rightMouseButtonState = getRightButtonState(mouseEvent.dwButtonState);
+                    //
+                    MouseEventArgs mouseEventArgs = new MouseEventArgs(source, Control.MouseMoveEvent,
+                                                                       rawPosition,
+                                                                       leftMouseButtonState,
+                                                                       middleMouseButtonState,
+                                                                       rightMouseButtonState
+                        );
+                    eventsQueue.Enqueue(mouseEventArgs);
+                    //
+                    lastLeftMouseButtonState = leftMouseButtonState;
+                    lastMiddleMouseButtonState = middleMouseButtonState;
+                    lastRightMouseButtonState = rightMouseButtonState;
+                }
+                if (mouseEvent.dwEventFlags == MouseEventFlags.PRESSED_OR_RELEASED) {
+                    //
+                    MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
+                    MouseButtonState middleMouseButtonState = getMiddleButtonState(mouseEvent.dwButtonState);
+                    MouseButtonState rightMouseButtonState = getRightButtonState(mouseEvent.dwButtonState);
+                    //
+                    if (leftMouseButtonState != lastLeftMouseButtonState) {
+                        MouseButtonEventArgs eventArgs = new MouseButtonEventArgs(source,
+                            leftMouseButtonState == MouseButtonState.Pressed ? Control.PreviewMouseDownEvent : Control.PreviewMouseUpEvent,
+                            rawPosition,
+                            leftMouseButtonState,
+                            lastMiddleMouseButtonState,
+                            lastRightMouseButtonState,
+                            MouseButton.Left
+                            );
+                        eventsQueue.Enqueue(eventArgs);
+                    }
+                    if (middleMouseButtonState != lastMiddleMouseButtonState) {
+                        MouseButtonEventArgs eventArgs = new MouseButtonEventArgs(source,
+                            middleMouseButtonState == MouseButtonState.Pressed ? Control.PreviewMouseDownEvent : Control.PreviewMouseUpEvent,
+                            rawPosition,
+                            lastLeftMouseButtonState,
+                            middleMouseButtonState,
+                            lastRightMouseButtonState,
+                            MouseButton.Middle
+                            );
+                        eventsQueue.Enqueue(eventArgs);
+                    }
+                    if (rightMouseButtonState != lastRightMouseButtonState) {
+                        MouseButtonEventArgs eventArgs = new MouseButtonEventArgs(source,
+                            rightMouseButtonState == MouseButtonState.Pressed ? Control.PreviewMouseDownEvent : Control.PreviewMouseUpEvent,
+                            rawPosition,
+                            lastLeftMouseButtonState,
+                            lastMiddleMouseButtonState,
+                            rightMouseButtonState,
+                            MouseButton.Right
+                            );
+                        eventsQueue.Enqueue(eventArgs);
+                    }
+                    //
+                    lastLeftMouseButtonState = leftMouseButtonState;
+                    lastMiddleMouseButtonState = middleMouseButtonState;
+                    lastRightMouseButtonState = rightMouseButtonState;
+                }
+                // todo : add whelled and double click handling
+                Debug.WriteLine(mouseEvent.dwEventFlags);
             }
+            //if (inputCaptureStack.Count != 0) {
+            //    Control capturingControl = inputCaptureStack.Peek();
+            //    capturingControl.HandleEvent(translateInputRecord(inputRecord, capturingControl));
+            //} else {
+            //    doProcessEvent(inputRecord, rootElement);
+            //}
+            while (eventsQueue.Count != 0) {
+                RoutedEventArgs routedEventArgs = eventsQueue.Dequeue();
+                processRoutedEvent(routedEventArgs.RoutedEvent, routedEventArgs);
+            }
+        }
+
+        private void processRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            //
+            List<RoutedEventTargetInfo> subscribedTargets = getTargetsSubscribedTo(routedEvent);
+            //if (null == subscribedTargets || subscribedTargets.Count == 0)
+                //return;
+            if (routedEvent.RoutingStrategy == RoutingStrategy.Direct) {
+                if (subscribedTargets != null) {
+                    foreach (RoutedEventTargetInfo targetInfo in subscribedTargets) {
+                        foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                            if (!args.Handled || delegateInfo.handledEventsToo) {
+                                if (delegateInfo.@delegate is RoutedEventHandler) {
+                                    ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                } else {
+                                    delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                }
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            Control source = (Control) args.Source;
+            // path to source from root element down
+            List<Control> path = new List<Control>();
+            Control current = source;
+            while (null != current) {
+                path.Insert(0, current);
+                current = current.Parent;
+            }
+
+            if (routedEvent.RoutingStrategy == RoutingStrategy.Tunnel) {
+                if (subscribedTargets != null) {
+                    foreach (Control potentialTarget in path) {
+                        Control target = potentialTarget;
+                        RoutedEventTargetInfo targetInfo =
+                            subscribedTargets.FirstOrDefault(info => info.target == target);
+                        if (null != targetInfo) {
+                            foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                                if (!args.Handled || delegateInfo.handledEventsToo) {
+                                    if (delegateInfo.@delegate is RoutedEventHandler) {
+                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                    } else {
+                                        delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // для парных Preview-событий запускаем соответствующие настоящие события,
+                // сохраняя при этом Handled (если Preview событие помечено как Handled=true,
+                // то и настоящее событие будет маршрутизировано с Handled=true)
+                if (routedEvent == Control.PreviewMouseDownEvent) {
+                    MouseButtonEventArgs argsNew = new MouseButtonEventArgs(
+                        args.Source, Control.MouseDownEvent,
+                        ((MouseButtonEventArgs) args).RawPosition,
+                        ((MouseButtonEventArgs)args).LeftButton,
+                        ((MouseButtonEventArgs)args).MiddleButton,
+                        ((MouseButtonEventArgs)args).RightButton,
+                        ((MouseButtonEventArgs)args).ChangedButton
+                        );
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
+                if (routedEvent == Control.PreviewMouseUpEvent) {
+                    MouseButtonEventArgs argsNew = new MouseButtonEventArgs(
+                        args.Source, Control.MouseUpEvent,
+                        ((MouseButtonEventArgs)args).RawPosition,
+                        ((MouseButtonEventArgs)args).LeftButton,
+                        ((MouseButtonEventArgs)args).MiddleButton,
+                        ((MouseButtonEventArgs)args).RightButton,
+                        ((MouseButtonEventArgs)args).ChangedButton
+                        );
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
+                if (routedEvent == Control.PreviewMouseMoveEvent) {
+                    MouseEventArgs argsNew = new MouseEventArgs(
+                        args.Source, Control.MouseMoveEvent,
+                        ((MouseButtonEventArgs)args).RawPosition,
+                        ((MouseButtonEventArgs)args).LeftButton,
+                        ((MouseButtonEventArgs)args).MiddleButton,
+                        ((MouseButtonEventArgs)args).RightButton
+                        );
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
+                // todo : add mouse wheel support
+            }
+
+            if (routedEvent.RoutingStrategy == RoutingStrategy.Bubble) {
+                if (subscribedTargets != null) {
+                    for (int i = path.Count - 1; i >= 0; i--) {
+                        Control target = path[i];
+                        RoutedEventTargetInfo targetInfo =
+                            subscribedTargets.FirstOrDefault(info => info.target == target);
+                        if (null != targetInfo) {
+                            foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                                if (!args.Handled || delegateInfo.handledEventsToo) {
+                                    if (delegateInfo.@delegate is RoutedEventHandler) {
+                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                    } else {
+                                        delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private Control findSource(Point rawPoint, Control rootElement) {
+            if (inputCaptureStack.Count != 0) {
+                return inputCaptureStack.Peek();
+            }
+            if (rootElement.children.Count != 0) {
+                List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
+                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
+                    Control child = childrenOrderedByZIndex[i];
+                    Point point = Control.TranslatePoint(null, rawPoint, rootElement);
+                    if (child.RenderSlotRect.Contains(point)) {
+                        return findSource(rawPoint, child);
+                    }
+                }
+            }
+            return rootElement;
         }
 
         private bool doProcessEvent(INPUT_RECORD inputRecord, Control control) {

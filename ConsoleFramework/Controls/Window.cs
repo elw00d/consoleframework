@@ -11,6 +11,12 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Window : Control
     {
+        public Window() {
+            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown), false);
+            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp), false);
+            EventManager.AddHandler(this, Control.MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove), false);
+        }
+
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -129,9 +135,118 @@ namespace ConsoleFramework.Controls
         private int resizingStartHeight;
         private Point resizingStartPoint;
 
+        public void Window_OnMouseDown(object sender, MouseButtonEventArgs args) {
+            // перемещение можно начинать только когда окно не ресайзится и наоборот
+            if (!moving && !resizing && !closing) {
+                Point point = args.GetPosition(this);
+                Point parentPoint = args.GetPosition(getWindowsHost());
+                if (point.y == 0 && point.x == 3) {
+                    closing = true;
+                    showClosingGlyph = true;
+                    ConsoleApplication.Instance.BeginCaptureInput(this);
+                    // closing is started, we should redraw the border
+                    Invalidate();
+                    args.Handled = true;
+                } else if (point.y == 0) {
+                    moving = true;
+                    movingStartPoint = parentPoint;
+                    movingStartX = X;
+                    movingStartY = Y;
+                    ConsoleApplication.Instance.BeginCaptureInput(this);
+                    // moving is started, we should redraw the border
+                    Invalidate();
+                    args.Handled = true;
+                } else if (point.x == ActualWidth - 3 && point.y == ActualHeight - 2) {
+                    resizing = true;
+                    resizingStartPoint = parentPoint;
+                    resizingStartWidth = ActualWidth;
+                    resizingStartHeight = ActualHeight;
+                    ConsoleApplication.Instance.BeginCaptureInput(this);
+                    // resizing is started, we should redraw the border
+                    Invalidate();
+                    args.Handled = true;
+                }
+            }
+        }
+
+        public void Window_OnMouseUp(object sender, MouseButtonEventArgs args) {
+            if (closing) {
+                Point point = args.GetPosition(this);
+                if (point.x == 3 && point.y == 0) {
+                    getWindowsHost().RemoveWindow(this);
+                }
+                closing = false;
+                showClosingGlyph = false;
+                ConsoleApplication.Instance.EndCaptureInput(this);
+                Invalidate();
+                args.Handled = true;
+            }
+            if (moving) {
+                moving = false;
+                ConsoleApplication.Instance.EndCaptureInput(this);
+                Invalidate();
+                args.Handled = true;
+            }
+            if (resizing) {
+                resizing = false;
+                ConsoleApplication.Instance.EndCaptureInput(this);
+                Invalidate();
+                args.Handled = true;
+            }
+        }
+
+        public void Window_OnMouseMove(object sender, MouseEventArgs args) {
+            if (closing) {
+                Point point = args.GetPosition(this);
+                bool anyChanged = false;
+                if (point.x == 3 && point.y == 0) {
+                    if (!showClosingGlyph) {
+                        showClosingGlyph = true;
+                        anyChanged = true;
+                    }
+                } else {
+                    if (showClosingGlyph) {
+                        showClosingGlyph = false;
+                        anyChanged = true;
+                    }
+                }
+                if (anyChanged)
+                    Invalidate();
+                args.Handled = true;
+            }
+            if (moving) {
+                Point parentPoint = args.GetPosition(getWindowsHost());
+                Vector vector = new Vector(parentPoint.X - movingStartPoint.x, parentPoint.Y - movingStartPoint.y);
+                X = movingStartX + vector.X;
+                Y = movingStartY + vector.Y;
+                Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
+                getWindowsHost().Invalidate();
+                args.Handled = true;
+            }
+            if (resizing) {
+                Point parentPoint = args.GetPosition(getWindowsHost());
+                int deltaWidth = parentPoint.X - resizingStartPoint.x;
+                int deltaHeight = parentPoint.Y - resizingStartPoint.y;
+                int width = resizingStartWidth + deltaWidth;
+                int height = resizingStartHeight + deltaHeight;
+                bool anyChanged = false;
+                if (width >= 4) {
+                    this.Width = width;
+                    anyChanged = true;
+                }
+                if (height >= 3) {
+                    this.Height = height;
+                    anyChanged = true;
+                }
+                if (anyChanged)
+                    Invalidate();
+                args.Handled = true;
+            }
+        }
+
         public override bool HandleEvent(INPUT_RECORD inputRecord) {
             bool eventHandled = false;
-            if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED)
+            if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED)
             {
                 COORD pos = inputRecord.MouseEvent.dwMousePosition;
                 //Point translatedPoint = TranslatePoint(null, new Point(pos.X, pos.Y), this);
@@ -161,7 +276,7 @@ namespace ConsoleFramework.Controls
                         if (anyChanged)
                             Invalidate();
                         eventHandled = true;
-                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                    } else if ((mouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) != MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
                         //Point translatedPoint = TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), this);
                         Point point = new Point(mousePosition.X, mousePosition.Y);
@@ -185,7 +300,7 @@ namespace ConsoleFramework.Controls
                         Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
                         getWindowsHost().Invalidate();
                         eventHandled = true;
-                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                    } else if ((mouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) != MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         moving = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
                         Invalidate();
@@ -213,7 +328,7 @@ namespace ConsoleFramework.Controls
                             Invalidate();
                         //
                         eventHandled = true;
-                    } else if ((mouseEvent.dwButtonState & MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) != MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                    } else if ((mouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) != MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         resizing = false;
                         ConsoleApplication.Instance.EndCaptureInput(this);
                         Invalidate();
@@ -222,7 +337,7 @@ namespace ConsoleFramework.Controls
                 }
                 // перемещение можно начинать только когда окно не ресайзится и наоборот
                 if (!moving && !resizing && !closing) {
-                    if (mouseEvent.dwButtonState == MouseButtonState.FROM_LEFT_1ST_BUTTON_PRESSED) {
+                    if (mouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
                         COORD mousePosition = mouseEvent.dwMousePosition;
                         //Point translatedPoint = TranslatePoint(this, new Point(mousePosition.X, mousePosition.Y), getWindowsHost());
                         Point point = new Point(mousePosition.X, mousePosition.Y);

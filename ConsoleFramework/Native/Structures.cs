@@ -149,7 +149,7 @@ namespace ConsoleFramework.Native
         [FieldOffset(0)]
         public COORD dwMousePosition;
         [FieldOffset(4)]
-        public MouseButtonState dwButtonState;
+        public MOUSE_BUTTON_STATE dwButtonState;
         [FieldOffset(8)]
         public ControlKeyState dwControlKeyState;
         [FieldOffset(12)]
@@ -157,7 +157,7 @@ namespace ConsoleFramework.Native
     }
 
     [Flags]
-    public enum MouseButtonState {
+    public enum MOUSE_BUTTON_STATE {
         FROM_LEFT_1ST_BUTTON_PRESSED = 0x0001,
         FROM_LEFT_2ND_BUTTON_PRESSED = 0x0004,
         FROM_LEFT_3RD_BUTTON_PRESSED = 0x0008,
@@ -167,6 +167,7 @@ namespace ConsoleFramework.Native
 
     [Flags]
     public enum MouseEventFlags {
+        PRESSED_OR_RELEASED = 0x0000,
         DOUBLE_CLICK = 0x0002,
         MOUSE_HWHEELED = 0x0008,
         MOUSE_MOVED = 0x0001,

@@ -86,7 +86,7 @@ namespace ConsoleFramework.Controls
 
     public delegate void MouseWheelEventHandler(object sender, MouseWheelEventArgs e);
 
-    public enum MouseButtonState2
+    public enum MouseButtonState
     {
         Released,
         Pressed
@@ -97,21 +97,38 @@ namespace ConsoleFramework.Controls
         public MouseEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
         }
 
+        public MouseEventArgs(object source, RoutedEvent routedEvent, Point rawPosition,
+            MouseButtonState leftButton, MouseButtonState middleButton, MouseButtonState rightButton)
+            : base(source, routedEvent) {
+            //
+            this.rawPosition = rawPosition;
+            this.LeftButton = leftButton;
+            this.MiddleButton = middleButton;
+            this.RightButton = rightButton;
+        }
+
+        private readonly Point rawPosition;
+        public Point RawPosition {
+            get {
+                return rawPosition;
+            }
+        }
+
         public Point GetPosition(Control relativeTo) {
-            throw new NotImplementedException();
+            return Control.TranslatePoint(null, rawPosition, relativeTo);
         }
 
-        public MouseButtonState2 LeftButton {
+        public MouseButtonState LeftButton {
             get;
             private set;
         }
 
-        public MouseButtonState2 MiddleButton {
+        public MouseButtonState MiddleButton {
             get;
             private set;
         }
 
-        public MouseButtonState2 RightButton {
+        public MouseButtonState RightButton {
             get;
             private set;
         }
@@ -135,27 +152,38 @@ namespace ConsoleFramework.Controls
         Right
     }
 
-    public class MouseButtonEventArgs : MouseEventArgs
-    {
-        // Fields
-        private MouseButton _button;
-        private int _count;
+    public class MouseButtonEventArgs : MouseEventArgs {
+        private readonly MouseButton button;
 
-        // Properties
         public MouseButtonEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
         }
 
-        public MouseButtonState2 ButtonState {
-            get;
-            private set;
-        }
-        public MouseButton ChangedButton { get;
-            private set;
+        public MouseButtonEventArgs(object source, RoutedEvent routedEvent, Point rawPosition,
+                                    MouseButtonState leftButton, MouseButtonState middleButton,
+                                    MouseButtonState rightButton,
+                                    MouseButton button)
+            : base(source, routedEvent, rawPosition, leftButton, middleButton, rightButton) {
+            this.button = button;
         }
 
-        public int ClickCount {
-            get;
-            private set;
+        public MouseButtonState ButtonState {
+            get {
+                switch (button) {
+                    case MouseButton.Left:
+                        return LeftButton;
+                    case MouseButton.Middle:
+                        return MiddleButton;
+                    case MouseButton.Right:
+                        return RightButton;
+                }
+                throw new InvalidOperationException("This code should not be reached.");
+            }
+        }
+
+        public MouseButton ChangedButton {
+            get {
+                return button;
+            }
         }
     }
 
