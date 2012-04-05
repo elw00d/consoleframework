@@ -102,6 +102,10 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent PreviewKeyUpEvent = EventManager.RegisterRoutedEvent("PreviewKeyUp", RoutingStrategy.Tunnel, typeof(KeyEventHandler), typeof(Control));
         public static RoutedEvent KeyUpEvent = EventManager.RegisterRoutedEvent("KeyUp", RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(Control));
 
+        public void AddHandler(RoutedEvent routedEvent, Delegate @delegate) {
+            EventManager.AddHandler(this, routedEvent, @delegate);
+        }
+
         public void AddHandler(RoutedEvent routedEvent, Delegate @delegate, bool handledEventsToo) {
             EventManager.AddHandler(this, routedEvent, @delegate, handledEventsToo);
         }

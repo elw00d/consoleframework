@@ -13,9 +13,9 @@ namespace ConsoleFramework.Controls
     public class Window : Control
     {
         public Window() {
-            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
-            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
-            EventManager.AddHandler(this, Control.MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
+            AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
+            AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
+            AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
         }
 
         public int X { get; set; }

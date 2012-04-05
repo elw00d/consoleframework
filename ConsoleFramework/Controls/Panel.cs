@@ -15,7 +15,7 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Panel : Control {
         private void subscribe() {
-            EventManager.AddHandler(this, Control.KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown));
+            AddHandler(KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown));
         }
 
         public Panel() {

@@ -14,7 +14,7 @@ namespace ConsoleFramework.Controls
     public class WindowsHost : Control
     {
         public WindowsHost() {
-            EventManager.AddHandler(this, MouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDown), true);
+            AddHandler(MouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDown), true);
         }
 
         protected override Size MeasureOverride(Size availableSize)

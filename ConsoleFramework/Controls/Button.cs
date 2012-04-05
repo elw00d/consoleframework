@@ -1,5 +1,4 @@
-﻿using System;
-using ConsoleFramework.Core;
+﻿using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
@@ -8,8 +7,8 @@ namespace ConsoleFramework.Controls
     public class Button : Control {
 
         public Button() {
-            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown));
-            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp));
+            AddHandler(MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown));
+            AddHandler(MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp));
         }
 
         private string caption;
