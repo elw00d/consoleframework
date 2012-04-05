@@ -68,7 +68,7 @@
     <Compile Include="Native\Structures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RoutedEvent.cs" />
+    <Compile Include="Events\RoutedEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />

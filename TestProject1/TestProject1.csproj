@@ -48,6 +48,7 @@
     <Compile Include="LayoutTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HitTestingTest.cs" />
+    <Compile Include="RoutedEvent.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ConsoleFramework\ConsoleFramework.csproj">
