@@ -11,3 +11,20 @@
 менеджерами размещения, то есть могут содержать множество дочерних элементов.
 
 Добавить OpacityMask
+
+
+Определить базовые события ввода:
+MouseEnterPreview
+MouseEnter
+MouseLeavePreview
+MouseLeave
+MouseDownPreview
+MouseDown
+MouseUpPreview
+MouseUp
+
+KeyDownPreview
+KeyDown
+KeyUpPreview
+KeyDown
+TextInput

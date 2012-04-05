@@ -85,6 +85,14 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Control {
 
+        public void AddHandler(RoutedEvent routedEvent, Delegate @delegate, bool handledEventsToo) {
+            //
+        }
+
+        public void RemoveHandler(RoutedEvent routedEvent, Delegate @delegate) {
+            //
+        }
+
         public Control FindChildByName(string name) {
             return children.FirstOrDefault(control => control.Name == name);
         }
@@ -146,7 +154,7 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// Смещение виртуального холста контрола отн-но слота родительского элемента управления.
+        /// Смещение виртуального холста контрола отн-но слота, выделенного родительским элементом управления.
         /// Учитывает <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
         /// </summary>
         public Vector ActualOffset {

@@ -1,5 +1,6 @@
 ﻿using System;
 using ConsoleFramework.Controls;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework {
@@ -9,7 +10,8 @@ namespace ConsoleFramework {
                 Panel panel = new Panel();
                 panel.AddChild(new TextBlock() {
                     Name = "label1",
-                    Text = "Label1"
+                    Text = "Label1",
+                    Margin = new Thickness(1,2,1,0)
                 });
                 panel.AddChild(new TextBlock() {
                     Name = "label2",
