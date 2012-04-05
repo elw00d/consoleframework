@@ -187,6 +187,20 @@ namespace ConsoleFramework.Controls
         }
     }
 
+    public delegate void KeyEventHandler(object sender, KeyEventArgs args);
+
+    public class KeyEventArgs : RoutedEventArgs {
+        public KeyEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
+        }
+
+        public bool bKeyDown;
+        public ushort wRepeatCount;
+        public short wVirtualKeyCode;
+        public ushort wVirtualScanCode;
+        public char UnicodeChar;
+        public ControlKeyState dwControlKeyState;
+    }
+
     /// <summary>
     /// Base class for all controls.
     /// </summary>
@@ -202,6 +216,11 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent MouseWheelEvent = EventManager.RegisterRoutedEvent("MouseWheel", RoutingStrategy.Bubble, typeof(MouseWheelEventHandler), typeof(Control));
         public static RoutedEvent MouseEnterEvent = EventManager.RegisterRoutedEvent("MouseEnter", RoutingStrategy.Direct, typeof(MouseEventHandler), typeof(Control));
         public static RoutedEvent MouseLeaveEvent = EventManager.RegisterRoutedEvent("MouseLeave", RoutingStrategy.Direct, typeof(MouseEventHandler), typeof(Control));
+
+        public static RoutedEvent PreviewKeyDownEvent = EventManager.RegisterRoutedEvent("PreviewKeyDown", RoutingStrategy.Tunnel, typeof(KeyEventHandler), typeof(Control));
+        public static RoutedEvent KeyDownEvent = EventManager.RegisterRoutedEvent("KeyDown", RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(Control));
+        public static RoutedEvent PreviewKeyUpEvent = EventManager.RegisterRoutedEvent("PreviewKeyUp", RoutingStrategy.Tunnel, typeof(KeyEventHandler), typeof(Control));
+        public static RoutedEvent KeyUpEvent = EventManager.RegisterRoutedEvent("KeyUp", RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(Control));
 
         public void AddHandler(RoutedEvent routedEvent, Delegate @delegate, bool handledEventsToo) {
             EventManager.AddHandler(this, routedEvent, @delegate, handledEventsToo);

@@ -13,10 +13,16 @@ namespace ConsoleFramework.Controls
     /// только в рамках хоста окон).
     /// </summary>
     public class Panel : Control {
+        private void subscribe() {
+            EventManager.AddHandler(this, Control.KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown), false);
+        }
+
         public Panel() {
+            subscribe();
         }
 
         public Panel(Control parent) : base(parent) {
+            subscribe();
         }
 
         public CHAR_ATTRIBUTES Background {
@@ -57,6 +63,12 @@ namespace ConsoleFramework.Controls
                 totalHeight += height;
             }
             return finalSize;
+        }
+
+        public void Panel_OnKeyDown(object sender, KeyEventArgs args) {
+            TextBlock textBlock = ((TextBlock)this.FindChildByName("label1"));
+            textBlock.Text = textBlock.Text + "5";
+            args.Handled = true;
         }
 
         public override bool HandleEvent(INPUT_RECORD inputRecord) {

@@ -299,7 +299,19 @@ namespace ConsoleFramework {
                     lastRightMouseButtonState = rightMouseButtonState;
                 }
                 // todo : add whelled and double click handling
-                Debug.WriteLine(mouseEvent.dwEventFlags);
+                //Debug.WriteLine(mouseEvent.dwEventFlags);
+            }
+            if (inputRecord.EventType == EventType.KEY_EVENT) {
+                KEY_EVENT_RECORD keyEvent = inputRecord.KeyEvent;
+                KeyEventArgs eventArgs = new KeyEventArgs(findSource(rootElement),
+                    keyEvent.bKeyDown ? Control.PreviewKeyDownEvent : Control.PreviewKeyUpEvent);
+                eventArgs.UnicodeChar = keyEvent.UnicodeChar;
+                eventArgs.bKeyDown = keyEvent.bKeyDown;
+                eventArgs.dwControlKeyState = keyEvent.dwControlKeyState;
+                eventArgs.wRepeatCount = keyEvent.wRepeatCount;
+                eventArgs.wVirtualKeyCode = keyEvent.wVirtualKeyCode;
+                eventArgs.wVirtualScanCode = keyEvent.wVirtualScanCode;
+                eventsQueue.Enqueue(eventArgs);
             }
             //if (inputCaptureStack.Count != 0) {
             //    Control capturingControl = inputCaptureStack.Peek();
@@ -402,6 +414,29 @@ namespace ConsoleFramework {
                     eventsQueue.Enqueue(argsNew);
                 }
                 // todo : add mouse wheel support
+
+                if (routedEvent == Control.PreviewKeyDownEvent) {
+                    KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyDownEvent);
+                    argsNew.UnicodeChar = ((KeyEventArgs) args).UnicodeChar;
+                    argsNew.bKeyDown = ((KeyEventArgs)args).bKeyDown;
+                    argsNew.dwControlKeyState = ((KeyEventArgs)args).dwControlKeyState;
+                    argsNew.wRepeatCount = ((KeyEventArgs)args).wRepeatCount;
+                    argsNew.wVirtualKeyCode = ((KeyEventArgs)args).wVirtualKeyCode;
+                    argsNew.wVirtualScanCode = ((KeyEventArgs)args).wVirtualScanCode;
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
+                if (routedEvent == Control.PreviewKeyUpEvent) {
+                    KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyUpEvent);
+                    argsNew.UnicodeChar = ((KeyEventArgs)args).UnicodeChar;
+                    argsNew.bKeyDown = ((KeyEventArgs)args).bKeyDown;
+                    argsNew.dwControlKeyState = ((KeyEventArgs)args).dwControlKeyState;
+                    argsNew.wRepeatCount = ((KeyEventArgs)args).wRepeatCount;
+                    argsNew.wVirtualKeyCode = ((KeyEventArgs)args).wVirtualKeyCode;
+                    argsNew.wVirtualScanCode = ((KeyEventArgs)args).wVirtualScanCode;
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
             }
 
             if (routedEvent.RoutingStrategy == RoutingStrategy.Bubble) {
@@ -426,6 +461,28 @@ namespace ConsoleFramework {
             }
         }
 
+        /// <summary>
+        /// Находит активный элемент (который находится сейчас в фокусе ввода).
+        /// </summary>
+        /// <param name="rootElement"></param>
+        /// <returns></returns>
+        private Control findSource(Control rootElement) {
+            if (inputCaptureStack.Count != 0) {
+                return inputCaptureStack.Peek();
+            }
+            if (rootElement.children.Count != 0) {
+                List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
+                return findSource(childrenOrderedByZIndex[childrenOrderedByZIndex.Count - 1]);
+            }
+            return rootElement;
+        }
+
+        /// <summary>
+        /// Находит самый верхний элемент под указателем мыши с координатами rawPoint.
+        /// </summary>
+        /// <param name="rawPoint"></param>
+        /// <param name="rootElement"></param>
+        /// <returns></returns>
         private Control findSource(Point rawPoint, Control rootElement) {
             if (inputCaptureStack.Count != 0) {
                 return inputCaptureStack.Peek();
@@ -443,40 +500,40 @@ namespace ConsoleFramework {
             return rootElement;
         }
 
-        private bool doProcessEvent(INPUT_RECORD inputRecord, Control control) {
-            bool handled = false;
-            if (control.children.Count != 0) {
-                List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
-                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-                    Control child = childrenOrderedByZIndex[i];
-                    INPUT_RECORD translatedToParent = translateInputRecord(inputRecord, control);
-                    Point point = new Point(translatedToParent.MouseEvent.dwMousePosition.X, translatedToParent.MouseEvent.dwMousePosition.Y);
-                    // if we found child responsible to handle this event
-                    if (inputRecord.EventType != EventType.MOUSE_EVENT || child.RenderSlotRect.Contains(point)) {
-                        //
-                        handled = doProcessEvent(inputRecord, child);
-                        break;
-                        //
-                    }
-                }
-            }
-            if (!handled || control.AcceptHandledEvents) {
-                handled = control.HandleEvent(translateInputRecord(inputRecord, control));
-            }
-            return handled;
-        }
+        //private bool doProcessEvent(INPUT_RECORD inputRecord, Control control) {
+        //    bool handled = false;
+        //    if (control.children.Count != 0) {
+        //        List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
+        //        for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
+        //            Control child = childrenOrderedByZIndex[i];
+        //            INPUT_RECORD translatedToParent = translateInputRecord(inputRecord, control);
+        //            Point point = new Point(translatedToParent.MouseEvent.dwMousePosition.X, translatedToParent.MouseEvent.dwMousePosition.Y);
+        //            // if we found child responsible to handle this event
+        //            if (inputRecord.EventType != EventType.MOUSE_EVENT || child.RenderSlotRect.Contains(point)) {
+        //                //
+        //                handled = doProcessEvent(inputRecord, child);
+        //                break;
+        //                //
+        //            }
+        //        }
+        //    }
+        //    if (!handled || control.AcceptHandledEvents) {
+        //        handled = control.HandleEvent(translateInputRecord(inputRecord, control));
+        //    }
+        //    return handled;
+        //}
 
         /// <summary>
         /// Translates coordinate information to dest-relative coord system and returns modified struct.
         /// </summary>
-        private INPUT_RECORD translateInputRecord(INPUT_RECORD inputRecord, Control dest) {
-            if (inputRecord.EventType != EventType.MOUSE_EVENT) {
-                return inputRecord;
-            }
-            COORD mousePosition = inputRecord.MouseEvent.dwMousePosition;
-            Point translatedPoint = Control.TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), dest);
-            inputRecord.MouseEvent.dwMousePosition = new COORD((short)translatedPoint.x, (short)translatedPoint.y);
-            return inputRecord;
-        }
+        //private INPUT_RECORD translateInputRecord(INPUT_RECORD inputRecord, Control dest) {
+        //    if (inputRecord.EventType != EventType.MOUSE_EVENT) {
+        //        return inputRecord;
+        //    }
+        //    COORD mousePosition = inputRecord.MouseEvent.dwMousePosition;
+        //    Point translatedPoint = Control.TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), dest);
+        //    inputRecord.MouseEvent.dwMousePosition = new COORD((short)translatedPoint.x, (short)translatedPoint.y);
+        //    return inputRecord;
+        //}
     }
 }
