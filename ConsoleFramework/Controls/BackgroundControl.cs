@@ -29,10 +29,5 @@ namespace ConsoleFramework.Controls
                 }
             }
         }
-
-        public override bool HandleEvent(INPUT_RECORD inputRecord) {
-            // do nothing
-            return true;
-        }
     }
 }

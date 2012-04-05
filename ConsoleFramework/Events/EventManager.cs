@@ -71,6 +71,10 @@ namespace ConsoleFramework.Events {
             return routedEvent;
         }
 
+        public static void AddHandler(object target, RoutedEvent routedEvent, Delegate handler) {
+            AddHandler(target, routedEvent, handler, false);
+        }
+
         public static void AddHandler(object target, RoutedEvent routedEvent, Delegate handler, bool handledEventsToo) {
             if (null == target)
                 throw new ArgumentNullException("target");
@@ -288,8 +292,7 @@ namespace ConsoleFramework.Events {
         private void processRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
             //
             List<RoutedEventTargetInfo> subscribedTargets = getTargetsSubscribedTo(routedEvent);
-            //if (null == subscribedTargets || subscribedTargets.Count == 0)
-                //return;
+            //
             if (routedEvent.RoutingStrategy == RoutingStrategy.Direct) {
                 if (subscribedTargets != null) {
                     foreach (RoutedEventTargetInfo targetInfo in subscribedTargets) {

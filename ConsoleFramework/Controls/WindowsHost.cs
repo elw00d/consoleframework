@@ -56,13 +56,7 @@ namespace ConsoleFramework.Controls
             if (oldTopWindow != window)
                 Invalidate();
         }
-
-        public override bool AcceptHandledEvents {
-            get {
-                return true;
-            }
-        }
-
+        
         public void WindowsHost_MouseDown(object sender, MouseButtonEventArgs args) {
             Point position = args.GetPosition(this);
             List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
@@ -73,33 +67,6 @@ namespace ConsoleFramework.Controls
                     break;
                 }
             }
-        }
-
-        public override bool HandleEvent(INPUT_RECORD inputRecord)
-        {
-            // todo : add another event types support
-            if (inputRecord.EventType == EventType.MOUSE_EVENT && inputRecord.MouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
-                MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
-                COORD position = mouseEvent.dwMousePosition;
-                List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
-                //Point translatedPoint = Control.TranslatePoint(null, new Point(position.X, position.Y), this);
-                Point translatedPoint = new Point(position.X, position.Y);
-                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-                    Control topChild = childrenOrderedByZIndex[i];
-                    if (topChild.RenderSlotRect.Contains(translatedPoint)) {
-                        if (mouseEvent.dwButtonState == MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED &&
-                            i != childrenOrderedByZIndex.Count - 1) {
-                            //
-                            ActivateWindow((Window)topChild);
-                        }
-                        //topChild.HandleEvent(inputRecord);
-                        break;
-                    }
-                }
-                return true;
-            } else
-                //base.HandleEvent(inputRecord);
-                return false;
         }
 
         public void AddWindow(Window window) {

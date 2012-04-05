@@ -8,8 +8,8 @@ namespace ConsoleFramework.Controls
     public class Button : Control {
 
         public Button() {
-            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown), false);
-            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp), false);
+            EventManager.AddHandler(this, Control.MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown));
+            EventManager.AddHandler(this, Control.MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp));
         }
 
         private string caption;
@@ -57,34 +57,6 @@ namespace ConsoleFramework.Controls
                 this.Invalidate();
                 args.Handled = true;
             }
-        }
-
-        public override bool HandleEvent(INPUT_RECORD inputRecord) {
-            if (inputRecord.EventType == EventType.MOUSE_EVENT &&
-                (inputRecord.MouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) ==
-                MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
-                if (!pressed) {
-                    pressed = true;
-                    ConsoleApplication.Instance.BeginCaptureInput(this);
-                    this.Invalidate();
-                    //this.Parent.Invalidate();
-                    //this.Parent.Parent.Invalidate();
-                    return true;
-                }
-            }
-            if (inputRecord.EventType == EventType.MOUSE_EVENT &&
-                (inputRecord.MouseEvent.dwButtonState & MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) !=
-                MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED) {
-                if (pressed) {
-                    pressed = false;
-                    ConsoleApplication.Instance.EndCaptureInput(this);
-                    this.Invalidate();
-                    //this.Parent.Invalidate();
-                    //this.Parent.Parent.Invalidate();
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }

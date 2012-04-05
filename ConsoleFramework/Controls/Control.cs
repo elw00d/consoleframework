@@ -589,21 +589,6 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
         
-        public virtual bool HandleEvent(INPUT_RECORD inputRecord) {
-            return false; // not handled
-        }
-
-        /// <summary>
-        /// Получает ли контрол извещения об уже обработанных событиях пользовательского ввода.
-        /// По сути это некий аналог механизма routed events, где событие может быть передано контролу
-        /// при всплытии даже если оно уже было обработано (помечено как Handled = true).
-        /// </summary>
-        public virtual bool AcceptHandledEvents {
-            get {
-                return false;
-            }
-        }
-        
         internal void ResetValidity() {
             // copy all calculated layout info into lastLayoutInfo
             if (layoutInfo.validity != LayoutValidity.Nothing) {

@@ -15,7 +15,7 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Panel : Control {
         private void subscribe() {
-            EventManager.AddHandler(this, Control.KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown), false);
+            EventManager.AddHandler(this, Control.KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown));
         }
 
         public Panel() {
@@ -70,17 +70,6 @@ namespace ConsoleFramework.Controls
             TextBlock textBlock = ((TextBlock)this.FindChildByName("label1"));
             textBlock.Text = textBlock.Text + "5";
             args.Handled = true;
-        }
-
-        public override bool HandleEvent(INPUT_RECORD inputRecord) {
-            // todo : remove after tests
-            if (inputRecord.EventType == EventType.KEY_EVENT && inputRecord.KeyEvent.bKeyDown) {
-                TextBlock textBlock = ((TextBlock) this.FindChildByName("label1"));
-                textBlock.Text = textBlock.Text + "5";
-                return true;
-            }
-            //
-            return false;
         }
 
         /// <summary>
