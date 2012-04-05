@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework

@@ -1,5 +1,6 @@
 ﻿using System;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls

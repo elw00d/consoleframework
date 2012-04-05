@@ -42,8 +42,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\KeyEventArgs.cs" />
+    <Compile Include="Events\MouseEventArgs.cs" />
     <Compile Include="Controls\Window.cs" />
-    <Compile Include="EventManager.cs" />
+    <Compile Include="Events\EventManager.cs" />
+    <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Native\Color.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />

@@ -1,46 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
-namespace ConsoleFramework {
-
-    public delegate void RoutedEventHandler(object sender, RoutedEventArgs e);
-
-    public class RoutedEventArgs : EventArgs {
-        private bool handled;
-        private readonly object source;
-        private readonly RoutedEvent routedEvent;
-
-        public bool Handled {
-            get {
-                return handled;
-            }
-            set {
-                handled = value;
-            }
-        }
-
-        public object Source {
-            get {
-                return source;
-            }
-        }
-
-        public RoutedEvent RoutedEvent {
-            get {
-                return routedEvent;
-            }
-        }
-
-        public RoutedEventArgs (object source, RoutedEvent routedEvent) {
-            this.source = source;
-            this.routedEvent = routedEvent;
-        }
-    }
+namespace ConsoleFramework.Events {
 
     /// <summary>
     /// Central point of events management routine.
@@ -51,7 +16,7 @@ namespace ConsoleFramework {
 
         private class DelegateInfo {
             public readonly Delegate @delegate;
-            public bool handledEventsToo;
+            public readonly bool handledEventsToo;
 
             public DelegateInfo(Delegate @delegate) {
                 this.@delegate = @delegate;
@@ -313,12 +278,7 @@ namespace ConsoleFramework {
                 eventArgs.wVirtualScanCode = keyEvent.wVirtualScanCode;
                 eventsQueue.Enqueue(eventArgs);
             }
-            //if (inputCaptureStack.Count != 0) {
-            //    Control capturingControl = inputCaptureStack.Peek();
-            //    capturingControl.HandleEvent(translateInputRecord(inputRecord, capturingControl));
-            //} else {
-            //    doProcessEvent(inputRecord, rootElement);
-            //}
+            //
             while (eventsQueue.Count != 0) {
                 RoutedEventArgs routedEventArgs = eventsQueue.Dequeue();
                 processRoutedEvent(routedEventArgs.RoutedEvent, routedEventArgs);
@@ -499,41 +459,5 @@ namespace ConsoleFramework {
             }
             return rootElement;
         }
-
-        //private bool doProcessEvent(INPUT_RECORD inputRecord, Control control) {
-        //    bool handled = false;
-        //    if (control.children.Count != 0) {
-        //        List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
-        //        for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-        //            Control child = childrenOrderedByZIndex[i];
-        //            INPUT_RECORD translatedToParent = translateInputRecord(inputRecord, control);
-        //            Point point = new Point(translatedToParent.MouseEvent.dwMousePosition.X, translatedToParent.MouseEvent.dwMousePosition.Y);
-        //            // if we found child responsible to handle this event
-        //            if (inputRecord.EventType != EventType.MOUSE_EVENT || child.RenderSlotRect.Contains(point)) {
-        //                //
-        //                handled = doProcessEvent(inputRecord, child);
-        //                break;
-        //                //
-        //            }
-        //        }
-        //    }
-        //    if (!handled || control.AcceptHandledEvents) {
-        //        handled = control.HandleEvent(translateInputRecord(inputRecord, control));
-        //    }
-        //    return handled;
-        //}
-
-        /// <summary>
-        /// Translates coordinate information to dest-relative coord system and returns modified struct.
-        /// </summary>
-        //private INPUT_RECORD translateInputRecord(INPUT_RECORD inputRecord, Control dest) {
-        //    if (inputRecord.EventType != EventType.MOUSE_EVENT) {
-        //        return inputRecord;
-        //    }
-        //    COORD mousePosition = inputRecord.MouseEvent.dwMousePosition;
-        //    Point translatedPoint = Control.TranslatePoint(null, new Point(mousePosition.X, mousePosition.Y), dest);
-        //    inputRecord.MouseEvent.dwMousePosition = new COORD((short)translatedPoint.x, (short)translatedPoint.y);
-        //    return inputRecord;
-        //}
     }
 }
