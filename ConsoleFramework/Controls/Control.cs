@@ -80,17 +80,107 @@ namespace ConsoleFramework.Controls
         }
     }
 
+    public delegate void MouseEventHandler(object sender, MouseEventArgs e);
+
+    public delegate void MouseButtonEventHandler(object sender, MouseButtonEventArgs e);
+
+    public delegate void MouseWheelEventHandler(object sender, MouseWheelEventArgs e);
+
+    public enum MouseButtonState2
+    {
+        Released,
+        Pressed
+    }
+
+    public class MouseEventArgs : RoutedEventArgs
+    {
+        public MouseEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
+        }
+
+        public Point GetPosition(Control relativeTo) {
+            throw new NotImplementedException();
+        }
+
+        public MouseButtonState2 LeftButton {
+            get;
+            private set;
+        }
+
+        public MouseButtonState2 MiddleButton {
+            get;
+            private set;
+        }
+
+        public MouseButtonState2 RightButton {
+            get;
+            private set;
+        }
+    }
+
+    public class MouseWheelEventArgs : MouseEventArgs {
+        // Properties
+        public MouseWheelEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
+        }
+
+        public int Delta {
+            get;
+            private set;
+        }
+    }
+
+    public enum MouseButton
+    {
+        Left,
+        Middle,
+        Right
+    }
+
+    public class MouseButtonEventArgs : MouseEventArgs
+    {
+        // Fields
+        private MouseButton _button;
+        private int _count;
+
+        // Properties
+        public MouseButtonEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
+        }
+
+        public MouseButtonState2 ButtonState {
+            get;
+            private set;
+        }
+        public MouseButton ChangedButton { get;
+            private set;
+        }
+
+        public int ClickCount {
+            get;
+            private set;
+        }
+    }
+
     /// <summary>
     /// Base class for all controls.
     /// </summary>
     public class Control {
 
+        public static RoutedEvent PreviewMouseMoveEvent = EventManager.RegisterRoutedEvent("PreviewMouseMove", RoutingStrategy.Tunnel, typeof(MouseEventHandler), typeof(Control));
+        public static RoutedEvent MouseMoveEvent = EventManager.RegisterRoutedEvent("MouseMove", RoutingStrategy.Bubble, typeof(MouseEventHandler), typeof(Control));
+        public static RoutedEvent PreviewMouseDownEvent = EventManager.RegisterRoutedEvent("PreviewMouseDown", RoutingStrategy.Tunnel, typeof(MouseButtonEventHandler), typeof(Control));
+        public static RoutedEvent MouseDownEvent = EventManager.RegisterRoutedEvent("MouseDown", RoutingStrategy.Bubble, typeof(MouseButtonEventHandler), typeof(Control));
+        public static RoutedEvent PreviewMouseUpEvent = EventManager.RegisterRoutedEvent("PreviewMouseUp", RoutingStrategy.Tunnel, typeof(MouseButtonEventHandler), typeof(Control));
+        public static RoutedEvent MouseUpEvent = EventManager.RegisterRoutedEvent("MouseUp", RoutingStrategy.Bubble, typeof(MouseButtonEventHandler), typeof(Control));
+        public static RoutedEvent PreviewMouseWheelEvent = EventManager.RegisterRoutedEvent("PreviewMouseWheel", RoutingStrategy.Tunnel, typeof(MouseWheelEventHandler), typeof(Control));
+        public static RoutedEvent MouseWheelEvent = EventManager.RegisterRoutedEvent("MouseWheel", RoutingStrategy.Bubble, typeof(MouseWheelEventHandler), typeof(Control));
+        public static RoutedEvent MouseEnterEvent = EventManager.RegisterRoutedEvent("MouseEnter", RoutingStrategy.Direct, typeof(MouseEventHandler), typeof(Control));
+        public static RoutedEvent MouseLeaveEvent = EventManager.RegisterRoutedEvent("MouseLeave", RoutingStrategy.Direct, typeof(MouseEventHandler), typeof(Control));
+
         public void AddHandler(RoutedEvent routedEvent, Delegate @delegate, bool handledEventsToo) {
-            //
+            EventManager.AddHandler(this, routedEvent, @delegate, handledEventsToo);
         }
 
         public void RemoveHandler(RoutedEvent routedEvent, Delegate @delegate) {
-            //
+            EventManager.RemoveHandler(this, routedEvent, @delegate);
         }
 
         public Control FindChildByName(string name) {
