@@ -299,9 +299,9 @@ namespace ConsoleFramework.Events {
                         foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
                             if (!args.Handled || delegateInfo.handledEventsToo) {
                                 if (delegateInfo.@delegate is RoutedEventHandler) {
-                                    ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                    ((RoutedEventHandler) delegateInfo.@delegate).Invoke(targetInfo.target, args);
                                 } else {
-                                    delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                    delegateInfo.@delegate.DynamicInvoke(targetInfo.target, args);
                                 }
                             }
                         }
@@ -329,9 +329,9 @@ namespace ConsoleFramework.Events {
                             foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
                                 if (!args.Handled || delegateInfo.handledEventsToo) {
                                     if (delegateInfo.@delegate is RoutedEventHandler) {
-                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(target, args);
                                     } else {
-                                        delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                        delegateInfo.@delegate.DynamicInvoke(target, args);
                                     }
                                 }
                             }
@@ -412,9 +412,9 @@ namespace ConsoleFramework.Events {
                             foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
                                 if (!args.Handled || delegateInfo.handledEventsToo) {
                                     if (delegateInfo.@delegate is RoutedEventHandler) {
-                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(args.Source, args);
+                                        ((RoutedEventHandler) delegateInfo.@delegate).Invoke(target, args);
                                     } else {
-                                        delegateInfo.@delegate.DynamicInvoke(args.Source, args);
+                                        delegateInfo.@delegate.DynamicInvoke(target, args);
                                     }
                                 }
                             }

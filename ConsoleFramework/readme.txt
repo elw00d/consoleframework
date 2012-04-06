@@ -5,26 +5,17 @@
 3. Сделать TextBox - тут довольно много работы будет
 4. Параллельно с этим протестировать Alignment и Margins.
 
-Ну а потом уже приступить к разработке контрола WindowsHost.
-
 Подумать, как разделить элементы управления, которые могут содержать 1 дочерний элемент и те, которые являются
 менеджерами размещения, то есть могут содержать множество дочерних элементов.
 
-Добавить OpacityMask
+Next :
+1. Определить focusChild в рамках каждого контрола - сюда будет идти ввод с клавиатуры, если парент является globalFocusElement.
+2. Определить globalFocusElement, - один для всех контролов, самый топовый по z-order'у в данный момент + имеющий focusedChild.
 
+z-order дочерних контролов определяется самим контролом (как сейчас и есть)
 
-Определить базовые события ввода:
-MouseEnterPreview
-MouseEnter
-MouseLeavePreview
-MouseLeave
-MouseDownPreview
-MouseDown
-MouseUpPreview
-MouseUp
+focusedControls определяются автоматически в рамках контрола и EventManager'a с учетом z-order контролов.
 
-KeyDownPreview
-KeyDown
-KeyUpPreview
-KeyDown
-TextInput
+3. Stack<Control> mouseOverStack
+
+если меняется с 12345 на 178 то 5432 получают событие MouseLeave, а 78 - MouseEnter.
