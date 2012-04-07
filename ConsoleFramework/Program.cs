@@ -8,6 +8,7 @@ namespace ConsoleFramework {
         private static void Main(string[] args) {
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();
+                panel.Name = "panel1";
                 panel.AddChild(new TextBlock() {
                     Name = "label1",
                     Text = "Label1",
@@ -47,7 +48,8 @@ namespace ConsoleFramework {
                     Name = "Window2",
                     Title = "Очень длинное название окна",
                     Content = new TextBlock() {
-                        Text = "window2 window2"
+                        Text = "window2 window2",
+                        Name = "Label_window2"
                     }
                 });
                 application.Run(windowsHost);

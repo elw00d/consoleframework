@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -165,12 +166,27 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public Control() {
+        private void initialize() {
             MinWidth = 0;
+            AddHandler(MouseEnterEvent, new MouseEventHandler(Control_MouseEnter));
+            AddHandler(MouseLeaveEvent, new MouseEventHandler(Control_MouseLeave));
+        }
+
+        private void Control_MouseEnter(object sender, MouseEventArgs args) {
+            //Debug.WriteLine("MouseEnter on control : " + Name);
+        }
+
+        private void Control_MouseLeave(object sender, MouseEventArgs args) {
+            //Debug.WriteLine("MouseLeave on control : " + Name);
+        }
+
+        public Control() {
+            initialize();
         }
         
         public Control(Control parent) {
-            MinWidth = 0;
+            initialize();
+            //
             Parent = parent;
         }
 

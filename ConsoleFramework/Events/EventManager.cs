@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
@@ -192,6 +193,8 @@ namespace ConsoleFramework.Events {
         private MouseButtonState lastMiddleMouseButtonState = MouseButtonState.Released;
         private MouseButtonState lastRightMouseButtonState = MouseButtonState.Released;
 
+        private readonly List<Control> prevMouseOverStack = new List<Control>();
+
         public void ProcessEvent(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
@@ -222,6 +225,55 @@ namespace ConsoleFramework.Events {
                     lastLeftMouseButtonState = leftMouseButtonState;
                     lastMiddleMouseButtonState = middleMouseButtonState;
                     lastRightMouseButtonState = rightMouseButtonState;
+
+                    // detect mouse enter / mouse leave events
+
+                    // path to source from root element down
+                    List<Control> mouseOverStack = new List<Control>();
+                    Control current = source;
+                    while (null != current) {
+                        mouseOverStack.Insert(0, current);
+                        current = current.Parent;
+                    }
+
+                    int index;
+                    for (index = 0; index < Math.Min(mouseOverStack.Count, prevMouseOverStack.Count); index++) {
+                        if (mouseOverStack[index] != prevMouseOverStack[index])
+                            break;
+                    }
+
+                    bool anyEnterOrLeaveEventQueued = false;
+                    for (int i = prevMouseOverStack.Count - 1; i >= index; i-- ) {
+                        // enqueue MouseLeave event
+                        Control control = prevMouseOverStack[i];
+                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
+                                                                       rawPosition,
+                                                                       leftMouseButtonState,
+                                                                       middleMouseButtonState,
+                                                                       rightMouseButtonState
+                        );
+                        eventsQueue.Enqueue(args);
+                        anyEnterOrLeaveEventQueued = true;
+                    }
+
+                    for (int i = index; i < mouseOverStack.Count; i++ ) {
+                        // enqueue MouseEnter event
+                        Control control = mouseOverStack[i];
+                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseEnterEvent,
+                                                                       rawPosition,
+                                                                       leftMouseButtonState,
+                                                                       middleMouseButtonState,
+                                                                       rightMouseButtonState
+                        );
+                        eventsQueue.Enqueue(args);
+                        anyEnterOrLeaveEventQueued = true;
+                    }
+
+                    prevMouseOverStack.Clear();
+                    prevMouseOverStack.AddRange(mouseOverStack);
+
+                    if (anyEnterOrLeaveEventQueued)
+                        Debug.WriteLine("");
                 }
                 if (mouseEvent.dwEventFlags == MouseEventFlags.PRESSED_OR_RELEASED) {
                     //
@@ -294,20 +346,23 @@ namespace ConsoleFramework.Events {
             List<RoutedEventTargetInfo> subscribedTargets = getTargetsSubscribedTo(routedEvent);
             //
             if (routedEvent.RoutingStrategy == RoutingStrategy.Direct) {
-                if (subscribedTargets != null) {
-                    foreach (RoutedEventTargetInfo targetInfo in subscribedTargets) {
-                        foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
-                            if (!args.Handled || delegateInfo.handledEventsToo) {
-                                if (delegateInfo.@delegate is RoutedEventHandler) {
-                                    ((RoutedEventHandler) delegateInfo.@delegate).Invoke(targetInfo.target, args);
-                                } else {
-                                    delegateInfo.@delegate.DynamicInvoke(targetInfo.target, args);
-                                }
-                            }
+                if (null == subscribedTargets)
+                    return;
+                //
+                RoutedEventTargetInfo targetInfo =
+                    subscribedTargets.FirstOrDefault(info => info.target == args.Source);
+                if (null == targetInfo)
+                    return;
+                //
+                foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                    if (!args.Handled || delegateInfo.handledEventsToo) {
+                        if (delegateInfo.@delegate is RoutedEventHandler) {
+                            ((RoutedEventHandler) delegateInfo.@delegate).Invoke(targetInfo.target, args);
+                        } else {
+                            delegateInfo.@delegate.DynamicInvoke(targetInfo.target, args);
                         }
                     }
                 }
-                return;
             }
 
             Control source = (Control) args.Source;
