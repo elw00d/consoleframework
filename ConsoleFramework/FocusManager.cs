@@ -45,24 +45,42 @@ namespace ConsoleFramework
             private set;
         }
 
-        private void changeFocusedElementTo(Control focusedElement) {
+        private bool tryChangeFocusedElementTo(Control focusedElement, bool ignorePreviewHandled = false) {
             if (focusedElement == FocusedElement) {
-                // do nothing
-                return;
+                return true; // do nothing
             }
-            Control oldFocus = FocusedElement;
-            FocusedElement = focusedElement;
             //
-            //if (isControlConnectedToRoot(focusedElement)) {
-                if (oldFocus != null) {
-                    KeyboardFocusChangedEventArgs lostArgs = new KeyboardFocusChangedEventArgs(oldFocus,
-                        Control.LostKeyboardFocusEvent, oldFocus, focusedElement);
-                    eventManager.ProcessRoutedEvent(lostArgs.RoutedEvent, lostArgs);
+            Control oldFocus = FocusedElement;
+            // генерируем Preview-события
+            // если Handled = true хотя бы для одного из Preview-событий, то метод возвращает false
+            // и фокус не меняется, а состояние Focused для измененных элементов визуального дерева
+            // возвращается как было
+            if (oldFocus != null) {
+                KeyboardFocusChangedEventArgs previewLostArgs = new KeyboardFocusChangedEventArgs(oldFocus,
+                    Control.PreviewLostKeyboardFocusEvent, oldFocus, focusedElement);
+                if (eventManager.ProcessRoutedEvent(previewLostArgs.RoutedEvent, previewLostArgs) && !ignorePreviewHandled) {
+                    return false;
                 }
-                KeyboardFocusChangedEventArgs args = new KeyboardFocusChangedEventArgs(focusedElement,
-                        Control.GotKeyboardFocusEvent, oldFocus, focusedElement);
-                eventManager.ProcessRoutedEvent(args.RoutedEvent, args);
-            //}
+            }
+            KeyboardFocusChangedEventArgs previewGotArgs = new KeyboardFocusChangedEventArgs(focusedElement,
+                    Control.PreviewGotKeyboardFocusEvent, oldFocus, focusedElement);
+            if (eventManager.ProcessRoutedEvent(previewGotArgs.RoutedEvent, previewGotArgs) && !ignorePreviewHandled) {
+                return false;
+            }
+
+            // меняем фокусный элемент и генерируем основные события
+            FocusedElement = focusedElement;
+            
+            if (oldFocus != null) {
+                KeyboardFocusChangedEventArgs lostArgs = new KeyboardFocusChangedEventArgs(oldFocus,
+                    Control.LostKeyboardFocusEvent, oldFocus, focusedElement);
+                eventManager.ProcessRoutedEvent(lostArgs.RoutedEvent, lostArgs);
+            }
+            KeyboardFocusChangedEventArgs args = new KeyboardFocusChangedEventArgs(focusedElement,
+                    Control.GotKeyboardFocusEvent, oldFocus, focusedElement);
+            eventManager.ProcessRoutedEvent(args.RoutedEvent, args);
+            //
+            return true;
         }
 
         /// <summary>
@@ -85,10 +103,15 @@ namespace ConsoleFramework
         public void SetFocus(Control control) {
             if (null == control)
                 throw new ArgumentNullException("control");
-            // todo : check that control is part of visuals tree
-            if (!control.Visible || !control.Focusable)
-                // do nothing
-                return;
+            if (!isControlConnectedToRoot(control))
+                throw new ArgumentException("Control must be in visual tree.", "control");
+            //
+            if (!control.Visible || !control.Focusable) {
+                return; // do nothing
+            }
+            //
+            List<Tuple<Control, bool>> controlsOriginalFocusState = new List<Tuple<Control, bool>>();
+
             // set focused = true for parents
             bool failed = false;
             Control current = control;
@@ -103,9 +126,11 @@ namespace ConsoleFramework
                     // invariant
                     Debug.Assert(parent.children.Count(c => c.Focused) <= 1);
                     foreach (Control child in parent.children) {
+                        controlsOriginalFocusState.Add(new Tuple<Control, bool>(child, child.Focused));
                         child.Focused = false;
                     }
                 }
+                controlsOriginalFocusState.Add(new Tuple<Control, bool>(current, current.Focused));
                 current.Focused = true;
                 //
                 current = current.Parent;
@@ -113,7 +138,7 @@ namespace ConsoleFramework
             // set focused = true for children
             Control focusedControl = null;
             if (!failed) {
-                focusedControl = setFocusOnSubtree(control);
+                focusedControl = setFocusOnSubtree(control, controlsOriginalFocusState);
                 if (null == focusedControl) {
                     failed = true;
                     Debug.WriteLine(string.Format("Failed to set focus on control : {0}", control.Name));
@@ -121,7 +146,16 @@ namespace ConsoleFramework
             }
             //
             if (!failed) {
-                changeFocusedElementTo(focusedControl);
+                if (!tryChangeFocusedElementTo(focusedControl)) {
+                    failed = true;
+                }
+            }
+
+            if (failed) {
+                // restore original focus states
+                foreach (Tuple<Control, bool> originalFocusState in controlsOriginalFocusState) {
+                    originalFocusState.Item1.Focused = originalFocusState.Item2;
+                }
             }
             //
         }
@@ -139,13 +173,25 @@ namespace ConsoleFramework
         public void AfterAddElementToTree(Control control) {
             if (control.Parent == null) {
                 // this is root element
-                Control defaultFocus = setDefaultFocusOnSubtree(control);
-                changeFocusedElementTo(defaultFocus);
+                // в этом месте установка значения Handled = true в обработчике PreviewGotKeyboardFocus
+                // игнорируется (поскольку мы обязаны при инициализации назначить фокусный элемент)
+                Control defaultFocus = setDefaultFocusOnSubtree(control, null);
+                tryChangeFocusedElementTo(defaultFocus, true);
             } else {
                 if (control.Parent.Focused) {
-                    Control defaultFocus = setDefaultFocusOnSubtree(control);
-                    if (control.Parent == FocusedElement) {
-                        changeFocusedElementTo(defaultFocus);
+                    List<Tuple<Control, bool>> controlsOriginalFocusState = new List<Tuple<Control, bool>>();
+                    Control defaultFocus = setDefaultFocusOnSubtree(control, controlsOriginalFocusState);
+                    bool failed = defaultFocus == null;
+                    if (!failed) {
+                        if (control.Parent == FocusedElement) {
+                            failed = !tryChangeFocusedElementTo(defaultFocus);
+                        }
+                    }
+                    if (failed) {
+                        // restore original focus states
+                        foreach (Tuple<Control, bool> originalFocusState in controlsOriginalFocusState) {
+                            originalFocusState.Item1.Focused = originalFocusState.Item2;
+                        }
                     }
                 }
             }
@@ -156,13 +202,14 @@ namespace ConsoleFramework
         /// Если удаляется поддерево, имеющее в данный момент фокус, то фокус переходит
         /// к элементу, из которого поддерево вынимается. Например, из окна вытащили панель с текстбоксом,
         /// который имел фокус ввода. Фокус автоматически будет назначен на окно.
+        /// Этот юзкейс не отменяется установкой Handled = true в Preview-событиях.
         /// </summary>
         public void BeforeRemoveElementFromTree(Control control) {
             if (null == control)
                 throw new ArgumentNullException("control");
             // if removing root element
             if (null == control.Parent) {
-                changeFocusedElementTo(null);
+                tryChangeFocusedElementTo(null, true);
                 return;
             }
             //
@@ -170,7 +217,7 @@ namespace ConsoleFramework
                 if (!control.Parent.Focused) {
                     throw new InvalidOperationException("Assertion failed.");
                 }
-                changeFocusedElementTo(control.Parent);
+                tryChangeFocusedElementTo(control.Parent, true);
             }
         }
 
@@ -194,7 +241,7 @@ namespace ConsoleFramework
         /// keyboard focus, если бы фокус получил control). Учитывает свойства Focused, уже
         /// установленные у контролов (если такие есть).
         /// </summary>
-        private Control setFocusOnSubtree(Control control) {
+        private Control setFocusOnSubtree(Control control, List<Tuple<Control, bool>> controlsOriginalFocusState) {
             if (null == control)
                 throw new ArgumentNullException("control");
             if (!control.Visible || !control.Focusable)
@@ -205,14 +252,15 @@ namespace ConsoleFramework
                 Debug.Assert(children.Count(c => c.Focused) <= 1);
                 Control alreadyFocused = children.FirstOrDefault(c => c.Focused);
                 if (null != alreadyFocused)
-                    return setFocusOnSubtree(alreadyFocused);
+                    return setFocusOnSubtree(alreadyFocused, controlsOriginalFocusState);
                 for (int i = children.Count - 1; i >= 0; i--) {
                     Control child = children[i];
-                    Control result = setFocusOnSubtree(child);
+                    Control result = setFocusOnSubtree(child, controlsOriginalFocusState);
                     if (result != null)
                         return result;
                 }
             }
+            controlsOriginalFocusState.Add(new Tuple<Control, bool>(control, control.Focused));
             control.Focused = true;
             return control;
         }
@@ -222,7 +270,7 @@ namespace ConsoleFramework
         /// элемента управления control. Возвращает самый верхний контрол (который получил бы
         /// keyboard focus, если бы фокус получил control).
         /// </summary>
-        private Control setDefaultFocusOnSubtree(Control control) {
+        private Control setDefaultFocusOnSubtree(Control control, List<Tuple<Control, bool>> controlsOriginalFocusState) {
             if (null == control)
                 throw new ArgumentNullException("control");
             if (!control.Visible || !control.Focusable)
@@ -236,10 +284,13 @@ namespace ConsoleFramework
                     alreadyFocused.Focused = false;
                 for (int i = children.Count - 1; i >= 0; i--) {
                     Control child = children[i];
-                    Control result = setFocusOnSubtree(child);
+                    Control result = setDefaultFocusOnSubtree(child, controlsOriginalFocusState);
                     if (result != null)
                         return result;
                 }
+            }
+            if (null != controlsOriginalFocusState) {
+                controlsOriginalFocusState.Add(new Tuple<Control, bool>(control, control.Focused));
             }
             control.Focused = true;
             return control;

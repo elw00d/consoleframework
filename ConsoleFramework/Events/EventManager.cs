@@ -496,14 +496,9 @@ namespace ConsoleFramework.Events {
         /// <param name="rootElement"></param>
         /// <returns></returns>
         private Control findSource(Control rootElement) {
-            if (inputCaptureStack.Count != 0) {
-                return inputCaptureStack.Peek();
-            }
-            //if (rootElement.children.Count != 0) {
-            //    List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
-            //    return findSource(childrenOrderedByZIndex[childrenOrderedByZIndex.Count - 1]);
+            //if (inputCaptureStack.Count != 0) {
+            //    return inputCaptureStack.Peek();
             //}
-            //return rootElement;
             return ConsoleApplication.Instance.FocusManager.FocusedElement;
         }
 
