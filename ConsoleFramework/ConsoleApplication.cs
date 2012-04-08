@@ -11,6 +11,8 @@ namespace ConsoleFramework
     public sealed class ConsoleApplication : IDisposable {
 
         private ConsoleApplication() {
+            eventManager = new EventManager();
+            focusManager = new FocusManager(eventManager);
         }
 
         private static volatile ConsoleApplication instance;
@@ -45,10 +47,16 @@ namespace ConsoleFramework
 
         private Control mainControl;
         private EventManager eventManager;
+        private FocusManager focusManager;
+
+        public FocusManager FocusManager {
+            get {
+                return focusManager;
+            }
+        }
 
         public void Run(Control control) {
             this.mainControl = control;
-            eventManager = new EventManager();
             //
             stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
@@ -62,6 +70,8 @@ namespace ConsoleFramework
             renderer.Canvas = canvas;
             renderer.RootElementRect = new Rect(5, 5, 80, 25);
             renderer.RootElement = mainControl;
+            // initialize default focus
+            focusManager.AfterAddElementToTree(mainControl);
             //
             mainControl.Invalidate();
             renderer.UpdateRender();
@@ -97,7 +107,7 @@ namespace ConsoleFramework
         }
 
         private void processInputEvent(INPUT_RECORD inputRecord) {
-            eventManager.ProcessEvent(inputRecord, mainControl, renderer.RootElementRect);
+            eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);
         }
 
         public void BeginCaptureInput(Control control) {

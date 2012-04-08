@@ -1,4 +1,7 @@
-﻿using ConsoleFramework.Core;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
@@ -6,10 +9,21 @@ namespace ConsoleFramework.Controls
     public class TextBlock : Control {
         private string text;
 
+        private void initialize() {
+            AddHandler(KeyDownEvent, new KeyEventHandler(TextBlock_KeyDown));
+        }
+
+        public void TextBlock_KeyDown(object sender, KeyEventArgs args) {
+            Text = Text + "5";
+            args.Handled = true;
+        }
+
         public TextBlock(Control parent) : base(parent) {
+            initialize();
         }
 
         public TextBlock() {
+            initialize();
         }
 
         public string Text {

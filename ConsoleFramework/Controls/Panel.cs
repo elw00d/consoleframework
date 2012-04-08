@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -15,7 +16,7 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Panel : Control {
         private void subscribe() {
-            AddHandler(KeyDownEvent, new KeyEventHandler(Panel_OnKeyDown));
+            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(Panel_PreviewKeyDown), true);
         }
 
         public Panel() {
@@ -66,10 +67,20 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
 
-        public void Panel_OnKeyDown(object sender, KeyEventArgs args) {
-            TextBlock textBlock = ((TextBlock)this.FindChildByName("label1"));
-            textBlock.Text = textBlock.Text + "5";
-            args.Handled = true;
+        public void Panel_PreviewKeyDown(object sender, KeyEventArgs args) {
+            if (args.wVirtualKeyCode == 09) {
+                Debug.WriteLine("Tab");
+                List<Control> childs = GetChildrenOrderedByZIndex();
+                if (childs.Count > 0) {
+                    int findIndex = childs.FindIndex(c => c.Focused);
+                    if (findIndex == -1)
+                        ConsoleApplication.Instance.FocusManager.SetFocus(childs[0]);
+                    else {
+                        ConsoleApplication.Instance.FocusManager.SetFocus(childs[(findIndex + 1) % childs.Count]);
+                    }
+                }
+                args.Handled = true;
+            }
         }
 
         /// <summary>

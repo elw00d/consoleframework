@@ -195,7 +195,7 @@ namespace ConsoleFramework.Events {
 
         private readonly List<Control> prevMouseOverStack = new List<Control>();
 
-        public void ProcessEvent(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
+        public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
                 if (mouseEvent.dwEventFlags != MouseEventFlags.PRESSED_OR_RELEASED &&
@@ -242,7 +242,7 @@ namespace ConsoleFramework.Events {
                             break;
                     }
 
-                    bool anyEnterOrLeaveEventQueued = false;
+                    //bool anyEnterOrLeaveEventQueued = false;
                     for (int i = prevMouseOverStack.Count - 1; i >= index; i-- ) {
                         // enqueue MouseLeave event
                         Control control = prevMouseOverStack[i];
@@ -253,7 +253,7 @@ namespace ConsoleFramework.Events {
                                                                        rightMouseButtonState
                         );
                         eventsQueue.Enqueue(args);
-                        anyEnterOrLeaveEventQueued = true;
+                        //anyEnterOrLeaveEventQueued = true;
                     }
 
                     for (int i = index; i < mouseOverStack.Count; i++ ) {
@@ -266,14 +266,14 @@ namespace ConsoleFramework.Events {
                                                                        rightMouseButtonState
                         );
                         eventsQueue.Enqueue(args);
-                        anyEnterOrLeaveEventQueued = true;
+                        //anyEnterOrLeaveEventQueued = true;
                     }
 
                     prevMouseOverStack.Clear();
                     prevMouseOverStack.AddRange(mouseOverStack);
 
-                    if (anyEnterOrLeaveEventQueued)
-                        Debug.WriteLine("");
+                    //if (anyEnterOrLeaveEventQueued)
+                    //    Debug.WriteLine("");
                 }
                 if (mouseEvent.dwEventFlags == MouseEventFlags.PRESSED_OR_RELEASED) {
                     //
@@ -341,18 +341,27 @@ namespace ConsoleFramework.Events {
             }
         }
 
-        private void processRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+        internal bool ProcessRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            if (null == routedEvent)
+                throw new ArgumentNullException("routedEvent");
+            if (null == args)
+                throw new ArgumentNullException("args");
+            //
+            return processRoutedEvent(routedEvent, args);
+        }
+
+        private bool processRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
             //
             List<RoutedEventTargetInfo> subscribedTargets = getTargetsSubscribedTo(routedEvent);
             //
             if (routedEvent.RoutingStrategy == RoutingStrategy.Direct) {
                 if (null == subscribedTargets)
-                    return;
+                    return false;
                 //
                 RoutedEventTargetInfo targetInfo =
                     subscribedTargets.FirstOrDefault(info => info.target == args.Source);
                 if (null == targetInfo)
-                    return;
+                    return false;
                 //
                 foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
                     if (!args.Handled || delegateInfo.handledEventsToo) {
@@ -477,6 +486,8 @@ namespace ConsoleFramework.Events {
                     }
                 }
             }
+
+            return args.Handled;
         }
 
         /// <summary>
@@ -488,11 +499,12 @@ namespace ConsoleFramework.Events {
             if (inputCaptureStack.Count != 0) {
                 return inputCaptureStack.Peek();
             }
-            if (rootElement.children.Count != 0) {
-                List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
-                return findSource(childrenOrderedByZIndex[childrenOrderedByZIndex.Count - 1]);
-            }
-            return rootElement;
+            //if (rootElement.children.Count != 0) {
+            //    List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
+            //    return findSource(childrenOrderedByZIndex[childrenOrderedByZIndex.Count - 1]);
+            //}
+            //return rootElement;
+            return ConsoleApplication.Instance.FocusManager.FocusedElement;
         }
 
         /// <summary>

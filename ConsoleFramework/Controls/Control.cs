@@ -103,6 +103,9 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent PreviewKeyUpEvent = EventManager.RegisterRoutedEvent("PreviewKeyUp", RoutingStrategy.Tunnel, typeof(KeyEventHandler), typeof(Control));
         public static RoutedEvent KeyUpEvent = EventManager.RegisterRoutedEvent("KeyUp", RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(Control));
 
+        public static RoutedEvent LostKeyboardFocusEvent = EventManager.RegisterRoutedEvent("LostKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
+        public static RoutedEvent GotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("GotKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
+
         public void AddHandler(RoutedEvent routedEvent, Delegate @delegate) {
             EventManager.AddHandler(this, routedEvent, @delegate);
         }
@@ -150,6 +153,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Add(child);
             child.Parent = this;
+            ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             Invalidate();
         }
 
@@ -159,6 +163,7 @@ namespace ConsoleFramework.Controls
             if (child.Parent != this)
                 throw new InvalidOperationException("Specified control is not a child.");
             else {
+                ConsoleApplication.Instance.FocusManager.BeforeRemoveElementFromTree(child);
                 if (!this.children.Remove(child))
                     throw new InvalidOperationException("Assertion failed.");
                 child.Parent = null;
@@ -168,8 +173,12 @@ namespace ConsoleFramework.Controls
 
         private void initialize() {
             MinWidth = 0;
+            Focusable = true;
+            Visible = true;
             AddHandler(MouseEnterEvent, new MouseEventHandler(Control_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Control_MouseLeave));
+            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
+            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_LostKeyboardFocus));
         }
 
         private void Control_MouseEnter(object sender, MouseEventArgs args) {
@@ -178,6 +187,20 @@ namespace ConsoleFramework.Controls
 
         private void Control_MouseLeave(object sender, MouseEventArgs args) {
             //Debug.WriteLine("MouseLeave on control : " + Name);
+        }
+
+        private void Control_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
+            Debug.WriteLine(string.Format("GotKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
+                args.OldFocus != null ? args.OldFocus.Name : "null",
+                args.NewFocus.Name));
+            args.Handled = true;
+        }
+
+        private void Control_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
+            //Debug.WriteLine(string.Format("LostKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
+            //    args.OldFocus != null ? args.OldFocus.Name : "null",
+            //    args.NewFocus.Name));
+            //args.Handled = true;
         }
 
         public Control() {
@@ -246,6 +269,17 @@ namespace ConsoleFramework.Controls
         }
 
         private int maxHeight = int.MaxValue;
+
+        public bool Focused {
+            get;
+            internal set;
+        }
+
+        public bool Focusable {
+            get;
+            set;
+        }
+
         public int MaxHeight {
             get {
                 return maxHeight;

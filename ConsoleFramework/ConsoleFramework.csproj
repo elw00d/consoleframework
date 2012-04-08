@@ -34,12 +34,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Events\KeyEventArgs.cs" />
@@ -47,6 +43,7 @@
     <Compile Include="Controls\Window.cs" />
     <Compile Include="Events\EventManager.cs" />
     <Compile Include="Events\RoutedEventArgs.cs" />
+    <Compile Include="FocusManager.cs" />
     <Compile Include="Native\Color.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
@@ -72,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
+    <Content Include="Events\Focus.txt" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

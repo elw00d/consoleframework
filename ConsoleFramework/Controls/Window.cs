@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -17,7 +19,7 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
         }
-
+        
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -220,7 +222,7 @@ namespace ConsoleFramework.Controls
                 Vector vector = new Vector(parentPoint.X - movingStartPoint.x, parentPoint.Y - movingStartPoint.y);
                 X = movingStartX + vector.X;
                 Y = movingStartY + vector.Y;
-                Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
+                //Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
                 getWindowsHost().Invalidate();
                 args.Handled = true;
             }
