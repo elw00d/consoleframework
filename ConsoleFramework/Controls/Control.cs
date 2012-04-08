@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
-using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
@@ -107,6 +106,22 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent LostKeyboardFocusEvent = EventManager.RegisterRoutedEvent("LostKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
         public static RoutedEvent PreviewGotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("PreviewGotKeyboardFocus", RoutingStrategy.Tunnel, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
         public static RoutedEvent GotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("GotKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
+
+        public void SetFocus(bool ignoreRememberedChildrenFocus = false) {
+            ConsoleApplication.Instance.FocusManager.SetFocus(this, ignoreRememberedChildrenFocus);
+        }
+
+        public bool HasKeyboardFocus {
+            get {
+                return ConsoleApplication.Instance.FocusManager.FocusedElement == this;
+            }
+        }
+
+        public bool HasLogicalFocus {
+            get {
+                return Focused;
+            }
+        }
 
         public void AddHandler(RoutedEvent routedEvent, Delegate @delegate) {
             EventManager.AddHandler(this, routedEvent, @delegate);
@@ -272,11 +287,17 @@ namespace ConsoleFramework.Controls
 
         private int maxHeight = int.MaxValue;
 
-        public bool Focused {
+        /// <summary>
+        /// Shows has control logical focus or doesn't.
+        /// </summary>
+        internal bool Focused {
             get;
-            internal set;
+            set;
         }
 
+        /// <summary>
+        /// Shows whether control can handle keyboard input or can't.
+        /// </summary>
         public bool Focusable {
             get;
             set;
@@ -770,6 +791,10 @@ namespace ConsoleFramework.Controls
             return string.Format("Control: {0}", Name);
         }
 
+        /// <summary>
+        /// You should define your rendering logic here.
+        /// </summary>
+        /// <param name="buffer">Buffer where rendered content will be stored.</param>
         public virtual void Render(RenderingBuffer buffer) {
         }
 

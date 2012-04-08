@@ -72,11 +72,11 @@ namespace ConsoleFramework.Controls
                 Debug.WriteLine("Tab");
                 List<Control> childs = GetChildrenOrderedByZIndex();
                 if (childs.Count > 0) {
-                    int findIndex = childs.FindIndex(c => c.Focused);
+                    int findIndex = childs.FindIndex(c => c.HasLogicalFocus);
                     if (findIndex == -1)
-                        ConsoleApplication.Instance.FocusManager.SetFocus(childs[0]);
+                        childs[0].SetFocus();
                     else {
-                        ConsoleApplication.Instance.FocusManager.SetFocus(childs[(findIndex + 1) % childs.Count]);
+                        childs[(findIndex + 1) % childs.Count].SetFocus();
                     }
                 }
                 args.Handled = true;

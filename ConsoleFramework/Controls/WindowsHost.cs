@@ -53,7 +53,7 @@ namespace ConsoleFramework.Controls
             Control oldTopWindow = children[children.Count - 1];
             children[children.Count - 1] = window;
             children[index] = oldTopWindow;
-            ConsoleApplication.Instance.FocusManager.SetFocus(window);
+            window.SetFocus();
             if (oldTopWindow != window)
                 Invalidate();
         }

@@ -3,34 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
-using ConsoleFramework.Events;
 
-namespace ConsoleFramework
+namespace ConsoleFramework.Events
 {
-    public class KeyboardFocusChangedEventArgs : RoutedEventArgs {
-        public KeyboardFocusChangedEventArgs(object source, RoutedEvent routedEvent) : base(source, routedEvent) {
-        }
-
-        public KeyboardFocusChangedEventArgs(object source, RoutedEvent routedEvent,
-            Control oldFocus, Control newFocus) : base(source, routedEvent) {
-            //
-            OldFocus = oldFocus;
-            NewFocus = newFocus;
-        }
-
-        public Control OldFocus {
-            get;
-            private set;
-        }
-
-        public Control NewFocus {
-            get;
-            private set;
-        }
-    }
-
-    public delegate void KeyboardFocusChangedEventHandler(object sender, KeyboardFocusChangedEventArgs args);
-
+    /// <summary>
+    /// Responsible to manage elements that has a keyboard focus.
+    /// </summary>
     public sealed class FocusManager {
         private readonly EventManager eventManager;
 
@@ -40,6 +18,9 @@ namespace ConsoleFramework
             this.eventManager = eventManager;
         }
 
+        /// <summary>
+        /// Control that has a keyboard focus now.
+        /// </summary>
         public Control FocusedElement {
             get;
             private set;
@@ -100,7 +81,17 @@ namespace ConsoleFramework
             } while (true);
         }
 
-        public void SetFocus(Control control) {
+        /// <summary>
+        /// Устанавливает клавиатурный фокус на выбранном элементе.
+        /// Если при установке фокуса события PreviewLostKeyboardFocus и PreviewGotKeyboardFocus
+        /// были перехвачены и Handled был установлен в true, клавиатурный фокус не изменяется, а
+        /// состояние фокуса элементов возвращается к прежнему.
+        /// </summary>
+        /// <param name="control">Элемент управления, на который необходимо передать фокус.</param>
+        /// <param name="ignoreRememberedChildrenFocus">Если true, то фокус дочерних элементов будет сброшен
+        /// в дефолтный. По умолчанию фокус дочерних элементов восстановится к такому же состоянию, как и д
+        /// потери элементом фокуса.</param>
+        internal void SetFocus(Control control, bool ignoreRememberedChildrenFocus = false) {
             if (null == control)
                 throw new ArgumentNullException("control");
             if (!isControlConnectedToRoot(control))
@@ -138,7 +129,11 @@ namespace ConsoleFramework
             // set focused = true for children
             Control focusedControl = null;
             if (!failed) {
-                focusedControl = setFocusOnSubtree(control, controlsOriginalFocusState);
+                if (ignoreRememberedChildrenFocus)
+                    focusedControl = setDefaultFocusOnSubtree(control, controlsOriginalFocusState);
+                else
+                    focusedControl = setFocusOnSubtree(control, controlsOriginalFocusState);
+                //
                 if (null == focusedControl) {
                     failed = true;
                     Debug.WriteLine(string.Format("Failed to set focus on control : {0}", control.Name));
@@ -170,7 +165,7 @@ namespace ConsoleFramework
         /// К примеру, если мы в окно, имеющее фокус ввода, вставляем панель с текстбоксом, то
         /// текстбокс автоматически получает клавиатурный фокус.
         /// </summary>
-        public void AfterAddElementToTree(Control control) {
+        internal void AfterAddElementToTree(Control control) {
             if (control.Parent == null) {
                 // this is root element
                 // в этом месте установка значения Handled = true в обработчике PreviewGotKeyboardFocus
@@ -204,7 +199,7 @@ namespace ConsoleFramework
         /// который имел фокус ввода. Фокус автоматически будет назначен на окно.
         /// Этот юзкейс не отменяется установкой Handled = true в Preview-событиях.
         /// </summary>
-        public void BeforeRemoveElementFromTree(Control control) {
+        internal void BeforeRemoveElementFromTree(Control control) {
             if (null == control)
                 throw new ArgumentNullException("control");
             // if removing root element
