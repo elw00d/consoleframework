@@ -207,7 +207,8 @@ namespace ConsoleFramework.Events {
                     throw new InvalidOperationException("Flags combination in mouse event was not expected.");
                 }
                 Point rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
-                Control source = findSource(rawPosition, rootElement);
+                Control topMost = findSource(rawPosition, rootElement);
+                Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
                 //
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
                     MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
@@ -230,7 +231,7 @@ namespace ConsoleFramework.Events {
 
                     // path to source from root element down
                     List<Control> mouseOverStack = new List<Control>();
-                    Control current = source;
+                    Control current = topMost;
                     while (null != current) {
                         mouseOverStack.Insert(0, current);
                         current = current.Parent;
@@ -509,9 +510,6 @@ namespace ConsoleFramework.Events {
         /// <param name="rootElement"></param>
         /// <returns></returns>
         private Control findSource(Point rawPoint, Control rootElement) {
-            if (inputCaptureStack.Count != 0) {
-                return inputCaptureStack.Peek();
-            }
             if (rootElement.children.Count != 0) {
                 List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
@@ -523,6 +521,10 @@ namespace ConsoleFramework.Events {
                 }
             }
             return rootElement;
+        }
+
+        internal void QueueEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            this.eventsQueue.Enqueue(args);
         }
     }
 }

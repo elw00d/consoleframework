@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Core;
+﻿using System.Diagnostics;
+using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
@@ -16,11 +17,16 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
             //AddHandler(PreviewLostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_PreviewLostKeyboardFocus));
+            AddHandler(Button.ClickEvent, new RoutedEventHandler(Window_Click));
         }
 
         //private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
         //    args.Handled = true;
         //}
+
+        private void Window_Click(object sender, RoutedEventArgs args) {
+            //Debug.WriteLine("Click");
+        }
 
         public int X { get; set; }
         public int Y { get; set; }

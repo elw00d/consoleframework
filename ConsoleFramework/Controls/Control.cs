@@ -131,6 +131,10 @@ namespace ConsoleFramework.Controls
             EventManager.AddHandler(this, routedEvent, @delegate, handledEventsToo);
         }
 
+        public void RaiseEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            ConsoleApplication.Instance.EventManager.QueueEvent(routedEvent, args);
+        }
+
         public void RemoveHandler(RoutedEvent routedEvent, Delegate @delegate) {
             EventManager.RemoveHandler(this, routedEvent, @delegate);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
@@ -21,6 +22,9 @@ namespace ConsoleFramework {
                 Button button = new Button() {
                     Name = "button1",
                     Caption = "button !"
+                };
+                button.OnClick += (sender, eventArgs) => {
+                    Debug.WriteLine("Click");
                 };
                 panel.AddChild(button);
                 //application.Run(panel);

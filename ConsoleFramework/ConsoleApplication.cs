@@ -55,6 +55,12 @@ namespace ConsoleFramework
             }
         }
 
+        public EventManager EventManager {
+            get {
+                return eventManager;
+            }
+        }
+
         public void Run(Control control) {
             this.mainControl = control;
             //
