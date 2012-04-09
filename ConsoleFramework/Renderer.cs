@@ -33,7 +33,6 @@ namespace ConsoleFramework
         private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
         // queue of controls marked for layout invalidation
         private readonly Queue<Control> invalidatedControls = new Queue<Control>();
-        private readonly List<Control> currentLayoutPassInvalidatedControls = new List<Control>();
 
         // список контролов, у которых обновилось содержимое full render buffer
         // актуален только при вызове UpdateRender, после вызова очищается
@@ -47,7 +46,6 @@ namespace ConsoleFramework
         /// </summary>
         public void UpdateRender() {
             renderingUpdatedControls.Clear();
-            currentLayoutPassInvalidatedControls.Clear();
             // invalidate layout and fill renderingUpdatedControls list
             InvalidateLayout();
             // propagate updated rendered buffers to parent elements and eventually to Canvas

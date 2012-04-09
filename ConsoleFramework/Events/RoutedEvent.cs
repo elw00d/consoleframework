@@ -81,6 +81,9 @@ namespace ConsoleFramework.Events
         }
     }
 
+    /// <summary>
+    /// Represents event that supports routing through visual tree.
+    /// </summary>
     public sealed class RoutedEvent {
         private readonly Type handlerType;
         private readonly string name;
