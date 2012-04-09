@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
@@ -18,11 +17,6 @@ namespace ConsoleFramework.Events {
         private class DelegateInfo {
             public readonly Delegate @delegate;
             public readonly bool handledEventsToo;
-
-            public DelegateInfo(Delegate @delegate) {
-                this.@delegate = @delegate;
-                this.handledEventsToo = false;
-            }
 
             public DelegateInfo(Delegate @delegate, bool handledEventsToo) {
                 this.@delegate = @delegate;
@@ -42,13 +36,11 @@ namespace ConsoleFramework.Events {
         }
 
         private class RoutedEventInfo {
-            public RoutedEvent routedEvent;
             public List<RoutedEventTargetInfo> targetsList;
 
             public RoutedEventInfo(RoutedEvent routedEvent) {
                 if (null == routedEvent)
                     throw new ArgumentNullException("routedEvent");
-                this.routedEvent = routedEvent;
             }
         }
 
@@ -209,6 +201,10 @@ namespace ConsoleFramework.Events {
                 Point rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
                 Control topMost = findSource(rawPosition, rootElement);
                 Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
+                // если мышь захвачена контролом, то события перемещения мыши доставляются только ему,
+                // события, связанные с нажатием мыши - доставляются только ему
+                // события MouseEnter/MouseLeave доставляются тоже только ему (причем относящиеся к другим контролам игнорируются)
+                bool mouseCaptured = inputCaptureStack.Count > 0;
                 //
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
                     MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
@@ -247,27 +243,31 @@ namespace ConsoleFramework.Events {
                     for (int i = prevMouseOverStack.Count - 1; i >= index; i-- ) {
                         // enqueue MouseLeave event
                         Control control = prevMouseOverStack[i];
-                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
-                                                                       rawPosition,
-                                                                       leftMouseButtonState,
-                                                                       middleMouseButtonState,
-                                                                       rightMouseButtonState
-                        );
-                        eventsQueue.Enqueue(args);
-                        //anyEnterOrLeaveEventQueued = true;
+                        if (!mouseCaptured || source == control) {
+                            MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
+                                                                     rawPosition,
+                                                                     leftMouseButtonState,
+                                                                     middleMouseButtonState,
+                                                                     rightMouseButtonState
+                                );
+                            eventsQueue.Enqueue(args);
+                            //anyEnterOrLeaveEventQueued = true;
+                        }
                     }
 
                     for (int i = index; i < mouseOverStack.Count; i++ ) {
                         // enqueue MouseEnter event
                         Control control = mouseOverStack[i];
-                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseEnterEvent,
-                                                                       rawPosition,
-                                                                       leftMouseButtonState,
-                                                                       middleMouseButtonState,
-                                                                       rightMouseButtonState
-                        );
-                        eventsQueue.Enqueue(args);
-                        //anyEnterOrLeaveEventQueued = true;
+                        if (!mouseCaptured || source == control) {
+                            MouseEventArgs args = new MouseEventArgs(control, Control.MouseEnterEvent,
+                                                                     rawPosition,
+                                                                     leftMouseButtonState,
+                                                                     middleMouseButtonState,
+                                                                     rightMouseButtonState
+                                );
+                            eventsQueue.Enqueue(args);
+                            //anyEnterOrLeaveEventQueued = true;
+                        }
                     }
 
                     prevMouseOverStack.Clear();
@@ -325,7 +325,7 @@ namespace ConsoleFramework.Events {
             }
             if (inputRecord.EventType == EventType.KEY_EVENT) {
                 KEY_EVENT_RECORD keyEvent = inputRecord.KeyEvent;
-                KeyEventArgs eventArgs = new KeyEventArgs(findSource(rootElement),
+                KeyEventArgs eventArgs = new KeyEventArgs(ConsoleApplication.Instance.FocusManager.FocusedElement,
                     keyEvent.bKeyDown ? Control.PreviewKeyDownEvent : Control.PreviewKeyUpEvent);
                 eventArgs.UnicodeChar = keyEvent.UnicodeChar;
                 eventArgs.bKeyDown = keyEvent.bKeyDown;
@@ -489,18 +489,6 @@ namespace ConsoleFramework.Events {
             }
 
             return args.Handled;
-        }
-
-        /// <summary>
-        /// Находит активный элемент (который находится сейчас в фокусе ввода).
-        /// </summary>
-        /// <param name="rootElement"></param>
-        /// <returns></returns>
-        private Control findSource(Control rootElement) {
-            //if (inputCaptureStack.Count != 0) {
-            //    return inputCaptureStack.Peek();
-            //}
-            return ConsoleApplication.Instance.FocusManager.FocusedElement;
         }
 
         /// <summary>
