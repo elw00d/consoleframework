@@ -52,16 +52,23 @@ namespace ConsoleFramework.Controls
                     maxWidth = child.DesiredSize.Width;
                 }
             }
+            foreach (Control child in children) {
+                child.Measure(new Size(maxWidth, child.DesiredSize.Height));
+            }
             return new Size(maxWidth, totalHeight);
         }
         
         protected override Size ArrangeOverride(Size finalSize) {
             int totalHeight = 0;
+            int maxWidth = 0;
+            foreach (Control child in children) {
+                if (child.DesiredSize.Width > maxWidth)
+                    maxWidth = child.DesiredSize.Width;
+            }
             foreach (Control child in children) {
                 int y = totalHeight;
-                int width = child.DesiredSize.Width;
                 int height = child.DesiredSize.Height;
-                child.Arrange(new Rect(0, y, width, height));
+                child.Arrange(new Rect(0, y, maxWidth, height));
                 totalHeight += height;
             }
             return finalSize;

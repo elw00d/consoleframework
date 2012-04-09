@@ -10,6 +10,8 @@ namespace ConsoleFramework {
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();
                 panel.Name = "panel1";
+                panel.HorizontalAlignment =  HorizontalAlignment.Center;
+                panel.VerticalAlignment = VerticalAlignment.Stretch;
                 panel.AddChild(new TextBlock() {
                     Name = "label1",
                     Text = "Label1",
@@ -17,11 +19,14 @@ namespace ConsoleFramework {
                 });
                 panel.AddChild(new TextBlock() {
                     Name = "label2",
-                    Text = "Label2_____"
+                    Text = "Label2_____",
+                    HorizontalAlignment = HorizontalAlignment.Right
                 });
                 Button button = new Button() {
                     Name = "button1",
-                    Caption = "button !"
+                    Caption = "Button!",
+                    Margin = new Thickness(1),
+                    HorizontalAlignment = HorizontalAlignment.Center
                 };
                 button.OnClick += (sender, eventArgs) => {
                     Debug.WriteLine("Click");
@@ -36,7 +41,7 @@ namespace ConsoleFramework {
                     X = 3,
                     Y = 4,
                     //MinHeight = 100,
-                    MaxWidth = 30,
+                    //MaxWidth = 30,
                     C = '1',
                     Name = "Window1",
                     Title = "Window1",

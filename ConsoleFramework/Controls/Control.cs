@@ -672,7 +672,7 @@ namespace ConsoleFramework.Controls
         
         internal void ResetValidity() {
             // copy all calculated layout info into lastLayoutInfo
-            if (layoutInfo.validity != LayoutValidity.Nothing) {
+            if (layoutInfo.validity == LayoutValidity.Render) {
                 lastLayoutInfo.CopyValuesFrom(layoutInfo);
             }
             // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)

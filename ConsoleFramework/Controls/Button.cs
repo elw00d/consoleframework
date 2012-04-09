@@ -30,9 +30,7 @@ namespace ConsoleFramework.Controls
                 return caption;
             }
             set {
-                if (caption != value) {
-                    caption = value;
-                }
+                caption = value;
             }
         }
 
@@ -40,9 +38,10 @@ namespace ConsoleFramework.Controls
         private bool showPressed;
 
         protected override Size MeasureOverride(Size availableSize) {
-            Size minButtonSize = new Size(caption.Length + 4, 2);
-            return minButtonSize;
-            //return new Size(Math.Max(minButtonSize.width, availableSize.width - 1), Math.Max(minButtonSize.height, availableSize.height - 1));
+            if (!string.IsNullOrEmpty(caption)) {
+                Size minButtonSize = new Size(caption.Length + 14, 2);
+                return minButtonSize;
+            } else return new Size(8, 2);
         }
         
         public override void Render(RenderingBuffer buffer) {
@@ -52,7 +51,7 @@ namespace ConsoleFramework.Controls
                 buffer.SetOpacity(0, 0, 3);
                 buffer.FillRectangle(1, 0, ActualWidth - 1, 1, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
-                    int titleStartX = 3;
+                    int titleStartX = 2;
                     bool renderTitle = false;
                     string renderTitleString = null;
                     int availablePixelsCount = ActualWidth - titleStartX * 2;
@@ -72,6 +71,8 @@ namespace ConsoleFramework.Controls
                         }
                     }
                     if (renderTitle) {
+                        // shift by 1 pixel
+                        titleStartX++;
                         // assert !string.IsNullOrEmpty(renderingTitleString);
                         buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
                         for (int i = 0; i < renderTitleString.Length; i++) {
@@ -83,7 +84,6 @@ namespace ConsoleFramework.Controls
                 buffer.SetPixel(0, 1, ' ');
                 buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
                 buffer.FillRectangle(0, 1, ActualWidth - 1, 1, ' ', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
-                buffer.DumpOpacityMatrix();
             } else {
                 buffer.FillRectangle(0, 0, ActualWidth - 1, 1, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
@@ -120,7 +120,6 @@ namespace ConsoleFramework.Controls
                 buffer.FillRectangle(1, 1, ActualWidth - 1, 1, '\u2580', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
                 buffer.SetOpacity(ActualWidth - 1, 0, 3);
                 buffer.SetPixel(ActualWidth - 1, 0, '\u2584');
-                buffer.DumpOpacityMatrix();
             }
         }
 
@@ -155,13 +154,15 @@ namespace ConsoleFramework.Controls
         public void Button_OnMouseUp(object sender, MouseButtonEventArgs args) {
             if (clicking) {
                 clicking = false;
-                showPressed = false;
+                if (showPressed) {
+                    showPressed = false;
+                    this.Invalidate();
+                }
                 Point point = args.GetPosition(Parent);
                 if (RenderSlotRect.Contains(point)) {
                     RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
                 }
                 ConsoleApplication.Instance.EndCaptureInput(this);
-                this.Invalidate();
                 args.Handled = true;
             }
         }

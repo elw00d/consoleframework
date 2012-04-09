@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 
