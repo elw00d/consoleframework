@@ -16,6 +16,7 @@ namespace ConsoleFramework
         /// 0 - непрозрачный пиксель
         /// 1 - полупрозрачный (отображается как тень)
         /// 2 - полностью прозрачный (при наложении на другой буфер будет проигнорирован)
+        /// 3 - прозначный фон (при наложении на другой буфер символы возьмут его background) - для рамок на кнопках, к примеру
         /// </summary>
         private int[,] opacityMatrix;
         // todo : add bool hasOpacityAttributes and optimize this
@@ -90,6 +91,30 @@ namespace ConsoleFramework
                                     charInfo.Attributes = (CHAR_ATTRIBUTES) Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
+                                } else if (opacity == 3) {
+                                    // берем фоновые атрибуты символа из родительского буфера
+                                    CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) == CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    }
+                                    buffer[parentX, parentY] = charInfo;
                                 }
                             }
                         }
@@ -128,6 +153,30 @@ namespace ConsoleFramework
                                     charInfo.Attributes = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
+                                } else if (opacity == 3) {
+                                    // берем фоновые атрибуты символа из родительского буфера
+                                    CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    }
+                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) == CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) {
+                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    } else {
+                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    }
+                                    buffer[parentX, parentY] = charInfo;
                                 }
                             }
                         }
@@ -150,14 +199,14 @@ namespace ConsoleFramework
         }
 
         public void SetOpacity(int x, int y, int opacity) {
-            if (opacity != 0 && opacity != 1 && opacity != 2)
+            if (opacity != 0 && opacity != 1 && opacity != 2 && opacity != 3)
                 throw new ArgumentException("opacity");
             //
             opacityMatrix[x, y] = opacity;
         }
 
         public void SetOpacityRect(int x, int y, int w, int h, int opacity) {
-            if (opacity != 0 && opacity != 1 && opacity != 2)
+            if (opacity != 0 && opacity != 1 && opacity != 2 && opacity != 3)
                 throw new ArgumentException("opacity");
             for (int i = 0; i < w; i++) {
                 int _x = x + i;
@@ -225,6 +274,23 @@ namespace ConsoleFramework
                 }
                 Debug.WriteLine(sb);
             }
+        }
+
+        /// <summary>
+        /// Проверяет, содержит ли affectedRect пиксели с выставленным значением opacity.
+        /// Это необходимо для обеспечения корректного смешивания с родительскими буферами в случае
+        /// частичного обновления экрана (если это не учитывать, то состояние экрана может смешивать
+        /// новые пиксели со старыми, которые были получены при предыдущем вызове рендеринга).
+        /// </summary>
+        public bool ContainsOpacity(Rect affectedRect) {
+            for (int x = 0; x < affectedRect.width; x++) {
+                for (int y = 0; y < affectedRect.height; y++) {
+                    if (opacityMatrix[x + affectedRect.x, y + affectedRect.y] != 0) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

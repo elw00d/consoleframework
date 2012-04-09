@@ -79,6 +79,17 @@ namespace ConsoleFramework
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
             if (control.Parent != null) {
                 RenderingBuffer fullParentBuffer = getOrCreateFullBufferForControl(control.Parent);
+                // если буфер контрола содержит opacity пиксели в affectedRect, то мы вынуждены переинициализировать
+                // буфер парента целиком (не вызывая Render, конечно, но переналожением буферов дочерних элементов)
+                if (fullBuffer.ContainsOpacity(affectedRect)) {
+                    fullParentBuffer.Clear();
+                    fullParentBuffer.CopyFrom(getOrCreateBufferForControl(control.Parent));
+                    foreach (Control child in control.Parent.children) {
+                        RenderingBuffer childBuffer = getOrCreateFullBufferForControl(child);
+                        fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, child.RenderSlotRect,
+                            child.LayoutClip);
+                    }
+                }
                 // определим соседей контрола, которые могут перекрывать его
                 List<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
                 int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
@@ -124,7 +135,6 @@ namespace ConsoleFramework
         internal void InvalidateLayout() {
             while (invalidatedControls.Count != 0) {
                 Control control = invalidatedControls.Dequeue();
-                currentLayoutPassInvalidatedControls.Add(control);
                 // set previous results of layout passes dirty
                 control.ResetValidity();
                 //

@@ -40,17 +40,87 @@ namespace ConsoleFramework.Controls
         private bool showPressed;
 
         protected override Size MeasureOverride(Size availableSize) {
-            Size minButtonSize = new Size(caption.Length + 3, 2);
+            Size minButtonSize = new Size(caption.Length + 4, 2);
             return minButtonSize;
             //return new Size(Math.Max(minButtonSize.width, availableSize.width - 1), Math.Max(minButtonSize.height, availableSize.height - 1));
         }
         
         public override void Render(RenderingBuffer buffer) {
-            // todo : print caption at center
+            ushort captionAttrs = Color.Attr(Color.Black, Color.DarkGreen);
             if (showPressed) {
-                buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', CHAR_ATTRIBUTES.BACKGROUND_GREEN | CHAR_ATTRIBUTES.BACKGROUND_INTENSITY);
+                buffer.SetPixel(0, 0, ' ');
+                buffer.SetOpacity(0, 0, 3);
+                buffer.FillRectangle(1, 0, ActualWidth - 1, 1, ' ', captionAttrs);
+                if (!string.IsNullOrEmpty(Caption)) {
+                    int titleStartX = 3;
+                    bool renderTitle = false;
+                    string renderTitleString = null;
+                    int availablePixelsCount = ActualWidth - titleStartX * 2;
+                    if (availablePixelsCount > 0) {
+                        renderTitle = true;
+                        if (Caption.Length <= availablePixelsCount) {
+                            // dont truncate title
+                            titleStartX += (availablePixelsCount - Caption.Length) / 2;
+                            renderTitleString = Caption;
+                        } else {
+                            renderTitleString = Caption.Substring(0, availablePixelsCount);
+                            if (renderTitleString.Length > 2) {
+                                renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
+                            } else {
+                                renderTitle = false;
+                            }
+                        }
+                    }
+                    if (renderTitle) {
+                        // assert !string.IsNullOrEmpty(renderingTitleString);
+                        buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        for (int i = 0; i < renderTitleString.Length; i++) {
+                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES)captionAttrs);
+                        }
+                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                    }
+                }
+                buffer.SetPixel(0, 1, ' ');
+                buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
+                buffer.FillRectangle(0, 1, ActualWidth - 1, 1, ' ', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
+                buffer.DumpOpacityMatrix();
             } else {
-                buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, 'b', CHAR_ATTRIBUTES.BACKGROUND_GREEN);
+                buffer.FillRectangle(0, 0, ActualWidth - 1, 1, ' ', captionAttrs);
+                if (!string.IsNullOrEmpty(Caption)) {
+                    int titleStartX = 2;
+                    bool renderTitle = false;
+                    string renderTitleString = null;
+                    int availablePixelsCount = ActualWidth - titleStartX*2;
+                    if (availablePixelsCount > 0) {
+                        renderTitle = true;
+                        if (Caption.Length <= availablePixelsCount) {
+                            // dont truncate title
+                            titleStartX += (availablePixelsCount - Caption.Length) / 2;
+                            renderTitleString = Caption;
+                        } else {
+                            renderTitleString = Caption.Substring(0, availablePixelsCount);
+                            if (renderTitleString.Length > 2) {
+                                renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
+                            } else {
+                                renderTitle = false;
+                            }
+                        }
+                    }
+                    if (renderTitle) {
+                        // assert !string.IsNullOrEmpty(renderingTitleString);
+                        buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        for (int i = 0; i < renderTitleString.Length; i++) {
+                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES)captionAttrs);
+                        }
+                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                    }
+                }
+                buffer.SetPixel(0, 1, ' ');
+                buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
+                buffer.FillRectangle(1, 1, ActualWidth - 1, 1, '\u2580', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
+                buffer.SetOpacity(ActualWidth - 1, 0, 3);
+                buffer.SetPixel(ActualWidth - 1, 0, '\u2584');
+                buffer.DumpOpacityMatrix();
             }
         }
 
