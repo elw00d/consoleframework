@@ -42,6 +42,8 @@ namespace ConsoleFramework {
                     Y = 4,
                     //MinHeight = 100,
                     //MaxWidth = 30,
+                    Width = 10,
+                    Height = 20,
                     C = '1',
                     Name = "Window1",
                     Title = "Window1",

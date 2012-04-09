@@ -83,7 +83,7 @@ namespace ConsoleFramework.Controls
                 }
                 buffer.SetPixel(0, 1, ' ');
                 buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
-                buffer.FillRectangle(0, 1, ActualWidth - 1, 1, ' ', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
+                buffer.FillRectangle(0, 1, ActualWidth, 1, ' ', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
             } else {
                 buffer.FillRectangle(0, 0, ActualWidth - 1, 1, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
@@ -158,8 +158,7 @@ namespace ConsoleFramework.Controls
                     showPressed = false;
                     this.Invalidate();
                 }
-                Point point = args.GetPosition(Parent);
-                if (RenderSlotRect.Contains(point)) {
+                if (HitTest(args.RawPosition)) {
                     RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
                 }
                 ConsoleApplication.Instance.EndCaptureInput(this);

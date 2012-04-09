@@ -235,7 +235,10 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// Смещение виртуального холста контрола отн-но слота, выделенного родительским элементом управления.
+        /// Смещение виртуального холста контрола отн-но холста родительского элемента управления.
+        /// Если контрол целиком размещен в родительском элементе управления и не обрезан маргином,
+        /// то ActualOffset численно равен RenderSlotRect.Location. Если же часть контрола скрыта, то
+        /// ActualOffset отличается от RenderSlotRect.Location.
         /// Учитывает <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
         /// </summary>
         public Vector ActualOffset {
@@ -708,8 +711,8 @@ namespace ConsoleFramework.Controls
                     // translating raw point (absolute coords) into relative to dest control point
                     Control currentControl = dest;
                     for (;;) {
-                        Point offset = currentControl.RenderSlotRect.Location;
-                        point.Offset(-offset.X, -offset.Y);
+                        Vector actualOffset = currentControl.ActualOffset;
+                        point.Offset(-actualOffset.X, -actualOffset.y);
                         if (currentControl.Parent == null) {
                             break;
                         }
@@ -720,8 +723,8 @@ namespace ConsoleFramework.Controls
                     // translating point relative to source into absolute coords
                     Control currentControl = source;
                     for (;;) {
-                        Point offset = currentControl.RenderSlotRect.Location;
-                        point.Offset(offset.X, offset.Y);
+                        Vector actualOffset = currentControl.ActualOffset;
+                        point.Offset(actualOffset.X, actualOffset.y);
                         if (currentControl.Parent == null)
                             break;
                         currentControl = currentControl.Parent;
@@ -737,15 +740,15 @@ namespace ConsoleFramework.Controls
                 // traverse back from source to common ancestor
                 Control currentControl = source;
                 while (currentControl != ancestor) {
-                    Point offset = currentControl.RenderSlotRect.Location;
-                    point.Offset(offset.X, offset.Y);
+                    Vector actualOffset = currentControl.ActualOffset;
+                    point.Offset(actualOffset.X, actualOffset.y);
                     currentControl = currentControl.Parent;
                 }
                 // traverse back from dest to common ancestor
                 currentControl = dest;
                 while (currentControl != ancestor) {
-                    Point offset = currentControl.RenderSlotRect.Location;
-                    point.Offset(-offset.X, -offset.Y);
+                    Vector actualOffset = currentControl.ActualOffset;
+                    point.Offset(-actualOffset.X, -actualOffset.y);
                     currentControl = currentControl.Parent;
                 }
                 return point;
@@ -793,6 +796,58 @@ namespace ConsoleFramework.Controls
 
         public override string ToString() {
             return string.Format("Control: {0}", Name);
+        }
+
+        /// <summary>
+        /// Performs hit testing to a visible part of control.
+        /// </summary>
+        /// <param name="rawPoint"></param>
+        /// <returns>True if point is on control, otherwise false.</returns>
+        public bool HitTest(Point rawPoint) {
+            Point point = TranslatePoint(null, rawPoint, Parent);
+            // hit testing - calculate position in child according to specified layout attributes
+            Vector actualOffset = ActualOffset;
+            Rect renderSlotRect = RenderSlotRect;
+            Rect virtualSlotRect = new Rect(new Point(actualOffset.x, actualOffset.y), RenderSize);
+            if (!LayoutClip.IsEmpty) {
+                Rect layoutClip = LayoutClip;
+                Point location = layoutClip.Location;
+                location.Offset(actualOffset.x, actualOffset.y);
+                layoutClip.Location = location;
+                virtualSlotRect.Intersect(layoutClip);
+            }
+            virtualSlotRect.Intersect(renderSlotRect);
+            return virtualSlotRect.Contains(point);
+        }
+
+        /// <summary>
+        /// Performs hit testing to a visible part of child control.
+        /// Static version of method.
+        /// </summary>
+        /// <param name="rawPoint"></param>
+        /// <param name="parent"></param>
+        /// <param name="child"></param>
+        /// <returns>True if point is on child, false otherwise.</returns>
+        public static bool HitTest(Point rawPoint, Control parent, Control child) {
+            if (null == parent)
+                throw new ArgumentNullException("parent");
+            if (null == child)
+                throw new ArgumentNullException("child");
+            //
+            Point point = TranslatePoint(null, rawPoint, parent);
+            // hit testing - calculate position in child according to specified layout attributes
+            Vector actualOffset = child.ActualOffset;
+            Rect renderSlotRect = child.RenderSlotRect;
+            Rect virtualSlotRect = new Rect(new Point(actualOffset.x, actualOffset.y), child.RenderSize);
+            if (!child.LayoutClip.IsEmpty) {
+                Rect layoutClip = child.LayoutClip;
+                Point location = layoutClip.Location;
+                location.Offset(actualOffset.x, actualOffset.y);
+                layoutClip.Location = location;
+                virtualSlotRect.Intersect(layoutClip);
+            }
+            virtualSlotRect.Intersect(renderSlotRect);
+            return virtualSlotRect.Contains(point);
         }
 
         /// <summary>

@@ -190,6 +190,8 @@ namespace ConsoleFramework.Events {
         public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
+                //if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)
+                //    return;
                 if (mouseEvent.dwEventFlags != MouseEventFlags.PRESSED_OR_RELEASED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_MOVED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.DOUBLE_CLICK &&
@@ -495,20 +497,19 @@ namespace ConsoleFramework.Events {
         /// Находит самый верхний элемент под указателем мыши с координатами rawPoint.
         /// </summary>
         /// <param name="rawPoint"></param>
-        /// <param name="rootElement"></param>
+        /// <param name="control">RootElement для проверки всего визуального дерева.</param>
         /// <returns></returns>
-        private Control findSource(Point rawPoint, Control rootElement) {
-            if (rootElement.children.Count != 0) {
-                List<Control> childrenOrderedByZIndex = rootElement.GetChildrenOrderedByZIndex();
+        private Control findSource(Point rawPoint, Control control) {
+            if (control.children.Count != 0) {
+                List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control child = childrenOrderedByZIndex[i];
-                    Point point = Control.TranslatePoint(null, rawPoint, rootElement);
-                    if (child.RenderSlotRect.Contains(point)) {
+                    if (Control.HitTest(rawPoint, control, child)) {
                         return findSource(rawPoint, child);
                     }
                 }
             }
-            return rootElement;
+            return control;
         }
 
         internal void QueueEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
