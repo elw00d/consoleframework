@@ -144,7 +144,7 @@ namespace ConsoleFramework
                         int childY = y + affectedRect.y;
                         int parentY = childY + actualOffset.y;
                         if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
-                            if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(x, y)) {
+                            if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(childX, childY)) {
                                 CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
                                 int opacity = childBuffer.opacityMatrix[childX, childY];
                                 if (opacity == 0) {
