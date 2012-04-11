@@ -23,7 +23,7 @@ namespace ConsoleFramework.Controls
             foreach (Control control in children)
             {
                 Window window = (Window) control;
-                window.Measure(availableSize);
+                window.Measure(new Size(int.MaxValue, int.MaxValue));
             }
             if (availableSize.width == int.MaxValue && availableSize.height == int.MaxValue)
                 return new Size(availableSize.width - 1, availableSize.height - 1);

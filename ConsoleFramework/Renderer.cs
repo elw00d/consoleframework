@@ -59,7 +59,12 @@ namespace ConsoleFramework
             }
             if (!affectedRect.IsEmpty) {
                 // flush stored image (with this.RootElementRect offset)
-                Canvas.Flush(new Rect(affectedRect.x + RootElementRect.x, affectedRect.y + RootElementRect.y, affectedRect.width, affectedRect.height));
+
+                // affected rect relative to canvas
+                Rect affectedRectAbsolute = new Rect(affectedRect.x + RootElementRect.x, affectedRect.y + RootElementRect.y, affectedRect.width, affectedRect.height);
+                // clip according to real canvas size
+                affectedRectAbsolute.Intersect(new Rect(new Point(0, 0), new Size(Canvas.Width, Canvas.Height)));
+                Canvas.Flush(affectedRectAbsolute);
             }
         }
 
