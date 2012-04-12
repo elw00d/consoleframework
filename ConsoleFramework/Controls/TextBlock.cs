@@ -45,13 +45,15 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
+            ushort attr = Color.Attr(Color.Black, Color.DarkYellow);
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
                     if (y == 0 && x < text.Length) {
-                        buffer.SetPixel(x, y, text[x], CHAR_ATTRIBUTES.FOREGROUND_BLUE | CHAR_ATTRIBUTES.FOREGROUND_GREEN | CHAR_ATTRIBUTES.FOREGROUND_RED);
+                        buffer.SetPixel(x, y, text[x], (CHAR_ATTRIBUTES) attr);
                     }
                 }
             }
+            buffer.SetOpacityRect(0, 0, ActualWidth, ActualHeight, 3);
         }
 
         public override string ToString() {

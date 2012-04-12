@@ -107,6 +107,51 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent PreviewGotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("PreviewGotKeyboardFocus", RoutingStrategy.Tunnel, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
         public static RoutedEvent GotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("GotKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
 
+        public event MouseEventHandler MouseMove {
+            add { AddHandler(MouseMoveEvent, value); }
+            remove { RemoveHandler(MouseMoveEvent, value); }
+        }
+
+        public event MouseButtonEventHandler MouseDown {
+            add { AddHandler(MouseDownEvent, value); }
+            remove { RemoveHandler(MouseDownEvent, value); }
+        }
+
+        public event MouseButtonEventHandler MouseUp {
+            add { AddHandler(MouseUpEvent, value); }
+            remove { RemoveHandler(MouseUpEvent, value); }
+        }
+
+        public event MouseEventHandler MouseEnter {
+            add { AddHandler(MouseEnterEvent, value); }
+            remove { RemoveHandler(MouseEnterEvent, value); }
+        }
+
+        public event MouseEventHandler MouseLeave {
+            add { AddHandler(MouseLeaveEvent, value); }
+            remove { RemoveHandler(MouseLeaveEvent, value); }
+        }
+
+        public event KeyEventHandler KeyDown {
+            add { AddHandler(KeyDownEvent, value); }
+            remove { RemoveHandler(KeyDownEvent, value); }
+        }
+
+        public event KeyEventHandler KeyUp {
+            add { AddHandler(KeyUpEvent, value); }
+            remove { RemoveHandler(KeyUpEvent, value); }
+        }
+
+        public event KeyboardFocusChangedEventHandler LostKeyboardFocus {
+            add { AddHandler(LostKeyboardFocusEvent, value); }
+            remove { RemoveHandler(LostKeyboardFocusEvent, value); }
+        }
+
+        public event KeyboardFocusChangedEventHandler GotKeyboardFocus {
+            add { AddHandler(GotKeyboardFocusEvent, value); }
+            remove { RemoveHandler(GotKeyboardFocusEvent, value); }
+        }
+
         public void SetFocus(bool ignoreRememberedChildrenFocus = false) {
             ConsoleApplication.Instance.FocusManager.SetFocus(this, ignoreRememberedChildrenFocus);
         }

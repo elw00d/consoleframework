@@ -22,6 +22,9 @@ namespace ConsoleFramework {
                     Text = "Label2_____",
                     HorizontalAlignment = HorizontalAlignment.Right
                 });
+                panel.AddChild(new TextBox() {
+                    Width = 10, Height = 1
+                });
                 Button button = new Button() {
                     Name = "button1",
                     Caption = "Button!",
