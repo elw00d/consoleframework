@@ -259,7 +259,7 @@ namespace ConsoleFramework.Controls
             Debug.WriteLine(string.Format("GotKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
                 args.OldFocus != null ? args.OldFocus.Name : "null",
                 args.NewFocus.Name));
-            args.Handled = true;
+            //args.Handled = true;
         }
 
         private void Control_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
@@ -904,6 +904,22 @@ namespace ConsoleFramework.Controls
 
         internal virtual List<Control> GetChildrenOrderedByZIndex() {
             return children;
+        }
+
+        /// <summary>
+        /// Sets the position of console cursor.
+        /// </summary>
+        /// <param name="point">Coords relatively to this control.</param>
+        protected void SetCursorPosition(Point point) {
+            ConsoleApplication.Instance.SetCursorPosition(TranslatePoint(this, point, null));
+        }
+
+        protected static void HideCursor() {
+            ConsoleApplication.Instance.HideCursor();
+        }
+
+        protected static void ShowCursor() {
+            ConsoleApplication.Instance.ShowCursor();
         }
     }
 }

@@ -61,6 +61,26 @@ namespace ConsoleFramework
             }
         }
 
+        internal void SetCursorPosition(Point position) {
+            NativeMethods.SetConsoleCursorPosition(stdOutputHandle, new COORD((short) position.x, (short) position.y));
+        }
+
+        internal void ShowCursor() {
+            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+                Size = 5,
+                Visible = true
+            };
+            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+        }
+
+        internal void HideCursor() {
+            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+                Size = 5,
+                Visible = false
+            };
+            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+        }
+
         public void Run(Control control) {
             this.mainControl = control;
             //

@@ -83,7 +83,8 @@ namespace ConsoleFramework.Controls
                     if (findIndex == -1)
                         childs[0].SetFocus();
                     else {
-                        childs[(findIndex + 1) % childs.Count].SetFocus();
+                        Control child = childs[(findIndex + 1)%childs.Count];
+                        child.SetFocus();
                     }
                 }
                 args.Handled = true;

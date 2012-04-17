@@ -31,6 +31,15 @@ namespace ConsoleFramework.Native
         private static extern int FormatMessage(int dwFlags, string lpSource, int dwMessageId, int dwLanguageId,
                                                StringBuilder lpBuffer, int nSize, string[] Arguments);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool SetConsoleCursorPosition(IntPtr hConsoleOutput, COORD dwCursorPosition);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool GetConsoleCursorInfo(IntPtr hConsoleOutput, out CONSOLE_CURSOR_INFO lpConsoleCursorInfo);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool SetConsoleCursorInfo(IntPtr hConsoleOutput, [In] ref CONSOLE_CURSOR_INFO lpConsoleCursorInfo);
+
         public static string GetLastErrorMessage() {
             StringBuilder strLastErrorMessage = new StringBuilder(255);
             int ret2 = Marshal.GetLastWin32Error();
