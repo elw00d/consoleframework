@@ -896,6 +896,38 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
+        /// Проверяет, не перекрывается ли точка point контрола другими контролами.
+        /// </summary>
+        public bool IsPointVisible(Point point) {
+            return IsPointVisible(this, point);
+        }
+
+        /// <summary>
+        /// Проверяет, не перекрывается ли точка point контрола control другими контролами.
+        /// </summary>
+        internal static bool IsPointVisible(Control control, Point point) {
+            if (null == control)
+                throw new ArgumentNullException("control");
+            //
+            Rect layoutClip = control.LayoutClip;
+            bool visible;
+            if (layoutClip.IsEmpty) {
+                Rect controlVirtualCanvasRect = new Rect(new Point(0, 0), control.RenderSize);
+                visible = controlVirtualCanvasRect.Contains(point);
+            } else {
+                visible = layoutClip.Contains(point);
+            }
+            //
+            if (!visible)
+                return false;
+            //
+            if (null == control.Parent)
+                return true;
+            // recursively check the parent
+            return IsPointVisible(control.Parent, TranslatePoint(control, point, control.Parent));
+        }
+
+        /// <summary>
         /// You should define your rendering logic here.
         /// </summary>
         /// <param name="buffer">Buffer where rendered content will be stored.</param>

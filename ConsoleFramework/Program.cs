@@ -45,7 +45,7 @@ namespace ConsoleFramework {
                     Y = 4,
                     //MinHeight = 100,
                     //MaxWidth = 30,
-                    Width = 10,
+                    //Width = 10,
                     Height = 20,
                     C = '1',
                     Name = "Window1",
@@ -54,7 +54,7 @@ namespace ConsoleFramework {
                 };
                 windowsHost.AddWindow(window1);
                 windowsHost.AddWindow(new Window() {
-                    X = 10,
+                    X = 30,
                     Y = 6,
                     MinHeight = 10,
                     MinWidth = 10,

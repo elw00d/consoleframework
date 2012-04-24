@@ -22,8 +22,11 @@ namespace ConsoleFramework.Controls
         }
 
         private void OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
-            SetCursorPosition(new Point(0, 0));
-            ShowCursor();
+            Point point = new Point(cursorPosition, 0);
+            if (this.IsPointVisible(point)) {
+                SetCursorPosition(point);
+                ShowCursor();
+            }
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs args) {
