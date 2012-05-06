@@ -8,3 +8,5 @@ ConsoleFramework.6.0.ReSharper.user
 ConsoleFramework.suo
 ConsoleFramework.6.1.ReSharper.user
 ConsoleFramework.sln.DotSettings.user
+TestProject1/bin/Release/
+TestProject1/obj/Release/

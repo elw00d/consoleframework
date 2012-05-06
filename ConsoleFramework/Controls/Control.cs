@@ -953,5 +953,35 @@ namespace ConsoleFramework.Controls
         protected static void ShowCursor() {
             ConsoleApplication.Instance.ShowCursor();
         }
+
+        private bool cursorVisible = false;
+        internal bool CursorVisible {
+            get {
+                return cursorVisible;
+            }
+            set {
+                if (cursorVisible != value) {
+                    cursorVisible = value;
+                    if (HasKeyboardFocus) {
+                        ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
+                    }
+                }
+            }
+        }
+
+        private Point cursorPosition = new Point(0, 0);
+        internal Point CursorPosition {
+            get {
+                return cursorPosition;
+            }
+            set {
+                if (cursorPosition != value) {
+                    cursorPosition = value;
+                    if (HasKeyboardFocus) {
+                        ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
+                    }
+                }
+            }
+        }
     }
 }

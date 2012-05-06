@@ -8,6 +8,8 @@ namespace ConsoleFramework.Events
 {
     /// <summary>
     /// Responsible to manage elements that has a keyboard focus.
+    /// Also maintains the console mouse cursor visibility according to
+    /// current focused control.
     /// </summary>
     public sealed class FocusManager {
         private readonly EventManager eventManager;
@@ -19,15 +21,45 @@ namespace ConsoleFramework.Events
         }
 
         /// <summary>
+        /// Refreshes the display of mouse cursor according to current focused element
+        /// and its cursor visibility status.
+        /// 
+        /// Вызывается после обновления лайаута (если были какие-то изменения),
+        /// а также при смене FocusedElement либо при изменении локального состояния курсора
+        /// на элементе уплавления, который сейчас удерживает фокус клавиатурного ввода.
+        /// </summary>
+        internal void RefreshMouseCursor() {
+            if (null != focusedElement && focusedElement.CursorVisible && focusedElement.IsPointVisible(focusedElement.CursorPosition)) {
+                ConsoleApplication.Instance.SetCursorPosition(Control.TranslatePoint(focusedElement, focusedElement.CursorPosition, null));
+                if (!ConsoleApplication.Instance.CursorIsVisible) {
+                    ConsoleApplication.Instance.ShowCursor();
+                }
+            } else {
+                if (ConsoleApplication.Instance.CursorIsVisible) {
+                    ConsoleApplication.Instance.HideCursor();
+                }
+            }
+        }
+
+        private Control focusedElement;
+
+        /// <summary>
         /// Control that has a keyboard focus now.
         /// </summary>
         public Control FocusedElement {
-            get;
-            private set;
+            get {
+                return focusedElement;
+            }
+            private set {
+                if (focusedElement != value) {
+                    focusedElement = value;
+                    RefreshMouseCursor();
+                }
+            }
         }
 
-        private bool tryChangeFocusedElementTo(Control focusedElement, bool ignorePreviewHandled = false) {
-            if (focusedElement == FocusedElement) {
+        private bool tryChangeFocusedElementTo(Control focusedControl, bool ignorePreviewHandled = false) {
+            if (focusedControl == FocusedElement) {
                 return true; // do nothing
             }
             //
@@ -38,27 +70,27 @@ namespace ConsoleFramework.Events
             // возвращается как было
             if (oldFocus != null) {
                 KeyboardFocusChangedEventArgs previewLostArgs = new KeyboardFocusChangedEventArgs(oldFocus,
-                    Control.PreviewLostKeyboardFocusEvent, oldFocus, focusedElement);
+                    Control.PreviewLostKeyboardFocusEvent, oldFocus, focusedControl);
                 if (eventManager.ProcessRoutedEvent(previewLostArgs.RoutedEvent, previewLostArgs) && !ignorePreviewHandled) {
                     return false;
                 }
             }
-            KeyboardFocusChangedEventArgs previewGotArgs = new KeyboardFocusChangedEventArgs(focusedElement,
-                    Control.PreviewGotKeyboardFocusEvent, oldFocus, focusedElement);
+            KeyboardFocusChangedEventArgs previewGotArgs = new KeyboardFocusChangedEventArgs(focusedControl,
+                    Control.PreviewGotKeyboardFocusEvent, oldFocus, focusedControl);
             if (eventManager.ProcessRoutedEvent(previewGotArgs.RoutedEvent, previewGotArgs) && !ignorePreviewHandled) {
                 return false;
             }
 
             // меняем фокусный элемент и генерируем основные события
-            FocusedElement = focusedElement;
+            FocusedElement = focusedControl;
             
             if (oldFocus != null) {
                 KeyboardFocusChangedEventArgs lostArgs = new KeyboardFocusChangedEventArgs(oldFocus,
-                    Control.LostKeyboardFocusEvent, oldFocus, focusedElement);
+                    Control.LostKeyboardFocusEvent, oldFocus, focusedControl);
                 eventManager.ProcessRoutedEvent(lostArgs.RoutedEvent, lostArgs);
             }
-            KeyboardFocusChangedEventArgs args = new KeyboardFocusChangedEventArgs(focusedElement,
-                    Control.GotKeyboardFocusEvent, oldFocus, focusedElement);
+            KeyboardFocusChangedEventArgs args = new KeyboardFocusChangedEventArgs(focusedControl,
+                    Control.GotKeyboardFocusEvent, oldFocus, focusedControl);
             eventManager.ProcessRoutedEvent(args.RoutedEvent, args);
             //
             return true;

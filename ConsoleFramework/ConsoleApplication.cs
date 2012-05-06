@@ -65,20 +65,40 @@ namespace ConsoleFramework
             NativeMethods.SetConsoleCursorPosition(stdOutputHandle, new COORD((short) position.x, (short) position.y));
         }
 
+        /// <summary>
+        /// Состояние курсора консоли для избежания повторных вызовов Show и Hide.
+        /// Консистентность этого свойства может быть нарушена, если пользоваться в приложении
+        /// нативными функциями для работы с курсором напрямую.
+        /// </summary>
+        internal bool CursorIsVisible {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Делает курсор консоли видимым и устанавливает значение
+        /// CursorIsVisible в true.
+        /// </summary>
         internal void ShowCursor() {
             CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
                 Size = 5,
                 Visible = true
             };
             NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+            CursorIsVisible = true;
         }
 
+        /// <summary>
+        /// Делает курсор консоли невидимым и устанавливает значение
+        /// CursorIsVisible в false.
+        /// </summary>
         internal void HideCursor() {
             CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
                 Size = 5,
                 Visible = false
             };
             NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+            CursorIsVisible = false;
         }
 
         public void Run(Control control) {
@@ -101,6 +121,9 @@ namespace ConsoleFramework
             //
             mainControl.Invalidate();
             renderer.UpdateRender();
+
+            // initially hide the console cursor
+            HideCursor();
             
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);

@@ -66,6 +66,10 @@ namespace ConsoleFramework
                 affectedRectAbsolute.Intersect(new Rect(new Point(0, 0), new Size(Canvas.Width, Canvas.Height)));
                 Canvas.Flush(affectedRectAbsolute);
             }
+            // if anything changed in layout - update displaying cursor state
+            if (renderingUpdatedControls.Count > 0) {
+                ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
+            }
         }
 
         /// <summary>
