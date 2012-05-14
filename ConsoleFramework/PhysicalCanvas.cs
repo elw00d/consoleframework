@@ -6,8 +6,14 @@ using ConsoleFramework.Native;
 namespace ConsoleFramework
 {
     public sealed class PhysicalCanvas {
-        private readonly IntPtr stdOutputHandle;
-
+        private readonly IntPtr stdOutputHandle = IntPtr.Zero;
+		
+		public PhysicalCanvas(int width, int height) {
+			this.width = width;
+			this.height = height;
+			this.buffer = new CHAR_INFO[height, width];
+		}
+		
         public PhysicalCanvas(int width, int height, IntPtr stdOutputHandle) {
             this.width = width;
             this.height = height;
@@ -158,12 +164,27 @@ namespace ConsoleFramework
         }
 
         public void Flush(Rect affectedRect) {
-            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
-                (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
-            if (!NativeMethods.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height),
-                new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
-                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", NativeMethods.GetLastErrorMessage()));
-            }
+			if (stdOutputHandle != IntPtr.Zero) {
+				// we are in windows environment
+	            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
+	                (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
+	            if (!NativeMethods.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height),
+	                new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
+	                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", NativeMethods.GetLastErrorMessage()));
+	            }
+			} else {
+				// we are in linux
+				for (int i = 0; i < affectedRect.width; i++) {
+					int x = i + affectedRect.x;
+					for (int j = 0; j < affectedRect.height; j++) {
+						int y = j + affectedRect.y;
+						// todo : convert attributes and optimize rendering
+						//buffer[y, x].Attributes
+						LinuxConsoleApplication.mvaddstr(y, x, new string(buffer[y, x].UnicodeChar,1));
+					}
+				}
+				LinuxConsoleApplication.refresh();
+			}
         }
     }
 }

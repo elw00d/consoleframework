@@ -9,8 +9,11 @@ using ConsoleFramework.Native;
 namespace ConsoleFramework
 {
     public sealed class ConsoleApplication : IDisposable {
-
-        private ConsoleApplication() {
+		
+		private bool usingLinux = false;
+		
+        private ConsoleApplication(bool usingLinux) {
+			this.usingLinux = usingLinux;
             eventManager = new EventManager();
             focusManager = new FocusManager(eventManager);
         }
@@ -22,7 +25,7 @@ namespace ConsoleFramework
                 if (instance == null) {
                     lock (syncRoot) {
                         if (instance == null) {
-                            instance = new ConsoleApplication();
+                            instance = new ConsoleApplication(true);
                         }
                     }
                 }
@@ -62,7 +65,9 @@ namespace ConsoleFramework
         }
 
         internal void SetCursorPosition(Point position) {
-            NativeMethods.SetConsoleCursorPosition(stdOutputHandle, new COORD((short) position.x, (short) position.y));
+			if (!usingLinux) {
+            	NativeMethods.SetConsoleCursorPosition(stdOutputHandle, new COORD((short) position.x, (short) position.y));
+			}
         }
 
         /// <summary>
@@ -80,11 +85,13 @@ namespace ConsoleFramework
         /// CursorIsVisible в true.
         /// </summary>
         internal void ShowCursor() {
-            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
-                Size = 5,
-                Visible = true
-            };
-            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+			if (!usingLinux) {
+	            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+	                Size = 5,
+	                Visible = true
+	            };
+	            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+			}
             CursorIsVisible = true;
         }
 
@@ -93,15 +100,52 @@ namespace ConsoleFramework
         /// CursorIsVisible в false.
         /// </summary>
         internal void HideCursor() {
-            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
-                Size = 5,
-                Visible = false
-            };
-            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+			if (!usingLinux) {
+	            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+	                Size = 5,
+	                Visible = false
+	            };
+	            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+			}
             CursorIsVisible = false;
         }
-
-        public void Run(Control control) {
+		
+		public void Run(Control control) {
+			if (usingLinux) {
+				RunLinux(control);
+			} else {
+				RunWindows(control);
+			}
+		}
+		
+		public void RunLinux(Control control) {
+			this.mainControl = control;
+			//
+			PhysicalCanvas canvas = new PhysicalCanvas(100, 35);
+            renderer.Canvas = canvas;
+            renderer.RootElementRect = new Rect(0, 0, 80, 25);
+            renderer.RootElement = mainControl;
+            // initialize default focus
+            focusManager.AfterAddElementToTree(mainControl);
+            //
+            mainControl.Invalidate();
+			
+			LinuxConsoleApplication.initscr();
+			LinuxConsoleApplication.start_color();
+			LinuxConsoleApplication.init_pair(1, LinuxConsoleApplication.COLOR_BLACK, 5);
+			LinuxConsoleApplication.attron(LinuxConsoleApplication.COLOR_PAIR(1));
+			
+            renderer.UpdateRender();
+			//LinuxConsoleApplication.addstr("lksjdf ыловаыва\u2591");
+			
+			
+			//addstr("Hello from C-sharp ! И немного русского текста.");
+			//refresh();
+			LinuxConsoleApplication.getch();
+			LinuxConsoleApplication.endwin();
+		}
+		
+        public void RunWindows(Control control) {
             this.mainControl = control;
             //
             stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
