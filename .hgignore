@@ -10,3 +10,8 @@ ConsoleFramework.6.1.ReSharper.user
 ConsoleFramework.sln.DotSettings.user
 TestProject1/bin/Release/
 TestProject1/obj/Release/
+Linux/Linux.userprefs
+Linux/Linux/bin/
+Linux/Linux/Linux.pidb
+ConsoleFramework.userprefs
+ConsoleFramework/ConsoleFramework.pidb

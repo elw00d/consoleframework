@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F4926FC-252F-455F-828B-7748DDD4029F}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Linux</RootNamespace>
+    <AssemblyName>Linux</AssemblyName>
+    <StartupObject>Linux.LinuxProgram</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\ConsoleFramework\ConsoleApplication.cs">
+      <Link>ConsoleFramework\ConsoleApplication.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\LinuxConsoleApplication.cs">
+      <Link>ConsoleFramework\LinuxConsoleApplication.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\PhysicalCanvas.cs">
+      <Link>ConsoleFramework\PhysicalCanvas.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Program.cs">
+      <Link>ConsoleFramework\Program.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Renderer.cs">
+      <Link>ConsoleFramework\Renderer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\RenderingBuffer.cs">
+      <Link>ConsoleFramework\RenderingBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\BackgroundControl.cs">
+      <Link>ConsoleFramework\Controls\BackgroundControl.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\Button.cs">
+      <Link>ConsoleFramework\Controls\Button.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\Control.cs">
+      <Link>ConsoleFramework\Controls\Control.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\Panel.cs">
+      <Link>ConsoleFramework\Controls\Panel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\TextBlock.cs">
+      <Link>ConsoleFramework\Controls\TextBlock.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\TextBox.cs">
+      <Link>ConsoleFramework\Controls\TextBox.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\Window.cs">
+      <Link>ConsoleFramework\Controls\Window.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\WindowsHost.cs">
+      <Link>ConsoleFramework\Controls\WindowsHost.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Point.cs">
+      <Link>ConsoleFramework\Core\Point.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Rect.cs">
+      <Link>ConsoleFramework\Core\Rect.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Size.cs">
+      <Link>ConsoleFramework\Core\Size.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Thickness.cs">
+      <Link>ConsoleFramework\Core\Thickness.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Vector.cs">
+      <Link>ConsoleFramework\Core\Vector.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\EventManager.cs">
+      <Link>ConsoleFramework\Events\EventManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\FocusManager.cs">
+      <Link>ConsoleFramework\Events\FocusManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\KeyEventArgs.cs">
+      <Link>ConsoleFramework\Events\KeyEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\KeyboardFocusChangedEventArgs.cs">
+      <Link>ConsoleFramework\Events\KeyboardFocusChangedEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\MouseEventArgs.cs">
+      <Link>ConsoleFramework\Events\MouseEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\RoutedEvent.cs">
+      <Link>ConsoleFramework\Events\RoutedEvent.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Events\RoutedEventArgs.cs">
+      <Link>ConsoleFramework\Events\RoutedEventArgs.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\Color.cs">
+      <Link>ConsoleFramework\Native\Color.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\NativeMethods.cs">
+      <Link>ConsoleFramework\Native\NativeMethods.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\Structures.cs">
+      <Link>ConsoleFramework\Native\Structures.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\UnicodeTable.cs">
+      <Link>ConsoleFramework\Native\UnicodeTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Properties\AssemblyInfo.cs">
+      <Link>ConsoleFramework\Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="ConsoleFramework\LinuxProgram.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <None Include="..\..\ConsoleFramework\ConsoleFramework.csproj">
+      <Link>ConsoleFramework\ConsoleFramework.csproj</Link>
+    </None>
+    <None Include="..\..\ConsoleFramework\ConsoleFramework.pidb">
+      <Link>ConsoleFramework\ConsoleFramework.pidb</Link>
+    </None>
+    <None Include="..\..\ConsoleFramework\readme.txt">
+      <Link>ConsoleFramework\readme.txt</Link>
+    </None>
+    <None Include="..\..\ConsoleFramework\Controls\LayoutSystem.txt">
+      <Link>ConsoleFramework\Controls\LayoutSystem.txt</Link>
+    </None>
+    <None Include="..\..\ConsoleFramework\Events\Focus.txt">
+      <Link>ConsoleFramework\Events\Focus.txt</Link>
+    </None>
+  </ItemGroup>
+</Project>
