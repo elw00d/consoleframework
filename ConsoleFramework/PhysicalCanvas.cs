@@ -179,7 +179,19 @@ namespace ConsoleFramework
 					for (int j = 0; j < affectedRect.height; j++) {
 						int y = j + affectedRect.y;
 						// todo : convert attributes and optimize rendering
-						//buffer[y, x].Attributes
+						bool fgIntensity;
+						short index = LinuxConsoleApplication.winAttrsToNCursesAttrs(buffer[y, x].Attributes,
+							out fgIntensity);
+						//LinuxConsoleApplication.attrset((int) LinuxConsoleApplication.COLOR_PAIR((ushort) index));
+						//LinuxConsoleApplication.attrset(0);
+						//LinuxConsoleApplication.color_set( index, IntPtr.Zero);
+						if (fgIntensity) {
+							LinuxConsoleApplication.attrset(
+								(int) (LinuxConsoleApplication.COLOR_PAIR(index) | LinuxConsoleApplication.A_BOLD));
+						} else {
+							LinuxConsoleApplication.attrset(
+								(int) LinuxConsoleApplication.COLOR_PAIR(index));
+						}
 						LinuxConsoleApplication.mvaddstr(y, x, new string(buffer[y, x].UnicodeChar,1));
 					}
 				}

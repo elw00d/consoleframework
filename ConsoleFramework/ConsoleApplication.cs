@@ -132,8 +132,9 @@ namespace ConsoleFramework
 			
 			LinuxConsoleApplication.initscr();
 			LinuxConsoleApplication.start_color();
-			LinuxConsoleApplication.init_pair(1, LinuxConsoleApplication.COLOR_BLACK, 5);
-			LinuxConsoleApplication.attron(LinuxConsoleApplication.COLOR_PAIR(1));
+			LinuxConsoleApplication.init_pair(1, LinuxConsoleApplication.COLOR_BLUE, LinuxConsoleApplication.COLOR_GREEN);
+			LinuxConsoleApplication.attron((int) (LinuxConsoleApplication.COLOR_PAIR(1)));
+			//LinuxConsoleApplication.attron((int)LinuxConsoleApplication.A_BOLD);
 			
             renderer.UpdateRender();
 			//LinuxConsoleApplication.addstr("lksjdf ыловаыва\u2591");

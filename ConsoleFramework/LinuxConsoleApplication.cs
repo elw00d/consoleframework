@@ -2,6 +2,8 @@ using System;
 using System.Runtime.InteropServices;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
+using ConsoleFramework.Native;
+using System.Collections.Generic;
 
 namespace ConsoleFramework
 {
@@ -51,16 +53,22 @@ namespace ConsoleFramework
 		internal static extern int attron(int attrs);
 		
 		[DllImport("libncursesw.so.5")]
+		internal static extern int attrset(int attrs);
+		
+		[DllImport("libncursesw.so.5")]
+		internal static extern int color_set(short color, IntPtr opts);
+		
+		[DllImport("libncursesw.so.5")]
 		internal static extern int attroff(int attrs);
 		
 		internal const short NCURSES_ATTR_SHIFT = 8;
 		
-		internal static short NCURSES_BITS(short mask, short shift) {
-			return (short) (mask << (shift + NCURSES_ATTR_SHIFT));
+		internal static ulong NCURSES_BITS(ulong mask, short shift) {
+			return (mask << (shift + NCURSES_ATTR_SHIFT));
 		}
 		
-		internal static short COLOR_PAIR(short n) {
-			return NCURSES_BITS(n, 0);
+		internal static ulong COLOR_PAIR(short n) {
+			return NCURSES_BITS((ulong) n, 0);
 		}
 		
 		#region Predefined colors
@@ -74,9 +82,85 @@ namespace ConsoleFramework
         internal const short COLOR_CYAN   = 6;
         internal const short COLOR_WHITE  = 7;
 		
+		internal static ulong A_STANDOUT =	NCURSES_BITS(1UL,8);
+internal static ulong A_UNDERLINE = NCURSES_BITS(1UL,9);
+internal static ulong A_REVERSE=	NCURSES_BITS(1UL,10);
+internal static ulong A_BLINK=		NCURSES_BITS(1UL,11);
+internal static ulong A_DIM=		NCURSES_BITS(1UL,12);
+internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
+		
 		//
 		
 		#endregion
+		
+		/// <summary>
+		/// Returns ncurses standard color for specified rgb combination.
+		/// </summary>
+		internal static int getStandardColor(bool r, bool g, bool b) {
+			if (r) {
+				if (g) {
+					if (b)
+						return COLOR_WHITE;
+					else
+						return COLOR_YELLOW; // must be brown ?
+				} else {
+					if (b)
+						return COLOR_MAGENTA;
+					else
+						return COLOR_RED;
+				}				
+			} else {
+				if (g) {
+					if (b)
+						return COLOR_CYAN;
+					else
+						return COLOR_GREEN;
+				} else {
+					if (b)
+						return COLOR_BLUE;
+					else
+						return COLOR_BLACK;
+				}
+			}
+		}
+		
+		/// <summary>
+		/// Doesn't support background intensity and other
+		/// extended windows attributes.
+		/// </summary>
+		internal static short winAttrsToNCursesAttrs(CHAR_ATTRIBUTES attrs, out bool fgIntensity) {
+			bool fgRed = (attrs & CHAR_ATTRIBUTES.FOREGROUND_RED) == CHAR_ATTRIBUTES.FOREGROUND_RED;
+			bool fgGreen = (attrs & CHAR_ATTRIBUTES.FOREGROUND_GREEN) == CHAR_ATTRIBUTES.FOREGROUND_GREEN;
+			bool fgBlue = (attrs & CHAR_ATTRIBUTES.FOREGROUND_BLUE) == CHAR_ATTRIBUTES.FOREGROUND_BLUE;
+			
+			bool bgRed = (attrs & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED;
+			bool bgGreen = (attrs & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+			bool bgBlue = (attrs & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+			
+			fgIntensity = (attrs & CHAR_ATTRIBUTES.FOREGROUND_INTENSITY) == CHAR_ATTRIBUTES.FOREGROUND_INTENSITY;
+			
+			int fg = getStandardColor(fgRed, fgGreen, fgBlue);
+			int bg = getStandardColor(bgRed, bgGreen, bgBlue);
+			
+			//short index = (short) (fg | (bg << 3));
+			//if (!usedIndexes.Contains(index)) {
+			//	init_pair(index, (short) fg, (short) bg);
+			//	usedIndexes.Add(index);
+			//}
+			int index = (fg | (bg << 3));
+			if (createdPairs.ContainsKey(index)) {
+				return createdPairs[index];
+			} else {
+				short pairId = (short) (lastUsedPairId + 1);
+				init_pair(pairId, (short) fg, (short) bg);
+				createdPairs.Add(index, pairId);
+				lastUsedPairId++;
+				return pairId;
+			}
+		}
+		
+		private static short lastUsedPairId = 0;
+		private static readonly Dictionary<int, short> createdPairs = new Dictionary<int, short>();
 		
 		#region Mouse-related stuff
 		
