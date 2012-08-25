@@ -38,6 +38,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Linux\Linux\ConsoleFramework\Native\LibTermKey.cs">
+      <Link>Native\LibTermKey.cs</Link>
+    </Compile>
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Events\KeyboardFocusChangedEventArgs.cs" />
     <Compile Include="Events\KeyEventArgs.cs" />
@@ -46,6 +49,7 @@
     <Compile Include="Events\EventManager.cs" />
     <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Events\FocusManager.cs" />
+    <Compile Include="LinuxConsoleApplication.cs" />
     <Compile Include="Native\Color.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
