@@ -5,6 +5,8 @@ using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
+using System.Diagnostics;
+using System.IO;
 
 namespace ConsoleFramework
 {
@@ -130,20 +132,31 @@ namespace ConsoleFramework
             //
             mainControl.Invalidate();
 			
-			LinuxConsoleApplication.initscr();
+			// terminal initialization sequence
+			IntPtr stdscr = LinuxConsoleApplication.initscr();
+			LinuxConsoleApplication.cbreak();
+			LinuxConsoleApplication.noecho();
+			LinuxConsoleApplication.nonl();
+			LinuxConsoleApplication.intrflush(stdscr, false);
+			LinuxConsoleApplication.keypad (stdscr, true);
 			LinuxConsoleApplication.start_color();
-			LinuxConsoleApplication.init_pair(1, LinuxConsoleApplication.COLOR_BLUE, LinuxConsoleApplication.COLOR_GREEN);
-			LinuxConsoleApplication.attron((int) (LinuxConsoleApplication.COLOR_PAIR(1)));
-			//LinuxConsoleApplication.attron((int)LinuxConsoleApplication.A_BOLD);
+			LinuxConsoleApplication.mousemask(0xFFFFFFFF, IntPtr.Zero);
 			
-            renderer.UpdateRender();
-			//LinuxConsoleApplication.addstr("lksjdf ыловаыва\u2591");
+			renderer.UpdateRender();
 			
-			
-			//addstr("Hello from C-sharp ! И немного русского текста.");
-			//refresh();
-			LinuxConsoleApplication.getch();
+			do {
+				int c = LinuxConsoleApplication.getch();
+				processLinuxInput(c);
+				renderer.UpdateRender();
+			} while (true);
+			//
 			LinuxConsoleApplication.endwin();
+		}
+		
+		private void processLinuxInput(int getch) {
+			if (getch == LinuxConsoleApplication.KEY_MOUSE) {
+				File.AppendAllText("log.txt", "MOUSE_EVENT\r\n");
+			}
 		}
 		
         public void RunWindows(Control control) {

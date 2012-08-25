@@ -17,11 +17,45 @@ namespace ConsoleFramework
 		[DllImport("libncursesw.so.5")]
 		internal static extern IntPtr initscr();
 		
+		/// <summary>
+		/// Enables the keypad of the user's terminal.
+		/// If enabled, the mouse events will be interpreted as mouse events
+		/// (prefixed with KEY_MOUSE). Otherwise, mouse events cannot be
+		/// correctly interpreted (garbage key codes in getch).
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int keypad(IntPtr window, bool bf);
+		
+		/// <summary>
+		/// Enters the cbreak mode (no lines buffering in input).
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int cbreak();
+		
+		/// <summary>
+		/// Should be called to disable echo.
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int noecho();
+		
+		/// <summary>
+		/// To avoid that addch('\') affects current symbol position.
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int nonl();
+		
+		/// <summary>
+		/// Set this option to true to avoid problems with keyboard input buffer
+		/// flushing and inconsistent data displaying.
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int intrflush(IntPtr window, bool bf);
+		
 		[DllImport("libncursesw.so.5")]
 		internal static extern void refresh();
 		
 		[DllImport("libncursesw.so.5")]
-		internal static extern void getch();
+		internal static extern int getch();
 		
 		[DllImport("libncursesw.so.5")]
 		internal static extern void endwin();
@@ -169,7 +203,7 @@ internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		/// попробуем воспользоваться выводом типов для generic методов.
 		/// </summary>
 		private static UInt64 NCURSES_MOUSE_MASK(int b, UInt64 m) {
-			return ((m) << (((b) - 1) * 5));
+			return ((m) << (((b) - 1) * 6));
 		}
 		
 		internal const UInt64 NCURSES_BUTTON_RELEASED = 001L;
@@ -204,10 +238,10 @@ internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		internal static UInt64	BUTTON4_DOUBLE_CLICKED=	NCURSES_MOUSE_MASK(4, NCURSES_DOUBLE_CLICKED);
 		internal static UInt64	BUTTON4_TRIPLE_CLICKED=	NCURSES_MOUSE_MASK(4, NCURSES_TRIPLE_CLICKED);
 				
-		internal static UInt64	BUTTON_CTRL=		NCURSES_MOUSE_MASK(6, 0001L);
-		internal static UInt64	BUTTON_SHIFT=		NCURSES_MOUSE_MASK(6, 0002L);
-		internal static UInt64	BUTTON_ALT=		NCURSES_MOUSE_MASK(6, 0004L);
-		internal static UInt64	REPORT_MOUSE_POSITION=	NCURSES_MOUSE_MASK(6, 0010L);
+		internal static UInt64	BUTTON_CTRL=		NCURSES_MOUSE_MASK(5, 0001L);
+		internal static UInt64	BUTTON_SHIFT=		NCURSES_MOUSE_MASK(5, 0002L);
+		internal static UInt64	BUTTON_ALT=		NCURSES_MOUSE_MASK(5, 0004L);
+		internal static UInt64	REPORT_MOUSE_POSITION=	NCURSES_MOUSE_MASK(5, 0010L);
 		
 		internal static UInt64	ALL_MOUSE_EVENTS=	(REPORT_MOUSE_POSITION - 1);
 		
@@ -221,6 +255,8 @@ internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		
 		[DllImport("libncursesw.so.5")]
 		internal static extern UInt64 mousemask(UInt64 mask, IntPtr currentMaskPtr);
+		
+		internal const int KEY_MOUSE = 409;
 		
 		#endregion
 		
