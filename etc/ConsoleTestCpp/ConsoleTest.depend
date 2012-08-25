@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1345749381 source:/home/elwood/Projects/ConsoleTest/ConsoleTest/main.cpp
+	<iostream>
+	<curses.h>
+	<unistd.h>
+	<signal.h>
+	<locale.h>
+	<termios.h>
+	<sys/ioctl.h>
+	<sys/eventfd.h>
+	<poll.h>
+
