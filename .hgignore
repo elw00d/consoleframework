@@ -15,3 +15,6 @@ Linux/Linux/bin/
 Linux/Linux/Linux.pidb
 ConsoleFramework.userprefs
 ConsoleFramework/ConsoleFramework.pidb
+etc/LibtermkeyTest/LibtermkeyTest.userprefs
+etc/LibtermkeyTest/LibtermkeyTest/bin/
+etc/LibtermkeyTest/LibtermkeyTest/LibtermkeyTest.pidb
