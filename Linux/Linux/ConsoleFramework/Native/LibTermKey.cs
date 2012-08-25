@@ -8,24 +8,92 @@ namespace Linux.Native
 		/// <summary>
 		/// see the <sys/poll.h> and <bits/poll.h>
 		/// </summary>
-		[DllImport("libc.so")]
-		public static extern int poll([MarshalAs(UnmanagedType.LPArray)] pollfd[] fds, int fdsCount, int timeout);
+		[DllImport("libc.so.6", SetLastError = true)]
+		public static extern int poll( pollfd[] fds, int fdsCount, int timeout);
 		
-		// todo : expand flags into the enumeration
+		/// <summary>
+		/// Creates the eventfd kernel object. Returns file descriptor for
+		/// created eventfd object.
+		/// </summary>
+		[DllImport("libc.so.6", SetLastError = true)]
+		public static extern int eventfd(uint initval, EVENTFD_FLAGS flags);
+		
+		[DllImport("libc.so.6", SetLastError = true)]
+		private static extern int read(int fd, out UInt64 buf, int count);
+		
+		[DllImport("libc.so.6", SetLastError = true)]
+		private static extern int write(int fd, ref UInt64 buf, int count);
+		
+		/// <summary>
+		/// Used to read from eventfd file descriptor.
+		/// </summary>
+		/// <returns>
+		/// Number of bytes readed or -1 if error has occured.
+		/// </returns>
+		public static int readInt64(int fd, out UInt64 res) {
+			return read (fd, out res, sizeof(UInt64));
+		}
+		
+		/// <summary>
+		/// Used to write to eventfd file descriptor.
+		/// </summary>
+		/// <returns>
+		/// Number of bytes written or -1 if error has occured.
+		/// </returns>
+		public static int writeInt64(int fd, UInt64 u) {
+			return write(fd, ref u, sizeof(UInt64));
+		}
+		
+		/// <summary>
+		/// Close the specified file descriptor.
+		/// </summary>
+		[DllImport("libc.so.6", SetLastError = true)]
+		public static extern int close(int fd);
+		
 		[DllImport("libtermkey.so")]
-		public static extern int termkey_new(int fd, int flags);
+		public static extern IntPtr termkey_new(int fd, TermKeyFlag flags);
+		
+		[DllImport("libtermkey.so")]
+		public static extern TermKeyResult termkey_getkey_force(IntPtr termKey, ref TermKeyKey key);
+
+		[DllImport("libtermkey.so")]
+		public static extern TermKeyResult termkey_getkey(IntPtr termKey, ref TermKeyKey key);
+
+		[DllImport("libtermkey.so")]
+		public static extern TermKeyResult termkey_advisereadable(IntPtr termKey);
+		
+		[DllImport("libtermkey.so")]
+		public static extern int termkey_get_waittime(IntPtr termkey);
+		
+		[DllImport("libtermkey.so")]
+		public static extern void termkey_destroy(IntPtr termkey);
+		
+		[DllImport("libtermkey.so")]
+		public static extern TermKeyResult termkey_interpret_mouse(IntPtr termKey, ref TermKeyKey key,
+		                                                           out TermKeyMouseEvent ev,
+		                                                           out int button,
+		                                                           out int line,
+		                                                           out int col);
+	}
+	
+	[Flags]
+	public enum EVENTFD_FLAGS : int {
+		EFD_SEMAPHORE = 0x00000001,
+		EFD_CLOEXEC =   0x00080000,
+		EEFD_NONBLOCK = 0x00000800
 	}
 	
 	[StructLayout(LayoutKind.Sequential)]
 	public struct pollfd {
-		int fd;
-		POLL_EVENTS events;
-		POLL_EVENTS revents;
+		public int fd;
+		public POLL_EVENTS events;
+		public POLL_EVENTS revents;
 	}
 	
 	
 	[Flags]
 	public enum POLL_EVENTS : ushort {
+		NONE = 0x0000,
 		POLLIN = 0x001,
 		POLLPRI = 0x002,
 		POLLOUT = 0x004,
@@ -36,6 +104,18 @@ namespace Linux.Native
 		POLLERR = 0x008,
 		POLLHUP = 0x010,
 		POLLNVAL = 0x020
+	}
+	
+	[Flags]
+	public enum TermKeyFlag {
+		TERMKEY_FLAG_NOINTERPRET = 1 << 0, /* Do not interpret C0//DEL codes if possible */
+		TERMKEY_FLAG_CONVERTKP   = 1 << 1, /* Convert KP codes to regular keypresses */
+		TERMKEY_FLAG_RAW         = 1 << 2, /* Input is raw bytes, not UTF-8 */
+		TERMKEY_FLAG_UTF8        = 1 << 3, /* Input is definitely UTF-8 */
+		TERMKEY_FLAG_NOTERMIOS   = 1 << 4, /* Do not make initial termios calls on construction */
+		TERMKEY_FLAG_SPACESYMBOL = 1 << 5, /* Sets TERMKEY_CANON_SPACESYMBOL */
+		TERMKEY_FLAG_CTRLC       = 1 << 6, /* Allow Ctrl-C to be read as normal, disabling SIGINT */
+		TERMKEY_FLAG_EINTR       = 1 << 7  /* Return ERROR on signal (EINTR) rather than retry */
 	}
 	
 	public enum TermKeyResult {
@@ -138,26 +218,53 @@ namespace Linux.Native
 		TERMKEY_MOUSE_RELEASE
 	}
 	
+	// why sizeof it is 8 ?
 	[StructLayout(LayoutKind.Explicit)]
 	public struct code {
+		// NOT long ! actually int
 		[FieldOffset(0)]
-		public long codepoint; /* TERMKEY_TYPE_UNICODE */
+		public int codepoint; /* TERMKEY_TYPE_UNICODE */
 		[FieldOffset(0)]
 		public int number; /* TERMKEY_TYPE_FUNCTION */
 		[FieldOffset(0)]
 		public TermKeySym sym; /* TERMKEY_TYPE_KEYSYM */
 		[FieldOffset(0)]
-		public char[] mouse; /* TERMKEY_TYPE_MOUSE (char[4]) */
+		public byte mouse0; /* TERMKEY_TYPE_MOUSE (char[4]) */
+		[FieldOffset(1)]
+		public byte mouse1;
+		[FieldOffset(2)]
+		public byte mouse2;
+		[FieldOffset(3)]
+		public byte mouse3;
 	}
 	
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Explicit)]
 	public struct TermKeyKey {
+		[FieldOffset(0)]
 		public TermKeyType type;
+		// sizeof(code) must be 4, but if use a Sequential layout
+		// it will be 8, so we have to explicitly specify the offsets
+		[FieldOffset(4)]
 		public code code;
-		int modifiers;
+		[FieldOffset(8)]
+		public int modifiers;
 		
 		/* char[7] = Any Unicode character can be UTF-8 encoded in no more than 6 bytes, plus terminating NUL */
-		char[] utf8;
+		[FieldOffset(12 + 0)]
+		public byte utf8_0;
+		[FieldOffset(12 + 1)]
+		public byte utf8_1;
+		[FieldOffset(12 + 2)]
+		public byte utf8_2;
+		[FieldOffset(12 + 3)]
+		public byte utf8_3;
+		[FieldOffset(12 + 4)]
+		public byte utf8_4;
+		[FieldOffset(12 + 5)]
+		public byte utf8_5;
+		[FieldOffset(12 + 6)]
+		public byte utf8_6;
 	}
 }
+
 
