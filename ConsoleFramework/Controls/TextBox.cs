@@ -37,8 +37,15 @@ namespace ConsoleFramework.Controls {
                                                         ControlKeyState.LEFT_ALT_PRESSED,
                                                         (args.dwControlKeyState & ControlKeyState.LEFT_CTRL_PRESSED) ==
                                                         ControlKeyState.LEFT_CTRL_PRESSED);
-            if (keyInfo.KeyChar != '\0') {
+            if (!char.IsControl(keyInfo.KeyChar)) {
                 // insert keychar into a text string according to cursorPosition and offset
+                if (text != null) {
+                    string leftPart = text.Substring(0, cursorPosition + displayOffset);
+                    string rightPart = text.Substring(cursorPosition + displayOffset);
+                    Text = leftPart + keyInfo.KeyChar + rightPart;
+                } else {
+                    Text = keyInfo.KeyChar.ToString();
+                }
             } else {
                 if (keyInfo.Key == ConsoleKey.Delete) {
                 }
@@ -74,6 +81,19 @@ namespace ConsoleFramework.Controls {
             set;
         }
 
+        public int Size {
+            get;
+            set;
+        }
+
+        protected override Size MeasureOverride(Size availableSize) {
+            return new Size(Size, 1);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize) {
+            return base.ArrangeOverride(finalSize);
+        }
+
         // this fields describe the whole state of textbox
         private int displayOffset;
         private int cursorPosition;
@@ -83,6 +103,13 @@ namespace ConsoleFramework.Controls {
         public override void Render(RenderingBuffer buffer) {
             ushort attr = Color.Attr(Color.White, Color.DarkBlue);
             buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', attr);
+            if (null != text) {
+                for (int i = displayOffset; i < text.Length; i++) {
+                    if (i - displayOffset < ActualWidth) {
+                        buffer.SetPixel(i - displayOffset, 0, text[i]);
+                    }
+                }
+            }
         }
     }
 }

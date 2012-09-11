@@ -82,6 +82,11 @@ namespace ConsoleFramework
         /// </summary>
         /// <returns>Affected rectangle in canvas should be copyied to console screen.</returns>
         private Rect applyChangesToCanvas(Control control, Rect affectedRect) {
+            // если системой лайаута были определены размеры дочернего контрола, превышающие размеры слота
+            // (такое может произойти, если дочерний контрол игнорирует переданные аргументы в MeasureOverride
+            // и ArrangeOverride), то в этом месте может прийти affectedRect, выходящий за рамки
+            // текущего RenderSize контрола, и мы должны выполнить intersection для корректного наложения
+            affectedRect.Intersect(new Rect(new Point(0, 0), control.RenderSize));
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
             if (control.Parent != null) {
                 RenderingBuffer fullParentBuffer = getOrCreateFullBufferForControl(control.Parent);

@@ -507,10 +507,43 @@ namespace ConsoleFramework.Controls
             DesiredSize = new Size(Math.Max(0, clippedDesiredWidth), Math.Max(0, clippedDesiredHeight));
         }
         
+        /// <summary>
+        /// Возвращает размеры, необходимые для размещения контрола вместе с его дочерними элементами.
+        /// 
+        /// Если возвращаемый размер меньше availableSize, то это может быть учтено родительским контролом,
+        /// и он может выделить под контрол слот, меньший, чем планировалось изначально. А может быть
+        /// проигнорировано, в этом случае контрол будет размещён в слоте, большем, чем собственно
+        /// контролу необходимо. Контрол должен учитывать такой вариант развития событий (если его
+        /// реальное размещение превышает ожидания).
+        /// 
+        /// Если возвращаемый размер больше availableSize, то опять же тут 2 варианта развития событий.
+        /// В первом случае родительский контрол согласно логике размещения может попробовать найти
+        /// дополнительное место для контрола и вызвать Measure повторно с бОльшим availableSize.
+        /// Либо, если подобной логики в алгоритме размещения родительского контрола не предусмотрено,
+        /// или же места нет, - возвращённый desired size будет записан в unclipped desired size и на этапе
+        /// arrange контрол будет размещен в желаемых размерах, однако реально столько места он занимать не
+        /// будет, и в контексте родительского контрола его рендеринг будет обрезан.
+        /// 
+        /// Нельзя возвращать int.MaxValue в качестве width или height возвращаемого размера.
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
         protected virtual Size MeasureOverride(Size availableSize) {
             return new Size(0, 0);
         }
 
+        /// <summary>
+        /// Размещает элемент управления вместе с дочерними контролами в указанном слоте.
+        /// После выполнения метода будут установлены все свойства, необходимые для рендеринга контрола.
+        /// Если Arrange вызывался с размерами, меньшими чем те, которые были возвращены контролом в 
+        /// MeasureOverride, то рендеринг контрола будет обрезанным.
+        /// Если Arrange вызывался с размерами, превышающими запрошенные в MeasureOverride, то
+        /// слот, выделенный контролу, будет больше ожидаемого, и то, как будет использовано дополнительное
+        /// место - зависит от логики ArrangeOverride контрола. Если ArrangeOverride вернет старое значение
+        /// (меньшее чем нынешний finalSize), то RenderSize будет меньше RenderSlotRect, и часть пространства,
+        /// выделенного для размещения элемента управления, просто не будет им использоваться.
+        /// </summary>
+        /// <param name="finalRect"></param>
         public void Arrange(Rect finalRect) {
             if (layoutInfo.validity != LayoutValidity.Nothing) {
                 return;
@@ -566,7 +599,7 @@ namespace ConsoleFramework.Controls
             }
 
             //Here we use un-clipped InkSize because element does not know that it is
-            //clipped by layout system and it shoudl have as much space to render as
+            //clipped by layout system and it should have as much space to render as
             //it returned from its own ArrangeOverride 
             RenderSize = ArrangeOverride(arrangeSize);
 
@@ -713,6 +746,9 @@ namespace ConsoleFramework.Controls
 
         /// <summary>
         /// Default <see cref="ArrangeOverride"/> implementation.
+        /// <param name="finalSize">The final area within the parent that this element
+        /// should use to arrange itself and its children.</param>
+        /// <returns>The actual size used.</returns>
         /// </summary>
         protected virtual Size ArrangeOverride(Size finalSize) {
             return finalSize;

@@ -22,9 +22,9 @@ namespace ConsoleFramework {
                     Text = "Label2_____",
                     HorizontalAlignment = HorizontalAlignment.Right
                 });
-                panel.AddChild(new TextBox() {
-                    Width = 10, Height = 1
-                });
+                TextBox textBox = new TextBox() {
+                    Size = 10, Width = 15
+                };
                 Button button = new Button() {
                     Name = "button1",
                     Caption = "Button!",
@@ -35,6 +35,7 @@ namespace ConsoleFramework {
                     Debug.WriteLine("Click");
                 };
                 panel.AddChild(button);
+                panel.AddChild(textBox);
                 //application.Run(panel);
                 WindowsHost windowsHost = new WindowsHost()
                                               {
@@ -52,7 +53,6 @@ namespace ConsoleFramework {
                     Title = "Window1",
                     Content = panel
                 };
-                windowsHost.AddWindow(window1);
                 windowsHost.AddWindow(new Window() {
                     X = 30,
                     Y = 6,
@@ -66,6 +66,16 @@ namespace ConsoleFramework {
                         Name = "Label_window2"
                     }
                 });
+                windowsHost.AddWindow(new Window() {
+                    X = 30,
+                    Y = 15,
+                    Name = "window 3",
+                    Content = new StrangePanel() {
+                        Content = new StrangeControl()
+                    }
+                });
+                windowsHost.AddWindow(window1);
+                textBox.Focused = true; // не работает ! а должно ! todo : поправить
                 application.Run(windowsHost);
             }
         }

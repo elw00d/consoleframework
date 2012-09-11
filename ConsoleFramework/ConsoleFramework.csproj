@@ -41,6 +41,7 @@
     <Compile Include="..\Linux\Linux\ConsoleFramework\Native\LibTermKey.cs">
       <Link>Native\LibTermKey.cs</Link>
     </Compile>
+    <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Events\KeyboardFocusChangedEventArgs.cs" />
     <Compile Include="Events\KeyEventArgs.cs" />
@@ -53,7 +54,7 @@
     <Compile Include="Native\Color.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
-    <Compile Include="Controls\BackgroundControl.cs" />
+    <Compile Include="Controls\StrangePanel.cs" />
     <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Control.cs" />
     <Compile Include="Controls\Panel.cs" />

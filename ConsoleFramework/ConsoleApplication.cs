@@ -28,7 +28,7 @@ namespace ConsoleFramework
                 if (instance == null) {
                     lock (syncRoot) {
                         if (instance == null) {
-                            instance = new ConsoleApplication(true);
+                            instance = new ConsoleApplication(false);
                         }
                     }
                 }
