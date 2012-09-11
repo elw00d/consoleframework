@@ -312,7 +312,7 @@ namespace ConsoleFramework
             renderer.UpdateRender();
 
             // initially hide the console cursor
-            HideCursor();
+            //HideCursor();
             
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
