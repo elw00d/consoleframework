@@ -7,6 +7,13 @@ using ConsoleFramework.Events;
 
 namespace ConsoleFramework.Controls
 {
+    public enum Visibility
+    {
+        Collapsed = 2,
+        Hidden = 1,
+        Visible = 0
+    }
+
     public enum HorizontalAlignment
     {
         Left,
@@ -190,6 +197,11 @@ namespace ConsoleFramework.Controls
 
         internal LayoutInfo layoutInfo = new LayoutInfo();
         internal LayoutInfo lastLayoutInfo = new LayoutInfo();
+
+        public Visibility Visibility {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Just for debug.
@@ -439,6 +451,12 @@ namespace ConsoleFramework.Controls
 
             layoutInfo.measureArgument = availableSize;
 
+            if (Visibility == Visibility.Collapsed) {
+                layoutInfo.unclippedDesiredSize = Size.Empty;
+                DesiredSize = Size.Empty;
+                return;
+            }
+
             // apply margin
             Thickness margin = Margin;
             int marginWidth = margin.Left + margin.Right;
@@ -546,6 +564,14 @@ namespace ConsoleFramework.Controls
         /// <param name="finalRect"></param>
         public void Arrange(Rect finalRect) {
             if (layoutInfo.validity != LayoutValidity.Nothing) {
+                return;
+            }
+
+            if (Visibility == Visibility.Collapsed) {
+                RenderSlotRect = Rect.Empty;
+                RenderSize = Size.Empty;
+                layoutInfo.layoutClip = calculateLayoutClip();
+                layoutInfo.validity = LayoutValidity.MeasureAndArrange;
                 return;
             }
 

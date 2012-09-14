@@ -96,21 +96,25 @@ namespace ConsoleFramework
                     fullParentBuffer.Clear();
                     fullParentBuffer.CopyFrom(getOrCreateBufferForControl(control.Parent));
                     foreach (Control child in control.Parent.children) {
-                        RenderingBuffer childBuffer = getOrCreateFullBufferForControl(child);
-                        fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, child.RenderSlotRect,
-                            child.LayoutClip);
+                        if (child.Visibility == Visibility.Visible) {
+                            RenderingBuffer childBuffer = getOrCreateFullBufferForControl(child);
+                            fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, child.RenderSlotRect,
+                                                        child.LayoutClip);
+                        }
                     }
                 }
                 // определим соседей контрола, которые могут перекрывать его
                 List<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
                 int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
-                // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
-                if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
-                    fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
-                                                control.LayoutClip);
-                } else {
-                    fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
-                                                control.LayoutClip, affectedRect);
+                if (control.Visibility == Visibility.Visible) {
+                    // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
+                    if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
+                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
+                                                    control.LayoutClip);
+                    } else {
+                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
+                                                    control.LayoutClip, affectedRect);
+                    }
                 }
                 // восстанавливаем изображение поверх обновленного контрола, если
                 // имеются контролы, лежащие выше по z-order
@@ -162,6 +166,9 @@ namespace ConsoleFramework
                 // вверх по дереву элементов, и мы переходим к работе с дочерними элементами
                 // в противном случае мы добавляем родительский элемент в конец очереди ревалидации, и
                 // возвращаем управление
+                if (control.Name == "label1") {
+                    int i = 1;
+                }
                 if (lastLayoutInfo.validity != LayoutValidity.Nothing) {
                     control.Measure(lastLayoutInfo.measureArgument);
                     if (lastLayoutInfo.unclippedDesiredSize == control.layoutInfo.unclippedDesiredSize) {
@@ -210,8 +217,13 @@ namespace ConsoleFramework
             fullBuffer.CopyFrom(buffer);
             List<Control> children = control.children;
             foreach (Control child in children) {
-                RenderingBuffer fullChildBuffer = processControl(child);
-                fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                if (child.Visibility == Visibility.Visible) {
+                    RenderingBuffer fullChildBuffer = processControl(child);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                } else {
+                    // чтобы следующий Invalidate перезаписал lastLayoutInfo
+                    child.LayoutValidity = LayoutValidity.Render;
+                }
             }
             //
             control.LayoutValidity = LayoutValidity.Render;
@@ -295,8 +307,14 @@ namespace ConsoleFramework
             //
             fullBuffer.CopyFrom(buffer);
             foreach (Control child in control.children) {
-                RenderingBuffer fullChildBuffer = processControl(child);
-                fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                if (child.Visibility == Visibility.Visible) {
+                    RenderingBuffer fullChildBuffer = processControl(child);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                } else {
+                    // чтобы следующий Invalidate для этого контрола
+                    // перезаписал lastLayoutInfo
+                    child.LayoutValidity = LayoutValidity.Render;
+                }
             }
             //
             control.LayoutValidity = LayoutValidity.Render;

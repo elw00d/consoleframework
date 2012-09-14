@@ -16,6 +16,7 @@ namespace ConsoleFramework {
                     Name = "label1",
                     Text = "Label1",
                     Margin = new Thickness(1,2,1,0)
+                    //,Visibility = Visibility.Collapsed
                 });
                 panel.AddChild(new TextBlock() {
                     Name = "label2",
@@ -33,6 +34,15 @@ namespace ConsoleFramework {
                 };
                 button.OnClick += (sender, eventArgs) => {
                     Debug.WriteLine("Click");
+                    Control label = panel.FindChildByName("label1");
+                    if (label.Visibility == Visibility.Visible) {
+                        label.Visibility = Visibility.Collapsed;
+                    } else if (label.Visibility == Visibility.Collapsed) {
+                        label.Visibility = Visibility.Hidden;
+                    } else {
+                        label.Visibility = Visibility.Visible;
+                    }
+                    label.Invalidate();
                 };
                 panel.AddChild(button);
                 panel.AddChild(textBox);
