@@ -8,10 +8,27 @@ namespace ConsoleFramework.Controls {
     public class TextBox : Control {
         public TextBox() {
             KeyDown += TextBox_KeyDown;
+            MouseDown += OnMouseDown;
             GotKeyboardFocus += OnGotKeyboardFocus;
             LostKeyboardFocus += OnLostKeyboardFocus;
             CursorVisible = true;
             CursorPosition = new Point(1, 0);
+        }
+
+        private void OnMouseDown(object sender, MouseButtonEventArgs args) {
+            Point point = args.GetPosition(this);
+            if (point.X > 0 && point.X - 1 < Size) {
+                int x = point.X - 1;
+                if (!String.IsNullOrEmpty(text)) {
+                    if (x <= text.Length)
+                        cursorPosition = x;
+                    else {
+                        cursorPosition = text.Length;
+                    }
+                    CursorPosition = new Point(cursorPosition + 1, 0);
+                }
+                args.Handled = true;
+            }
         }
 
         private void OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
@@ -123,7 +140,7 @@ namespace ConsoleFramework.Controls {
                     }
                 }
             }
-            Debugger.Log(0, "", String.Format("cursorPos : {0} offset {1}\n", cursorPosition, displayOffset));
+            //Debugger.Log(0, "", String.Format("cursorPos : {0} offset {1}\n", cursorPosition, displayOffset));
         }
 
         private string text;
