@@ -793,6 +793,12 @@ namespace ConsoleFramework.Controls
             }
         }
         
+        /// <summary>
+        /// Добавляет этот контрол в очередь для обновления. При следующем выполнении цикла
+        /// обновления UI система размещения вызовет Measure, Arrange и Render. Дочерние контролы,
+        /// чьи размеры не изменились, перерисованы не будут. То же касается родительских контролов,
+        /// если размеры самого контрола не изменились.
+        /// </summary>
         public void Invalidate() {
             ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
         }

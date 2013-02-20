@@ -10,31 +10,28 @@ namespace TestProject1
     public class HitTestingTest
     {
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestControlsDoesntLinkedToCanvas() {
             Control a = new Control();
             Control b = new Control();
-            Control.FindCommonAncestor(a, b);
+            Assert.IsNull(Control.FindCommonAncestor(a, b));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestControlsParentDoesntLinkedToCanvas() {
             Control a = new Control();
             Control b = new Control();
             Control aa = new Control(a);
             Control bb = new Control(b);
-            Control.FindCommonAncestor(aa, bb);
+            Assert.IsNull(Control.FindCommonAncestor(aa, bb));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
         public void TestControlsParentDoesntLinkedToCanvas2() {
             Control a = new Control();
             Control b = new Control();
             Control aa = new Control(a);
             Control bb = new Control(b);
-            Control.FindCommonAncestor(bb, aa);
+            Assert.IsNull(Control.FindCommonAncestor(bb, aa));
         }
 
         [TestMethod]

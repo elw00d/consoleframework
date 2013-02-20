@@ -85,7 +85,7 @@ namespace ConsoleFramework {
                     }
                 });
                 windowsHost.AddWindow(window1);
-                textBox.Focused = true; // не работает ! а должно ! todo : поправить
+                //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 application.Run(windowsHost);
             }
         }

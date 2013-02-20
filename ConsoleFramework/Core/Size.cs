@@ -48,6 +48,13 @@ namespace ConsoleFramework.Core {
             this.height = height;
         }
 
+        private static readonly Size max_size  = new Size(int.MaxValue, int.MaxValue);
+        public static Size MaxSize {
+            get {
+                return max_size;
+            }
+        }
+
         public static Size Empty {
             get {
                 return s_empty;

@@ -11,7 +11,7 @@ namespace ConsoleFramework.Controls
     /// MeasureOverride этого контрола возвращает 10х10, а
     /// ArrangeOverride - 5x5
     /// </summary>
-    class StrangeControl : Control
+    public class StrangeControl : Control
     {
         protected override Size MeasureOverride(Size availableSize) {
             return new Size(20, 20);

@@ -121,7 +121,7 @@ namespace ConsoleFramework.Events
         /// </summary>
         /// <param name="control">Элемент управления, на который необходимо передать фокус.</param>
         /// <param name="ignoreRememberedChildrenFocus">Если true, то фокус дочерних элементов будет сброшен
-        /// в дефолтный. По умолчанию фокус дочерних элементов восстановится к такому же состоянию, как и д
+        /// в дефолтный. По умолчанию фокус дочерних элементов восстановится к такому же состоянию, как и до
         /// потери элементом фокуса.</param>
         internal void SetFocus(Control control, bool ignoreRememberedChildrenFocus = false) {
             if (null == control)
