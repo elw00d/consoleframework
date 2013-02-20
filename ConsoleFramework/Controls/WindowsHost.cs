@@ -50,9 +50,12 @@ namespace ConsoleFramework.Controls
             int index = children.FindIndex(0, control => control == window);
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
+            //
             Control oldTopWindow = children[children.Count - 1];
+            for (int i = index; i < children.Count - 1; i++) {
+                children[i] = children[i + 1];
+            }
             children[children.Count - 1] = window;
-            children[index] = oldTopWindow;
             window.SetFocus();
             if (oldTopWindow != window)
                 Invalidate();

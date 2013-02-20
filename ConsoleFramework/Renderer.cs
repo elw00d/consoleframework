@@ -166,9 +166,6 @@ namespace ConsoleFramework
                 // вверх по дереву элементов, и мы переходим к работе с дочерними элементами
                 // в противном случае мы добавляем родительский элемент в конец очереди ревалидации, и
                 // возвращаем управление
-                if (control.Name == "label1") {
-                    int i = 1;
-                }
                 if (lastLayoutInfo.validity != LayoutValidity.Nothing) {
                     control.Measure(lastLayoutInfo.measureArgument);
                     if (lastLayoutInfo.unclippedDesiredSize == control.layoutInfo.unclippedDesiredSize) {
