@@ -14,7 +14,7 @@ namespace ConsoleFramework.Controls
     public class WindowsHost : Control
     {
         public WindowsHost() {
-            AddHandler(MouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDown), true);
+            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDownPreview), true);
         }
 
         protected override Size MeasureOverride(Size availableSize)
@@ -56,12 +56,15 @@ namespace ConsoleFramework.Controls
                 children[i] = children[i + 1];
             }
             children[children.Count - 1] = window;
-            window.SetFocus();
+            
             if (oldTopWindow != window)
+            {
+                ConsoleApplication.Instance.FocusManager.SetFocusScope(window);
                 Invalidate();
+            }
         }
         
-        public void WindowsHost_MouseDown(object sender, MouseButtonEventArgs args) {
+        public void WindowsHost_MouseDownPreview(object sender, MouseButtonEventArgs args) {
             Point position = args.GetPosition(this);
             List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
             for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {

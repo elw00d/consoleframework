@@ -159,19 +159,16 @@ namespace ConsoleFramework.Controls
             remove { RemoveHandler(GotKeyboardFocusEvent, value); }
         }
 
-        public void SetFocus(bool ignoreRememberedChildrenFocus = false) {
-            ConsoleApplication.Instance.FocusManager.SetFocus(this, ignoreRememberedChildrenFocus);
-        }
+//        public void SetFocus() {
+//            ConsoleApplication.Instance.FocusManager.SetFocus(this);
+//        }
 
-        public bool HasKeyboardFocus {
+        /// <summary>
+        /// Обладает ли текущий контрол фокусом (т.е. принимает клавиатурный ввод)
+        /// </summary>
+        public bool HasFocus {
             get {
                 return ConsoleApplication.Instance.FocusManager.FocusedElement == this;
-            }
-        }
-
-        public bool HasLogicalFocus {
-            get {
-                return Focused;
             }
         }
 
@@ -251,8 +248,8 @@ namespace ConsoleFramework.Controls
 
         private void initialize() {
             MinWidth = 0;
-            Focusable = true;
-            Visible = true;
+            Focusable = false;
+            //Visibility = Visibility.Visible;
             AddHandler(MouseEnterEvent, new MouseEventHandler(Control_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Control_MouseLeave));
             AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
@@ -387,11 +384,6 @@ namespace ConsoleFramework.Controls
         }
 
         public Thickness Margin {
-            get;
-            set;
-        }
-
-        public bool Visible {
             get;
             set;
         }
@@ -1030,7 +1022,7 @@ namespace ConsoleFramework.Controls
             set {
                 if (cursorVisible != value) {
                     cursorVisible = value;
-                    if (HasKeyboardFocus) {
+                    if (HasFocus) {
                         ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
                     }
                 }
@@ -1045,7 +1037,7 @@ namespace ConsoleFramework.Controls
             set {
                 if (cursorPosition != value) {
                     cursorPosition = value;
-                    if (HasKeyboardFocus) {
+                    if (HasFocus) {
                         ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
                     }
                 }

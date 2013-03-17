@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -14,10 +17,48 @@ namespace ConsoleFramework.Controls
     {
         public Window() {
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
+            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
             //AddHandler(PreviewLostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_PreviewLostKeyboardFocus));
             AddHandler(Button.ClickEvent, new RoutedEventHandler(Window_Click));
+            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
+        }
+
+        private void Window_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Control tofocus = null;
+            Control parent = this;
+            Control hitTested = null;
+            do
+            {
+                Point position = e.GetPosition(parent);
+                hitTested = parent.GetTopChildAtPoint(position);
+                if (null != hitTested)
+                {
+                    parent = hitTested;
+                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
+                    {
+                        tofocus = hitTested;
+                    }
+                }
+            } while (hitTested != null);
+            if (tofocus != null)
+            {
+                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
+            }
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs args)
+        {
+            if (args.wVirtualKeyCode == 09)
+            {
+                Debug.WriteLine("Tab");
+                
+                ConsoleApplication.Instance.FocusManager.MoveFocusNext();
+
+                args.Handled = true;
+            }
         }
 
         //private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
@@ -61,7 +102,8 @@ namespace ConsoleFramework.Controls
                 return base.MeasureOverride(availableSize);
             // reserve 2 pixels for frame and 2/1 pixels for shadow
             Content.Measure(new Size(availableSize.width - 4, availableSize.height - 3));
-            return new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
+            var result = new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
+            return result;
         }
 
         protected override Size ArrangeOverride(Size finalSize)
@@ -167,7 +209,8 @@ namespace ConsoleFramework.Controls
                     // moving is started, we should redraw the border
                     Invalidate();
                     args.Handled = true;
-                } else if (point.x == ActualWidth - 3 && point.y == ActualHeight - 2) {
+                } else if (point.x == ActualWidth - 3 && point.y == ActualHeight - 2)
+                {
                     resizing = true;
                     resizingStartPoint = parentPoint;
                     resizingStartWidth = ActualWidth;
@@ -176,6 +219,14 @@ namespace ConsoleFramework.Controls
                     // resizing is started, we should redraw the border
                     Invalidate();
                     args.Handled = true;
+                }
+                else
+                {
+//                    Control topChildAtPoint = this.GetTopChildAtPoint(point);
+//                    if (null != topChildAtPoint && topChildAtPoint.Visibility == Visibility.Visible && topChildAtPoint.Focusable)
+//                    {
+//                        ConsoleApplication.Instance.FocusManager.SetFocus(this, topChildAtPoint);
+//                    }
                 }
             }
         }

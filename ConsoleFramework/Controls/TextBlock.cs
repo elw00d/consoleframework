@@ -11,6 +11,8 @@ namespace ConsoleFramework.Controls
 
         private void initialize() {
             AddHandler(KeyDownEvent, new KeyEventHandler(TextBlock_KeyDown));
+            // todo : remove after focus testing
+            Focusable = true;
         }
 
         public void TextBlock_KeyDown(object sender, KeyEventArgs args) {

@@ -21,7 +21,7 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Panel : Control {
         private void subscribe() {
-            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(Panel_PreviewKeyDown), true);
+//            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(Panel_PreviewKeyDown), true);
         }
 
         public Panel() {
@@ -123,22 +123,22 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public void Panel_PreviewKeyDown(object sender, KeyEventArgs args) {
-            if (args.wVirtualKeyCode == 09) {
-                Debug.WriteLine("Tab");
-                List<Control> childs = GetChildrenOrderedByZIndex();
-                if (childs.Count > 0) {
-                    int findIndex = childs.FindIndex(c => c.HasLogicalFocus);
-                    if (findIndex == -1)
-                        childs[0].SetFocus();
-                    else {
-                        Control child = childs[(findIndex + 1)%childs.Count];
-                        child.SetFocus();
-                    }
-                }
-                args.Handled = true;
-            }
-        }
+//        public void Panel_PreviewKeyDown(object sender, KeyEventArgs args) {
+//            if (args.wVirtualKeyCode == 09) {
+//                Debug.WriteLine("Tab");
+//                List<Control> childs = GetChildrenOrderedByZIndex();
+//                if (childs.Count > 0) {
+//                    int findIndex = childs.FindIndex(c => c.HasLogicalFocus);
+//                    if (findIndex == -1)
+//                        childs[0].SetFocus();
+//                    else {
+//                        Control child = childs[(findIndex + 1)%childs.Count];
+//                        child.SetFocus();
+//                    }
+//                }
+//                args.Handled = true;
+//            }
+//        }
 
         /// <summary>
         /// Рисует исключительно себя - просто фон.

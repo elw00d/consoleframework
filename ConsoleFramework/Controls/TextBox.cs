@@ -13,6 +13,7 @@ namespace ConsoleFramework.Controls {
             LostKeyboardFocus += OnLostKeyboardFocus;
             CursorVisible = true;
             CursorPosition = new Point(1, 0);
+            Focusable = true;
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs args) {
