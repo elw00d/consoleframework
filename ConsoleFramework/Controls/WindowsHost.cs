@@ -59,7 +59,8 @@ namespace ConsoleFramework.Controls
             
             if (oldTopWindow != window)
             {
-                ConsoleApplication.Instance.FocusManager.SetFocusScope(window);
+                // todo : проверить, не удалён ли StoredFocus и является ли он Visible & Focusable
+                ConsoleApplication.Instance.FocusManager.SetFocus(window, window.StoredFocus);
                 Invalidate();
             }
         }
