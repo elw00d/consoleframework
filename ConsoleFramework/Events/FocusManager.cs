@@ -167,6 +167,7 @@ namespace ConsoleFramework.Events
         /// </summary>
         private Control findClosestScope(Control control)
         {
+            Debug.Assert( null != control );
             Control currentParent = control.Parent;
             while (currentParent != null)
             {
@@ -221,12 +222,13 @@ namespace ConsoleFramework.Events
         /// </summary>
         private List<Control> getControlsInScope(Control scope)
         {
-            List<Control> children = new List<Control>(scope.GetChildrenOrderedByZIndex());
+            List<Control> children = new List<Control>(scope.Children);
             int i = 0;
             while (i < children.Count)
             {
                 Control child = children[i];
-                List<Control> nested = child.GetChildrenOrderedByZIndex();
+                List<Control> nested = new List< Control >(child.Children);
+                nested.Sort(( control, control1 ) => control.TabOrder.CompareTo( control1.TabOrder ));
                 if (nested.Count > 0)
                 {
                     children.AddRange(nested);

@@ -358,6 +358,15 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
+        /// Specifies the order for keyboard focus move.
+        /// Takes 0 by default.
+        /// </summary>
+        public int TabOrder {
+            get; 
+            set;
+        }
+
+        /// <summary>
         /// Показывает, может ли элемент управления выступать в роли FocusScope.
         /// </summary>
         public bool IsFocusScope { get; set; }

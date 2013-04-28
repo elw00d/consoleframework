@@ -22,10 +22,12 @@ namespace PhonesBook
                 panelName.AddChild(new TextBlock() {
                     Name = "labelName",
                     Text = "    Имя",
+                    TabOrder = 2,
                     //Margin = new Thickness(1, 2, 1, 0)
                 });
                 TextBox textBox = new TextBox() {
                     Name = "textBoxName",
+                    TabOrder = 1,
                     Size = 30,
                     Margin = new Thickness(1, 0, 1, 0)
                 };
