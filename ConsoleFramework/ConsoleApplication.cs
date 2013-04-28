@@ -60,6 +60,10 @@ namespace ConsoleFramework
             }
         }
 
+        public Control RootControl {
+            get { return mainControl; }
+        }
+
         private Control mainControl;
         private EventManager eventManager;
         private FocusManager focusManager;

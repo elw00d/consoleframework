@@ -138,6 +138,47 @@ namespace ConsoleFramework.Events
         }
 
         /// <summary>
+        /// Находит первую подходящую область фокуса среди родительских элементов указанного
+        /// контрола, и устанавливает соответствующий фокус. Первая подходящая - это первый
+        /// вверх по иерархии контролов родительский контрол, у которого свойство IsFocusScope = True.
+        /// Если control - null, то фокус будет убран, и клавиатурный ввод больше не будет обрабатываться
+        /// (не будут генерироваться маршрутизируемые события, назначаемые текущему фокусному элементу).
+        /// </summary>
+        /// <param name="control"></param>
+        public void SetFocus(Control control)
+        {
+            if (null == control)
+            {
+                this.currentScope = null;
+                tryChangeFocusedElementTo(null);
+                return;
+            }
+
+            Control closestFocusScope = findClosestScope(control);
+            if (null == closestFocusScope) 
+                throw new InvalidOperationException("Cannot set focus to control because no focus scope found up to visual tree");
+
+            SetFocus(closestFocusScope, control);
+        }
+
+        /// <summary>
+        /// Находит ближайший вверх по иерархии контролов элемент управления со значением IsFocusScope = True.
+        /// Возвращает null, если такого элемента управления нет.
+        /// </summary>
+        private Control findClosestScope(Control control)
+        {
+            Control currentParent = control.Parent;
+            while (currentParent != null)
+            {
+                if (currentParent.IsFocusScope)
+                    return currentParent;
+
+                currentParent = currentParent.Parent;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Устанавливает текущую область фокуса scope и передает фокус элементу управления control
         /// </summary>
         /// <param name="scope"></param>
@@ -146,6 +187,8 @@ namespace ConsoleFramework.Events
         {
             if (scope == null)
                 throw new ArgumentNullException("scope");
+            if (!scope.IsFocusScope)
+                throw new ArgumentException("IsFocusScope property should be true", "scope");
 
             List<Control> children = getControlsInScope(scope);
             if (children.Count == 0)

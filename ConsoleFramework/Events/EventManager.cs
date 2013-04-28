@@ -500,7 +500,7 @@ namespace ConsoleFramework.Events {
         /// <param name="control">RootElement для проверки всего визуального дерева.</param>
         /// <returns></returns>
         private Control findSource(Point rawPoint, Control control) {
-            if (control.children.Count != 0) {
+            if (control.Children.Count != 0) {
                 List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control child = childrenOrderedByZIndex[i];

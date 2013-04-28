@@ -64,7 +64,7 @@ namespace ConsoleFramework.Controls
             if (orientation == Orientation.Vertical) {
                 int totalHeight = 0;
                 int maxWidth = 0;
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     child.Measure(Size.MaxSize);
                     // todo : fix if child returns big size > availableSize
                     totalHeight += child.DesiredSize.Height;
@@ -72,20 +72,20 @@ namespace ConsoleFramework.Controls
                         maxWidth = child.DesiredSize.Width;
                     }
                 }
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     child.Measure(new Size(maxWidth, child.DesiredSize.Height));
                 }
                 return new Size(maxWidth, totalHeight);
             } else {
                 int totalWidth = 0;
                 int maxHeight = 0;
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     child.Measure(Size.MaxSize);
                     totalWidth += child.DesiredSize.Width;
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;
                 }
-                foreach (Control child in children)
+                foreach (Control child in Children)
                     child.Measure(new Size(child.DesiredSize.Width, maxHeight));
                 return new Size(totalWidth, maxHeight);
             }
@@ -95,11 +95,11 @@ namespace ConsoleFramework.Controls
             if (orientation == Orientation.Vertical) {
                 int totalHeight = 0;
                 int maxWidth = 0;
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     if (child.DesiredSize.Width > maxWidth)
                         maxWidth = child.DesiredSize.Width;
                 }
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     int y = totalHeight;
                     int height = child.DesiredSize.Height;
                     child.Arrange(new Rect(0, y, maxWidth, height));
@@ -109,11 +109,11 @@ namespace ConsoleFramework.Controls
             } else {
                 int totalWidth = 0;
                 int maxHeight = 0;
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;
                 }
-                foreach (Control child in children) {
+                foreach (Control child in Children) {
                     int x = totalWidth;
                     int width = child.DesiredSize.Width;
                     child.Arrange(new Rect(x, 0, width, maxHeight));

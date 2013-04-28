@@ -10,11 +10,11 @@ namespace ConsoleFramework.Controls
     {
         public Control Content {
             get {
-                return children.Count != 0 ? children[0] : null;
+                return Children.Count != 0 ? Children[0] : null;
             }
             set {
-                if (children.Count != 0) {
-                    RemoveChild(children[0]);
+                if (Children.Count != 0) {
+                    RemoveChild(Children[0]);
                 }
                 AddChild(value);
             }

@@ -95,7 +95,7 @@ namespace ConsoleFramework
                 if (fullBuffer.ContainsOpacity(affectedRect)) {
                     fullParentBuffer.Clear();
                     fullParentBuffer.CopyFrom(getOrCreateBufferForControl(control.Parent));
-                    foreach (Control child in control.Parent.children) {
+                    foreach (Control child in control.Parent.Children) {
                         if (child.Visibility == Visibility.Visible) {
                             RenderingBuffer childBuffer = getOrCreateFullBufferForControl(child);
                             fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, child.RenderSlotRect,
@@ -212,7 +212,7 @@ namespace ConsoleFramework
             // проверяем дочерние контролы - если их layoutInfo не изменился по сравнению с последним,
             // то мы можем взять их последний renderBuffer без обновления и применить к текущему контролу
             fullBuffer.CopyFrom(buffer);
-            List<Control> children = control.children;
+            List<Control> children = control.Children;
             foreach (Control child in children) {
                 if (child.Visibility == Visibility.Visible) {
                     RenderingBuffer fullChildBuffer = processControl(child);
@@ -303,7 +303,7 @@ namespace ConsoleFramework
             control.Render(buffer);
             //
             fullBuffer.CopyFrom(buffer);
-            foreach (Control child in control.children) {
+            foreach (Control child in control.Children) {
                 if (child.Visibility == Visibility.Visible) {
                     RenderingBuffer fullChildBuffer = processControl(child);
                     fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);

@@ -20,7 +20,7 @@ namespace ConsoleFramework.Controls
         protected override Size MeasureOverride(Size availableSize)
         {
             // дочерние окна могут занимать сколько угодно пространства
-            foreach (Control control in children)
+            foreach (Control control in Children)
             {
                 Window window = (Window) control;
                 window.Measure(new Size(int.MaxValue, int.MaxValue));
@@ -33,7 +33,7 @@ namespace ConsoleFramework.Controls
         protected override Size ArrangeOverride(Size finalSize)
         {
             // сколько дочерние окна хотели - столько и получают
-            foreach (Control control in children)
+            foreach (Control control in Children)
             {
                 Window window = (Window) control;
                 window.Arrange(new Rect(window.X, window.Y, window.DesiredSize.Width, window.DesiredSize.Height));
@@ -47,20 +47,21 @@ namespace ConsoleFramework.Controls
         }
 
         public void ActivateWindow(Window window) {
-            int index = children.FindIndex(0, control => control == window);
+            int index = Children.FindIndex(0, control => control == window);
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
             //
-            Control oldTopWindow = children[children.Count - 1];
-            for (int i = index; i < children.Count - 1; i++) {
-                children[i] = children[i + 1];
+            Control oldTopWindow = Children[Children.Count - 1];
+            for (int i = index; i < Children.Count - 1; i++) {
+                Children[i] = Children[i + 1];
             }
-            children[children.Count - 1] = window;
+            Children[Children.Count - 1] = window;
             
             if (oldTopWindow != window)
             {
-                // todo : проверить, не удалён ли StoredFocus и является ли он Visible & Focusable
-                ConsoleApplication.Instance.FocusManager.SetFocus(window, window.StoredFocus);
+                
+                //ConsoleApplication.Instance.FocusManager.SetFocus(window, window.StoredFocus);
+                initializeFocusOnActivatedWindow( window );
                 Invalidate();
             }
         }
@@ -77,8 +78,41 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private void initializeFocusOnActivatedWindow( Window window ) {
+            bool reinitFocus = false;
+            if ( window.StoredFocus != null ) {
+                // проверяем, не удалён ли StoredFocus и является ли он Visible & Focusable
+                if ( !VisualTreeHelper.IsConnectedToRoot( window.StoredFocus ) ) {
+                    // todo : log warn about disconnected control
+                    reinitFocus = true;
+                } else if ( window.StoredFocus.Visibility != Visibility.Visible ) {
+                    // todo : log warn about invizible control to be focused
+                    reinitFocus = true;
+                }
+                else if ( !window.StoredFocus.Focusable ) {
+                    // todo : log warn
+                    reinitFocus = true;
+                } else {
+                    ConsoleApplication.Instance.FocusManager.SetFocus( window, window.StoredFocus );
+                }
+            } else {
+                reinitFocus = true;
+            }
+            //
+            if ( reinitFocus ) {
+                if ( window.ChildToFocus != null ) {
+                    Control child = VisualTreeHelper.FindChildByNameRecoursively( window, window.ChildToFocus );
+                    ConsoleApplication.Instance.FocusManager.SetFocus( child );
+                } else {
+                    ConsoleApplication.Instance.FocusManager.SetFocusScope( window );
+                }
+            }
+        }
+
         public void AddWindow(Window window) {
             AddChild(window);
+            //ConsoleApplication.Instance.FocusManager.SetFocusScope(window);
+            initializeFocusOnActivatedWindow(window);
         }
 
         public void RemoveWindow(Window window) {

@@ -9,9 +9,9 @@ namespace ConsoleFramework.Controls
 {
     public enum Visibility
     {
-        Collapsed = 2,
-        Hidden = 1,
-        Visible = 0
+        Collapsed = 3,
+        Hidden = 2,
+        Visible = 1
     }
 
     public enum HorizontalAlignment
@@ -189,7 +189,7 @@ namespace ConsoleFramework.Controls
         }
 
         public Control FindChildByName(string name) {
-            return children.FirstOrDefault(control => control.Name == name);
+            return Children.FirstOrDefault(control => control.Name == name);
         }
 
         internal LayoutInfo layoutInfo = new LayoutInfo();
@@ -214,7 +214,7 @@ namespace ConsoleFramework.Controls
             set;
         }
 
-        internal readonly List<Control> children = new List<Control>();
+        internal readonly List<Control> Children = new List<Control>();
 
         public Control Parent {
             get;
@@ -226,7 +226,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentNullException("child");
             if (null != child.Parent)
                 throw new ArgumentException("Specified child already has parent.");
-            children.Add(child);
+            Children.Add(child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             Invalidate();
@@ -239,7 +239,7 @@ namespace ConsoleFramework.Controls
                 throw new InvalidOperationException("Specified control is not a child.");
             else {
                 ConsoleApplication.Instance.FocusManager.BeforeRemoveElementFromTree(child);
-                if (!this.children.Remove(child))
+                if (!this.Children.Remove(child))
                     throw new InvalidOperationException("Assertion failed.");
                 child.Parent = null;
                 Invalidate();
@@ -249,7 +249,8 @@ namespace ConsoleFramework.Controls
         private void initialize() {
             MinWidth = 0;
             Focusable = false;
-            //Visibility = Visibility.Visible;
+            IsFocusScope = false;
+            Visibility = Visibility.Visible;
             AddHandler(MouseEnterEvent, new MouseEventHandler(Control_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Control_MouseLeave));
             AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
@@ -349,20 +350,17 @@ namespace ConsoleFramework.Controls
         private int maxHeight = int.MaxValue;
 
         /// <summary>
-        /// Shows has control logical focus or doesn't.
-        /// </summary>
-        internal bool Focused {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Shows whether control can handle keyboard input or can't.
         /// </summary>
         public bool Focusable {
             get;
             set;
         }
+
+        /// <summary>
+        /// Показывает, может ли элемент управления выступать в роли FocusScope.
+        /// </summary>
+        public bool IsFocusScope { get; set; }
 
         public int MaxHeight {
             get {
@@ -780,7 +778,7 @@ namespace ConsoleFramework.Controls
             // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
             layoutInfo.ClearValues();
             // recursively invalidate children, but without add them to queue
-            foreach (Control child in children) {
+            foreach (Control child in Children) {
                 child.ResetValidity();
             }
         }
@@ -796,7 +794,7 @@ namespace ConsoleFramework.Controls
         }
 
         public virtual Control GetTopChildAtPoint(Point point) {
-            return (from child in children
+            return (from child in Children
                     where child.RenderSlotRect.Contains(point)
                     select child).FirstOrDefault();
         }
@@ -995,7 +993,7 @@ namespace ConsoleFramework.Controls
         }
 
         internal virtual List<Control> GetChildrenOrderedByZIndex() {
-            return children;
+            return Children;
         }
 
         /// <summary>

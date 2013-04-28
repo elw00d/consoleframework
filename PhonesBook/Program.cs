@@ -6,6 +6,7 @@ using System.Text;
 using ConsoleFramework;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 
 namespace PhonesBook
 {
@@ -24,6 +25,7 @@ namespace PhonesBook
                     //Margin = new Thickness(1, 2, 1, 0)
                 });
                 TextBox textBox = new TextBox() {
+                    Name = "textBoxName",
                     Size = 30,
                     Margin = new Thickness(1, 0, 1, 0)
                 };
@@ -102,7 +104,12 @@ namespace PhonesBook
                         Name = "Label_window2"
                     }
                 });
+
+                window1.ChildToFocus = "textBoxName";
                 windowsHost.AddWindow(window1);
+                //panelName.IsFocusScope = true;
+                //application.FocusManager.SetFocus(textBox);
+                //application.FocusManager.SetFocus(null);
                 application.Run(windowsHost);
             }
         }

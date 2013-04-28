@@ -15,6 +15,11 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Window : Control
     {
+        public string ChildToFocus
+        {
+            get; set;
+        }
+
         public Window() {
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
@@ -25,6 +30,7 @@ namespace ConsoleFramework.Controls
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
 
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_OnLostFocus));
+            this.IsFocusScope = true;
         }
 
         /// <summary>
@@ -97,11 +103,11 @@ namespace ConsoleFramework.Controls
 
         public Control Content {
             get {
-                return children.Count != 0 ? children[0] : null;
+                return Children.Count != 0 ? Children[0] : null;
             }
             set {
-                if (children.Count != 0) {
-                    RemoveChild(children[0]);
+                if (Children.Count != 0) {
+                    RemoveChild(Children[0]);
                 }
                 AddChild(value);
             }
