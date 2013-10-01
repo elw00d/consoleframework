@@ -12,12 +12,12 @@ namespace ConsoleFramework.Controls
         private void initialize() {
             AddHandler(KeyDownEvent, new KeyEventHandler(TextBlock_KeyDown));
             // todo : remove after focus testing
-            Focusable = true;
+            //Focusable = true;
         }
 
         public void TextBlock_KeyDown(object sender, KeyEventArgs args) {
-            Text = Text + "5";
-            args.Handled = true;
+            //Text = Text + "5";
+            //args.Handled = true;
         }
 
         public TextBlock(Control parent) : base(parent) {

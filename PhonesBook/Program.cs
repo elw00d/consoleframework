@@ -69,16 +69,7 @@ namespace PhonesBook
                 };
                 panelMain.AddChild(button);
                 button.OnClick += (sender, eventArgs) => {
-                    Debug.WriteLine("Click");
-                    Control label = panelName.FindChildByName("label1");
-                    if (label.Visibility == Visibility.Visible) {
-                        label.Visibility = Visibility.Collapsed;
-                    } else if (label.Visibility == Visibility.Collapsed) {
-                        label.Visibility = Visibility.Hidden;
-                    } else {
-                        label.Visibility = Visibility.Visible;
-                    }
-                    label.Invalidate();
+                    int x = 3;
                 };
                 
                 WindowsHost windowsHost = new WindowsHost() {

@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Core;
+﻿using System;
+using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
@@ -22,7 +23,29 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp));
             AddHandler(MouseEnterEvent, new MouseEventHandler(Button_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Button_MouseLeave));
+            AddHandler( KeyDownEvent, new KeyEventHandler(Button_KeyDown) );
+            Focusable = true;
         }
+
+        private void Button_KeyDown( object sender, KeyEventArgs args ) {
+            if ( args.wVirtualKeyCode == 13 ) {
+//                clicking = true;
+//                showPressed = true;
+//                this.Invalidate();
+                //
+                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                //
+                //clicking = false;
+                //if (showPressed)
+                //{
+                //    showPressed = false;
+                //    this.Invalidate();
+                //}
+                //args.Handled = true;
+            }
+        }
+
+        // todo : add keydown event handler
 
         private string caption;
         public string Caption {
