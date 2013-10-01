@@ -28,7 +28,7 @@ namespace ConsoleFramework
                 if (instance == null) {
                     lock (syncRoot) {
                         if (instance == null) {
-                            instance = new ConsoleApplication(false);
+                            instance = new ConsoleApplication(true);
                         }
                     }
                 }
@@ -168,6 +168,7 @@ namespace ConsoleFramework
 			//} while (true);
 			
 			termkeyHandle = LibTermKey.termkey_new(0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL);
+			// setup the "videomode"
 			Console.Write("\x1B[?1002h");
 			pollfd fd = new pollfd();
 			fd.fd = 0;
@@ -182,7 +183,7 @@ namespace ConsoleFramework
 				Console.WriteLine("Cannot create eventfd\n");
 				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
 				Console.WriteLine("Last error is {0}\n", lastError);
-			}
+			}	
 			fds[1].fd = eventfd;
 			fds[1].events = POLL_EVENTS.POLLIN;
 			
@@ -234,14 +235,85 @@ namespace ConsoleFramework
 			
 			LibTermKey.termkey_destroy(termkeyHandle);
 			LibTermKey.close(eventfd);
+			// close the "videomode"
 			Console.Write("\x1B[?1002l");
 			
 			//
 			LinuxConsoleApplication.endwin();
 		}
 		
-		private void processLinuxInput(TermKeyKey key) {
-			if (key.type == TermKeyType.TERMKEY_TYPE_UNICODE) {
+		private void processLinuxInput (TermKeyKey key)
+		{
+			// if any special button has been pressed (Tab, Enter, etc)
+			// we should convert its code to INPUT_RECORD.KeyEvent
+			// Because INPUT_RECORD.KeyEvent depends on Windows' scan codes,
+			// we convert codes retrieved from LibTermKey to Windows virtual scan codes
+			// In the future, this logic may be changed (for example, both Windows and Linux
+			// raw codes can be converted into ConsoleFramework's own abstract enum)
+			if (key.type == TermKeyType.TERMKEY_TYPE_KEYSYM) {
+				INPUT_RECORD inputRecord = new INPUT_RECORD ();
+				inputRecord.EventType = EventType.KEY_EVENT;
+				inputRecord.KeyEvent.bKeyDown = true;
+				inputRecord.KeyEvent.wRepeatCount = 1;
+				switch (key.code.sym) {
+				case TermKeySym.TERMKEY_SYM_TAB:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x09;
+					break;
+				case TermKeySym.TERMKEY_SYM_ENTER:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x0D;
+					break;
+				case TermKeySym.TERMKEY_SYM_BACKSPACE:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x08;
+					break;
+				case TermKeySym.TERMKEY_SYM_DELETE:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x2E;
+					break;
+				case TermKeySym.TERMKEY_SYM_HOME:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x24;
+					break;
+				case TermKeySym.TERMKEY_SYM_END:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x23;
+					break;
+				case TermKeySym.TERMKEY_SYM_PAGEUP:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x21;
+					break;
+				case TermKeySym.TERMKEY_SYM_PAGEDOWN:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x22;
+					break;
+				case TermKeySym.TERMKEY_SYM_SPACE:
+					inputRecord.KeyEvent.UnicodeChar = ' ';
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x20;
+					break;
+				case TermKeySym.TERMKEY_SYM_ESCAPE:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x1B;
+					break;
+				case TermKeySym.TERMKEY_SYM_INSERT:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x2D;
+					break;
+				case TermKeySym.TERMKEY_SYM_UP:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x26;
+					break;
+				case TermKeySym.TERMKEY_SYM_DOWN:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x28;
+					break;
+				case TermKeySym.TERMKEY_SYM_LEFT:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x25;
+					break;
+				case TermKeySym.TERMKEY_SYM_RIGHT:
+					inputRecord.KeyEvent.wVirtualKeyCode = 0x27;
+					break;
+				default:
+					throw new NotSupportedException ("Not supported keyboard code detected");
+				}
+				inputRecord.KeyEvent.dwControlKeyState = 0;
+				if ((key.modifiers & 4) == 4) {
+					inputRecord.KeyEvent.dwControlKeyState |= ControlKeyState.LEFT_CTRL_PRESSED;
+				}
+				if ((key.modifiers & 2) == 2) {
+					inputRecord.KeyEvent.dwControlKeyState |= ControlKeyState.LEFT_ALT_PRESSED;
+				}
+				processInputEvent (inputRecord);
+			} else if (key.type == TermKeyType.TERMKEY_TYPE_UNICODE) {
 				byte[] data = new byte[7];
 				data[0] = key.utf8_0;
 				data[1] = key.utf8_1;
