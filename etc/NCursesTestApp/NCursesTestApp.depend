@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1380711986 source:/root/Documents/consoleframework/NCursesTestApp/NCursesTestApp/main.cpp
+	<iostream>
+	<curses.h>
+

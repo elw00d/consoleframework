@@ -21,3 +21,9 @@ etc/LibtermkeyTest/LibtermkeyTest/LibtermkeyTest.pidb
 ConsoleFramework.v11.suo
 PhonesBook/bin/
 PhonesBook/obj/
+etc/ConsoleTestCpp/a.out
+etc/ConsoleTestCpp/bin/
+etc/ConsoleTestCpp/obj/
+etc/NCursesTestApp/bin/
+etc/NCursesTestApp/obj/
+etc/mono-ncurses-problem/TestApp/TestApp/bin/

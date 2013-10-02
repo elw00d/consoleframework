@@ -20,13 +20,12 @@ void *functionC(void*);
 
 int main()
 {
-    /*int sdf = KEY_MOUSE;
     SCREEN* screen = newterm("xterm-1003", stdin, stdout);
     set_term(screen);
     setlocale(LC_ALL, "");
     //signal(SIGINT, sig);
-    //cout << "Hello world!" << endl;
-    //WINDOW* window = initscr();
+    cout << "Hello world!" << endl;
+    WINDOW* window = initscr();
     cbreak();
     noecho();
     nonl();
@@ -41,6 +40,7 @@ int main()
     //char buffer[40];
     //sprintf(buffer, "%s", "Hello ncurses ! фывфыв russian text,");
     addstr("lksjdf ыловаыва\u2591");
+    refresh();
 
     long c = '\u2591';
     cchar_t ch;
@@ -50,7 +50,7 @@ int main()
     ch.chars[2] = 'f';
     ch.chars[3] = 'x';
     ch.chars[4] = 'n';
-    mvadd_wch(3, 3, &ch);
+    //mvadd_wch(3, 3, &ch);
     attroff(COLOR_PAIR(2));//attron(COLOR_PAIR(2));
     void* _stdscr = stdscr;
 //    if (window != _stdscr ) {
@@ -81,7 +81,8 @@ int main()
     if (c1 == KEY_MOUSE) {
         printf("Mouse.");
     }
-    return 0;*/
+    return 0;
+
     printf("%x\n", EFD_NONBLOCK);
     fd = eventfd(0, EFD_CLOEXEC);
     if (fd == -1) {
@@ -152,10 +153,10 @@ int main()
         }
     }*/
 
-    pthread_join(thread1, NULL);
-    close(fd);
-    close(fd2);
-    return 0;
+    //pthread_join(thread1, NULL);
+    //close(fd);
+    //close(fd2);
+    //return 0;
 }
 
 void *functionC(void* data) {

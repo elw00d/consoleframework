@@ -137,109 +137,104 @@ namespace ConsoleFramework
 		private int eventfd = -1;
 		private IntPtr termkeyHandle = IntPtr.Zero;
 		
-		public void RunLinux(Control control) {
+		public void RunLinux (Control control)
+		{
 			this.mainControl = control;
 			//
-			PhysicalCanvas canvas = new PhysicalCanvas(100, 35);
-            renderer.Canvas = canvas;
-            renderer.RootElementRect = new Rect(0, 0, 80, 25);
-            renderer.RootElement = mainControl;
-            // initialize default focus
-            focusManager.AfterAddElementToTree(mainControl);
-            //
-            mainControl.Invalidate();
+			PhysicalCanvas canvas = new PhysicalCanvas (100, 35);
+			renderer.Canvas = canvas;
+			renderer.RootElementRect = new Rect (0, 0, 80, 25);
+			renderer.RootElement = mainControl;
+			// initialize default focus
+			focusManager.AfterAddElementToTree (mainControl);
+			//
+			mainControl.Invalidate ();
 			
 			// terminal initialization sequence
-			IntPtr stdscr = LinuxConsoleApplication.initscr();
-			LinuxConsoleApplication.cbreak();
-			LinuxConsoleApplication.noecho();
-			LinuxConsoleApplication.nonl();
-			LinuxConsoleApplication.intrflush(stdscr, false);
+			
+			// This is magic workaround to avoid messing up terminal after program finish
+			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
+			bool ignored = Console.KeyAvailable;
+			
+			IntPtr stdscr = LinuxConsoleApplication.initscr ();
+			LinuxConsoleApplication.cbreak ();
+			LinuxConsoleApplication.noecho ();
+			LinuxConsoleApplication.nonl ();
+			LinuxConsoleApplication.intrflush (stdscr, false);
 			LinuxConsoleApplication.keypad (stdscr, true);
-			LinuxConsoleApplication.start_color();
-			//LinuxConsoleApplication.mousemask(0xFFFFFFFF, IntPtr.Zero);
+			LinuxConsoleApplication.start_color ();
 			
-			renderer.UpdateRender();
+			renderer.UpdateRender ();
 			
-			//do {
-			//	int c = LinuxConsoleApplication.getch();
-			//	processLinuxInput(c);
-			//	renderer.UpdateRender();
-			//} while (true);
-			
-			termkeyHandle = LibTermKey.termkey_new(0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL);
-			// setup the "videomode"
-			Console.Write("\x1B[?1002h");
-			pollfd fd = new pollfd();
+			termkeyHandle = LibTermKey.termkey_new (0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL);
+			// setup the input mode
+			Console.Write ("\x1B[?1002h");
+			pollfd fd = new pollfd ();
 			fd.fd = 0;
 			fd.events = POLL_EVENTS.POLLIN;
 			
 			pollfd[] fds = new pollfd[2];
-			fds[0] = fd;
+			fds [0] = fd;
 			
-			fds[1] = new pollfd();
-			eventfd = LibTermKey.eventfd(0, EVENTFD_FLAGS.EFD_CLOEXEC);
+			fds [1] = new pollfd ();
+			eventfd = LibTermKey.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
 			if (eventfd == -1) {
-				Console.WriteLine("Cannot create eventfd\n");
-				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-				Console.WriteLine("Last error is {0}\n", lastError);
+				Console.WriteLine ("Cannot create eventfd\n");
+				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
+				Console.WriteLine ("Last error is {0}\n", lastError);
 			}	
-			fds[1].fd = eventfd;
-			fds[1].events = POLL_EVENTS.POLLIN;
+			fds [1].fd = eventfd;
+			fds [1].events = POLL_EVENTS.POLLIN;
 			
-			TermKeyKey key = new TermKeyKey();
+			TermKeyKey key = new TermKeyKey ();
 			while (true) {
-				int pollRes = LibTermKey.poll(fds, 2, -1);
+				int pollRes = LibTermKey.poll (fds, 2, -1);
 				if (0 == pollRes) {
 					// timed out
-					Console.WriteLine("Timed out");
-					if (LibTermKey.termkey_getkey_force(termkeyHandle, ref key) == TermKeyResult.TERMKEY_RES_KEY) {
-						Console.WriteLine("got TERMKEY_RES_KEY");
+					Console.WriteLine ("Timed out");
+					if (LibTermKey.termkey_getkey_force (termkeyHandle, ref key) == TermKeyResult.TERMKEY_RES_KEY) {
+						Console.WriteLine ("got TERMKEY_RES_KEY");
 					}					
 				} else if (-1 == pollRes) {
-					int errorCode = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+					int errorCode = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
 					//Console.WriteLine(string.Format("ErrorCode = {0}", errorCode));
 					// todo : write to debug console if error code differs from 4
 				}
-				//Console.WriteLine(string.Format("PollRes is {0}", pollRes));
 				
-				if (fds[1].revents != POLL_EVENTS.NONE) {
+				if (fds [1].revents != POLL_EVENTS.NONE) {
 					// exit signal
 					break;
 				}
 				
 				for (int i = 0; i < 2; i++) {
-					if (fds[i].revents != POLL_EVENTS.NONE) {
+					if (fds [i].revents != POLL_EVENTS.NONE) {
 						if (i == 1) {
 							UInt64 u;
-							LibTermKey.readInt64(fds[i].fd, out u);
-							Console.WriteLine("Readed eventfd counter : {0}\n", u);
+							LibTermKey.readInt64 (fds [i].fd, out u);
+							Console.WriteLine ("Readed eventfd counter : {0}\n", u);
 						}
 					}
 				}
 				
-				if ((fds[0].revents & POLL_EVENTS.POLLIN) == POLL_EVENTS.POLLIN ||
-				    (fds[0].revents & POLL_EVENTS.POLLHUP) == POLL_EVENTS.POLLHUP ||
-				    (fds[0].revents & POLL_EVENTS.POLLERR) == POLL_EVENTS.POLLERR)
-				{
+				if ((fds [0].revents & POLL_EVENTS.POLLIN) == POLL_EVENTS.POLLIN ||
+					(fds [0].revents & POLL_EVENTS.POLLHUP) == POLL_EVENTS.POLLHUP ||
+					(fds [0].revents & POLL_EVENTS.POLLERR) == POLL_EVENTS.POLLERR) {
 					// todo : log return value
-					LibTermKey.termkey_advisereadable(termkeyHandle);
+					LibTermKey.termkey_advisereadable (termkeyHandle);
 				}
 				
 				TermKeyResult result;
 				while ((result = LibTermKey.termkey_getkey(termkeyHandle, ref key)) == TermKeyResult.TERMKEY_RES_KEY) {
-					processLinuxInput(key);
-					renderer.UpdateRender();
+					processLinuxInput (key);
+					renderer.UpdateRender ();
 				}
 			}
 			
-			LibTermKey.termkey_destroy(termkeyHandle);
-			LibTermKey.close(eventfd);
-			// close the "videomode"
-			Console.Write("\x1B[?1002l");
+			LibTermKey.termkey_destroy (termkeyHandle);
+			LibTermKey.close (eventfd);
+			Console.Write ("\x1B[?1002l");
 			
-			//
-			LinuxConsoleApplication.endwin();
+			LinuxConsoleApplication.endwin ();
 		}
 		
 		private void processLinuxInput (TermKeyKey key)
