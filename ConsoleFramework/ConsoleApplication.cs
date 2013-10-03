@@ -79,10 +79,14 @@ namespace ConsoleFramework
                 return eventManager;
             }
         }
-
-        internal void SetCursorPosition(Point position) {
-			if (!usingLinux) {
-            	NativeMethods.SetConsoleCursorPosition(stdOutputHandle, new COORD((short) position.x, (short) position.y));
+		
+        internal void SetCursorPosition (Point position)
+		{
+			if (!usingLinux) {				
+				NativeMethods.SetConsoleCursorPosition (stdOutputHandle, new COORD ((short)position.x, (short)position.y));
+			} else {
+				LinuxConsoleApplication.move (position.y, position.x);
+				LinuxConsoleApplication.refresh ();
 			}
         }
 
@@ -100,13 +104,16 @@ namespace ConsoleFramework
         /// Делает курсор консоли видимым и устанавливает значение
         /// CursorIsVisible в true.
         /// </summary>
-        internal void ShowCursor() {
+        internal void ShowCursor ()
+		{
 			if (!usingLinux) {
-	            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+				CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
 	                Size = 5,
 	                Visible = true
 	            };
-	            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+				NativeMethods.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
+			} else {
+				LinuxConsoleApplication.curs_set (CursorVisibility.Visible);
 			}
             CursorIsVisible = true;
         }
@@ -115,13 +122,16 @@ namespace ConsoleFramework
         /// Делает курсор консоли невидимым и устанавливает значение
         /// CursorIsVisible в false.
         /// </summary>
-        internal void HideCursor() {
+        internal void HideCursor ()
+		{
 			if (!usingLinux) {
-	            CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
+				CONSOLE_CURSOR_INFO consoleCursorInfo = new CONSOLE_CURSOR_INFO {
 	                Size = 5,
 	                Visible = false
 	            };
-	            NativeMethods.SetConsoleCursorInfo(stdOutputHandle, ref consoleCursorInfo);
+				NativeMethods.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
+			} else {
+				LinuxConsoleApplication.curs_set (CursorVisibility.Invisible);
 			}
             CursorIsVisible = false;
         }

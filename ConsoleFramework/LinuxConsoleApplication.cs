@@ -57,6 +57,20 @@ namespace ConsoleFramework
 		[DllImport("libncursesw.so.5")]
 		internal static extern int getch();
 		
+		/// <summary>
+		/// Set specified cursor visibility.
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int curs_set(CursorVisibility cursorVisibility);
+		
+		/// <summary>
+		/// Moves the cursor associated with the window to line y and column x.
+		/// This routine does not move the physical cursor of the terminal until refresh is called.
+		/// The position specified is relative to the upper left-hand corner of the window, which is (0,0).
+		/// </summary>
+		[DllImport("libncursesw.so.5")]
+		internal static extern int move(int y, int x);
+		
 		[DllImport("libncursesw.so.5")]
 		internal static extern void endwin();
 		
@@ -264,6 +278,15 @@ internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		{
 		}
 		
+	}
+	
+	/// <summary>
+	/// Cursor visibility for ncurses.
+	/// </summary>
+	public enum CursorVisibility {
+		Invisible = 0,
+		Visible = 1,
+		VeryVisible = 2
 	}
 }
 
