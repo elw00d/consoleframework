@@ -174,6 +174,7 @@ namespace ConsoleFramework
 			LinuxConsoleApplication.keypad (stdscr, true);
 			LinuxConsoleApplication.start_color ();
 			
+			HideCursor ();
 			renderer.UpdateRender ();
 			
 			termkeyHandle = LibTermKey.termkey_new (0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL);
@@ -244,6 +245,8 @@ namespace ConsoleFramework
 			LibTermKey.close (eventfd);
 			Console.Write ("\x1B[?1002l");
 			
+			// restore cursor visibility before exit
+			ShowCursor ();
 			LinuxConsoleApplication.endwin ();
 		}
 		
