@@ -267,6 +267,9 @@ namespace ConsoleFramework
 				case TermKeySym.TERMKEY_SYM_ENTER:
 					inputRecord.KeyEvent.wVirtualKeyCode = 0x0D;
 					break;
+				// in gnome-terminal it is backspace by default
+				// (see default compatibility settings in Profile's settings)
+				case TermKeySym.TERMKEY_SYM_DEL:
 				case TermKeySym.TERMKEY_SYM_BACKSPACE:
 					inputRecord.KeyEvent.wVirtualKeyCode = 0x08;
 					break;
@@ -308,7 +311,7 @@ namespace ConsoleFramework
 					inputRecord.KeyEvent.wVirtualKeyCode = 0x27;
 					break;
 				default:
-					throw new NotSupportedException ("Not supported keyboard code detected");
+					throw new NotSupportedException ("Not supported keyboard code detected: " + key.code.sym);
 				}
 				inputRecord.KeyEvent.dwControlKeyState = 0;
 				if ((key.modifiers & 4) == 4) {
