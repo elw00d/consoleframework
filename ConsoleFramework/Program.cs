@@ -44,8 +44,13 @@ namespace ConsoleFramework {
                     }
                     label.Invalidate();
                 };
+                ComboBox comboBox = new ComboBox(  )
+                    {
+                        Width = 14
+                    };
                 panel.AddChild(button);
                 panel.AddChild(textBox);
+                panel.AddChild( comboBox );
                 //application.Run(panel);
                 WindowsHost windowsHost = new WindowsHost()
                                               {

@@ -65,7 +65,7 @@ namespace ConsoleFramework.Controls
                 int totalHeight = 0;
                 int maxWidth = 0;
                 foreach (Control child in Children) {
-                    child.Measure(Size.MaxSize);
+                    child.Measure(availableSize);
                     // todo : fix if child returns big size > availableSize
                     totalHeight += child.DesiredSize.Height;
                     if (child.DesiredSize.Width > maxWidth) {
@@ -80,7 +80,7 @@ namespace ConsoleFramework.Controls
                 int totalWidth = 0;
                 int maxHeight = 0;
                 foreach (Control child in Children) {
-                    child.Measure(Size.MaxSize);
+                    child.Measure(availableSize);
                     totalWidth += child.DesiredSize.Width;
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;

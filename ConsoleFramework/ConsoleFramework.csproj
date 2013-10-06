@@ -41,6 +41,7 @@
     <Compile Include="..\Linux\Linux\ConsoleFramework\Native\LibTermKey.cs">
       <Link>Native\LibTermKey.cs</Link>
     </Compile>
+    <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Core\VisualTreeHelper.cs" />
