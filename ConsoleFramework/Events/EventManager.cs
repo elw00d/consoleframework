@@ -202,12 +202,13 @@ namespace ConsoleFramework.Events {
                 }
                 Point rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
                 Control topMost = findSource(rawPosition, rootElement);
-                Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
+
                 // если мышь захвачена контролом, то события перемещения мыши доставляются только ему,
-                // события, связанные с нажатием мыши - доставляются только ему
-                // события MouseEnter/MouseLeave доставляются тоже только ему (причем относящиеся к другим контролам игнорируются)
-                bool mouseCaptured = inputCaptureStack.Count > 0;
-                //
+                // события, связанные с нажатием мыши - тоже доставляются только ему, вместо того
+                // контрола, над которым событие было зарегистрировано. Такой механизм необходим,
+                // например, для корректной обработки перемещений окон (вверх или в стороны)
+                Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
+                
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
                     MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
                     MouseButtonState middleMouseButtonState = getMiddleButtonState(mouseEvent.dwButtonState);
@@ -243,40 +244,30 @@ namespace ConsoleFramework.Events {
 
                     //bool anyEnterOrLeaveEventQueued = false;
                     for (int i = prevMouseOverStack.Count - 1; i >= index; i-- ) {
-                        // enqueue MouseLeave event
                         Control control = prevMouseOverStack[i];
-                        if (!mouseCaptured || source == control) {
-                            MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
-                                                                     rawPosition,
-                                                                     leftMouseButtonState,
-                                                                     middleMouseButtonState,
-                                                                     rightMouseButtonState
-                                );
-                            eventsQueue.Enqueue(args);
-                            //anyEnterOrLeaveEventQueued = true;
-                        }
+                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
+                                                                    rawPosition,
+                                                                    leftMouseButtonState,
+                                                                    middleMouseButtonState,
+                                                                    rightMouseButtonState
+                            );
+                        eventsQueue.Enqueue(args);
                     }
 
                     for (int i = index; i < mouseOverStack.Count; i++ ) {
                         // enqueue MouseEnter event
                         Control control = mouseOverStack[i];
-                        if (!mouseCaptured || source == control) {
-                            MouseEventArgs args = new MouseEventArgs(control, Control.MouseEnterEvent,
-                                                                     rawPosition,
-                                                                     leftMouseButtonState,
-                                                                     middleMouseButtonState,
-                                                                     rightMouseButtonState
-                                );
-                            eventsQueue.Enqueue(args);
-                            //anyEnterOrLeaveEventQueued = true;
-                        }
+                        MouseEventArgs args = new MouseEventArgs(control, Control.MouseEnterEvent,
+                                                                    rawPosition,
+                                                                    leftMouseButtonState,
+                                                                    middleMouseButtonState,
+                                                                    rightMouseButtonState
+                            );
+                        eventsQueue.Enqueue(args);
                     }
 
                     prevMouseOverStack.Clear();
                     prevMouseOverStack.AddRange(mouseOverStack);
-
-                    //if (anyEnterOrLeaveEventQueued)
-                    //    Debug.WriteLine("");
                 }
                 if (mouseEvent.dwEventFlags == MouseEventFlags.PRESSED_OR_RELEASED) {
                     //
@@ -353,9 +344,20 @@ namespace ConsoleFramework.Events {
             return processRoutedEvent(routedEvent, args);
         }
 
+        private static bool isControlAllowedToReceiveEvents( Control control, Control capturingControl ) {
+            Control c = control;
+            while ( true ) {
+                if ( c == capturingControl ) return true;
+                if ( c == null ) return false;
+                c = c.Parent;
+            }
+        }
+
         private bool processRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
             //
             List<RoutedEventTargetInfo> subscribedTargets = getTargetsSubscribedTo(routedEvent);
+
+            Control capturingControl = inputCaptureStack.Count != 0 ? inputCaptureStack.Peek() : null;
             //
             if (routedEvent.RoutingStrategy == RoutingStrategy.Direct) {
                 if (null == subscribedTargets)
@@ -365,6 +367,14 @@ namespace ConsoleFramework.Events {
                     subscribedTargets.FirstOrDefault(info => info.target == args.Source);
                 if (null == targetInfo)
                     return false;
+
+                // если имеется контрол, захватывающий события, события получает только он сам
+                // и его дочерние контролы
+                if ( capturingControl != null ) {
+                    if ( !(args.Source is Control) ) return false;
+                    if ( !isControlAllowedToReceiveEvents( ( Control ) args.Source, capturingControl ) )
+                        return false;
+                }
                 //
                 foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
                     if (!args.Handled || delegateInfo.handledEventsToo) {
@@ -378,12 +388,19 @@ namespace ConsoleFramework.Events {
             }
 
             Control source = (Control) args.Source;
-            // path to source from root element down
+            // path to source from root element down to Source
             List<Control> path = new List<Control>();
             Control current = source;
             while (null != current) {
-                path.Insert(0, current);
-                current = current.Parent;
+                // та же логика с контролом, захватившим обработку сообщений
+                // если имеется контрол, захватывающий события, события получает только он сам
+                // и его дочерние контролы
+                if ( capturingControl == null || isControlAllowedToReceiveEvents( current, capturingControl ) ) {
+                    path.Insert( 0, current );
+                    current = current.Parent;
+                } else {
+                    break;
+                }
             }
 
             if (routedEvent.RoutingStrategy == RoutingStrategy.Tunnel) {

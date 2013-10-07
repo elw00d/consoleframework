@@ -2,9 +2,22 @@
 
 namespace ConsoleFramework.Events
 {
+    /// <summary>
+    /// Тип маршрутизации события.
+    /// </summary>
     public enum RoutingStrategy {
+        /// <summary>
+        /// Событие передаётся всем подписчикам, от корневого элемента управления к источнику.
+        /// </summary>
         Tunnel,
+        /// <summary>
+        /// Событие передаётся всем подписчикам, от источника до корневого элемента управления.
+        /// </summary>
         Bubble,
+        /// <summary>
+        /// Событие будет передано только тем подписчикам, которые подписаны на
+        /// источник события.
+        /// </summary>
         Direct
     }
 
@@ -97,24 +110,36 @@ namespace ConsoleFramework.Events
             this.routingStrategy = routingStrategy;
         }
 
+        /// <summary>
+        /// Тип делегата - обработчика события.
+        /// </summary>
         public Type HandlerType {
             get {
                 return handlerType;
             }
         }
 
+        /// <summary>
+        /// Имя события - должно быть уникальным в рамках указанного <see cref="OwnerType"/>.
+        /// </summary>
         public string Name {
             get {
                 return name;
             }
         }
 
+        /// <summary>
+        /// Тип владельца события.
+        /// </summary>
         public Type OwnerType {
             get {
                 return ownerType;
             }
         }
 
+        /// <summary>
+        /// Стратегия маршрутизации события.
+        /// </summary>
         public RoutingStrategy RoutingStrategy {
             get {
                 return routingStrategy;

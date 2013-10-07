@@ -222,7 +222,21 @@ namespace ConsoleFramework.Events
         /// </summary>
         private List<Control> getControlsInScope(Control scope)
         {
-            List<Control> children = new List<Control>(scope.Children);
+            List<Control> children;
+            if ( scope.Focusable ) {
+                // Добавляем туда же и сам контрол, если он Focusable
+                // этот кейс может быть полезен, если у Focusable контрола, который является также и
+                // FocusScope, нет дочерних элементов. В этом случае фокус будет предоставлен самому
+                // контролу (например, пустое модальное Focusable-окно со специальной отрисовкой)
+
+                // Если же у Focusable & FocusScope контрола есть хотя бы 1 дочерний Focusable-контрол,
+                // то он и получит фокус, на сам FocusScope-контрол уже фокуса передано никогда не будет
+
+                children = new List< Control >( );
+                children.Add( scope );
+            } else {
+                children = new List< Control >( scope.Children );
+            }
             int i = 0;
             while (i < children.Count)
             {

@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
-using System.Diagnostics;
-using System.IO;
 using Linux.Native;
 
 namespace ConsoleFramework
 {
+    /// <summary>
+    /// Console application entry point.
+    /// Encapsulates messages loop and application lifecycle.
+    /// Supports Windows and Linux.
+    /// </summary>
     public sealed class ConsoleApplication : IDisposable {
 		
 		private bool usingLinux = false;
@@ -23,6 +25,10 @@ namespace ConsoleFramework
 
         private static volatile ConsoleApplication instance;
         private static readonly object syncRoot = new object();
+
+        /// <summary>
+        /// Instance of Application object.
+        /// </summary>
         public static ConsoleApplication Instance {
             get {
                 if (instance == null) {
@@ -40,6 +46,10 @@ namespace ConsoleFramework
         private IntPtr stdOutputHandle;
         private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
 
+        /// <summary>
+        /// Signals the message loop to be finished.
+        /// Application shutdowns after that.
+        /// </summary>
         public void Exit() {
 			if (usingLinux) {
 				int res = LibTermKey.writeInt64(eventfd, 1);
@@ -60,6 +70,9 @@ namespace ConsoleFramework
             }
         }
 
+        /// <summary>
+        /// Returns the root control of the application.
+        /// </summary>
         public Control RootControl {
             get { return mainControl; }
         }
@@ -101,8 +114,7 @@ namespace ConsoleFramework
         }
 
         /// <summary>
-        /// Делает курсор консоли видимым и устанавливает значение
-        /// CursorIsVisible в true.
+        /// Делает курсор консоли видимым и устанавливает значение CursorIsVisible в true.
         /// </summary>
         internal void ShowCursor ()
 		{
@@ -136,18 +148,23 @@ namespace ConsoleFramework
             CursorIsVisible = false;
         }
 		
+        /// <summary>
+        /// Runs application using specified control as root control.
+        /// Application will run until method <see cref="Exit"/> is called.
+        /// </summary>
+        /// <param name="control"></param>
 		public void Run(Control control) {
 			if (usingLinux) {
-				RunLinux(control);
+				runLinux(control);
 			} else {
-				RunWindows(control);
+				runWindows(control);
 			}
 		}
 		
 		private int eventfd = -1;
 		private IntPtr termkeyHandle = IntPtr.Zero;
 		
-		public void RunLinux (Control control)
+		private void runLinux (Control control)
 		{
 			this.mainControl = control;
 			//
@@ -377,7 +394,7 @@ namespace ConsoleFramework
 			}
 		}
 		
-        public void RunWindows(Control control) {
+        private void runWindows(Control control) {
             this.mainControl = control;
             //
             stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
@@ -399,7 +416,7 @@ namespace ConsoleFramework
             renderer.UpdateRender();
 
             // initially hide the console cursor
-            //HideCursor();
+            HideCursor();
             
             while (true) {
                 uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
@@ -417,6 +434,9 @@ namespace ConsoleFramework
                     throw new InvalidOperationException("Invalid wait result of WaitForMultipleObjects.");
                 }
             }
+
+            // restore cursor visibility before exit
+            ShowCursor();
         }
 
         private void processInput() {
@@ -435,10 +455,19 @@ namespace ConsoleFramework
             eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);
         }
 
+        /// <summary>
+        /// Начинает захват мыши и маршрутизируемых событий
+        /// указанным элементом управления. После этого контрол принимает все события от мыши
+        /// в качестве источника события (вне зависимости от позиции курсора мыши), а все маршрутизируемые
+        /// события передаются только в этот контрол и к его потомкам.
+        /// </summary>
         public void BeginCaptureInput(Control control) {
             eventManager.BeginCaptureInput(control);
         }
 
+        /// <summary>
+        /// Завершает захват мыши и маршрутизируемых событий.
+        /// </summary>
         public void EndCaptureInput(Control control) {
             eventManager.EndCaptureInput(control);
         }

@@ -96,6 +96,11 @@ namespace ConsoleFramework.Events {
             }
         }
 
+        /// <summary>
+        /// Возвращает преобразованные координаты относительно указанного контрола.
+        /// Если контрол захватывает ввод, то получаемые таким образом координаты могут
+        /// выходить за пределы контрола (отрицательные или больше ActualWidth/ActualHeight).
+        /// </summary>
         public Point GetPosition(Control relativeTo) {
             return Control.TranslatePoint(null, rawPosition, relativeTo);
         }

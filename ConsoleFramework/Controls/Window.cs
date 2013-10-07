@@ -15,12 +15,22 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Window : Control
     {
+        public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
+        public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
+
         public string ChildToFocus
         {
             get; set;
         }
 
         public Window() {
+            this.IsFocusScope = true;
+            Focusable = true;//todo : remove after test
+
+            initialize(  );
+        }
+
+        protected virtual void initialize( ) {
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
@@ -30,7 +40,6 @@ namespace ConsoleFramework.Controls
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
 
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_OnLostFocus));
-            this.IsFocusScope = true;
         }
 
         /// <summary>
@@ -76,7 +85,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs args)
+        protected void OnKeyDown(object sender, KeyEventArgs args)
         {
             if (args.wVirtualKeyCode == 09)
             {
@@ -118,7 +127,7 @@ namespace ConsoleFramework.Controls
             set;
         }
 
-        private WindowsHost getWindowsHost()
+        protected WindowsHost getWindowsHost()
         {
             return (WindowsHost) Parent;
         }

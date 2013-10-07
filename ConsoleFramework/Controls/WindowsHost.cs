@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -15,6 +16,9 @@ namespace ConsoleFramework.Controls
     {
         public WindowsHost() {
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDownPreview), true);
+            AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
+                //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
+            }) );
         }
 
         public static readonly Size MaxWindowSize = new Size(500, 500);
@@ -51,9 +55,7 @@ namespace ConsoleFramework.Controls
         /// Делает указанное окно активным. Если оно до этого не было активным, то
         /// по Z-индексу оно будет перемещено на самый верх, и получит клавиатурный фокус ввода.
         /// </summary>
-        /// <param name="window">Окно</param>
-        /// <param name="forceSetFocus">Окну будет передан фокус ввода в любом случае</param>
-        private void activateWindow(Window window, bool forceSetFocus) {
+        private void activateWindow(Window window) {
             int index = Children.FindIndex(0, control => control == window);
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
@@ -64,8 +66,10 @@ namespace ConsoleFramework.Controls
             }
             Children[Children.Count - 1] = window;
             
-            if (oldTopWindow != window || forceSetFocus)
+            if (oldTopWindow != window)
             {
+                oldTopWindow.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( oldTopWindow, Window.DeactivatedEvent ) );
+                window.RaiseEvent(Window.ActivatedEvent, new RoutedEventArgs(window, Window.ActivatedEvent));
                 initializeFocusOnActivatedWindow( window );
                 Invalidate();
             }
@@ -77,7 +81,7 @@ namespace ConsoleFramework.Controls
             for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                 Control topChild = childrenOrderedByZIndex[i];
                 if (topChild.RenderSlotRect.Contains(position)) {
-                    activateWindow((Window)topChild, false);
+                    activateWindow((Window)topChild);
                     break;
                 }
             }
@@ -115,16 +119,26 @@ namespace ConsoleFramework.Controls
         }
 
         public void AddWindow(Window window) {
+            if ( Children.Count != 0 ) {
+                Control topWindow = Children[ Children.Count - 1 ];
+                topWindow.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( topWindow, Window.DeactivatedEvent ) );
+            }
             AddChild(window);
+            window.RaiseEvent( Window.ActivatedEvent, new RoutedEventArgs( window, Window.ActivatedEvent ) );
             initializeFocusOnActivatedWindow(window);
         }
 
         public void RemoveWindow(Window window) {
+            window.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( window, Window.DeactivatedEvent ) );
             RemoveChild(window);
             // после удаления окна активизировать то, которое было активным до него
             List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
-            if (childrenOrderedByZIndex.Count != 0)
-                activateWindow((Window)childrenOrderedByZIndex[childrenOrderedByZIndex.Count - 1], true);
+            if ( childrenOrderedByZIndex.Count != 0 ) {
+                Window topWindow = ( Window ) childrenOrderedByZIndex[ childrenOrderedByZIndex.Count - 1 ];
+                topWindow.RaiseEvent( Window.ActivatedEvent, new RoutedEventArgs( topWindow, Window.ActivatedEvent ) );
+                initializeFocusOnActivatedWindow(topWindow);
+                Invalidate();
+            }
         }
     }
 }
