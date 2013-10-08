@@ -48,9 +48,16 @@ namespace ConsoleFramework {
                     {
                         Width = 14
                     };
+                ListBox listbox = new ListBox(  );
+                listbox.Items.Add( "First item" );
+                listbox.Items.Add( "second item1!!!!!!1fff" );
+                listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+                //listbox.Width = 10;
+
                 panel.AddChild(comboBox);
                 panel.AddChild(button);
                 panel.AddChild(textBox);
+                panel.AddChild( listbox );
                 
                 //application.Run(panel);
                 WindowsHost windowsHost = new WindowsHost()

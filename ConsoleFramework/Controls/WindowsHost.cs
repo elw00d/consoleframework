@@ -80,21 +80,29 @@ namespace ConsoleFramework.Controls
             return windowInfos[ (Window) Children[ Children.Count - 1 ] ].Modal;
         }
 
+        /// <summary>
+        /// Обработчик отвечает за вывод на передний план неактивных окон, на которые нажали мышкой,
+        /// и за обработку мыши, когда имеется модальное окно - в этом случае обработчик не пропускает
+        /// события, которые идут мимо модального окна, дальше по дереву (Tunneling) - устанавливая
+        /// Handled в True, либо закрывает модальное окно, если оно было показано с флагом
+        /// OutsideClickClosesWindow.
+        /// </summary>
         public void OnPreviewMouseDown(object sender, MouseButtonEventArgs args) {
             bool handle = false;
             if ( isTopWindowModal( ) ) {
                 Window modalWindow = ( Window ) Children[ Children.Count - 1 ];
                 Window windowClicked = VisualTreeHelper.FindClosestParent<Window>((Control)args.Source);
-                if (windowClicked == modalWindow)
-                {
-                    // do nothing
-                } else {
+                if ( windowClicked != modalWindow ) {
                     if ( windowInfos[ modalWindow ].OutsideClickClosesWindow ) {
+                        // закрываем текущее модальное окно
                         CloseWindow( modalWindow );
 
-                        // обрабатываем событие как обычно
+                        // далее обрабатываем событие как обычно
                         handle = true;
                     } else {
+                        // прекращаем распространение события (правда, контролы, подписавшиеся с флагом
+                        // handledEventsToo, получат его в любом случае) и генерацию соответствующего
+                        // парного не-preview события
                         args.Handled = true;
                     }
                 }
@@ -102,14 +110,6 @@ namespace ConsoleFramework.Controls
                 handle = true;
             }
             if (handle) {
-//                List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
-//                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-//                    Control topChild = childrenOrderedByZIndex[i];
-//                    if (topChild.RenderSlotRect.Contains(position)) {
-//                        activateWindow((Window)topChild);
-//                        break;
-//                    }
-//                }
                 Window windowClicked = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
                 if ( null != windowClicked ) {
                     activateWindow( windowClicked );
