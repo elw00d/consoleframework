@@ -15,7 +15,7 @@ namespace ConsoleFramework.Controls
     public class WindowsHost : Control
     {
         public WindowsHost() {
-            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(WindowsHost_MouseDownPreview), true);
+            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDown), true);
             AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
                 //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
             }) );
@@ -75,14 +75,44 @@ namespace ConsoleFramework.Controls
             }
         }
         
-        public void WindowsHost_MouseDownPreview(object sender, MouseButtonEventArgs args) {
-            Point position = args.GetPosition(this);
-            List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
-            for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-                Control topChild = childrenOrderedByZIndex[i];
-                if (topChild.RenderSlotRect.Contains(position)) {
-                    activateWindow((Window)topChild);
-                    break;
+        private bool isTopWindowModal( ) {
+            if ( Children.Count == 0 ) return false;
+            return windowInfos[ (Window) Children[ Children.Count - 1 ] ].Modal;
+        }
+
+        public void OnPreviewMouseDown(object sender, MouseButtonEventArgs args) {
+            bool handle = false;
+            if ( isTopWindowModal( ) ) {
+                Window modalWindow = ( Window ) Children[ Children.Count - 1 ];
+                Window windowClicked = VisualTreeHelper.FindClosestParent<Window>((Control)args.Source);
+                if (windowClicked == modalWindow)
+                {
+                    // do nothing
+                } else {
+                    if ( windowInfos[ modalWindow ].OutsideClickClosesWindow ) {
+                        CloseWindow( modalWindow );
+
+                        // обрабатываем событие как обычно
+                        handle = true;
+                    } else {
+                        args.Handled = true;
+                    }
+                }
+            } else {
+                handle = true;
+            }
+            if (handle) {
+//                List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
+//                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
+//                    Control topChild = childrenOrderedByZIndex[i];
+//                    if (topChild.RenderSlotRect.Contains(position)) {
+//                        activateWindow((Window)topChild);
+//                        break;
+//                    }
+//                }
+                Window windowClicked = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
+                if ( null != windowClicked ) {
+                    activateWindow( windowClicked );
                 }
             }
         }
@@ -118,7 +148,34 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public void AddWindow(Window window) {
+        private class WindowInfo
+        {
+            public readonly bool Modal;
+            public readonly bool OutsideClickClosesWindow;
+
+            public WindowInfo( bool modal, bool outsideClickClosesWindow ) {
+                Modal = modal;
+                OutsideClickClosesWindow = outsideClickClosesWindow;
+            }
+        }
+
+        private readonly Dictionary<Window, WindowInfo> windowInfos = new Dictionary< Window, WindowInfo >();
+
+        /// <summary>
+        /// Adds window to window host children and shows it as modal window.
+        /// </summary>
+        public void ShowModal( Window window, bool outsideClickWillCloseWindow = false ) {
+            showCore( window, true, outsideClickWillCloseWindow );
+        }
+
+        /// <summary>
+        /// Adds window to window host children and shows it.
+        /// </summary>
+        public void Show(Window window) {
+            showCore( window, false, false );
+        }
+
+        private void showCore( Window window, bool modal, bool outsideClickWillCloseWindow ) {
             if ( Children.Count != 0 ) {
                 Control topWindow = Children[ Children.Count - 1 ];
                 topWindow.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( topWindow, Window.DeactivatedEvent ) );
@@ -126,9 +183,14 @@ namespace ConsoleFramework.Controls
             AddChild(window);
             window.RaiseEvent( Window.ActivatedEvent, new RoutedEventArgs( window, Window.ActivatedEvent ) );
             initializeFocusOnActivatedWindow(window);
+            windowInfos.Add( window, new WindowInfo( modal, outsideClickWillCloseWindow ) );
         }
 
-        public void RemoveWindow(Window window) {
+        /// <summary>
+        /// Removes window from window host.
+        /// </summary>
+        public void CloseWindow(Window window) {
+            windowInfos.Remove( window );
             window.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( window, Window.DeactivatedEvent ) );
             RemoveChild(window);
             // после удаления окна активизировать то, которое было активным до него
@@ -139,6 +201,18 @@ namespace ConsoleFramework.Controls
                 initializeFocusOnActivatedWindow(topWindow);
                 Invalidate();
             }
+        }
+
+        /// <summary>
+        /// Утилитный метод, позволяющий для любого контрола определить ближайший WindowsHost,
+        /// в котором он размещается.
+        /// </summary>
+        public static WindowsHost FindWindowsHostParent( Control control ) {
+            Control tmp = control;
+            while ( tmp != null && !( tmp is WindowsHost ) ) {
+                tmp = tmp.Parent;
+            }
+            return ( WindowsHost ) ( tmp );
         }
     }
 }

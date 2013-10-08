@@ -1,14 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
+    /// <summary>
+    /// В свёрнутом состоянии представляет собой однострочный контрол. При разворачивании списка
+    /// создаётся всплывающее модальное кастомное окошко и показывается пользователю, причём первая
+    /// строчка этого окна - прозрачная и через неё видно сам комбобокс (это нужно для того, чтобы
+    /// обрабатывать клики по комбобоксу - при клике на прозрачную область комбобокс должен сворачиваться).
+    /// Если этого бы не было, то с учётом того, что модальное окно показывается с флагом
+    /// outsideClickWillCloseWindow = true, клик по самому комбобоксу приводил бы к мгновенному закрытию
+    /// и открытию комбобокса заново.
+    /// </summary>
     public class ComboBox : Control
     {
         public ComboBox( ) {
@@ -33,36 +39,28 @@ namespace ConsoleFramework.Controls
             }
 
             protected override void initialize( ) {
-                AddHandler(Window.ActivatedEvent, new EventHandler(OnActivated));
-                AddHandler( Control.KeyDownEvent, new KeyEventHandler(OnKeyDown), true );
-                AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
-                    //args.Handled = true;
-                }) );
-                AddHandler( MouseDownEvent, new MouseEventHandler(( sender, args ) => {
-                    Point position = args.GetPosition( this );
-                    if ( !new Rect( new Size( this.ActualWidth, this.ActualHeight ) ).Contains( position ) ) {
-                        ConsoleApplication.Instance.EndCaptureInput(this);
-                        getWindowsHost().RemoveWindow(this);
-                    }
-                } ) );
+                AddHandler(ActivatedEvent, new EventHandler(OnActivated));
+                AddHandler( KeyDownEvent, new KeyEventHandler(OnKeyDown), true );
             }
 
             private new void OnKeyDown( object sender, KeyEventArgs args ) {
                 if (args.wVirtualKeyCode == 0x1B) { // VK_ESCAPE
-                    ConsoleApplication.Instance.EndCaptureInput( this );
-                    getWindowsHost(  ).RemoveWindow( this );
+                    Close();
                 } else base.OnKeyDown( sender, args );
             }
 
             private void OnActivated( object sender, EventArgs eventArgs ) {
-                ConsoleApplication.Instance.BeginCaptureInput(this);
             }
 
             public override void Render(RenderingBuffer buffer)
             {
                 ushort borderAttrs = Color.Attr(Color.White, Color.Gray);
+                // устанавливаем прозрачными первую строку и первый столбец
+                // для столбца дополнительно включена прозрачность для событий мыши
+                buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
+                buffer.SetOpacityRect( 0, 0, 1, ActualHeight, 6 );
                 // background
-                buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
+                buffer.FillRectangle(1, 1, this.ActualWidth-1, this.ActualHeight-1, ' ', borderAttrs);
             }
 
             public override string ToString() {
@@ -72,12 +70,14 @@ namespace ConsoleFramework.Controls
 
         private void OnMouseDown( object sender, MouseButtonEventArgs mouseButtonEventArgs ) {
             Window popup = new PopupWindow();
-            popup.X = 0;
-            popup.Y = 0;
-            popup.Width = 15;
-            popup.Height = 8;
+            Point popupCoord = TranslatePoint( this, new Point( 0, 0 ),
+                WindowsHost.FindWindowsHostParent(this));
+            popup.X = popupCoord.X;
+            popup.Y = popupCoord.Y;
+            popup.Width = ActualWidth;
+            popup.Height = 8; // todo:
             WindowsHost windowsHost = ( ( WindowsHost ) this.Parent.Parent.Parent );
-            windowsHost.AddWindow( popup );
+            windowsHost.ShowModal( popup, true );
         }
 
         private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {

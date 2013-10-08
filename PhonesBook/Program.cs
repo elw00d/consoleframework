@@ -84,7 +84,7 @@ namespace PhonesBook
                     Title = "Телефоны",
                     Content = panelMain
                 };
-                windowsHost.AddWindow(new Window() {
+                windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,
                     MinHeight = 10,
@@ -99,7 +99,7 @@ namespace PhonesBook
                 });
 
                 window1.ChildToFocus = "textBoxName";
-                windowsHost.AddWindow(window1);
+                windowsHost.Show(window1);
                 //panelName.IsFocusScope = true;
                 //application.FocusManager.SetFocus(textBox);
                 //application.FocusManager.SetFocus(null);

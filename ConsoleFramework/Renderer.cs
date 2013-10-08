@@ -354,5 +354,13 @@ namespace ConsoleFramework
                 return buffer;
             }
         }
+
+        /// <summary>
+        /// Возващает код прозрачности контрола в указанной точке.
+        /// Это необходимо для определения контрола, который станет источником события мыши.
+        /// </summary>
+        internal int getControlOpacityAt( Control control, int x, int y ) {
+            return buffers[ control ].GetOpacityAt( x, y );
+        }
     }
 }

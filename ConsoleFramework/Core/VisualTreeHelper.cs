@@ -49,5 +49,18 @@ namespace ConsoleFramework.Core
             }
             return false;
         }
+
+        /// <summary>
+        /// Ищет ближайший родительский элемент контрола типа T.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="control"></param>
+        /// <returns></returns>
+        public static T FindClosestParent< T >( Control control ) where T : Control {
+            Control tmp = control;
+            while ( tmp != null && !( tmp is T ) )
+                tmp = tmp.Parent;
+            return (T) tmp;
+        }
     }
 }

@@ -25,8 +25,6 @@ namespace ConsoleFramework.Controls
 
         public Window() {
             this.IsFocusScope = true;
-            Focusable = true;//todo : remove after test
-
             initialize(  );
         }
 
@@ -173,12 +171,12 @@ namespace ConsoleFramework.Controls
                 buffer.SetPixel(4, 0, ']');
             }
             // shadows
-            buffer.SetOpacity(0, ActualHeight - 1, 2);
-            buffer.SetOpacity(1, ActualHeight - 1, 2);
-            buffer.SetOpacity(ActualWidth - 1, 0, 2);
-            buffer.SetOpacity(ActualWidth - 2, 0, 2);
-            buffer.SetOpacityRect(2, ActualHeight - 1, ActualWidth - 2, 1, 1);
-            buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1);
+            buffer.SetOpacity(0, ActualHeight - 1, 2+4);
+            buffer.SetOpacity(1, ActualHeight - 1, 2+4);
+            buffer.SetOpacity(ActualWidth - 1, 0, 2+4);
+            buffer.SetOpacity(ActualWidth - 2, 0, 2+4);
+            buffer.SetOpacityRect(2, ActualHeight - 1, ActualWidth - 2, 1, 1+4);
+            buffer.SetOpacityRect(ActualWidth - 2, 1, 2, ActualHeight - 1, 1+4);
             // title
             if (!string.IsNullOrEmpty(Title)) {
                 int titleStartX = 7;
@@ -267,11 +265,15 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public void Close( ) {
+            getWindowsHost(  ).CloseWindow( this );
+        }
+
         public void Window_OnMouseUp(object sender, MouseButtonEventArgs args) {
             if (closing) {
                 Point point = args.GetPosition(this);
                 if (point.x == 3 && point.y == 0) {
-                    getWindowsHost().RemoveWindow(this);
+                    getWindowsHost().CloseWindow(this);
                 }
                 closing = false;
                 showClosingGlyph = false;

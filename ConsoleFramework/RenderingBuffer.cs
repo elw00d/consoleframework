@@ -12,11 +12,16 @@ namespace ConsoleFramework
     /// </summary>
     public sealed class RenderingBuffer {
         private CHAR_INFO[,] buffer;
-        /// <summary>
+        /// <summary> todo : convert to enum
         /// 0 - непрозрачный пиксель
         /// 1 - полупрозрачный (отображается как тень)
         /// 2 - полностью прозрачный (при наложении на другой буфер будет проигнорирован)
         /// 3 - прозначный фон (при наложении на другой буфер символы возьмут его background) - для рамок на кнопках, к примеру
+        /// 
+        /// 4 - то же, что и 0, но пропускает через себя события мыши
+        /// 5 - то же, что и 1, но пропускает через себя события мыши
+        /// 6 - то же, что и 2, но пропускает через себя события мыши
+        /// 7 - то же, что и 3, но пропускает через себя события мыши
         /// </summary>
         private int[,] opacityMatrix;
         // todo : add bool hasOpacityAttributes and optimize this
@@ -85,13 +90,13 @@ namespace ConsoleFramework
                             if (layoutClip.Contains(childX, childY)) {
                                 CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
                                 int opacity = childBuffer.opacityMatrix[childX, childY];
-                                if (opacity == 0) {
+                                if (opacity == 0 || opacity == 4) {
                                     this.buffer[parentX, parentY] = charInfo;
-                                } else if (opacity == 1) {
+                                } else if (opacity == 1 || opacity == 5) {
                                     charInfo.Attributes = (CHAR_ATTRIBUTES) Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
-                                } else if (opacity == 3) {
+                                } else if (opacity == 3 || opacity == 7) {
                                     // берем фоновые атрибуты символа из родительского буфера
                                     CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
                                     if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
@@ -147,13 +152,13 @@ namespace ConsoleFramework
                             if (renderSlotRect.Contains(parentX, parentY) && layoutClip.Contains(childX, childY)) {
                                 CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
                                 int opacity = childBuffer.opacityMatrix[childX, childY];
-                                if (opacity == 0) {
+                                if (opacity == 0 || opacity == 4) {
                                     this.buffer[parentX, parentY] = charInfo;
-                                } else if (opacity == 1) {
+                                } else if (opacity == 1 || opacity == 5) {
                                     charInfo.Attributes = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
-                                } else if (opacity == 3) {
+                                } else if (opacity == 3 || opacity == 7) {
                                     // берем фоновые атрибуты символа из родительского буфера
                                     CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
                                     if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
@@ -199,14 +204,14 @@ namespace ConsoleFramework
         }
 
         public void SetOpacity(int x, int y, int opacity) {
-            if (opacity != 0 && opacity != 1 && opacity != 2 && opacity != 3)
+            if (opacity < 0 || opacity > 7)
                 throw new ArgumentException("opacity");
             //
             opacityMatrix[x, y] = opacity;
         }
 
         public void SetOpacityRect(int x, int y, int w, int h, int opacity) {
-            if (opacity != 0 && opacity != 1 && opacity != 2 && opacity != 3)
+            if (opacity < 0 || opacity > 7)
                 throw new ArgumentException("opacity");
             for (int i = 0; i < w; i++) {
                 int _x = x + i;
@@ -291,6 +296,13 @@ namespace ConsoleFramework
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Возвращает код прозрачности в указанной точке.
+        /// </summary>
+        public int GetOpacityAt( int x, int y ) {
+            return opacityMatrix[ x, y ];
         }
     }
 }

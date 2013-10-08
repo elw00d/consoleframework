@@ -48,16 +48,17 @@ namespace ConsoleFramework {
                     {
                         Width = 14
                     };
+                panel.AddChild(comboBox);
                 panel.AddChild(button);
                 panel.AddChild(textBox);
-                panel.AddChild( comboBox );
+                
                 //application.Run(panel);
                 WindowsHost windowsHost = new WindowsHost()
                                               {
                                                   Name = "WindowsHost"
                                               };
                 Window window1 = new Window {
-                    X = 3,
+                    X = 5,
                     Y = 4,
                     //MinHeight = 100,
                     //MaxWidth = 30,
@@ -68,7 +69,7 @@ namespace ConsoleFramework {
                     Title = "Window1",
                     Content = panel
                 };
-                windowsHost.AddWindow(new Window() {
+                windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,
                     MinHeight = 10,
@@ -81,7 +82,7 @@ namespace ConsoleFramework {
                         Name = "Label_window2"
                     }
                 });
-                windowsHost.AddWindow(new Window() {
+                windowsHost.Show(new Window() {
                     X = 30,
                     Y = 15,
                     Name = "window 3",
@@ -89,7 +90,7 @@ namespace ConsoleFramework {
                         Content = new StrangeControl()
                     }
                 });
-                windowsHost.AddWindow(window1);
+                windowsHost.Show(window1);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 application.Run(windowsHost);
             }

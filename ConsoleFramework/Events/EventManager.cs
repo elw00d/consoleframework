@@ -190,8 +190,8 @@ namespace ConsoleFramework.Events {
         public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
-                //if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)
-                //    return;
+//                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)
+//                    return;
                 if (mouseEvent.dwEventFlags != MouseEventFlags.PRESSED_OR_RELEASED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_MOVED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.DOUBLE_CLICK &&
@@ -512,6 +512,10 @@ namespace ConsoleFramework.Events {
 
         /// <summary>
         /// Находит самый верхний элемент под указателем мыши с координатами rawPoint.
+        /// Учитывается прозрачность элементов - если пиксель, куда указывает мышь, отмечен как
+        /// прозрачный для событий мыши (opacity от 4 до 7), то они будут проходить насквозь,
+        /// к следующему контролу.
+        /// Так обрабатываются, например, тени окошек и прозрачные места контролов (первый столбец Combobox).
         /// </summary>
         /// <param name="rawPoint"></param>
         /// <param name="control">RootElement для проверки всего визуального дерева.</param>
@@ -522,6 +526,11 @@ namespace ConsoleFramework.Events {
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control child = childrenOrderedByZIndex[i];
                     if (Control.HitTest(rawPoint, control, child)) {
+                        Point childPoint = Control.TranslatePoint( null, rawPoint, child );
+                        int opacity = ConsoleApplication.Instance.Renderer.getControlOpacityAt( child, childPoint.X, childPoint.Y );
+                        if ( opacity >= 4 && opacity <= 7 ) {
+                            continue;
+                        }
                         return findSource(rawPoint, child);
                     }
                 }
