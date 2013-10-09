@@ -375,8 +375,9 @@ namespace ConsoleFramework.Events {
                     if ( !isControlAllowedToReceiveEvents( ( Control ) args.Source, capturingControl ) )
                         return false;
                 }
-                //
-                foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+
+                // copy handlersList to local list to avoid modifications when enumerating
+                foreach (DelegateInfo delegateInfo in new List< DelegateInfo >(targetInfo.handlersList)) {
                     if (!args.Handled || delegateInfo.handledEventsToo) {
                         if (delegateInfo.@delegate is RoutedEventHandler) {
                             ((RoutedEventHandler) delegateInfo.@delegate).Invoke(targetInfo.target, args);
@@ -410,7 +411,7 @@ namespace ConsoleFramework.Events {
                         RoutedEventTargetInfo targetInfo =
                             subscribedTargets.FirstOrDefault(info => info.target == target);
                         if (null != targetInfo) {
-                            foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                            foreach (DelegateInfo delegateInfo in new List< DelegateInfo >(targetInfo.handlersList)) {
                                 if (!args.Handled || delegateInfo.handledEventsToo) {
                                     if (delegateInfo.@delegate is RoutedEventHandler) {
                                         ((RoutedEventHandler) delegateInfo.@delegate).Invoke(target, args);
@@ -493,7 +494,8 @@ namespace ConsoleFramework.Events {
                         RoutedEventTargetInfo targetInfo =
                             subscribedTargets.FirstOrDefault(info => info.target == target);
                         if (null != targetInfo) {
-                            foreach (DelegateInfo delegateInfo in targetInfo.handlersList) {
+                            //
+                            foreach (DelegateInfo delegateInfo in new List< DelegateInfo >(targetInfo.handlersList)) {
                                 if (!args.Handled || delegateInfo.handledEventsToo) {
                                     if (delegateInfo.@delegate is RoutedEventHandler) {
                                         ((RoutedEventHandler) delegateInfo.@delegate).Invoke(target, args);
