@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
+using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
@@ -1049,6 +1050,40 @@ namespace ConsoleFramework.Controls
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Записывает строку в буфер, обрезая её при необходимости (ставя в конце две точки).
+        /// </summary>
+        /// <param name="s">Строка</param>
+        /// <param name="buffer">Буфер вывода</param>
+        /// <param name="x">X-координата, с которой начинать вывод строки</param>
+        /// <param name="y">Y-координата</param>
+        /// <param name="maxWidth">Доступная для вывода ширина (начиная с x). То есть x + maxWidth не должен
+        /// превышать ActualWidth контрола</param>
+        /// <param name="attr">Атрибуты</param>
+        /// <returns>Количество реально выведенных в буфер пикселей, min(s.len, maxWidth)</returns>
+        protected static int RenderString(string s,
+            RenderingBuffer buffer,
+            int x,
+            int y,
+            int maxWidth,
+            CHAR_ATTRIBUTES attr)
+        {
+            for (int i = 0; i < Math.Min(s.Length, maxWidth); i++)
+            {
+                char c;
+                if (i + 2 < maxWidth || i < 2 || s.Length <= maxWidth)
+                {
+                    c = s[i];
+                }
+                else
+                {
+                    c = '.';
+                }
+                buffer.SetPixel(x + i, y, c, attr);
+            }
+            return Math.Min(s.Length, maxWidth);
         }
     }
 }

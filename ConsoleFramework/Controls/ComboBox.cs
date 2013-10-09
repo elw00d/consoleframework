@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -26,16 +27,27 @@ namespace ConsoleFramework.Controls
 
         private class PopupWindow : Window
         {
-            public PopupWindow( ) {
-                AddChild( new TextBlock()
-                    {
-                        Text = "Item 1"
-                    } );
-                AddChild(new TextBlock()
-                {
-                    Text = "Item 2"
-                });
-                //Focusable = true;
+            public int IndexSelected;
+
+            public PopupWindow( IEnumerable< string > items, int selectedItemIndex  ) {
+                ListBox listbox = new ListBox(  );
+                listbox.Items.AddRange( items );
+                listbox.SelectedItemIndex = selectedItemIndex;
+                IndexSelected = selectedItemIndex;
+                listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+                Content = listbox;
+                EventManager.AddHandler( listbox, MouseUpEvent, new MouseButtonEventHandler(
+                    ( sender, args ) => {
+                        IndexSelected = listbox.SelectedItemIndex;
+                        Close();
+                    }), true );
+                EventManager.AddHandler(listbox, KeyDownEvent, new KeyEventHandler(
+                    (sender, args) => {
+                        if ( args.wVirtualKeyCode == 0x0D ) { // VK_RETURN
+                            IndexSelected = listbox.SelectedItemIndex;
+                            Close( );
+                        }
+                    }), true);
             }
 
             protected override void initialize( ) {
@@ -54,7 +66,7 @@ namespace ConsoleFramework.Controls
 
             public override void Render(RenderingBuffer buffer)
             {
-                ushort borderAttrs = Color.Attr(Color.White, Color.Gray);
+                ushort borderAttrs = Color.Attr(Color.Black, Color.DarkCyan);
                 // устанавливаем прозрачными первую строку и первый столбец
                 // для столбца дополнительно включена прозрачность для событий мыши
                 buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
@@ -63,21 +75,59 @@ namespace ConsoleFramework.Controls
                 buffer.FillRectangle(1, 1, this.ActualWidth-1, this.ActualHeight-1, ' ', borderAttrs);
             }
 
+            protected override Size MeasureOverride(Size availableSize)
+            {
+                if (Content == null) return new Size(0, 0);
+                // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
+                Content.Measure( new Size(availableSize.Width - 1, availableSize.Height - 1) );
+                return new Size(Content.DesiredSize.Width + 1, Content.DesiredSize.Height + 1);
+            }
+
+            protected override Size ArrangeOverride(Size finalSize) {
+                if ( Content != null ) {
+                    Content.Arrange( new Rect(new Point(1, 1), new Size(finalSize.Width - 1, finalSize.Height - 1)) );
+                }
+                return finalSize;
+            }
+
             public override string ToString() {
                 return "ComboBox.PopupWindow";
             }
         }
 
+        private bool opened {
+            get {
+                return m_opened;
+            }
+            set {
+                m_opened = value;
+                Invalidate(  );
+            }
+        }
+
         private void OnMouseDown( object sender, MouseButtonEventArgs mouseButtonEventArgs ) {
-            Window popup = new PopupWindow();
+            if (opened) throw new InvalidOperationException("Assertion failed.");
+            Window popup = new PopupWindow(Items, SelectedItemIndex);
+            popup.Width = ActualWidth;
             Point popupCoord = TranslatePoint( this, new Point( 0, 0 ),
                 WindowsHost.FindWindowsHostParent(this));
             popup.X = popupCoord.X;
             popup.Y = popupCoord.Y;
             popup.Width = ActualWidth;
-            popup.Height = 8; // todo:
+            if ( Items.Count != 0 )
+                popup.Height = Items.Count + 1; // 1 строка для прозначного "заголовка"
+            else popup.Height = 2;
             WindowsHost windowsHost = ( ( WindowsHost ) this.Parent.Parent.Parent );
             windowsHost.ShowModal( popup, true );
+            opened = true;
+            EventManager.AddHandler( popup, Window.ClosedEvent, new EventHandler(OnPopupClosed) );
+        }
+
+        private void OnPopupClosed( object o, EventArgs args ) {
+            if (!opened) throw new InvalidOperationException("Assertion failed.");
+            opened = false;
+            this.SelectedItemIndex = ( ( PopupWindow ) o ).IndexSelected;
+            EventManager.RemoveHandler(o, Window.ClosedEvent, new EventHandler(OnPopupClosed));
         }
 
         private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
@@ -88,16 +138,26 @@ namespace ConsoleFramework.Controls
             Invalidate(  );
         }
 
-        public List<String> Items { get; set; }
+        public readonly List<String> Items = new List< string >();
+        public int SelectedItemIndex {
+            get { return selectedItemIndex; }
+            set {
+                if ( selectedItemIndex != value ) {
+                    selectedItemIndex = value;
+                    Invalidate(  );
+                }
+            }
+        }
+
+        private bool m_opened;
+        private int selectedItemIndex;
 
         protected override Size MeasureOverride(Size availableSize) {
-            int w;
-            if ( availableSize.Width == Int32.MaxValue )
-                w = Int32.MaxValue - 1;
-            else {
-                w = availableSize.Width;
-            }
-            return new Size(w, 1);
+            if (Items.Count == 0) return new Size(0, 0);
+            int maxLen = Items.Max(s => s.Length);
+            // 1 пиксель слева от надписи, 1 справа, потом стрелка и ещё 1 пустой пиксель
+            Size size = new Size(Math.Min(maxLen + 4, availableSize.Width), 1);
+            return size;
         }
 
         public override void Render(RenderingBuffer buffer) {
@@ -106,14 +166,15 @@ namespace ConsoleFramework.Controls
                 attrs = Color.Attr(Color.White, Color.DarkGreen);
             } else attrs = Color.Attr( Color.Black, Color.DarkCyan );
 
-            for ( int i = 0; i < ActualWidth - 2; i++ ) {
-                buffer.SetPixel( i, 0, ' ' , ( CHAR_ATTRIBUTES ) attrs );
+            buffer.SetPixel( 0, 0, ' ', ( CHAR_ATTRIBUTES ) attrs );
+            int usedForCurrentItem = 0;
+            if ( Items.Count != 0 && ActualWidth > 4 ) {
+                usedForCurrentItem = RenderString(Items[SelectedItemIndex], buffer, 1, 0, ActualWidth - 4, (CHAR_ATTRIBUTES)attrs);
             }
-            if ( ActualWidth > 2 ) {
-                buffer.SetPixel( ActualWidth - 2, 0, 'v', ( CHAR_ATTRIBUTES ) attrs );
-            }
-            if ( ActualWidth > 1 ) {
-                buffer.SetPixel( ActualWidth - 1, 0, ' ', ( CHAR_ATTRIBUTES ) attrs );
+            buffer.FillRectangle( 1 + usedForCurrentItem, 0, ActualWidth - (usedForCurrentItem + 1), 1, ' ', attrs );
+            if (ActualWidth > 2)
+            {
+                buffer.SetPixel(ActualWidth - 2, 0, opened ? '^' : 'v', (CHAR_ATTRIBUTES)attrs);
             }
         }
     }

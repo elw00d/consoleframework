@@ -193,6 +193,7 @@ namespace ConsoleFramework.Controls
             windowInfos.Remove( window );
             window.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( window, Window.DeactivatedEvent ) );
             RemoveChild(window);
+            window.RaiseEvent( Window.ClosedEvent, new RoutedEventArgs( window, Window.ClosedEvent ) );
             // после удаления окна активизировать то, которое было активным до него
             List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
             if ( childrenOrderedByZIndex.Count != 0 ) {

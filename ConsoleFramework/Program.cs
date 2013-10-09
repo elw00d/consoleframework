@@ -46,8 +46,12 @@ namespace ConsoleFramework {
                 };
                 ComboBox comboBox = new ComboBox(  )
                     {
-                        Width = 14
+//                        Width = 14
+//HorizontalAlignment = HorizontalAlignment.Stretch
                     };
+                comboBox.Items.Add( "Сделать одно" );
+                comboBox.Items.Add("Сделать второе");
+                comboBox.Items.Add("Ничего не делать");
                 ListBox listbox = new ListBox(  );
                 listbox.Items.Add( "First item" );
                 listbox.Items.Add( "second item1!!!!!!1fff" );

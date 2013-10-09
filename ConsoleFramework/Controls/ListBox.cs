@@ -66,8 +66,10 @@ namespace ConsoleFramework.Controls
             // если maxLen < availableSize.Width, то возвращается maxLen
             // если maxLen > availableSize.Width, возвращаем availableSize.Width,
             // а содержимое не влезающих строк будет выведено с многоточием
+            if (Items.Count == 0) return new Size(0, 0);
             int maxLen = Items.Max( s => s.Length );
-            Size size = new Size(Math.Min( maxLen, availableSize.Width ), Items.Count);
+            // 1 пиксель слева и 1 справа
+            Size size = new Size(Math.Min( maxLen + 2, availableSize.Width ), Items.Count);
             return size;
         }
 
@@ -76,38 +78,44 @@ namespace ConsoleFramework.Controls
             ushort selectedAttr = Color.Attr(Color.White, Color.DarkGreen);
             ushort attr = Color.Attr(Color.Black, Color.DarkCyan);
             for ( int y = 0; y < ActualHeight; y++ ) {
-                string item = Items[ y ];
-                ushort currentAttr = SelectedItemIndex == y ? selectedAttr : attr;
+                string item = y < Items.Count ? Items[ y ] : null;
 
-                string renderTitleString = "";
-                if (ActualWidth > 0)
-                {
-                    if (item.Length <= ActualWidth)
-                    {
-                        // dont truncate title
-                        renderTitleString = item;
+                if ( item != null ) {
+                    ushort currentAttr = SelectedItemIndex == y ? selectedAttr : attr;
+
+                    buffer.SetPixel( 0, y, ' ', ( CHAR_ATTRIBUTES ) currentAttr );
+                    if ( ActualWidth > 1 ) {
+                        // минус 2 потому что у нас есть по пустому пикселю слева и справа
+                        int rendered = RenderString( item, buffer, 1, y, ActualWidth - 2, ( CHAR_ATTRIBUTES ) currentAttr );
+                        //if ( 1 + rendered < ActualWidth ) {
+                            buffer.FillRectangle( 1 + rendered, y, ActualWidth - (1 + rendered), 1, ' ',
+                                currentAttr);
+                        //}
                     }
-                    else
-                    {
-                        renderTitleString = item.Substring(0, ActualWidth);
-                        if (renderTitleString.Length > 3)
-                        {
-                            renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
-                        }
-                        else if (renderTitleString.Length > 2)
-                        {
-                            renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 1) + ".";
-                        }
-                    }
-                }
-                for (int i = 0; i < renderTitleString.Length; i++)
-                {
-                    buffer.SetPixel(0 + i, y, renderTitleString[i], (CHAR_ATTRIBUTES)currentAttr);
-                }
-                int usedLen = ( renderTitleString != null ? renderTitleString.Length : 0 );
-                if (usedLen < ActualWidth)
-                {
-                    buffer.FillRectangle(usedLen, y, ActualWidth - usedLen, 1, ' ', (CHAR_ATTRIBUTES)currentAttr);
+//                    string renderTitleString = "";
+//                    if ( ActualWidth > 0 ) {
+//                        if ( item.Length <= ActualWidth ) {
+//                            // dont truncate title
+//                            renderTitleString = item;
+//                        } else {
+//                            renderTitleString = item.Substring( 0, ActualWidth );
+//                            if ( renderTitleString.Length > 3 ) {
+//                                renderTitleString = renderTitleString.Substring( 0, renderTitleString.Length - 2 ) +
+//                                                    "..";
+//                            } else if ( renderTitleString.Length > 2 ) {
+//                                renderTitleString = renderTitleString.Substring( 0, renderTitleString.Length - 1 ) + ".";
+//                            }
+//                        }
+//                    }
+//                    for ( int i = 0; i < renderTitleString.Length; i++ ) {
+//                        buffer.SetPixel( 0 + i, y, renderTitleString[ i ], ( CHAR_ATTRIBUTES ) currentAttr );
+//                    }
+//                    int usedLen = ( renderTitleString != null ? renderTitleString.Length : 0 );
+//                    if ( usedLen < ActualWidth ) {
+//                        buffer.FillRectangle( usedLen, y, ActualWidth - usedLen, 1, ' ', ( CHAR_ATTRIBUTES ) currentAttr );
+//                    }
+                } else {
+                    buffer.FillRectangle(0, y, ActualWidth, 1, ' ', (CHAR_ATTRIBUTES)attr);
                 }
             }
         }
