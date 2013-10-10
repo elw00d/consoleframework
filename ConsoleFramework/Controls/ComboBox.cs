@@ -18,7 +18,14 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class ComboBox : Control
     {
-        public ComboBox( ) {
+        private readonly bool shadow;
+
+        /// <summary>
+        /// Создаёт экземпляр комбобокса
+        /// </summary>
+        /// <param name="shadow">Отображать ли тень</param>
+        public ComboBox( bool shadow = true ) {
+            this.shadow = shadow;
             Focusable = true;
             AddHandler( GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus) );
             AddHandler( LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus) );
@@ -29,13 +36,15 @@ namespace ConsoleFramework.Controls
         private class PopupWindow : Window
         {
             public int IndexSelected;
+            private bool shadow;
 
-            public PopupWindow( IEnumerable< string > items, int selectedItemIndex  ) {
+            public PopupWindow( IEnumerable< string > items, int selectedItemIndex, bool shadow  ) {
+                this.shadow = shadow;
                 ListBox listbox = new ListBox(  );
                 listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
                 IndexSelected = selectedItemIndex;
-                listbox.HorizontalAlignment = HorizontalAlignment.Left;
+                listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 Content = listbox;
 
                 // if click on the transparent header, close the popup
@@ -81,23 +90,47 @@ namespace ConsoleFramework.Controls
                 ushort borderAttrs = Color.Attr(Color.Black, Color.DarkCyan);
                 // устанавливаем прозрачными первую строку и первый столбец
                 // для столбца дополнительно включена прозрачность для событий мыши
+
+                // background
+                buffer.FillRectangle(1, 1, this.ActualWidth - 1, this.ActualHeight - 1, ' ', borderAttrs);
+
                 buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
                 buffer.SetOpacityRect( 0, 1, 1, ActualHeight-1, 6 );
-                // background
-                buffer.FillRectangle(1, 1, this.ActualWidth-1, this.ActualHeight-1, ' ', borderAttrs);
+                if ( shadow ) {
+                    buffer.SetOpacity( 1, ActualHeight - 1, 6 );
+                    buffer.SetOpacity( ActualWidth - 1, 0, 2 );
+                    buffer.SetOpacityRect( ActualWidth - 1, 1, 1, ActualHeight - 1, 1 );
+                    buffer.FillRectangle( ActualWidth - 1, 1, 1, ActualHeight - 1, '\u2588', borderAttrs );
+                    buffer.SetOpacityRect( 2, ActualHeight - 1, ActualWidth - 2, 1, 3 );
+                    buffer.FillRectangle( 2, ActualHeight - 1, ActualWidth - 2, 1, '\u2580',
+                                          CHAR_ATTRIBUTES.NO_ATTRIBUTES );
+                    //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );
+                }
             }
 
             protected override Size MeasureOverride(Size availableSize)
             {
                 if (Content == null) return new Size(0, 0);
-                // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
-                Content.Measure( new Size(availableSize.Width - 1, availableSize.Height - 1) );
-                return new Size(Content.DesiredSize.Width + 1, Content.DesiredSize.Height + 1);
+                if ( shadow ) {
+                    // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
+                    Content.Measure( new Size( availableSize.Width - 2, availableSize.Height - 2 ) );
+                    return new Size( Content.DesiredSize.Width + 2, Content.DesiredSize.Height + 2 );
+                } else {
+                    // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
+                    Content.Measure(new Size(availableSize.Width - 1, availableSize.Height - 1));
+                    return new Size(Content.DesiredSize.Width + 1, Content.DesiredSize.Height + 1);
+                }
             }
 
             protected override Size ArrangeOverride(Size finalSize) {
                 if ( Content != null ) {
-                    Content.Arrange( new Rect(new Point(1, 1), new Size(finalSize.Width - 1, finalSize.Height - 1)) );
+                    if ( shadow ) {
+                        Content.Arrange( new Rect( new Point( 1, 1 ),
+                                                   new Size( finalSize.Width - 2, finalSize.Height - 2 ) ) );
+                    } else {
+                        Content.Arrange(new Rect(new Point(1, 1),
+                                                   new Size(finalSize.Width - 1, finalSize.Height - 1)));
+                    }
                 }
                 return finalSize;
             }
@@ -119,16 +152,15 @@ namespace ConsoleFramework.Controls
 
         private void openPopup( ) {
             if (opened) throw new InvalidOperationException("Assertion failed.");
-            Window popup = new PopupWindow(Items, SelectedItemIndex);
-            popup.Width = ActualWidth;
+            Window popup = new PopupWindow(Items, SelectedItemIndex, shadow);
             Point popupCoord = TranslatePoint(this, new Point(0, 0),
                 WindowsHost.FindWindowsHostParent(this));
             popup.X = popupCoord.X;
             popup.Y = popupCoord.Y;
-            popup.Width = ActualWidth;
+            popup.Width = shadow ? ActualWidth+1 : ActualWidth;
             if (Items.Count != 0)
-                popup.Height = Items.Count + 1; // 1 строка для прозначного "заголовка"
-            else popup.Height = 2;
+                popup.Height = Items.Count + (shadow ? 2 : 1); // 1 строка для прозначного "заголовка"
+            else popup.Height = shadow ? 3 : 2;
             WindowsHost windowsHost = ((WindowsHost)this.Parent.Parent.Parent);
             windowsHost.ShowModal(popup, true);
             opened = true;

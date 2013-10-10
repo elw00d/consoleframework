@@ -208,7 +208,8 @@ namespace ConsoleFramework
                 fullBuffers[control] = fullBuffer;
             }
             buffer.Clear();
-            control.Render(buffer);
+            if (control.RenderSize.Width != 0 && control.RenderSize.Height != 0)
+                control.Render(buffer);
             // проверяем дочерние контролы - если их layoutInfo не изменился по сравнению с последним,
             // то мы можем взять их последний renderBuffer без обновления и применить к текущему контролу
             fullBuffer.CopyFrom(buffer);
@@ -300,7 +301,8 @@ namespace ConsoleFramework
             }
             // otherwise we should assemble full rendered buffer using childs
             buffer.Clear();
-            control.Render(buffer);
+            if (control.RenderSize.Width != 0 && control.RenderSize.Height != 0)
+                control.Render(buffer);
             //
             fullBuffer.CopyFrom(buffer);
             foreach (Control child in control.Children) {
