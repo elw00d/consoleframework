@@ -23,6 +23,7 @@ namespace ConsoleFramework.Controls
             AddHandler( GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus) );
             AddHandler( LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus) );
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
+            AddHandler( KeyDownEvent, new KeyEventHandler(OnKeyDown) );
         }
 
         private class PopupWindow : Window
@@ -34,8 +35,18 @@ namespace ConsoleFramework.Controls
                 listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
                 IndexSelected = selectedItemIndex;
-                listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+                listbox.HorizontalAlignment = HorizontalAlignment.Left;
                 Content = listbox;
+
+                // if click on the transparent header, close the popup
+                AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
+                    if ( !listbox.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
+                        Close();
+                        args.Handled = true;
+                    }
+                }));
+
+                // if listbox item has been selected
                 EventManager.AddHandler( listbox, MouseUpEvent, new MouseButtonEventHandler(
                     ( sender, args ) => {
                         IndexSelected = listbox.SelectedItemIndex;
@@ -48,6 +59,7 @@ namespace ConsoleFramework.Controls
                             Close( );
                         }
                     }), true);
+                // todo : cleanup event handlers after popup closing
             }
 
             protected override void initialize( ) {
@@ -70,7 +82,7 @@ namespace ConsoleFramework.Controls
                 // устанавливаем прозрачными первую строку и первый столбец
                 // для столбца дополнительно включена прозрачность для событий мыши
                 buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
-                buffer.SetOpacityRect( 0, 0, 1, ActualHeight, 6 );
+                buffer.SetOpacityRect( 0, 1, 1, ActualHeight-1, 6 );
                 // background
                 buffer.FillRectangle(1, 1, this.ActualWidth-1, this.ActualHeight-1, ' ', borderAttrs);
             }
@@ -105,22 +117,32 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private void OnMouseDown( object sender, MouseButtonEventArgs mouseButtonEventArgs ) {
+        private void openPopup( ) {
             if (opened) throw new InvalidOperationException("Assertion failed.");
             Window popup = new PopupWindow(Items, SelectedItemIndex);
             popup.Width = ActualWidth;
-            Point popupCoord = TranslatePoint( this, new Point( 0, 0 ),
+            Point popupCoord = TranslatePoint(this, new Point(0, 0),
                 WindowsHost.FindWindowsHostParent(this));
             popup.X = popupCoord.X;
             popup.Y = popupCoord.Y;
             popup.Width = ActualWidth;
-            if ( Items.Count != 0 )
+            if (Items.Count != 0)
                 popup.Height = Items.Count + 1; // 1 строка для прозначного "заголовка"
             else popup.Height = 2;
-            WindowsHost windowsHost = ( ( WindowsHost ) this.Parent.Parent.Parent );
-            windowsHost.ShowModal( popup, true );
+            WindowsHost windowsHost = ((WindowsHost)this.Parent.Parent.Parent);
+            windowsHost.ShowModal(popup, true);
             opened = true;
-            EventManager.AddHandler( popup, Window.ClosedEvent, new EventHandler(OnPopupClosed) );
+            EventManager.AddHandler(popup, Window.ClosedEvent, new EventHandler(OnPopupClosed));
+        }
+
+        private void OnKeyDown( object sender, KeyEventArgs args ) {
+            if ( args.wVirtualKeyCode == 0x0D ) { // VK_RETURN
+                openPopup(  );
+            }
+        }
+
+        private void OnMouseDown( object sender, MouseButtonEventArgs mouseButtonEventArgs ) {
+            openPopup(  );
         }
 
         private void OnPopupClosed( object o, EventArgs args ) {
