@@ -43,6 +43,7 @@
     </Compile>
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
+    <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Core\VisualTreeHelper.cs" />

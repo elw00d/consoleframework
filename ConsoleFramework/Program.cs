@@ -80,18 +80,25 @@ namespace ConsoleFramework {
                     Title = "Window1",
                     Content = panel
                 };
+                ScrollViewer scrollViewer = new ScrollViewer(  );
+                ListBox listBox = new ListBox(  );
+                listBox.Items.Add( "Длинный элемент" );
+                listBox.Items.Add("Длинный элемент 2");
+                listBox.Items.Add("Длинный элемент 3");
+                listBox.Items.Add("Длинный элемент 4");
+                listBox.Items.Add("Длинный элемент 5");
+                listBox.Items.Add("Длинный элемент 6");
+                listBox.Items.Add("Длинный элемент 700");
+                scrollViewer.Content = listBox;
                 windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,
-                    MinHeight = 10,
-                    MinWidth = 10,
+                    //MinHeight = 10,
+                    //MinWidth = 10,
                     C = '2',
                     Name = "Window2",
                     Title = "Очень длинное название окна",
-                    Content = new TextBlock() {
-                        Text = "window2 window2",
-                        Name = "Label_window2"
-                    }
+                    Content = scrollViewer
                 });
                 windowsHost.Show(new Window() {
                     X = 30,
