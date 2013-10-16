@@ -92,6 +92,7 @@ namespace ConsoleFramework
                                 int opacity = childBuffer.opacityMatrix[childX, childY];
                                 if (opacity == 0 || opacity == 4) {
                                     this.buffer[parentX, parentY] = charInfo;
+                                    this.opacityMatrix[ parentX, parentY ] = opacity;
                                 } else if (opacity == 1 || opacity == 5) {
                                     charInfo.Attributes = (CHAR_ATTRIBUTES) Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
@@ -154,6 +155,7 @@ namespace ConsoleFramework
                                 int opacity = childBuffer.opacityMatrix[childX, childY];
                                 if (opacity == 0 || opacity == 4) {
                                     this.buffer[parentX, parentY] = charInfo;
+                                    this.opacityMatrix[parentX, parentY] = opacity;
                                 } else if (opacity == 1 || opacity == 5) {
                                     charInfo.Attributes = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;

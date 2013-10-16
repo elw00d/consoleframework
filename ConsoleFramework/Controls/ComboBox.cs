@@ -45,7 +45,6 @@ namespace ConsoleFramework.Controls
                 listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
                 IndexSelected = selectedItemIndex;
-                // todo : исправить баг с тем, что не работает Stretch
                 listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.Content = listbox;

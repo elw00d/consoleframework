@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -177,11 +178,12 @@ namespace ConsoleFramework.Controls
                 // нужно проверить ещё раз, нужен ли горизонтальный сколлбар
                 horizontalScrollVisible = (desiredSize.Width + 1 > availableSize.Width);
             }
-            
-            return new Size(
-                Math.Min( verticalScrollVisible ? desiredSize.Width + 1 :desiredSize.Width, availableSize.Width),
-                Math.Min( horizontalScrollVisible ? desiredSize.Height + 1 : desiredSize.Height, availableSize.Height)
-            );
+
+            int width = Math.Min( verticalScrollVisible ? desiredSize.Width + 1 : desiredSize.Width, availableSize.Width );
+            int height = Math.Min( horizontalScrollVisible ? desiredSize.Height + 1 : desiredSize.Height, availableSize.Height );
+            Size result = new Size( width, height );
+            Debugger.Log( 1, "", "ScrollViewer.MeasureOverride: " + result+ "\n" );
+            return result;
         }
 
         protected override Size ArrangeOverride(Size finalSize) {
@@ -217,15 +219,47 @@ namespace ConsoleFramework.Controls
                 );
             }
 
+            Debugger.Log( 1,"", "Content.Arrange(" + finalRect + ")\n" );
             Content.Arrange( finalRect );
-            return new Size(Math.Min(verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, width),
-                Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, height));
+            int resultWidth =
+                Math.Min(verticalScrollVisible ? 1 + finalRect.Width : finalRect.Width, width);
+            int resultHeight =
+                Math.Min(horizontalScrollVisible ? 1 + finalRect.Height : finalRect.Height, height);
+
+            // !!! Нельзя так делать:
+            // Нельзя вызывать для дочерних элементов Arrange со значением, превышающим
+            // то, которое будет возвращено из ArrangeOverride. Это будет означать, что родительский
+            // контрол сообщит, что ему надо места мало, а дочернему выделит даже больше чем имеется,
+            // и дочерний контрол при рендеринге будет затирать родительский элемент управления.
+            // За рамки слота родительского контрола он, конечно, не залезет (обрежется системой
+            // отрисовки), но и родительскому контролу не даст ничего нарисовать.
+
+//            int resultWidth2 =
+//                Math.Min( verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, width );
+//            int resultHeight2 =
+//                Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, height );
+
+//            if (HorizontalAlignment == HorizontalAlignment.Stretch)
+//                resultWidth = finalSize.Width;
+//            if (VerticalAlignment == VerticalAlignment.Stretch)
+//                resultHeight = finalSize.Height;
+            Size result = new Size(resultWidth, resultHeight);
+            Debugger.Log(1, "", "ScrollViewer.ArrangeOverride: " + result + "\n");
+            //Debugger.Log(1, "", "ScrollViewer.ActualOffset: " + ActualOffset + "\n");
+            return result;
         }
 
         public override void Render(RenderingBuffer buffer) {
+            Debugger.Log(1, "", "ScrollViewer.RenderSize: " + RenderSize + "\n");
+            Debugger.Log(1, "", "ScrollViewer.RenderSlotRect: " + RenderSlotRect + "\n");
+            Debugger.Log(1, "", "ScrollViewer.ActualOffset: " + ActualOffset + "\n");
+
             CHAR_ATTRIBUTES attr = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkCyan, Color.DarkBlue);
 
+            buffer.SetOpacityRect( 0,0, ActualWidth, ActualHeight, 2 );
+
             if ( horizontalScrollVisible ) {
+                buffer.SetOpacityRect( 0, ActualHeight-1, ActualWidth, 1, 0 );
                 buffer.SetPixel(0, ActualHeight - 1, '\u25C4', attr); // ◄
                 // оставляем дополнительный пиксель справа, если одновременно видны оба скроллбара
                 int rightOffset = verticalScrollVisible ? 1 : 0;
@@ -261,6 +295,8 @@ namespace ConsoleFramework.Controls
                 }
             }
             if ( verticalScrollVisible ) {
+                buffer.SetOpacityRect(ActualWidth-1, 0, 1, ActualHeight, 0);
+
                 buffer.SetPixel(ActualWidth - 1, 0, '\u25B2', attr); // ▲
                 // оставляем дополнительный пиксель снизу, если одновременно видны оба скроллбара
                 int downOffset = horizontalScrollVisible ? 1 : 0;
