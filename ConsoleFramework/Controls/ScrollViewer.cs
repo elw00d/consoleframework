@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
@@ -12,6 +13,37 @@ namespace ConsoleFramework.Controls
         public ScrollViewer( ) {
 //            HorizontalAlignment = HorizontalAlignment.Stretch;
 //            VerticalAlignment = VerticalAlignment.Stretch;
+            AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
+        }
+
+        private void OnMouseDown( object sender, MouseButtonEventArgs args ) {
+            Point pos = args.GetPosition( this );
+            if ( horizontalScrollVisible ) {
+                if ( pos == new Point( 0, ActualHeight - 1 ) ) {
+                    // left arrow clicked todo : учитывать наличие verticalScroll ! тогда можно еще на 1 сдвигать
+                    if ( deltaX <= Content.RenderSize.Width - Content.RenderSlotRect.Size.Width ) {
+                        deltaX++;
+                        Invalidate( );
+                    }
+                }
+                if ( pos ==
+                     new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ), ActualHeight - 1 ) ) {
+                    // right arrow clicked
+                    if ( deltaX > 0 ) {
+                        deltaX--;
+                        Invalidate( );
+                    }
+                }
+            }
+            if ( verticalScrollVisible ) {
+                if ( pos == new Point( ActualWidth - 1, 0 ) ) {
+                    // up arrow clicked
+                }
+                if ( pos ==
+                     new Point( ActualWidth - 1, ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) ) ) {
+                    // down arrow clicked
+                }
+            }
         }
 
         private Control content;
@@ -27,6 +59,9 @@ namespace ConsoleFramework.Controls
 
         private bool horizontalScrollVisible = false;
         private bool verticalScrollVisible = false;
+
+        private int deltaX;
+        private int deltaY;
         
 
         protected override Size MeasureOverride(Size availableSize) {
@@ -54,10 +89,22 @@ namespace ConsoleFramework.Controls
 
         protected override Size ArrangeOverride(Size finalSize) {
             if ( Content == null ) return finalSize;
-            Content.Arrange( new Rect(new Point(0, 0), new Size(
-                    Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width),
-                    Math.Max( 0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height )
-                )) );
+            Rect finalRect = new Rect( new Point( -deltaX, -deltaY ), 
+                new Size( 
+                    deltaX + Math.Max( 0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width ), 
+                    deltaY + Math.Max( 0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height ) )
+                );
+            // todo : для deltaY
+            if (deltaX > Content.DesiredSize.Width - Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width))
+            {
+                deltaX = 0;
+                finalRect = new Rect(new Point(-deltaX, -deltaY),
+                new Size(
+                    deltaX + Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width),
+                    deltaY + Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+                );
+            }
+            Content.Arrange( finalRect );
             return new Size(Math.Min(verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, finalSize.Width),
                 Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, finalSize.Height));
         }
