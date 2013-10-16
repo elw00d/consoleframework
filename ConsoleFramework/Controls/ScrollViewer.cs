@@ -1,13 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
+    /// <summary>
+    /// Контрол, виртуализирующий содержимое так, что можно прокручивать его, если
+    /// оно не вмещается в отведённое пространство.
+    /// todo : добавить обработку нажатий мыши по ползункам и между ползунками и стрелками
+    /// todo : добавить повторение нажатий мыши по таймеру
+    /// </summary>
     public class ScrollViewer : Control
     {
         public ScrollViewer( ) {
@@ -21,20 +24,23 @@ namespace ConsoleFramework.Controls
             if ( horizontalScrollVisible ) {
                 if ( pos == new Point( 0, ActualHeight - 1 ) ) {
                     // left arrow clicked
-                    
-                    // сколько места сейчас оставлено дочернему контролу
-                    int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
-                    if ( deltaX < Content.RenderSize.Width - remainingWidth) {
-                        deltaX++;
-                        Invalidate( );
+                    if (deltaX > 0)
+                    {
+                        deltaX--;
+                        Invalidate();
                     }
+                    
                 } else {
                     if ( pos ==
                          new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ), ActualHeight - 1 ) ) {
                         // right arrow clicked
-                        if ( deltaX > 0 ) {
-                            deltaX--;
-                            Invalidate( );
+                        
+                        // сколько места сейчас оставлено дочернему контролу
+                        int remainingWidth = ActualWidth - (verticalScrollVisible ? 1 : 0);
+                        if (deltaX < Content.RenderSize.Width - remainingWidth)
+                        {
+                            deltaX++;
+                            Invalidate();
                         }
                     }
                 }
@@ -42,20 +48,22 @@ namespace ConsoleFramework.Controls
             if ( verticalScrollVisible ) {
                 if ( pos == new Point( ActualWidth - 1, 0 ) ) {
                     // up arrow clicked
-
-                    // сколько места сейчас оставлено дочернему контролу
-                    int remainingHeight = ActualHeight - ( horizontalScrollVisible ? 1 : 0 );
-                    if ( deltaY < Content.RenderSize.Height - remainingHeight) {
-                        deltaY++;
-                        Invalidate( );
+                    if (deltaY > 0)
+                    {
+                        deltaY--;
+                        Invalidate();
                     }
                 } else {
                     if ( pos ==
                          new Point( ActualWidth - 1, ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) ) ) {
                         // down arrow clicked
-                        if ( deltaY > 0 ) {
-                            deltaY--;
-                            Invalidate( );
+                        
+                        // сколько места сейчас оставлено дочернему контролу
+                        int remainingHeight = ActualHeight - (horizontalScrollVisible ? 1 : 0);
+                        if (deltaY < Content.RenderSize.Height - remainingHeight)
+                        {
+                            deltaY++;
+                            Invalidate();
                         }
                     }
                 }
@@ -79,7 +87,6 @@ namespace ConsoleFramework.Controls
         private int deltaX;
         private int deltaY;
         
-
         protected override Size MeasureOverride(Size availableSize) {
             if (Content == null) return new Size(0, 0);
 
@@ -150,6 +157,30 @@ namespace ConsoleFramework.Controls
                 if ( ActualWidth > 1 + rightOffset ) {
                     buffer.SetPixel(ActualWidth - (1 + rightOffset), ActualHeight - 1, '\u25BA', attr); // ►
                 }
+
+                // определим, в каком месте находится ползунок
+                if ( ActualWidth > 3 + ( verticalScrollVisible ? 1 : 0 ) ) {
+                    int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
+                    int extraWidth = Content.RenderSize.Width - remainingWidth;
+                    int pages = extraWidth/( remainingWidth - 2 - 1 );
+
+                    //Debugger.Log( 1, "", "pages: " + pages + "\n" );
+
+                    int scrollerPos;
+                    if ( pages == 0 ) {
+                        double posInDelta = ( remainingWidth*1.0 - 2 - 1 )/extraWidth;
+                        //Debugger.Log( 1, "", "posInDelta: " + posInDelta + "\n" );
+                        scrollerPos = ( int ) Math.Round( posInDelta*deltaX );
+                    } else {
+                        double deltaInPos = ( extraWidth*1.0 )/( remainingWidth - 2 - 1 );
+                        //Debugger.Log( 1, "", "deltaX/( deltaInPos ): " + deltaX/( deltaInPos ) + "\n" );
+                        scrollerPos = ( int ) Math.Round( deltaX/( deltaInPos ) );
+                    }
+
+                    buffer.SetPixel( 1 + scrollerPos, ActualHeight - 1, '\u25A0', attr ); // ■
+                } else if ( ActualWidth == 3 + ( verticalScrollVisible ? 1 : 0 ) ) {
+                    buffer.SetPixel(1, ActualHeight - 1, '\u25A0', attr); // ■
+                }
             }
             if ( verticalScrollVisible ) {
                 buffer.SetPixel(ActualWidth - 1, 0, '\u25B2', attr); // ▲
@@ -160,6 +191,30 @@ namespace ConsoleFramework.Controls
                 }
                 if ( ActualHeight > 1 + downOffset ) {
                     buffer.SetPixel(ActualWidth - 1, ActualHeight - (1 + downOffset), '\u25BC', attr); // ▼
+                }
+
+                // определим, в каком месте находится ползунок
+                if ( ActualHeight > 3 + ( horizontalScrollVisible ? 1 : 0 ) ) {
+                    int remainingHeight = ActualHeight - (horizontalScrollVisible ? 1 : 0);
+                    int extraHeight = Content.RenderSize.Height - remainingHeight;
+                    int pages = extraHeight/( remainingHeight - 2 - 1 );
+
+                    //Debugger.Log( 1, "", "pages: " + pages + "\n" );
+
+                    int scrollerPos;
+                    if ( pages == 0 ) {
+                        double posInDelta = ( remainingHeight*1.0 - 2 - 1 )/extraHeight;
+                        //Debugger.Log( 1, "", "posInDelta: " + posInDelta + "\n" );
+                        scrollerPos = ( int ) Math.Round( posInDelta*deltaY );
+                    } else {
+                        double deltaInPos = ( extraHeight*1.0 )/( remainingHeight - 2 - 1 );
+                        //Debugger.Log( 1, "", "deltaY/( deltaInPos ): " + deltaY/( deltaInPos ) + "\n" );
+                        scrollerPos = ( int ) Math.Round( deltaY/( deltaInPos ) );
+                    }
+
+                    buffer.SetPixel( ActualWidth - 1, 1 + scrollerPos, '\u25A0', attr ); // ■
+                } else if ( ActualHeight == 3 + ( horizontalScrollVisible ? 1 : 0 ) ) {
+                    buffer.SetPixel(ActualWidth - 1, 1, '\u25A0', attr); // ■
                 }
             }
             if ( horizontalScrollVisible && verticalScrollVisible ) {
