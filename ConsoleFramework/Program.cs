@@ -89,7 +89,12 @@ namespace ConsoleFramework {
                 listBox.Items.Add("Длинный элемент 5");
                 listBox.Items.Add("Длинный элемент 6");
                 listBox.Items.Add("Длинный элемент 700");
+                // todo: исправить проблему с этими настройками
+                listBox.HorizontalAlignment = HorizontalAlignment.Stretch;
+                listBox.VerticalAlignment = VerticalAlignment.Stretch;
                 scrollViewer.Content = listBox;
+                scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
+                scrollViewer.VerticalAlignment = VerticalAlignment.Stretch;
                 windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,

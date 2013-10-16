@@ -13,7 +13,20 @@ namespace ConsoleFramework.Controls
     public class ListBox : Control
     {
         public readonly List< string > Items = new List< string >();
-        public int SelectedItemIndex { get; set; }
+        private int selectedItemIndex;
+
+        public event EventHandler SelectedItemIndexChanged;
+
+        public int SelectedItemIndex {
+            get { return selectedItemIndex; }
+            set {
+                if ( selectedItemIndex != value ) {
+                    selectedItemIndex = value;
+                    if (null != SelectedItemIndexChanged)
+                        SelectedItemIndexChanged( this, EventArgs.Empty);
+                }
+            }
+        }
 
         public ListBox( ) {
             Focusable = true;

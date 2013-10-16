@@ -40,12 +40,31 @@ namespace ConsoleFramework.Controls
 
             public PopupWindow( IEnumerable< string > items, int selectedItemIndex, bool shadow  ) {
                 this.shadow = shadow;
+                ScrollViewer scrollViewer = new ScrollViewer(  );
                 ListBox listbox = new ListBox(  );
                 listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
                 IndexSelected = selectedItemIndex;
+                // todo : исправить баг с тем, что не работает Stretch
                 listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
-                Content = listbox;
+                scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
+                scrollViewer.Content = listbox;
+                Content = scrollViewer;
+
+                // todo : продумать более удобное API для взаимодействия с ScrollViewer
+                // todo : вынести этот код в ScrollableListBox
+                listbox.SelectedItemIndexChanged += ( sender, args ) => {
+                    int itemIndex = listbox.SelectedItemIndex;
+                    int deltaY = scrollViewer.DeltaY;
+                    int firstVisibleItemIndex = deltaY;
+                    int lastVisibleItemIndex = firstVisibleItemIndex + scrollViewer.ActualHeight -
+                                               ( scrollViewer.HorizontalScrollVisible ? 1 : 0 ) - 1;
+                    if ( itemIndex > lastVisibleItemIndex ) {
+                        scrollViewer.ScrollContent( ScrollViewer.Direction.Up, itemIndex - lastVisibleItemIndex );
+                    } else if ( itemIndex < firstVisibleItemIndex ) {
+                        scrollViewer.ScrollContent( ScrollViewer.Direction.Down, firstVisibleItemIndex - itemIndex );
+                    }
+                };
 
                 // if click on the transparent header, close the popup
                 AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {

@@ -19,6 +19,79 @@ namespace ConsoleFramework.Controls
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
         }
 
+        public enum Direction
+        {
+            Up,
+            Down,
+            Left,
+            Right
+        }
+
+        public bool ContentFullyVisible {
+            get { return !verticalScrollVisible && !horizontalScrollVisible; }
+        }
+
+        public void ScrollContent( Direction direction, int delta ) {
+            switch ( direction ) {
+                    case Direction.Left:
+                    {
+                        // сколько места сейчас оставлено дочернему контролу
+                        int remainingWidth = ActualWidth - (verticalScrollVisible ? 1 : 0);
+                        while (deltaX < Content.RenderSize.Width - remainingWidth)
+                        {
+                            deltaX++;
+                        }
+                        Invalidate();
+                        break;
+                    }
+                    case Direction.Right:
+                    {
+                        while (deltaX > 0)
+                        {
+                            deltaX--;
+                        }
+                        Invalidate();
+                        break;
+                    }
+                    case Direction.Up:
+                    {
+                        // сколько места сейчас оставлено дочернему контролу
+                        int remainingHeight = ActualHeight - (horizontalScrollVisible ? 1 : 0);
+                        while (deltaY < Content.RenderSize.Height - remainingHeight)
+                        {
+                            deltaY++;
+                        }
+                        Invalidate();
+                        break;
+                    }
+                    case Direction.Down:
+                    {
+                        if (deltaY > 0)
+                        {
+                            deltaY--;
+                        }
+                        Invalidate();
+                        break;
+                    }
+            }
+        }
+
+        public int DeltaX {
+            get { return deltaX; }
+        }
+
+        public int DeltaY {
+            get { return deltaY; }
+        }
+
+        public bool HorizontalScrollVisible {
+            get { return horizontalScrollVisible; }
+        }
+
+        public bool VerticalScrollVisible {
+            get { return verticalScrollVisible; }
+        }
+
         private void OnMouseDown( object sender, MouseButtonEventArgs args ) {
             Point pos = args.GetPosition( this );
             if ( horizontalScrollVisible ) {
@@ -68,6 +141,7 @@ namespace ConsoleFramework.Controls
                     }
                 }
             }
+            args.Handled = true;
         }
 
         private Control content;
@@ -112,36 +186,40 @@ namespace ConsoleFramework.Controls
 
         protected override Size ArrangeOverride(Size finalSize) {
             if ( Content == null ) return finalSize;
+            int width = finalSize.Width;
+            int height = finalSize.Height;
+//            int width = Content.DesiredSize.Width;
+//            int height = Content.DesiredSize.Height;
             Rect finalRect = new Rect( new Point( -deltaX, -deltaY ), 
                 new Size( 
-                    deltaX + Math.Max( 0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width ), 
-                    deltaY + Math.Max( 0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height ) )
+                    deltaX + Math.Max( 0, verticalScrollVisible ? width - 1 : width ), 
+                    deltaY + Math.Max( 0, horizontalScrollVisible ? height - 1 : height ) )
                 );
 
             // если мы сдвинули окно просмотра, а потом размеры, доступные контролу, увеличились,
             // мы должны вернуть дочерний контрол в точку (0, 0)
-            if (deltaX > Content.DesiredSize.Width - Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width))
+            if (deltaX > Content.DesiredSize.Width - Math.Max(0, verticalScrollVisible ? width - 1 : width))
             {
                 deltaX = 0;
                 finalRect = new Rect(new Point(-deltaX, -deltaY),
                 new Size(
-                    deltaX + Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width),
-                    deltaY + Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+                    deltaX + Math.Max(0, verticalScrollVisible ? width - 1 : width),
+                    deltaY + Math.Max(0, horizontalScrollVisible ? height - 1 : height))
                 );
             }
-            if (deltaY > Content.DesiredSize.Height - Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+            if (deltaY > Content.DesiredSize.Height - Math.Max(0, horizontalScrollVisible ? height - 1 : height))
             {
                 deltaY = 0;
                 finalRect = new Rect(new Point(-deltaX, -deltaY),
                 new Size(
-                    deltaX + Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width),
-                    deltaY + Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+                    deltaX + Math.Max(0, verticalScrollVisible ? width - 1 : width),
+                    deltaY + Math.Max(0, horizontalScrollVisible ? height - 1 : height))
                 );
             }
 
             Content.Arrange( finalRect );
-            return new Size(Math.Min(verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, finalSize.Width),
-                Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, finalSize.Height));
+            return new Size(Math.Min(verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, width),
+                Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, height));
         }
 
         public override void Render(RenderingBuffer buffer) {
