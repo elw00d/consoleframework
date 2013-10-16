@@ -20,28 +20,44 @@ namespace ConsoleFramework.Controls
             Point pos = args.GetPosition( this );
             if ( horizontalScrollVisible ) {
                 if ( pos == new Point( 0, ActualHeight - 1 ) ) {
-                    // left arrow clicked todo : учитывать наличие verticalScroll ! тогда можно еще на 1 сдвигать
-                    if ( deltaX <= Content.RenderSize.Width - Content.RenderSlotRect.Size.Width ) {
+                    // left arrow clicked
+                    
+                    // сколько места сейчас оставлено дочернему контролу
+                    int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
+                    if ( deltaX < Content.RenderSize.Width - remainingWidth) {
                         deltaX++;
                         Invalidate( );
                     }
-                }
-                if ( pos ==
-                     new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ), ActualHeight - 1 ) ) {
-                    // right arrow clicked
-                    if ( deltaX > 0 ) {
-                        deltaX--;
-                        Invalidate( );
+                } else {
+                    if ( pos ==
+                         new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ), ActualHeight - 1 ) ) {
+                        // right arrow clicked
+                        if ( deltaX > 0 ) {
+                            deltaX--;
+                            Invalidate( );
+                        }
                     }
                 }
             }
             if ( verticalScrollVisible ) {
                 if ( pos == new Point( ActualWidth - 1, 0 ) ) {
                     // up arrow clicked
-                }
-                if ( pos ==
-                     new Point( ActualWidth - 1, ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) ) ) {
-                    // down arrow clicked
+
+                    // сколько места сейчас оставлено дочернему контролу
+                    int remainingHeight = ActualHeight - ( horizontalScrollVisible ? 1 : 0 );
+                    if ( deltaY < Content.RenderSize.Height - remainingHeight) {
+                        deltaY++;
+                        Invalidate( );
+                    }
+                } else {
+                    if ( pos ==
+                         new Point( ActualWidth - 1, ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) ) ) {
+                        // down arrow clicked
+                        if ( deltaY > 0 ) {
+                            deltaY--;
+                            Invalidate( );
+                        }
+                    }
                 }
             }
         }
@@ -94,7 +110,9 @@ namespace ConsoleFramework.Controls
                     deltaX + Math.Max( 0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width ), 
                     deltaY + Math.Max( 0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height ) )
                 );
-            // todo : для deltaY
+
+            // если мы сдвинули окно просмотра, а потом размеры, доступные контролу, увеличились,
+            // мы должны вернуть дочерний контрол в точку (0, 0)
             if (deltaX > Content.DesiredSize.Width - Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width))
             {
                 deltaX = 0;
@@ -104,6 +122,16 @@ namespace ConsoleFramework.Controls
                     deltaY + Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
                 );
             }
+            if (deltaY > Content.DesiredSize.Height - Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+            {
+                deltaY = 0;
+                finalRect = new Rect(new Point(-deltaX, -deltaY),
+                new Size(
+                    deltaX + Math.Max(0, verticalScrollVisible ? finalSize.Width - 1 : finalSize.Width),
+                    deltaY + Math.Max(0, horizontalScrollVisible ? finalSize.Height - 1 : finalSize.Height))
+                );
+            }
+
             Content.Arrange( finalRect );
             return new Size(Math.Min(verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, finalSize.Width),
                 Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, finalSize.Height));
