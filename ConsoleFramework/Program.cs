@@ -94,6 +94,7 @@ namespace ConsoleFramework {
                 scrollViewer.Content = listBox;
                 scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.VerticalAlignment = VerticalAlignment.Stretch;
+                scrollViewer.HorizontalScrollEnabled = false;
                 windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,

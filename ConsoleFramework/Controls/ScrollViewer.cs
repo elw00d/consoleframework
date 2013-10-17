@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -15,9 +14,9 @@ namespace ConsoleFramework.Controls
     public class ScrollViewer : Control
     {
         public ScrollViewer( ) {
-//            HorizontalAlignment = HorizontalAlignment.Stretch;
-//            VerticalAlignment = VerticalAlignment.Stretch;
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
+            HorizontalScrollEnabled = true;
+            VerticalScrollEnabled = true;
         }
 
         public enum Direction
@@ -93,6 +92,16 @@ namespace ConsoleFramework.Controls
             get { return verticalScrollVisible; }
         }
 
+        public bool VerticalScrollEnabled {
+            get;
+            set;
+        }
+
+        public bool HorizontalScrollEnabled {
+            get;
+            set;
+        }
+
         private void OnMouseDown( object sender, MouseButtonEventArgs args ) {
             Point pos = args.GetPosition( this );
             if ( horizontalScrollVisible ) {
@@ -165,24 +174,30 @@ namespace ConsoleFramework.Controls
         protected override Size MeasureOverride(Size availableSize) {
             if (Content == null) return new Size(0, 0);
 
-            // последний вызов Measure должен быть именно с такими размерами, которые реально
-            // будут использоваться при размещении, вот мы и размещаем его так, как будто бы у него
-            // имеется сколько угодно пространства
+            // Размещаем контрол так, как будто бы у него имеется сколько угодно пространства
             Content.Measure( new Size(int.MaxValue, int.MaxValue) );
             
             Size desiredSize = Content.DesiredSize;
 
-            horizontalScrollVisible = ( desiredSize.Width > availableSize.Width );
-            verticalScrollVisible = desiredSize.Height + ( horizontalScrollVisible ? 1 : 0 ) > availableSize.Height;
+            horizontalScrollVisible = HorizontalScrollEnabled && (desiredSize.Width > availableSize.Width);
+            verticalScrollVisible = VerticalScrollEnabled && (desiredSize.Height + (horizontalScrollVisible ? 1 : 0) > availableSize.Height);
             if ( verticalScrollVisible ) {
-                // нужно проверить ещё раз, нужен ли горизонтальный сколлбар
-                horizontalScrollVisible = (desiredSize.Width + 1 > availableSize.Width);
+                // Нужно проверить ещё раз, нужен ли горизонтальный сколлбар
+                horizontalScrollVisible = HorizontalScrollEnabled && (desiredSize.Width + 1 > availableSize.Width);
             }
 
             int width = Math.Min( verticalScrollVisible ? desiredSize.Width + 1 : desiredSize.Width, availableSize.Width );
             int height = Math.Min( horizontalScrollVisible ? desiredSize.Height + 1 : desiredSize.Height, availableSize.Height );
+
+            // Если горизонтальная прокрутка отключена - то мы должны сообщить контролу, что по горизонтали он будет иметь не int.MaxValue
+            // пространства, а ровно width. Таким образом мы даём возможность контролу приспособиться к тому, что прокрутки по горизонтали не будет.
+            // Аналогично и с вертикальной прокруткой. Так как последний вызов Measure должен быть именно с такими размерами, которые реально
+            // будут использоваться при размещении, то мы и должны выполнить Measure ещё раз.
+            if (!HorizontalScrollEnabled || !VerticalScrollEnabled) {
+                Content.Measure(new Size(HorizontalScrollEnabled ? int.MaxValue : width, VerticalScrollEnabled ? int.MaxValue : height));
+            }
+
             Size result = new Size( width, height );
-            Debugger.Log( 1, "", "ScrollViewer.MeasureOverride: " + result+ "\n" );
             return result;
         }
 
@@ -190,10 +205,8 @@ namespace ConsoleFramework.Controls
             if ( Content == null ) return finalSize;
             int width = finalSize.Width;
             int height = finalSize.Height;
-//            int width = Content.DesiredSize.Width;
-//            int height = Content.DesiredSize.Height;
             Rect finalRect = new Rect( new Point( -deltaX, -deltaY ), 
-                new Size( 
+                new Size(
                     deltaX + Math.Max( 0, verticalScrollVisible ? width - 1 : width ), 
                     deltaY + Math.Max( 0, horizontalScrollVisible ? height - 1 : height ) )
                 );
@@ -219,41 +232,17 @@ namespace ConsoleFramework.Controls
                 );
             }
 
-            Debugger.Log( 1,"", "Content.Arrange(" + finalRect + ")\n" );
             Content.Arrange( finalRect );
             int resultWidth =
                 Math.Min(verticalScrollVisible ? 1 + finalRect.Width : finalRect.Width, width);
             int resultHeight =
                 Math.Min(horizontalScrollVisible ? 1 + finalRect.Height : finalRect.Height, height);
 
-            // !!! Нельзя так делать:
-            // Нельзя вызывать для дочерних элементов Arrange со значением, превышающим
-            // то, которое будет возвращено из ArrangeOverride. Это будет означать, что родительский
-            // контрол сообщит, что ему надо места мало, а дочернему выделит даже больше чем имеется,
-            // и дочерний контрол при рендеринге будет затирать родительский элемент управления.
-            // За рамки слота родительского контрола он, конечно, не залезет (обрежется системой
-            // отрисовки), но и родительскому контролу не даст ничего нарисовать.
-
-//            int resultWidth2 =
-//                Math.Min( verticalScrollVisible ? 1 + Content.DesiredSize.Width : Content.DesiredSize.Width, width );
-//            int resultHeight2 =
-//                Math.Min( horizontalScrollVisible ? 1 + Content.DesiredSize.Height : Content.DesiredSize.Height, height );
-
-//            if (HorizontalAlignment == HorizontalAlignment.Stretch)
-//                resultWidth = finalSize.Width;
-//            if (VerticalAlignment == VerticalAlignment.Stretch)
-//                resultHeight = finalSize.Height;
             Size result = new Size(resultWidth, resultHeight);
-            Debugger.Log(1, "", "ScrollViewer.ArrangeOverride: " + result + "\n");
-            //Debugger.Log(1, "", "ScrollViewer.ActualOffset: " + ActualOffset + "\n");
             return result;
         }
 
         public override void Render(RenderingBuffer buffer) {
-            Debugger.Log(1, "", "ScrollViewer.RenderSize: " + RenderSize + "\n");
-            Debugger.Log(1, "", "ScrollViewer.RenderSlotRect: " + RenderSlotRect + "\n");
-            Debugger.Log(1, "", "ScrollViewer.ActualOffset: " + ActualOffset + "\n");
-
             CHAR_ATTRIBUTES attr = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkCyan, Color.DarkBlue);
 
             buffer.SetOpacityRect( 0,0, ActualWidth, ActualHeight, 2 );

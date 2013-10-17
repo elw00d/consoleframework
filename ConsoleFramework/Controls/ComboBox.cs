@@ -46,6 +46,7 @@ namespace ConsoleFramework.Controls
                 listbox.SelectedItemIndex = selectedItemIndex;
                 IndexSelected = selectedItemIndex;
                 listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
+                scrollViewer.HorizontalScrollEnabled = false;
                 scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.Content = listbox;
                 Content = scrollViewer;
