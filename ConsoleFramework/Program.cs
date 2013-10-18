@@ -80,6 +80,8 @@ namespace ConsoleFramework {
                     Title = "Window1",
                     Content = panel
                 };
+                GroupBox groupBox = new GroupBox(  );
+                groupBox.Title = "Группа";
                 ScrollViewer scrollViewer = new ScrollViewer(  );
                 ListBox listBox = new ListBox(  );
                 listBox.Items.Add( "Длинный элемент" );
@@ -92,9 +94,13 @@ namespace ConsoleFramework {
                 listBox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 listBox.VerticalAlignment = VerticalAlignment.Stretch;
                 scrollViewer.Content = listBox;
-                scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
+//                scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.VerticalAlignment = VerticalAlignment.Stretch;
                 scrollViewer.HorizontalScrollEnabled = false;
+
+                groupBox.Content = scrollViewer;
+                groupBox.HorizontalAlignment = HorizontalAlignment.Stretch;
+
                 windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,
@@ -103,7 +109,7 @@ namespace ConsoleFramework {
                     C = '2',
                     Name = "Window2",
                     Title = "Очень длинное название окна",
-                    Content = scrollViewer
+                    Content = groupBox
                 });
                 windowsHost.Show(new Window() {
                     X = 30,
