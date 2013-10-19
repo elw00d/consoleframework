@@ -131,11 +131,11 @@ namespace ConsoleFramework
         internal const short COLOR_WHITE  = 7;
 		
 		internal static ulong A_STANDOUT =	NCURSES_BITS(1UL,8);
-internal static ulong A_UNDERLINE = NCURSES_BITS(1UL,9);
-internal static ulong A_REVERSE=	NCURSES_BITS(1UL,10);
-internal static ulong A_BLINK=		NCURSES_BITS(1UL,11);
-internal static ulong A_DIM=		NCURSES_BITS(1UL,12);
-internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
+        internal static ulong A_UNDERLINE = NCURSES_BITS(1UL,9);
+        internal static ulong A_REVERSE=	NCURSES_BITS(1UL,10);
+        internal static ulong A_BLINK=		NCURSES_BITS(1UL,11);
+        internal static ulong A_DIM=		NCURSES_BITS(1UL,12);
+        internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		
 		//
 		
@@ -176,16 +176,16 @@ internal static ulong A_BOLD=		NCURSES_BITS(1UL,13);
 		/// Doesn't support background intensity and other
 		/// extended windows attributes.
 		/// </summary>
-		internal static short winAttrsToNCursesAttrs(CHAR_ATTRIBUTES attrs, out bool fgIntensity) {
-			bool fgRed = (attrs & CHAR_ATTRIBUTES.FOREGROUND_RED) == CHAR_ATTRIBUTES.FOREGROUND_RED;
-			bool fgGreen = (attrs & CHAR_ATTRIBUTES.FOREGROUND_GREEN) == CHAR_ATTRIBUTES.FOREGROUND_GREEN;
-			bool fgBlue = (attrs & CHAR_ATTRIBUTES.FOREGROUND_BLUE) == CHAR_ATTRIBUTES.FOREGROUND_BLUE;
+		internal static short winAttrsToNCursesAttrs(Attr attrs, out bool fgIntensity) {
+			bool fgRed = (attrs & Attr.FOREGROUND_RED) == Attr.FOREGROUND_RED;
+			bool fgGreen = (attrs & Attr.FOREGROUND_GREEN) == Attr.FOREGROUND_GREEN;
+			bool fgBlue = (attrs & Attr.FOREGROUND_BLUE) == Attr.FOREGROUND_BLUE;
 			
-			bool bgRed = (attrs & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED;
-			bool bgGreen = (attrs & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN;
-			bool bgBlue = (attrs & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+			bool bgRed = (attrs & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED;
+			bool bgGreen = (attrs & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN;
+			bool bgBlue = (attrs & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE;
 			
-			fgIntensity = (attrs & CHAR_ATTRIBUTES.FOREGROUND_INTENSITY) == CHAR_ATTRIBUTES.FOREGROUND_INTENSITY;
+			fgIntensity = (attrs & Attr.FOREGROUND_INTENSITY) == Attr.FOREGROUND_INTENSITY;
 			
 			int fg = getStandardColor(fgRed, fgGreen, fgBlue);
 			int bg = getStandardColor(bgRed, bgGreen, bgBlue);

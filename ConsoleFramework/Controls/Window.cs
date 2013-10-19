@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -151,14 +149,14 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer)
         {
-            ushort borderAttrs = moving ? Color.Attr(Color.Green, Color.Gray) : Color.Attr(Color.White, Color.Gray);
+            Attr borderAttrs = moving ? Colors.Blend(Color.Green, Color.Gray) : Colors.Blend(Color.White, Color.Gray);
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
             // corners
-            buffer.SetPixel(0, 0, UnicodeTable.DoubleFrameTopLeftCorner, (CHAR_ATTRIBUTES) borderAttrs);
-            buffer.SetPixel(ActualWidth - 3, ActualHeight - 2, UnicodeTable.DoubleFrameBottomRightCorner, (CHAR_ATTRIBUTES) borderAttrs);
-            buffer.SetPixel(0, ActualHeight - 2, UnicodeTable.DoubleFrameBottomLeftCorner, (CHAR_ATTRIBUTES)borderAttrs);
-            buffer.SetPixel(ActualWidth - 3, 0, UnicodeTable.DoubleFrameTopRightCorner, (CHAR_ATTRIBUTES)borderAttrs);
+            buffer.SetPixel(0, 0, UnicodeTable.DoubleFrameTopLeftCorner, borderAttrs);
+            buffer.SetPixel(ActualWidth - 3, ActualHeight - 2, UnicodeTable.DoubleFrameBottomRightCorner, borderAttrs);
+            buffer.SetPixel(0, ActualHeight - 2, UnicodeTable.DoubleFrameBottomLeftCorner, borderAttrs);
+            buffer.SetPixel(ActualWidth - 3, 0, UnicodeTable.DoubleFrameTopRightCorner, borderAttrs);
             // horizontal & vertical frames
             buffer.FillRectangle(1, 0, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
             buffer.FillRectangle(1, ActualHeight - 2, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
@@ -168,7 +166,7 @@ namespace ConsoleFramework.Controls
             if (ActualWidth > 4) {
                 buffer.SetPixel(2, 0, '[');
                 buffer.SetPixel(3, 0, showClosingGlyph ? UnicodeTable.WindowClosePressedSymbol : UnicodeTable.WindowCloseSymbol,
-                    (CHAR_ATTRIBUTES) Color.Attr(Color.Green, Color.Gray));
+                    Colors.Blend(Color.Green, Color.Gray));
                 buffer.SetPixel(4, 0, ']');
             }
             // shadows
@@ -201,11 +199,11 @@ namespace ConsoleFramework.Controls
                 }
                 if (renderTitle) {
                     // assert !string.IsNullOrEmpty(renderingTitleString);
-                    buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES) borderAttrs);
+                    buffer.SetPixel(titleStartX - 1, 0, ' ', borderAttrs);
                     for (int i = 0; i < renderTitleString.Length; i++) {
-                        buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES) borderAttrs);
+                        buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], borderAttrs);
                     }
-                    buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)borderAttrs);
+                    buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', borderAttrs);
                 }
             }
         }

@@ -32,7 +32,7 @@ namespace ConsoleFramework.Controls
             subscribe();
         }
 
-        public CHAR_ATTRIBUTES Background {
+        public Attr Background {
             get;
             set;
         }
@@ -147,9 +147,9 @@ namespace ConsoleFramework.Controls
         public override void Render(RenderingBuffer buffer) {
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
-                    buffer.SetPixel(x, y, ' ', CHAR_ATTRIBUTES.BACKGROUND_BLUE |
-                        CHAR_ATTRIBUTES.BACKGROUND_GREEN | CHAR_ATTRIBUTES.BACKGROUND_RED | CHAR_ATTRIBUTES.FOREGROUND_BLUE |
-                        CHAR_ATTRIBUTES.FOREGROUND_GREEN | CHAR_ATTRIBUTES.FOREGROUND_RED | CHAR_ATTRIBUTES.FOREGROUND_INTENSITY);
+                    buffer.SetPixel(x, y, ' ', Attr.BACKGROUND_BLUE |
+                        Attr.BACKGROUND_GREEN | Attr.BACKGROUND_RED | Attr.FOREGROUND_BLUE |
+                        Attr.FOREGROUND_GREEN | Attr.FOREGROUND_RED | Attr.FOREGROUND_INTENSITY);
                 }
             }
         }

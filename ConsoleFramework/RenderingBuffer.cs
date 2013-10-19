@@ -8,7 +8,7 @@ namespace ConsoleFramework
 {
     /// <summary>
     /// Stores rendered control content.
-    /// Supports impositioning and opacity.
+    /// Supports impositioning and opacity mask matrix.
     /// </summary>
     public sealed class RenderingBuffer {
         private CHAR_INFO[,] buffer;
@@ -94,31 +94,31 @@ namespace ConsoleFramework
                                     this.buffer[parentX, parentY] = charInfo;
                                     this.opacityMatrix[ parentX, parentY ] = opacity;
                                 } else if (opacity == 1 || opacity == 5) {
-                                    charInfo.Attributes = (CHAR_ATTRIBUTES) Color.Attr(Color.DarkGray, Color.Black);
+                                    charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
                                 } else if (opacity == 3 || opacity == 7) {
                                     // берем фоновые атрибуты символа из родительского буфера
-                                    CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    Attr parentAttr = buffer[parentX, parentY].Attributes;
+                                    if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_BLUE;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_GREEN;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_RED;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_RED;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) == CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
                                     }
                                     buffer[parentX, parentY] = charInfo;
                                 }
@@ -157,31 +157,31 @@ namespace ConsoleFramework
                                     this.buffer[parentX, parentY] = charInfo;
                                     this.opacityMatrix[parentX, parentY] = opacity;
                                 } else if (opacity == 1 || opacity == 5) {
-                                    charInfo.Attributes = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkGray, Color.Black);
+                                    charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
                                     charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
                                     buffer[parentX, parentY] = charInfo;
                                 } else if (opacity == 3 || opacity == 7) {
                                     // берем фоновые атрибуты символа из родительского буфера
-                                    CHAR_ATTRIBUTES parentAttr = buffer[parentX, parentY].Attributes;
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_BLUE) == CHAR_ATTRIBUTES.BACKGROUND_BLUE) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                    Attr parentAttr = buffer[parentX, parentY].Attributes;
+                                    if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_BLUE;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_BLUE;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_GREEN) == CHAR_ATTRIBUTES.BACKGROUND_GREEN) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                    if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_GREEN;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_GREEN;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_RED) == CHAR_ATTRIBUTES.BACKGROUND_RED) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                    if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_RED;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_RED;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_RED;
                                     }
-                                    if ((parentAttr & CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) == CHAR_ATTRIBUTES.BACKGROUND_INTENSITY) {
-                                        charInfo.Attributes |= CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                    if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
+                                        charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
                                     } else {
-                                        charInfo.Attributes &= ~CHAR_ATTRIBUTES.BACKGROUND_INTENSITY;
+                                        charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
                                     }
                                     buffer[parentX, parentY] = charInfo;
                                 }
@@ -196,11 +196,11 @@ namespace ConsoleFramework
             buffer[x, y].UnicodeChar = c;
         }
 
-        public void SetPixel(int x, int y, CHAR_ATTRIBUTES attr) {
+        public void SetPixel(int x, int y, Attr attr) {
             buffer[x, y].Attributes = attr;
         }
 
-        public void SetPixel(int x, int y, char c, CHAR_ATTRIBUTES attr) {
+        public void SetPixel(int x, int y, char c, Attr attr) {
             buffer[x, y].UnicodeChar = c;
             buffer[x, y].Attributes = attr;
         }
@@ -223,11 +223,7 @@ namespace ConsoleFramework
             }
         }
 
-        public void FillRectangle(int x, int y, int w, int h, char c, ushort attrs) {
-            FillRectangle(x, y, w, h, c, (CHAR_ATTRIBUTES)attrs);
-        }
-
-        public void FillRectangle(int x, int y, int w, int h, char c, CHAR_ATTRIBUTES attributes) {
+        public void FillRectangle(int x, int y, int w, int h, char c, Attr attributes) {
             for (int _x = 0; _x < w; _x++) {
                 for (int _y = 0; _y < h; _y++) {
                     SetPixel(x + _x, y + _y, c, attributes);

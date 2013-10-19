@@ -56,7 +56,7 @@
     <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Events\FocusManager.cs" />
     <Compile Include="LinuxConsoleApplication.cs" />
-    <Compile Include="Native\Color.cs" />
+    <Compile Include="Core\Colors.cs" />
     <Compile Include="Native\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
     <Compile Include="Controls\StrangePanel.cs" />

@@ -1101,7 +1101,7 @@ namespace ConsoleFramework.Controls
             int x,
             int y,
             int maxWidth,
-            CHAR_ATTRIBUTES attr)
+            Attr attr)
         {
             for (int i = 0; i < Math.Min(s.Length, maxWidth); i++)
             {

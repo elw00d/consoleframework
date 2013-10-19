@@ -1,6 +1,12 @@
 ﻿Roadmap
 
-2. Сделать CheckBox
+Продумать систему свойств, аналогичных DependencyProperties и AttachedProperties.
+Должны быть свойства, изменение которых автоматически влечёт за собой вызов Invalidate() контрола
+(как AffectsRender).
+
+Сделать CheckBox
+
+Добавить стандартные диалоги и MessageBox.
 
 Придумать, как передавать фокус между Focus Scope.
 

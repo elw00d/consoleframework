@@ -243,7 +243,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            CHAR_ATTRIBUTES attr = (CHAR_ATTRIBUTES)Color.Attr(Color.DarkCyan, Color.DarkBlue);
+            Attr attr = Colors.Blend(Color.DarkCyan, Color.DarkBlue);
 
             buffer.SetOpacityRect( 0,0, ActualWidth, ActualHeight, 2 );
 

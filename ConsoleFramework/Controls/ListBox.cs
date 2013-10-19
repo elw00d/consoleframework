@@ -88,47 +88,23 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer)
         {
-            ushort selectedAttr = Color.Attr(Color.White, Color.DarkGreen);
-            ushort attr = Color.Attr(Color.Black, Color.DarkCyan);
+            Attr selectedAttr = Colors.Blend(Color.White, Color.DarkGreen);
+            Attr attr = Colors.Blend(Color.Black, Color.DarkCyan);
             for ( int y = 0; y < ActualHeight; y++ ) {
                 string item = y < Items.Count ? Items[ y ] : null;
 
                 if ( item != null ) {
-                    ushort currentAttr = SelectedItemIndex == y ? selectedAttr : attr;
+                    Attr currentAttr = SelectedItemIndex == y ? selectedAttr : attr;
 
-                    buffer.SetPixel( 0, y, ' ', ( CHAR_ATTRIBUTES ) currentAttr );
+                    buffer.SetPixel( 0, y, ' ', currentAttr );
                     if ( ActualWidth > 1 ) {
                         // минус 2 потому что у нас есть по пустому пикселю слева и справа
-                        int rendered = RenderString( item, buffer, 1, y, ActualWidth - 2, ( CHAR_ATTRIBUTES ) currentAttr );
-                        //if ( 1 + rendered < ActualWidth ) {
-                            buffer.FillRectangle( 1 + rendered, y, ActualWidth - (1 + rendered), 1, ' ',
-                                currentAttr);
-                        //}
+                        int rendered = RenderString( item, buffer, 1, y, ActualWidth - 2, currentAttr );
+                        buffer.FillRectangle( 1 + rendered, y, ActualWidth - (1 + rendered), 1, ' ',
+                            currentAttr);
                     }
-//                    string renderTitleString = "";
-//                    if ( ActualWidth > 0 ) {
-//                        if ( item.Length <= ActualWidth ) {
-//                            // dont truncate title
-//                            renderTitleString = item;
-//                        } else {
-//                            renderTitleString = item.Substring( 0, ActualWidth );
-//                            if ( renderTitleString.Length > 3 ) {
-//                                renderTitleString = renderTitleString.Substring( 0, renderTitleString.Length - 2 ) +
-//                                                    "..";
-//                            } else if ( renderTitleString.Length > 2 ) {
-//                                renderTitleString = renderTitleString.Substring( 0, renderTitleString.Length - 1 ) + ".";
-//                            }
-//                        }
-//                    }
-//                    for ( int i = 0; i < renderTitleString.Length; i++ ) {
-//                        buffer.SetPixel( 0 + i, y, renderTitleString[ i ], ( CHAR_ATTRIBUTES ) currentAttr );
-//                    }
-//                    int usedLen = ( renderTitleString != null ? renderTitleString.Length : 0 );
-//                    if ( usedLen < ActualWidth ) {
-//                        buffer.FillRectangle( usedLen, y, ActualWidth - usedLen, 1, ' ', ( CHAR_ATTRIBUTES ) currentAttr );
-//                    }
                 } else {
-                    buffer.FillRectangle(0, y, ActualWidth, 1, ' ', (CHAR_ATTRIBUTES)attr);
+                    buffer.FillRectangle(0, y, ActualWidth, 1, ' ', attr);
                 }
             }
         }

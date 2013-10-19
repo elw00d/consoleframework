@@ -47,11 +47,11 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            ushort attr = Color.Attr(Color.Black, Color.DarkYellow);
+            Attr attr = Colors.Blend(Color.Black, Color.DarkYellow);
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
                     if (y == 0 && x < text.Length) {
-                        buffer.SetPixel(x, y, text[x], (CHAR_ATTRIBUTES) attr);
+                        buffer.SetPixel(x, y, text[x], attr);
                     }
                 }
             }

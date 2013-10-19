@@ -121,7 +121,7 @@ namespace ConsoleFramework
                     }
                 }
 
-                public CHAR_ATTRIBUTES Attributes {
+                public Attr Attributes {
                     get {
                         return canvas.buffer[y, x].Attributes;
                     }

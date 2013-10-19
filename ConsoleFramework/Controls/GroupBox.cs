@@ -72,7 +72,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            CHAR_ATTRIBUTES attr = ( CHAR_ATTRIBUTES ) Color.Attr( Color.Black, Color.DarkGreen );
+            Attr attr = Colors.Blend( Color.Black, Color.DarkGreen );
 
             // прозрачный фон для рамки
             buffer.SetOpacityRect( 0, 0, ActualWidth, ActualHeight, 3 );

@@ -68,7 +68,7 @@ namespace ConsoleFramework.Controls
         }
         
         public override void Render(RenderingBuffer buffer) {
-            ushort captionAttrs = Color.Attr(Color.Black, Color.DarkGreen);
+            Attr captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             if (showPressed) {
                 buffer.SetPixel(0, 0, ' ');
                 buffer.SetOpacity(0, 0, 3);
@@ -97,16 +97,16 @@ namespace ConsoleFramework.Controls
                         // shift by 1 pixel
                         titleStartX++;
                         // assert !string.IsNullOrEmpty(renderingTitleString);
-                        buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        buffer.SetPixel(titleStartX - 1, 0, ' ', (Attr)captionAttrs);
                         for (int i = 0; i < renderTitleString.Length; i++) {
-                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES)captionAttrs);
+                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (Attr)captionAttrs);
                         }
-                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (Attr)captionAttrs);
                     }
                 }
                 buffer.SetPixel(0, 1, ' ');
                 buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
-                buffer.FillRectangle(0, 1, ActualWidth, 1, ' ', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
+                buffer.FillRectangle(0, 1, ActualWidth, 1, ' ', Attr.NO_ATTRIBUTES);
             } else {
                 buffer.FillRectangle(0, 0, ActualWidth - 1, 1, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
@@ -131,16 +131,16 @@ namespace ConsoleFramework.Controls
                     }
                     if (renderTitle) {
                         // assert !string.IsNullOrEmpty(renderingTitleString);
-                        buffer.SetPixel(titleStartX - 1, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        buffer.SetPixel(titleStartX - 1, 0, ' ', (Attr)captionAttrs);
                         for (int i = 0; i < renderTitleString.Length; i++) {
-                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (CHAR_ATTRIBUTES)captionAttrs);
+                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (Attr)captionAttrs);
                         }
-                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (CHAR_ATTRIBUTES)captionAttrs);
+                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (Attr)captionAttrs);
                     }
                 }
                 buffer.SetPixel(0, 1, ' ');
                 buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
-                buffer.FillRectangle(1, 1, ActualWidth - 1, 1, '\u2580', CHAR_ATTRIBUTES.NO_ATTRIBUTES);
+                buffer.FillRectangle(1, 1, ActualWidth - 1, 1, '\u2580', Attr.NO_ATTRIBUTES);
                 buffer.SetOpacity(ActualWidth - 1, 0, 3);
                 buffer.SetPixel(ActualWidth - 1, 0, '\u2584');
             }

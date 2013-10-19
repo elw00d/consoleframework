@@ -106,7 +106,7 @@ namespace ConsoleFramework.Controls
 
             public override void Render(RenderingBuffer buffer)
             {
-                ushort borderAttrs = Color.Attr(Color.Black, Color.DarkCyan);
+                Attr borderAttrs = Colors.Blend(Color.Black, Color.DarkCyan);
                 // устанавливаем прозрачными первую строку и первый столбец
                 // для столбца дополнительно включена прозрачность для событий мыши
 
@@ -122,7 +122,7 @@ namespace ConsoleFramework.Controls
                     buffer.FillRectangle( ActualWidth - 1, 1, 1, ActualHeight - 1, '\u2588', borderAttrs );
                     buffer.SetOpacityRect( 2, ActualHeight - 1, ActualWidth - 2, 1, 3 );
                     buffer.FillRectangle( 2, ActualHeight - 1, ActualWidth - 2, 1, '\u2580',
-                                          CHAR_ATTRIBUTES.NO_ATTRIBUTES );
+                                          Attr.NO_ATTRIBUTES );
                     //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );
                 }
             }
@@ -234,20 +234,20 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            ushort attrs;
+            Attr attrs;
             if ( HasFocus ) {
-                attrs = Color.Attr(Color.White, Color.DarkGreen);
-            } else attrs = Color.Attr( Color.Black, Color.DarkCyan );
+                attrs = Colors.Blend(Color.White, Color.DarkGreen);
+            } else attrs = Colors.Blend( Color.Black, Color.DarkCyan );
 
-            buffer.SetPixel( 0, 0, ' ', ( CHAR_ATTRIBUTES ) attrs );
+            buffer.SetPixel( 0, 0, ' ', attrs );
             int usedForCurrentItem = 0;
             if ( Items.Count != 0 && ActualWidth > 4 ) {
-                usedForCurrentItem = RenderString(Items[SelectedItemIndex], buffer, 1, 0, ActualWidth - 4, (CHAR_ATTRIBUTES)attrs);
+                usedForCurrentItem = RenderString(Items[SelectedItemIndex], buffer, 1, 0, ActualWidth - 4, attrs);
             }
             buffer.FillRectangle( 1 + usedForCurrentItem, 0, ActualWidth - (usedForCurrentItem + 1), 1, ' ', attrs );
             if (ActualWidth > 2)
             {
-                buffer.SetPixel(ActualWidth - 2, 0, opened ? '^' : 'v', (CHAR_ATTRIBUTES)attrs);
+                buffer.SetPixel(ActualWidth - 2, 0, opened ? '^' : 'v', attrs);
             }
         }
     }

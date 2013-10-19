@@ -183,7 +183,7 @@ namespace ConsoleFramework.Controls {
         private int startSelection;
 
         public override void Render(RenderingBuffer buffer) {
-            ushort attr = Color.Attr(Color.White, Color.DarkBlue);
+            Attr attr = Colors.Blend(Color.White, Color.DarkBlue);
             buffer.FillRectangle(0, 0, Size + 2, ActualHeight, ' ', attr);
             if (null != text) {
                 for (int i = displayOffset; i < text.Length; i++) {
@@ -192,11 +192,11 @@ namespace ConsoleFramework.Controls {
                     }
                 }
             }
-            ushort arrowsAttr = Color.Attr(Color.Green, Color.DarkBlue);
+            Attr arrowsAttr = Colors.Blend(Color.Green, Color.DarkBlue);
             if (displayOffset > 0)
-                buffer.SetPixel(0, 0, '<', (CHAR_ATTRIBUTES) arrowsAttr);
+                buffer.SetPixel(0, 0, '<', arrowsAttr);
             if (!String.IsNullOrEmpty(text) && Size + displayOffset < text.Length)
-                buffer.SetPixel(Size + 1, 0, '>', (CHAR_ATTRIBUTES) arrowsAttr);
+                buffer.SetPixel(Size + 1, 0, '>', arrowsAttr);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, '0', CHAR_ATTRIBUTES.FOREGROUND_RED);
+            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, '0', Attr.FOREGROUND_RED);
         }
     }
 }
