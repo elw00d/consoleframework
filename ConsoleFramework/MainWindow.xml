@@ -1,0 +1,20 @@
+﻿<Window Name="window2" Title="Очень длинное название окна">
+  <GroupBox Title="Группа">
+    <ScrollViewer VerticalAlignment="Stretch">
+      <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
+      <ListBox>
+        <ListBox.Items>
+          <list>
+            <item>Длинный элемент</item>
+            <item>Длинный элемент 2</item>
+            <item>Длинный элемент 3</item>
+            <item>Длинный элемент 4</item>
+            <item>Длинный элемент 5</item>
+            <item>Длинный элемент 6</item>
+            <item>Длинный элемент 700</item>
+          </list>
+        </ListBox.Items>
+      </ListBox>
+    </ScrollViewer>
+  </GroupBox>
+</Window>

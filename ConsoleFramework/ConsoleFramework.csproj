@@ -41,6 +41,7 @@
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
+    <Compile Include="Controls\MessageBox.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
@@ -80,6 +81,7 @@
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
     <Content Include="Events\Focus.txt" />
+    <Content Include="MainWindow.xml" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

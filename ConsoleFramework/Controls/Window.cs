@@ -103,10 +103,12 @@ namespace ConsoleFramework.Controls
             //Debug.WriteLine("Click");
         }
 
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public char C { get; set; }
+        /// <summary>
+        /// Координаты в рамках WindowsHost. По сути - костыль вместо
+        /// отсутствующих пока Attached properties.
+        /// </summary>
+        public int? X { get; set; }
+        public int? Y { get; set; }
 
         public Control Content {
             get {
@@ -237,8 +239,8 @@ namespace ConsoleFramework.Controls
                 } else if (point.y == 0) {
                     moving = true;
                     movingStartPoint = parentPoint;
-                    movingStartX = X;
-                    movingStartY = Y;
+                    movingStartX = RenderSlotRect.TopLeft.X;
+                    movingStartY = RenderSlotRect.TopLeft.Y;
                     ConsoleApplication.Instance.BeginCaptureInput(this);
                     // moving is started, we should redraw the border
                     Invalidate();

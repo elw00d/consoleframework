@@ -79,7 +79,6 @@ namespace PhonesBook
                     X = 3,
                     Y = 4,
                     Height = 20,
-                    C = '1',
                     Name = "mainWindow",
                     Title = "Телефоны",
                     Content = panelMain
@@ -89,7 +88,6 @@ namespace PhonesBook
                     Y = 6,
                     MinHeight = 10,
                     MinWidth = 10,
-                    C = '2',
                     Name = "Window2",
                     Title = "Управление",
                     Content = new TextBlock() {

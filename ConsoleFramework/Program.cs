@@ -34,6 +34,7 @@ namespace ConsoleFramework {
                 };
                 button.OnClick += (sender, eventArgs) => {
                     Debug.WriteLine("Click");
+                    MessageBox.Show( "Окно сообщения", "Внимание ! Тестовое сообщение", delegate( MessageBoxResult result ) {  } );
                     Control label = panel.FindChildByName("label1");
                     if (label.Visibility == Visibility.Visible) {
                         label.Visibility = Visibility.Collapsed;
@@ -75,7 +76,6 @@ namespace ConsoleFramework {
                     //MaxWidth = 30,
                     //Width = 10,
                     Height = 20,
-                    C = '1',
                     Name = "Window1",
                     Title = "Window1",
                     Content = panel
@@ -106,7 +106,6 @@ namespace ConsoleFramework {
                     Y = 6,
                     //MinHeight = 10,
                     //MinWidth = 10,
-                    C = '2',
                     Name = "Window2",
                     Title = "Очень длинное название окна",
                     Content = groupBox

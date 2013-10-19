@@ -42,7 +42,19 @@ namespace ConsoleFramework.Controls
             foreach (Control control in Children)
             {
                 Window window = (Window) control;
-                window.Arrange(new Rect(window.X, window.Y, window.DesiredSize.Width, window.DesiredSize.Height));
+                int x;
+                if ( window.X.HasValue ) {
+                    x = window.X.Value;
+                } else {
+                    x = (finalSize.Width - window.DesiredSize.Width)/2;
+                }
+                int y;
+                if ( window.Y.HasValue ) {
+                    y = window.Y.Value;
+                } else {
+                    y = (finalSize.Height - window.DesiredSize.Height)/2;
+                }
+                window.Arrange(new Rect(x, y, window.DesiredSize.Width, window.DesiredSize.Height));
             }
             return finalSize;
         }
