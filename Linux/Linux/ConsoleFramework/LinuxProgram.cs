@@ -53,8 +53,8 @@ namespace Linux
                     Title = "Window1",
                     Content = panel
                 };
-                windowsHost.AddWindow(window1);
-                windowsHost.AddWindow(new Window() {
+                windowsHost.Show(window1);
+                windowsHost.Show(new Window() {
                     X = 30,
                     Y = 6,
                     MinHeight = 10,

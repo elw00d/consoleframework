@@ -44,20 +44,8 @@
     <Compile Include="..\..\ConsoleFramework\ConsoleApplication.cs">
       <Link>ConsoleFramework\ConsoleApplication.cs</Link>
     </Compile>
-    <Compile Include="..\..\ConsoleFramework\LinuxConsoleApplication.cs">
-      <Link>ConsoleFramework\LinuxConsoleApplication.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\PhysicalCanvas.cs">
-      <Link>ConsoleFramework\PhysicalCanvas.cs</Link>
-    </Compile>
     <Compile Include="..\..\ConsoleFramework\Program.cs">
       <Link>ConsoleFramework\Program.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\Renderer.cs">
-      <Link>ConsoleFramework\Renderer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\RenderingBuffer.cs">
-      <Link>ConsoleFramework\RenderingBuffer.cs</Link>
     </Compile>
     <Compile Include="..\..\ConsoleFramework\Controls\Button.cs">
       <Link>ConsoleFramework\Controls\Button.cs</Link>
@@ -116,23 +104,10 @@
     <Compile Include="..\..\ConsoleFramework\Events\RoutedEventArgs.cs">
       <Link>ConsoleFramework\Events\RoutedEventArgs.cs</Link>
     </Compile>
-    <Compile Include="..\..\ConsoleFramework\Native\Color.cs">
-      <Link>ConsoleFramework\Native\Color.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\Native\NativeMethods.cs">
-      <Link>ConsoleFramework\Native\NativeMethods.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\Native\Structures.cs">
-      <Link>ConsoleFramework\Native\Structures.cs</Link>
-    </Compile>
-    <Compile Include="..\..\ConsoleFramework\Native\UnicodeTable.cs">
-      <Link>ConsoleFramework\Native\UnicodeTable.cs</Link>
-    </Compile>
     <Compile Include="..\..\ConsoleFramework\Properties\AssemblyInfo.cs">
       <Link>ConsoleFramework\Properties\AssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="ConsoleFramework\LinuxProgram.cs" />
-    <Compile Include="ConsoleFramework\Native\LibTermKey.cs" />
     <Compile Include="..\..\ConsoleFramework\Controls\StrangeControl.cs">
       <Link>ConsoleFramework\Controls\StrangeControl.cs</Link>
     </Compile>
@@ -141,6 +116,45 @@
     </Compile>
     <Compile Include="..\..\ConsoleFramework\Core\VisualTreeHelper.cs">
       <Link>ConsoleFramework\Core\VisualTreeHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\ComboBox.cs">
+      <Link>ConsoleFramework\Controls\ComboBox.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\GroupBox.cs">
+      <Link>ConsoleFramework\Controls\GroupBox.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\ListBox.cs">
+      <Link>ConsoleFramework\Controls\ListBox.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\ScrollViewer.cs">
+      <Link>ConsoleFramework\Controls\ScrollViewer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\Colors.cs">
+      <Link>ConsoleFramework\Core\Colors.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Core\UnicodeTable.cs">
+      <Link>ConsoleFramework\Core\UnicodeTable.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Rendering\PhysicalCanvas.cs">
+      <Link>ConsoleFramework\Rendering\PhysicalCanvas.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Rendering\Renderer.cs">
+      <Link>ConsoleFramework\Rendering\Renderer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Rendering\RenderingBuffer.cs">
+      <Link>ConsoleFramework\Rendering\RenderingBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\LibTermKey.cs">
+      <Link>ConsoleFramework\Native\LibTermKey.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\Libc.cs">
+      <Link>ConsoleFramework\Native\Libc.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\NCurses.cs">
+      <Link>ConsoleFramework\Native\NCurses.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Native\Win32.cs">
+      <Link>ConsoleFramework\Native\Win32.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -157,5 +171,9 @@
     <None Include="..\..\ConsoleFramework\Events\Focus.txt">
       <Link>ConsoleFramework\Events\Focus.txt</Link>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ConsoleFramework\Native\" />
+    <Folder Include="ConsoleFramework\Rendering\" />
   </ItemGroup>
 </Project>
