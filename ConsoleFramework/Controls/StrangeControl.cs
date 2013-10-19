@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
+using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {

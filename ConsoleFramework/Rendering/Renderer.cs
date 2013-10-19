@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 
-namespace ConsoleFramework
+namespace ConsoleFramework.Rendering
 {
     /// <summary>
     /// Central point of the console framework layout system.

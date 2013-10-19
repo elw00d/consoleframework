@@ -4,6 +4,7 @@ using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
+using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {

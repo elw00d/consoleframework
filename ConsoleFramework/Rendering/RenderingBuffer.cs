@@ -4,7 +4,7 @@ using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
-namespace ConsoleFramework
+namespace ConsoleFramework.Rendering
 {
     /// <summary>
     /// Stores rendered control content.

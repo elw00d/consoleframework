@@ -1,6 +1,7 @@
 ﻿using System;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
+using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {

@@ -4,7 +4,7 @@ using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
-using Linux.Native;
+using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework
 {

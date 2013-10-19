@@ -38,9 +38,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Linux\Linux\ConsoleFramework\Native\LibTermKey.cs">
-      <Link>Native\LibTermKey.cs</Link>
-    </Compile>
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
@@ -56,10 +53,11 @@
     <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Events\FocusManager.cs" />
     <Compile Include="Native\Libc.cs" />
+    <Compile Include="Native\LibTermKey.cs" />
     <Compile Include="Native\NCurses.cs" />
     <Compile Include="Core\Colors.cs" />
     <Compile Include="Core\UnicodeTable.cs" />
-    <Compile Include="RenderingBuffer.cs" />
+    <Compile Include="Rendering\RenderingBuffer.cs" />
     <Compile Include="Controls\StrangePanel.cs" />
     <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Control.cs" />
@@ -71,8 +69,8 @@
     <Compile Include="Core\Size.cs" />
     <Compile Include="Core\Thickness.cs" />
     <Compile Include="Core\Vector.cs" />
-    <Compile Include="PhysicalCanvas.cs" />
-    <Compile Include="Renderer.cs" />
+    <Compile Include="Rendering\PhysicalCanvas.cs" />
+    <Compile Include="Rendering\Renderer.cs" />
     <Compile Include="ConsoleApplication.cs" />
     <Compile Include="Native\Win32.cs" />
     <Compile Include="Program.cs" />

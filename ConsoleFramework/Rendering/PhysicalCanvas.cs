@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
-namespace ConsoleFramework
+namespace ConsoleFramework.Rendering
 {
     /// <summary>
     /// Represents the buffer prepared to output into terminal.
