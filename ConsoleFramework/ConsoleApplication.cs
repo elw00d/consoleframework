@@ -403,11 +403,22 @@ namespace ConsoleFramework
                 exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
                 stdInputHandle
             };
-            
-            // todo : introduce settings instead hardcode 80x25
-            PhysicalCanvas canvas = new PhysicalCanvas(100, 35, stdOutputHandle);
+
+            // set console mode to enable mouse and window resizing events
+            const uint ENABLE_WINDOW_INPUT = 0x0008;
+            const uint ENABLE_MOUSE_INPUT = 0x0010;
+            uint consoleMode;
+            Win32.GetConsoleMode( stdInputHandle, out consoleMode );
+            Win32.SetConsoleMode(stdInputHandle, consoleMode | ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
+
+            // get console screen buffer size
+            CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
+            Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
+
+            PhysicalCanvas canvas = new PhysicalCanvas(screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle);
             renderer.Canvas = canvas;
-            renderer.RootElementRect = new Rect(5, 5, 80, 25);
+            // fill the canvas by default
+            renderer.RootElementRect = new Rect(0, 0, canvas.Width, canvas.Height);
             renderer.RootElement = mainControl;
             // initialize default focus
             focusManager.AfterAddElementToTree(mainControl);
@@ -425,7 +436,6 @@ namespace ConsoleFramework
                 }
                 if (waitResult == 1) {
                     processInput();
-                    // update 
                     renderer.UpdateRender();
                     continue;
                 }
@@ -437,6 +447,11 @@ namespace ConsoleFramework
 
             // restore cursor visibility before exit
             ShowCursor();
+
+            // restore console mode before exit
+            Win32.SetConsoleMode( stdInputHandle, consoleMode );
+
+            // todo : restore attributes of console output
         }
 
         private void processInput() {
@@ -452,6 +467,13 @@ namespace ConsoleFramework
         }
 
         private void processInputEvent(INPUT_RECORD inputRecord) {
+            if ( inputRecord.EventType == EventType.WINDOW_BUFFER_SIZE_EVENT ) {
+                COORD dwSize = inputRecord.WindowBufferSizeEvent.dwSize;
+                renderer.Canvas.Width = dwSize.X;
+                renderer.Canvas.Height = dwSize.Y;
+                renderer.RootElementRect = new Rect(0, 0, dwSize.X, dwSize.Y);
+                return;
+            }
             eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);
         }
 

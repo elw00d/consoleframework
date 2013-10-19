@@ -9,12 +9,21 @@ namespace ConsoleFramework.Rendering
     /// Central point of the console framework layout system.
     /// </summary>
     public sealed class Renderer {
+
+        private Rect rootElementRect;
+
         /// <summary>
         /// Прямоугольная область относительно экрана консоли, в которой будет размещён Root Element.
         /// </summary>
         public Rect RootElementRect {
-            get;
-            set;
+            get { return rootElementRect; }
+            set {
+                if ( rootElementRect != value ) {
+                    rootElementRect = value;
+                    if (null != RootElement)
+                        AddControlToInvalidationQueue(RootElement);
+                }
+            }
         }
 
         public Control RootElement {

@@ -13,6 +13,24 @@ namespace ConsoleFramework.Native
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern void AllocConsole();
 
+        /// <summary>
+        /// Returns current console mode. Program saves it before changing and
+        /// restores before exit.
+        /// </summary>
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        public static extern bool GetConsoleMode( IntPtr hConsoleHandle, [Out] out uint mode );
+
+        /// <summary>
+        /// It is used to set ENABLE_WINDOW_INPUT flag, which enables the events
+        /// about console screen buffer resize.
+        /// </summary>
+        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        public static extern bool SetConsoleMode( IntPtr hConsoleHandle, uint mode );
+
+        [DllImport("kernel32.dll")]
+        public static extern bool GetConsoleScreenBufferInfo(IntPtr hConsoleOutput,
+            out CONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
+
         [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
         public static extern IntPtr GetStdHandle([MarshalAs(UnmanagedType.I4)]StdHandleType nStdHandle);
 
@@ -56,6 +74,15 @@ namespace ConsoleFramework.Native
         STD_INPUT_HANDLE = -10,
         STD_OUTPUT_HANDLE = -11,
         STD_ERROR_HANDLE = -12
+    }
+
+    public struct CONSOLE_SCREEN_BUFFER_INFO
+    {
+        public COORD dwSize;
+        public COORD dwCursorPosition;
+        public short wAttributes;
+        public SMALL_RECT srWindow;
+        public COORD dwMaximumWindowSize;
     }
 
     /// <summary>
