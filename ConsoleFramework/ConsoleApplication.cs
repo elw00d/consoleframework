@@ -52,7 +52,7 @@ namespace ConsoleFramework
         /// </summary>
         public void Exit() {
 			if (usingLinux) {
-				int res = LibTermKey.writeInt64(eventfd, 1);
+				int res = Libc.writeInt64(eventfd, 1);
 				//Console.WriteLine("write(1) returned {0}\n", res);
 				//if (res == -1) {
 				//	int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
@@ -96,10 +96,10 @@ namespace ConsoleFramework
         internal void SetCursorPosition (Point position)
 		{
 			if (!usingLinux) {				
-				NativeMethods.SetConsoleCursorPosition (stdOutputHandle, new COORD ((short)position.x, (short)position.y));
+				Win32.SetConsoleCursorPosition (stdOutputHandle, new COORD ((short)position.x, (short)position.y));
 			} else {
-				LinuxConsoleApplication.move (position.y, position.x);
-				LinuxConsoleApplication.refresh ();
+				NCurses.move (position.y, position.x);
+				NCurses.refresh ();
 			}
         }
 
@@ -123,9 +123,9 @@ namespace ConsoleFramework
 	                Size = 5,
 	                Visible = true
 	            };
-				NativeMethods.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
+				Win32.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
 			} else {
-				LinuxConsoleApplication.curs_set (CursorVisibility.Visible);
+				NCurses.curs_set (CursorVisibility.Visible);
 			}
             CursorIsVisible = true;
         }
@@ -141,9 +141,9 @@ namespace ConsoleFramework
 	                Size = 5,
 	                Visible = false
 	            };
-				NativeMethods.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
+				Win32.SetConsoleCursorInfo (stdOutputHandle, ref consoleCursorInfo);
 			} else {
-				LinuxConsoleApplication.curs_set (CursorVisibility.Invisible);
+				NCurses.curs_set (CursorVisibility.Invisible);
 			}
             CursorIsVisible = false;
         }
@@ -183,13 +183,13 @@ namespace ConsoleFramework
 			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
 			bool ignored = Console.KeyAvailable;
 			
-			IntPtr stdscr = LinuxConsoleApplication.initscr ();
-			LinuxConsoleApplication.cbreak ();
-			LinuxConsoleApplication.noecho ();
-			LinuxConsoleApplication.nonl ();
-			LinuxConsoleApplication.intrflush (stdscr, false);
-			LinuxConsoleApplication.keypad (stdscr, true);
-			LinuxConsoleApplication.start_color ();
+			IntPtr stdscr = NCurses.initscr ();
+			NCurses.cbreak ();
+			NCurses.noecho ();
+			NCurses.nonl ();
+			NCurses.intrflush (stdscr, false);
+			NCurses.keypad (stdscr, true);
+			NCurses.start_color ();
 			
 			HideCursor ();
 			renderer.UpdateRender ();
@@ -205,7 +205,7 @@ namespace ConsoleFramework
 			fds [0] = fd;
 			
 			fds [1] = new pollfd ();
-			eventfd = LibTermKey.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
+			eventfd = Libc.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
 			if (eventfd == -1) {
 				Console.WriteLine ("Cannot create eventfd\n");
 				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
@@ -216,7 +216,7 @@ namespace ConsoleFramework
 			
 			TermKeyKey key = new TermKeyKey ();
 			while (true) {
-				int pollRes = LibTermKey.poll (fds, 2, -1);
+				int pollRes = Libc.poll (fds, 2, -1);
 				if (0 == pollRes) {
 					// timed out
 					Console.WriteLine ("Timed out");
@@ -238,7 +238,7 @@ namespace ConsoleFramework
 					if (fds [i].revents != POLL_EVENTS.NONE) {
 						if (i == 1) {
 							UInt64 u;
-							LibTermKey.readInt64 (fds [i].fd, out u);
+							Libc.readInt64 (fds [i].fd, out u);
 							Console.WriteLine ("Readed eventfd counter : {0}\n", u);
 						}
 					}
@@ -259,12 +259,12 @@ namespace ConsoleFramework
 			}
 			
 			LibTermKey.termkey_destroy (termkeyHandle);
-			LibTermKey.close (eventfd);
+			Libc.close (eventfd);
 			Console.Write ("\x1B[?1002l");
 			
 			// restore cursor visibility before exit
 			ShowCursor ();
-			LinuxConsoleApplication.endwin ();
+			NCurses.endwin ();
 		}
 		
 		private void processLinuxInput (TermKeyKey key)
@@ -397,8 +397,8 @@ namespace ConsoleFramework
         private void runWindows(Control control) {
             this.mainControl = control;
             //
-            stdInputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
-            stdOutputHandle = NativeMethods.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
+            stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
+            stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
             IntPtr[] handles = new[] {
                 exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
                 stdInputHandle
@@ -419,7 +419,7 @@ namespace ConsoleFramework
             HideCursor();
             
             while (true) {
-                uint waitResult = NativeMethods.WaitForMultipleObjects(2, handles, false, NativeMethods.INFINITE);
+                uint waitResult = Win32.WaitForMultipleObjects(2, handles, false, Win32.INFINITE);
                 if (waitResult == 0) {
                     break;
                 }
@@ -442,7 +442,7 @@ namespace ConsoleFramework
         private void processInput() {
             INPUT_RECORD[] buffer = new INPUT_RECORD[10];
             uint read;
-            bool bReaded = NativeMethods.ReadConsoleInput(stdInputHandle, buffer, (uint) buffer.Length, out read);
+            bool bReaded = Win32.ReadConsoleInput(stdInputHandle, buffer, (uint) buffer.Length, out read);
             if (!bReaded) {
                 throw new InvalidOperationException("ReadConsoleInput method failed.");
             }

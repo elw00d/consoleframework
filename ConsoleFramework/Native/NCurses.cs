@@ -1,13 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
-using ConsoleFramework.Controls;
-using ConsoleFramework.Core;
-using ConsoleFramework.Native;
 using System.Collections.Generic;
 
-namespace ConsoleFramework
+namespace ConsoleFramework.Native
 {
-	public class LinuxConsoleApplication
+    /// <summary>
+    /// Interop code for NCurses linux library. NCurses is used for graphics output only.
+    /// For keyboard and mouse input LibTermKey library is used.
+    /// </summary>
+	public static class NCurses
 	{
 		/// <summary>
 		/// Returns pointer to the WINDOW struct.
@@ -273,11 +274,6 @@ namespace ConsoleFramework
 		internal const int KEY_MOUSE = 409;
 		
 		#endregion
-		
-		public LinuxConsoleApplication ()
-		{
-		}
-		
 	}
 	
 	/// <summary>

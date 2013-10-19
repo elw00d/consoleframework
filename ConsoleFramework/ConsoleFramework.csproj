@@ -55,9 +55,10 @@
     <Compile Include="Events\EventManager.cs" />
     <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Events\FocusManager.cs" />
-    <Compile Include="LinuxConsoleApplication.cs" />
+    <Compile Include="Native\Libc.cs" />
+    <Compile Include="Native\NCurses.cs" />
     <Compile Include="Core\Colors.cs" />
-    <Compile Include="Native\UnicodeTable.cs" />
+    <Compile Include="Core\UnicodeTable.cs" />
     <Compile Include="RenderingBuffer.cs" />
     <Compile Include="Controls\StrangePanel.cs" />
     <Compile Include="Controls\Button.cs" />
@@ -73,8 +74,7 @@
     <Compile Include="PhysicalCanvas.cs" />
     <Compile Include="Renderer.cs" />
     <Compile Include="ConsoleApplication.cs" />
-    <Compile Include="Native\NativeMethods.cs" />
-    <Compile Include="Native\Structures.cs" />
+    <Compile Include="Native\Win32.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Events\RoutedEvent.cs" />

@@ -5,6 +5,10 @@ using ConsoleFramework.Native;
 
 namespace ConsoleFramework
 {
+    /// <summary>
+    /// Represents the buffer prepared to output into terminal.
+    /// Provides indexer-like access to buffer and method <see cref="Flush(ConsoleFramework.Core.Rect)"/>.
+    /// </summary>
     public sealed class PhysicalCanvas {
         private readonly IntPtr stdOutputHandle = IntPtr.Zero;
 		
@@ -163,14 +167,17 @@ namespace ConsoleFramework
             Flush(new Rect(0, 0, width, height));
         }
 
+        /// <summary>
+        /// Writes collected data to console screen buffer, but paints specified rect only.
+        /// </summary>
         public void Flush(Rect affectedRect) {
 			if (stdOutputHandle != IntPtr.Zero) {
 				// we are in windows environment
 	            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
 	                (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
-	            if (!NativeMethods.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height),
+	            if (!Win32.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height),
 	                new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
-	                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", NativeMethods.GetLastErrorMessage()));
+	                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", Win32.GetLastErrorMessage()));
 	            }
 			} else {
 				// we are in linux
@@ -180,22 +187,19 @@ namespace ConsoleFramework
 						int y = j + affectedRect.y;
 						// todo : convert attributes and optimize rendering
 						bool fgIntensity;
-						short index = LinuxConsoleApplication.winAttrsToNCursesAttrs(buffer[y, x].Attributes,
+						short index = NCurses.winAttrsToNCursesAttrs(buffer[y, x].Attributes,
 							out fgIntensity);
-						//LinuxConsoleApplication.attrset((int) LinuxConsoleApplication.COLOR_PAIR((ushort) index));
-						//LinuxConsoleApplication.attrset(0);
-						//LinuxConsoleApplication.color_set( index, IntPtr.Zero);
 						if (fgIntensity) {
-							LinuxConsoleApplication.attrset(
-								(int) (LinuxConsoleApplication.COLOR_PAIR(index) | LinuxConsoleApplication.A_BOLD));
+							NCurses.attrset(
+								(int) (NCurses.COLOR_PAIR(index) | NCurses.A_BOLD));
 						} else {
-							LinuxConsoleApplication.attrset(
-								(int) LinuxConsoleApplication.COLOR_PAIR(index));
+							NCurses.attrset(
+								(int) NCurses.COLOR_PAIR(index));
 						}
-						LinuxConsoleApplication.mvaddstr(y, x, new string(buffer[y, x].UnicodeChar,1));
+						NCurses.mvaddstr(y, x, new string(buffer[y, x].UnicodeChar,1));
 					}
 				}
-				LinuxConsoleApplication.refresh();
+				NCurses.refresh();
 			}
         }
     }

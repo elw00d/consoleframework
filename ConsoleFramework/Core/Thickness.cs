@@ -3,7 +3,7 @@
 namespace ConsoleFramework.Core
 {
     /// <summary>
-    /// WPF Thickness analog but using integers not doubles.
+    /// WPF Thickness analog but using integers instead doubles.
     /// </summary>
     public struct Thickness : IEquatable<Thickness> {
         private int left;

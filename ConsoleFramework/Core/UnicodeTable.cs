@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace ConsoleFramework.Native
+﻿namespace ConsoleFramework.Core
 {
     class UnicodeTable {
         public const char WindowCloseSymbol = '\u25a0'; // ■
