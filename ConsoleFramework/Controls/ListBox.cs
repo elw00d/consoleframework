@@ -13,7 +13,11 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class ListBox : Control
     {
-        public readonly List< string > Items = new List< string >();
+        private readonly List<string> items = new List<string>();
+        public List<String>  Items {
+            get { return items; }
+        }
+        
         private int selectedItemIndex;
 
         public event EventHandler SelectedItemIndexChanged;
@@ -57,20 +61,20 @@ namespace ConsoleFramework.Controls
         }
 
         private void OnKeyDown( object sender, KeyEventArgs args ) {
-            if ( Items.Count == 0 ) {
+            if ( items.Count == 0 ) {
                 args.Handled = true;
                 return;
             }
             if (args.wVirtualKeyCode == 0x26) { // VK_UP
                 if ( SelectedItemIndex == 0 )
-                    SelectedItemIndex = Items.Count - 1;
+                    SelectedItemIndex = items.Count - 1;
                 else {
                     SelectedItemIndex--;
                 }
                 Invalidate(  );
             }
             if (args.wVirtualKeyCode == 0x28) { // VK_DOWN
-                SelectedItemIndex = (SelectedItemIndex + 1) % Items.Count;
+                SelectedItemIndex = (SelectedItemIndex + 1) % items.Count;
                 Invalidate(  );
             }
             args.Handled = true;
@@ -80,10 +84,10 @@ namespace ConsoleFramework.Controls
             // если maxLen < availableSize.Width, то возвращается maxLen
             // если maxLen > availableSize.Width, возвращаем availableSize.Width,
             // а содержимое не влезающих строк будет выведено с многоточием
-            if (Items.Count == 0) return new Size(0, 0);
-            int maxLen = Items.Max( s => s.Length );
+            if (items.Count == 0) return new Size(0, 0);
+            int maxLen = items.Max( s => s.Length );
             // 1 пиксель слева и 1 справа
-            Size size = new Size(Math.Min( maxLen + 2, availableSize.Width ), Items.Count);
+            Size size = new Size(Math.Min( maxLen + 2, availableSize.Width ), items.Count);
             return size;
         }
 
@@ -92,7 +96,7 @@ namespace ConsoleFramework.Controls
             Attr selectedAttr = Colors.Blend(Color.White, Color.DarkGreen);
             Attr attr = Colors.Blend(Color.Black, Color.DarkCyan);
             for ( int y = 0; y < ActualHeight; y++ ) {
-                string item = y < Items.Count ? Items[ y ] : null;
+                string item = y < items.Count ? items[ y ] : null;
 
                 if ( item != null ) {
                     Attr currentAttr = SelectedItemIndex == y ? selectedAttr : attr;

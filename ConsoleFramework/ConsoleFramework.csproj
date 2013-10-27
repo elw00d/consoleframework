@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\ComboBox.cs" />
@@ -77,11 +78,13 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Events\RoutedEvent.cs" />
+    <Compile Include="Xaml\StringToBoolConverter.cs" />
+    <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
     <Content Include="Events\Focus.txt" />
-    <Content Include="MainWindow.xml" />
+    <EmbeddedResource Include="MainWindow.xml" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
