@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Xml;
 using ConsoleFramework.Controls;
 
@@ -14,15 +11,26 @@ namespace ConsoleFramework.Xaml
     {
         private class ObjectInfo
         {
+            /// <summary>
+            /// Тип конструируемого объекта.
+            /// </summary>
             public Type type;
+            /// <summary>
+            /// Объект (или null если создаётся String).
+            /// </summary>
             public object obj;
+            /// <summary>
+            /// Название тега.
+            /// </summary>
             public string name;
             /// <summary>
-            /// Текущее свойство, которое задаётся через точку.
+            /// Текущее свойство, которое задаётся тегом с точкой в имени.
             /// </summary>
             public string currentProperty;
-
-            public string currentPropertyContent;
+            /// <summary>
+            /// Задаётся при парсинге тегов, содержимое которых - текст.
+            /// </summary>
+            public string currentPropertyText;
         }
 
         /// <summary>
@@ -37,6 +45,7 @@ namespace ConsoleFramework.Xaml
 
             using ( XmlReader xmlReader = XmlReader.Create( new StringReader( xaml ) ) ) {
 
+                // stack of constructing objects
                 Stack<ObjectInfo> objects = new Stack< ObjectInfo >();
                 ObjectInfo top = null;
 
@@ -81,8 +90,12 @@ namespace ConsoleFramework.Xaml
                             // process attributes
                             if ( xmlReader.HasAttributes ) {
                                 while ( xmlReader.MoveToNextAttribute( ) ) {
-                                    // todo :
-                                    Console.WriteLine(xmlReader.Name, xmlReader.Value);
+                                    //
+                                    PropertyInfo propertyInfo = top.type.GetProperty( xmlReader.Name );
+                                    object value = convertValueIfNeed( typeof ( String ), 
+                                        propertyInfo.PropertyType, xmlReader.Value );
+                                    propertyInfo.SetValue( top.obj, value, null );
+                                    //
                                 }
                                 xmlReader.MoveToElement( );
                             }
@@ -95,29 +108,25 @@ namespace ConsoleFramework.Xaml
                         if ( top.name == "item" ) {
                             top.obj = content;
                         } else {
-                            top.currentPropertyContent = content;
+                            top.currentPropertyText = content;
                         }
                     }
 
                     if ( xmlReader.NodeType == XmlNodeType.EndElement ) {
                         // closed element having text content
-                        if (top.currentPropertyContent != null) {
-                            string content = top.currentPropertyContent;
+                        if (top.currentPropertyText != null) {
+                            string content = top.currentPropertyText;
                             PropertyInfo property = top.type.GetProperty( top.currentProperty );
                             Type typeArg = property.PropertyType.IsGenericType
                                     ? property.PropertyType.GetGenericArguments()[0]
                                     : null;
                             if (null == typeArg || !typeof ( ICollection< > ).MakeGenericType( typeArg )
                                                           .IsAssignableFrom( property.PropertyType ) ) {
-                                if ( property.PropertyType == typeof ( string ) ) {
-                                    property.SetValue( top.obj, content, null );
-                                } else {
-                                    property.SetValue( top.obj, convertValue( typeof ( string ),
-                                                                              property.PropertyType, content ), null );
-                                }
+                                property.SetValue( top.obj, convertValueIfNeed( typeof ( string ),
+                                                                            property.PropertyType, content ), null );
                             }
                             top.currentProperty = null;
-                            top.currentPropertyContent = null;
+                            top.currentPropertyText = null;
                         } else {
                             // closed element having sub-element content
                             if ( top.currentProperty != null ) {
@@ -135,8 +144,16 @@ namespace ConsoleFramework.Xaml
                                 } else {
                                     top = objects.Peek( );
 
+                                    string propertyName;
+                                    if ( top.currentProperty != null ) {
+                                        propertyName = top.currentProperty;
+                                    } else {
+                                        // todo : determine name of content property
+                                        propertyName = "Content";
+                                    }
+
                                     // use type conversion and handle collection if need
-                                    PropertyInfo property = top.type.GetProperty( top.currentProperty );
+                                    PropertyInfo property = top.type.GetProperty(propertyName);
                                     Type typeArg = property.PropertyType.IsGenericType
                                         ? property.PropertyType.GetGenericArguments( )[ 0 ]
                                         : null;
@@ -144,19 +161,11 @@ namespace ConsoleFramework.Xaml
                                     {
                                         object collection = property.GetValue( top.obj, null );
                                         MethodInfo methodInfo = collection.GetType( ).GetMethod( "Add" );
-                                        if ( initialized.obj.GetType( ) == typeArg ) {
-                                            methodInfo.Invoke( collection, new object[ ] { initialized.obj } );
-                                        } else {
-                                            object converted = convertValue( initialized.obj.GetType(  ), typeArg, initialized.obj );
-                                            methodInfo.Invoke( collection, new object[ ] { converted } );
-                                        }
+                                        object converted = convertValueIfNeed( initialized.obj.GetType(  ), typeArg, initialized.obj );
+                                        methodInfo.Invoke( collection, new[ ] { converted } );
                                     } else {
-                                        if ( property.PropertyType.IsInstanceOfType(initialized.obj) ) {
-                                            property.SetValue( top.obj, initialized.obj, null );
-                                        } else {
-                                            object converted = convertValue(initialized.obj.GetType(  ), property.PropertyType, initialized.obj);
-                                            property.SetValue( top.obj, converted, null );
-                                        }
+                                        property.SetValue(top.obj, convertValueIfNeed(
+                                            initialized.obj.GetType(), property.PropertyType, initialized.obj), null);
                                     }
                                 }
                             }
@@ -167,8 +176,30 @@ namespace ConsoleFramework.Xaml
 
             return result;
         }
+        
+        /// <summary>
+        /// Converts the value from source type to destination if need
+        /// using default conversion strategies and registered type converters.
+        /// </summary>
+        /// <param name="source">Type of source value</param>
+        /// <param name="dest">Type of destination</param>
+        /// <param name="value">Source value</param>
+        private static object convertValueIfNeed( Type source, Type dest, object value ) {
+            if ( dest.IsAssignableFrom( source ) ) {
+                return value;
+            }
 
-        private static object convertValue( Type source, Type dest, object value ) {
+            // process enumerations
+            if ( source == typeof ( String ) && dest.IsEnum ) {
+                string[ ] enumNames = dest.GetEnumNames( );
+                for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
+                    if ( enumNames[i] == (String) value ) {
+                        return Enum.ToObject( dest, dest.GetEnumValues( ).GetValue( i ) );
+                    }
+                }
+                throw new ApplicationException("Specified enum value not found.");
+            }
+
             // todo :
             if ( source == typeof ( string ) && dest == typeof ( bool ) ) {
                 return new StringToBoolConverter( ).Convert( ( string ) value );
@@ -177,6 +208,7 @@ namespace ConsoleFramework.Xaml
         }
 
         private static Type resolveType( string name ) {
+            // todo : scan default namespaces and connected namespaces
             switch ( name ) {
                 case "Window":
                     return typeof ( Window );
