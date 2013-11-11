@@ -78,6 +78,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Events\RoutedEvent.cs" />
+    <Compile Include="Xaml\MarkupExtensionsParser.cs" />
     <Compile Include="Xaml\StringToBoolConverter.cs" />
     <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>

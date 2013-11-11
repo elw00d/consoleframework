@@ -117,14 +117,8 @@ namespace ConsoleFramework.Xaml
                         if (top.currentPropertyText != null) {
                             string content = top.currentPropertyText;
                             PropertyInfo property = top.type.GetProperty( top.currentProperty );
-                            Type typeArg = property.PropertyType.IsGenericType
-                                    ? property.PropertyType.GetGenericArguments()[0]
-                                    : null;
-                            if (null == typeArg || !typeof ( ICollection< > ).MakeGenericType( typeArg )
-                                                          .IsAssignableFrom( property.PropertyType ) ) {
-                                property.SetValue( top.obj, convertValueIfNeed( typeof ( string ),
-                                                                            property.PropertyType, content ), null );
-                            }
+                            property.SetValue( top.obj, convertValueIfNeed( typeof ( string ),
+                                property.PropertyType, content ), null );
                             top.currentProperty = null;
                             top.currentPropertyText = null;
                         } else {
@@ -176,7 +170,7 @@ namespace ConsoleFramework.Xaml
 
             return result;
         }
-        
+
         /// <summary>
         /// Converts the value from source type to destination if need
         /// using default conversion strategies and registered type converters.
@@ -200,7 +194,7 @@ namespace ConsoleFramework.Xaml
                 throw new ApplicationException("Specified enum value not found.");
             }
 
-            // todo :
+            // todo : default converters for primitives
             if ( source == typeof ( string ) && dest == typeof ( bool ) ) {
                 return new StringToBoolConverter( ).Convert( ( string ) value );
             }

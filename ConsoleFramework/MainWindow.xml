@@ -1,5 +1,5 @@
 ﻿<Window Name="window2" Title="Очень длинное название окна">
-  <GroupBox Title="Группа">
+  <GroupBox Title="{Test Text={Test Text={{test!}}}}">
     <ScrollViewer VerticalAlignment="Stretch">
       <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
       <ListBox>
