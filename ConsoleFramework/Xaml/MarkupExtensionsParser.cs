@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -24,10 +23,11 @@ namespace ConsoleFramework.Xaml
 
     public class MarkupExtensionsParser
     {
-        private IMarkupExtensionsResolver resolver;
+        private readonly IMarkupExtensionsResolver resolver;
 
-        public MarkupExtensionsParser( IMarkupExtensionsResolver resolver ) {
+        public MarkupExtensionsParser( IMarkupExtensionsResolver resolver, String text ) {
             this.resolver = resolver;
+            this.text = text;
         }
 
         private String text;
@@ -35,10 +35,6 @@ namespace ConsoleFramework.Xaml
 
         private bool hasNextChar( ) {
             return index < text.Length;
-        }
-
-        private bool hasNextNChars( int n ) {
-            return index + (n-1) < text.Length;
         }
 
         private char consumeChar( ) {
@@ -49,36 +45,23 @@ namespace ConsoleFramework.Xaml
             return text[ index ];
         }
 
-        private char peekNextNChar( int n ) {
-            return text[ index - n ];
+        public Object ProcessMarkupExtension( Object context ) {
+            // interpret as markup extension expression
+            object result = processMarkupExtensionCore(context);
+
+            if ( hasNextChar( ) ) {
+                throw new InvalidOperationException(
+                    String.Format("Syntax error: unexpected characters at {0}", index));
+            }
+
+            return result;
         }
 
         /// <summary>
-        /// Если text начинается с одинарной открывающей фигурной скобки, то метод обрабатывает его
-        /// как вызов расширения разметки, и возвращает результат, или выбрасывает исключение,
-        /// если при парсинге или выполнении возникли ошибки. Если же text начинается c комбинации
-        /// {}, то остаток строки возвращается просто строкой. Те же правила действуют при обработке 
-        /// вложенных вызовов расширений разметки.
+        /// Consumes all whitespace characters. If necessary is true, at least one
+        /// whitespace character should be consumed.
         /// </summary>
-        /// <param name="text"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public Object ProcessText( String text, Object context ) {
-            if ( String.IsNullOrEmpty( text ) ) return String.Empty;
-
-            this.text = text;
-            this.index = 0;
-
-            if ( text[ 0 ] != '{' || text.Length > 1 && text[ 1 ] == '}' ) {
-                // interpret the rest as string
-                return text.Length > 2 ? text.Substring( 2 ) : String.Empty;
-            } else {
-                // interpret as markup extension expression
-                return processMarkupExtension( context);
-            }
-        }
-
-        public void processWhitespace(bool necessary = true) {
+        private void processWhitespace(bool necessary = true) {
             if ( necessary ) {
                 // at least one whitespace should be
                 if (peekNextChar( ) != ' ') 
@@ -87,8 +70,14 @@ namespace ConsoleFramework.Xaml
             }
             while ( peekNextChar( ) == ' ' ) consumeChar( );
         }
-
-        public Object processMarkupExtension( Object context) {
+        
+        /// <summary>
+        /// Recursive method. Consumes next characters as markup extension definition.
+        /// Resolves type, ctor arguments and properties of markup extension,
+        /// constructs and initializes it, and returns ProvideValue method result.
+        /// </summary>
+        /// <param name="context">Context object passed to ProvideValue method.</param>
+        private Object processMarkupExtensionCore( Object context) {
             if (consumeChar( ) != '{') 
                 throw new InvalidOperationException("Syntax error: '{{' token expected at 0.");
             processWhitespace( false );
@@ -111,14 +100,20 @@ namespace ConsoleFramework.Xaml
                         throw new InvalidOperationException("Syntax error: constructor argument" +
                                                             " cannot be after property assignment.");
 
-                    Object value = processMarkupExtension( context );
+                    Object value = processMarkupExtensionCore( context );
                     ctorArgs.Add( value );
                 } else {
                     String membernameOrString = processString( );
+                    
+                    if (membernameOrString.Length == 0)
+                        throw new InvalidOperationException(
+                            String.Format("Syntax error: member name or string expected at {0}",
+                                index));
+
                     if ( peekNextChar( ) == '=' ) {
                         consumeChar( );
                         object value = peekNextChar( ) == '{' 
-                            ? processMarkupExtension( context )
+                            ? processMarkupExtensionCore( context )
                             : processString( );
 
                         // construct object if not constructed yet
@@ -170,10 +165,12 @@ namespace ConsoleFramework.Xaml
 
         private void assignProperty( Type type, Object obj, string propertyName, object value ) {
             PropertyInfo property = type.GetProperty( propertyName);
-            // todo : use type conversion if need
             property.SetValue( obj, value, null );
         }
 
+        /// <summary>
+        /// Constructs object of specified type using specified ctor arguments list.
+        /// </summary>
         private Object construct( Type type, List< Object > ctorArgs ) {
             ConstructorInfo[] constructors = type.GetConstructors( );
             List< ConstructorInfo > constructorInfos = constructors.Where( info => info.GetParameters( ).Length == ctorArgs.Count ).ToList( );
@@ -187,14 +184,10 @@ namespace ConsoleFramework.Xaml
             ParameterInfo[] parameters = ctor.GetParameters( );
             Object[] convertedArgs = new object[ctorArgs.Count];
             for ( int i = 0; i < parameters.Length; i++ ) {
-                ParameterInfo parameter = parameters[ i ];
-                
-                // todo : convert ctorArg to parameter type if need
                 convertedArgs[ i ] = ctorArgs[ i ];
             }
             return ctor.Invoke( convertedArgs );
         }
-
 
         /// <summary>
         /// Возвращает строку, в которой могут содержаться любые символы кроме {},=.

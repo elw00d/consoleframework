@@ -33,6 +33,68 @@ namespace ConsoleFramework.Xaml
             public string currentPropertyText;
         }
 
+        public class TestExtension : IMarkupExtension
+        {
+            public TestExtension( ) {
+                Property1 = String.Empty;
+                Property2 = String.Empty;
+                Property3 = String.Empty;
+            }
+
+            public TestExtension( String param1 ) {
+                Property1 = param1;
+                Property2 = String.Empty;
+                Property3 = String.Empty;
+            }
+
+            public TestExtension( String param1, String param2 ) {
+                Property1 = param1;
+                Property2 = param2;
+                Property3 = String.Empty;
+            }
+
+            public String Property1 { get; set; }
+
+            public String Property2 { get; set; }
+
+            public String Property3 { get; set; }
+
+            public object ProvideValue( object context ) {
+                return Property1 + "_" + Property2 + "_" + Property3;
+            }
+        }
+
+        public class TestResolver : IMarkupExtensionsResolver
+        {
+            public Type Resolve( string name ) {
+                return typeof(TestExtension);
+            }
+        }
+
+        /// <summary>
+        /// Если str начинается с одинарной открывающей фигурной скобки, то метод обрабатывает его
+        /// как вызов расширения разметки, и возвращает результат, или выбрасывает исключение,
+        /// если при парсинге или выполнении возникли ошибки. Если же str начинается c комбинации
+        /// {}, то остаток строки возвращается просто строкой.
+        /// </summary>
+        private static Object processText( String text ) {
+            if ( String.IsNullOrEmpty( text ) ) return String.Empty;
+
+            if ( text[ 0 ] != '{' ) {
+                // interpret whole text as string
+                return text;
+            } else if (text.Length > 1 && text[1] == '}') {
+                // interpret the rest as string
+                return text.Length > 2 ? text.Substring(2) : String.Empty;
+            } else {
+                // todo : use real resolver
+                MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
+                    new TestResolver( ), text );
+                // todo : use real context
+                return markupExtensionsParser.ProcessMarkupExtension( null );
+            }
+        }
+
         /// <summary>
         /// Creates the object graph using provided xaml.
         /// </summary>
@@ -92,9 +154,10 @@ namespace ConsoleFramework.Xaml
                                 while ( xmlReader.MoveToNextAttribute( ) ) {
                                     //
                                     PropertyInfo propertyInfo = top.type.GetProperty( xmlReader.Name );
-                                    object value = convertValueIfNeed( typeof ( String ), 
-                                        propertyInfo.PropertyType, xmlReader.Value );
-                                    propertyInfo.SetValue( top.obj, value, null );
+                                    Object value = processText(xmlReader.Value);
+                                    object convertedValue = convertValueIfNeed( value.GetType(  ), 
+                                        propertyInfo.PropertyType, value );
+                                    propertyInfo.SetValue( top.obj, convertedValue, null );
                                     //
                                 }
                                 xmlReader.MoveToElement( );
@@ -115,10 +178,11 @@ namespace ConsoleFramework.Xaml
                     if ( xmlReader.NodeType == XmlNodeType.EndElement ) {
                         // closed element having text content
                         if (top.currentPropertyText != null) {
-                            string content = top.currentPropertyText;
-                            PropertyInfo property = top.type.GetProperty( top.currentProperty );
-                            property.SetValue( top.obj, convertValueIfNeed( typeof ( string ),
-                                property.PropertyType, content ), null );
+                            PropertyInfo property = top.type.GetProperty(top.currentProperty);
+                            Object value = processText( top.currentPropertyText );
+                            Object convertedValue = convertValueIfNeed( value.GetType(  ),
+                                                                        property.PropertyType, value );
+                            property.SetValue( top.obj, convertedValue, null );
                             top.currentProperty = null;
                             top.currentPropertyText = null;
                         } else {

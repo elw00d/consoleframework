@@ -80,6 +80,7 @@
     <Compile Include="Events\RoutedEvent.cs" />
     <Compile Include="Xaml\MarkupExtensionsParser.cs" />
     <Compile Include="Xaml\StringToBoolConverter.cs" />
+    <Compile Include="Xaml\TypeConvertersResolver.cs" />
     <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>
   <ItemGroup>
