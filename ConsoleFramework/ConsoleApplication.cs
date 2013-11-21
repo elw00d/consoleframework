@@ -6,7 +6,9 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 
+#if !WIN32
 using Mono.Unix;
+#endif
 
 namespace ConsoleFramework
 {
@@ -36,7 +38,7 @@ namespace ConsoleFramework
                 if (instance == null) {
                     lock (syncRoot) {
                         if (instance == null) {
-                            instance = new ConsoleApplication(true);
+                            instance = new ConsoleApplication(false);
                         }
                     }
                 }
@@ -216,6 +218,7 @@ namespace ConsoleFramework
 			fds [1].fd = eventfd;
 			fds [1].events = POLL_EVENTS.POLLIN;
 			
+#if !WIN32
 			// catch SIGWINCH to handle terminal resizing
 			UnixSignal[] signals = new UnixSignal [] {
 			    new UnixSignal (Mono.Unix.Native.Signum.SIGWINCH)
@@ -225,12 +228,13 @@ namespace ConsoleFramework
 					// Wait for a signal to be delivered
 					int index = UnixSignal.WaitAny (signals, -1);
 					Mono.Unix.Native.Signum signal = signals [index].Signum;
-					int res = Libc.writeInt64 (eventfd, 2);
+					Libc.writeInt64 (eventfd, 2);
 				}
 			}
 			);
 			signal_thread.IsBackground = false;
 			signal_thread.Start ();
+#endif
 			
 			TermKeyKey key = new TermKeyKey ();
 			while (true) {
@@ -253,7 +257,9 @@ namespace ConsoleFramework
 					//Console.WriteLine ("Readed eventfd counter : {0}\n", u);
 					if (u == 1) {
 						// exit from application
+#if !WIN32
 						signal_thread.Abort ();
+#endif
 						break;
 					}
 					if (u == 2) {
@@ -400,6 +406,7 @@ namespace ConsoleFramework
 				if ((key.modifiers & 2) == 2) {
 					inputRecord.KeyEvent.dwControlKeyState |= ControlKeyState.LEFT_ALT_PRESSED;
 				}
+                // todo : remove hardcoded exit combo after testing
 				if (unicodeCharacter == 'd' && key.modifiers == 4) {
 					Exit ();
 				}
