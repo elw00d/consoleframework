@@ -56,6 +56,9 @@ namespace ConsoleFramework.Native
 		internal static extern void refresh();
 		
 		[DllImport("libncursesw.so.5")]
+		internal static extern void clear();
+		
+		[DllImport("libncursesw.so.5")]
 		internal static extern int getch();
 		
 		/// <summary>

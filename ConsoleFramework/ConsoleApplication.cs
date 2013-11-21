@@ -6,6 +6,8 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 
+using Mono.Unix;
+
 namespace ConsoleFramework
 {
     /// <summary>
@@ -214,6 +216,22 @@ namespace ConsoleFramework
 			fds [1].fd = eventfd;
 			fds [1].events = POLL_EVENTS.POLLIN;
 			
+			// catch SIGWINCH to handle terminal resizing
+			UnixSignal[] signals = new UnixSignal [] {
+			    new UnixSignal (Mono.Unix.Native.Signum.SIGWINCH)
+			};
+			Thread signal_thread = new Thread (delegate () {
+				while (true) {
+					// Wait for a signal to be delivered
+					int index = UnixSignal.WaitAny (signals, -1);
+					Mono.Unix.Native.Signum signal = signals [index].Signum;
+					int res = Libc.writeInt64 (eventfd, 2);
+				}
+			}
+			);
+			signal_thread.IsBackground = false;
+			signal_thread.Start ();
+			
 			TermKeyKey key = new TermKeyKey ();
 			while (true) {
 				int pollRes = Libc.poll (fds, 2, -1);
@@ -230,17 +248,35 @@ namespace ConsoleFramework
 				}
 				
 				if (fds [1].revents != POLL_EVENTS.NONE) {
-					// exit signal
-					break;
-				}
-				
-				for (int i = 0; i < 2; i++) {
-					if (fds [i].revents != POLL_EVENTS.NONE) {
-						if (i == 1) {
-							UInt64 u;
-							Libc.readInt64 (fds [i].fd, out u);
-							Console.WriteLine ("Readed eventfd counter : {0}\n", u);
-						}
+					UInt64 u;
+					Libc.readInt64 (fds [1].fd, out u);
+					//Console.WriteLine ("Readed eventfd counter : {0}\n", u);
+					if (u == 1) {
+						// exit from application
+						signal_thread.Abort ();
+						break;
+					}
+					if (u == 2) {
+						// reinitializing ncurses to deal with new dimensions
+						// http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
+						NCurses.endwin ();
+						// Needs to be called after an endwin() so ncurses will initialize
+						// itself with the new terminal dimensions.
+						NCurses.refresh ();
+						NCurses.clear ();
+						
+						// get new term size and process appropriate INPUT_RECORD event
+						INPUT_RECORD inputRecord = new INPUT_RECORD ();
+						inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
+						
+						winsize ws;
+						Libc.ioctl (Libc.STDIN_FILENO, Libc.TIOCGWINSZ, out ws);
+						
+						inputRecord.WindowBufferSizeEvent.dwSize.X = (short)ws.ws_col;
+						inputRecord.WindowBufferSizeEvent.dwSize.Y = (short)ws.ws_row;
+						processInputEvent (inputRecord);
+						
+						renderer.UpdateRender ();
 					}
 				}
 				

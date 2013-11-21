@@ -53,7 +53,27 @@ namespace ConsoleFramework.Native
 		/// </summary>
 		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int close(int fd);
+		
+		// Used in terminal size retrieving
+		public const Int32 STDIN_FILENO = 0;
+		public const Int32 TIOCGWINSZ = 0x5413;
+		
+		/// <summary>
+		/// Used in terminal size retrieving.
+		/// </summary>
+		[DllImport("libc.so.6", SetLastError = true)]
+		public static extern int ioctl(int fd, int cmd, out winsize ws);
     }
+	
+	/// <summary>
+	/// Structure to retrieve terminal size.
+	/// </summary>
+	public struct winsize {
+		public UInt16 ws_row;
+		public UInt16 ws_col;
+		public UInt16 ws_xpixel;
+		public UInt16 ws_ypixel;
+	}
 
     [Flags]
 	public enum EVENTFD_FLAGS : int {
