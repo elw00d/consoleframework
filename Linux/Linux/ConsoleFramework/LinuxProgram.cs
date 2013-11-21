@@ -48,7 +48,6 @@ namespace Linux
                     //MaxWidth = 30,
                     //Width = 10,
                     Height = 20,
-                    C = '1',
                     Name = "Window1",
                     Title = "Window1",
                     Content = panel
@@ -59,7 +58,6 @@ namespace Linux
                     Y = 6,
                     MinHeight = 10,
                     MinWidth = 10,
-                    C = '2',
                     Name = "Window2",
                     Title = "Очень длинное название окна",
                     Content = new TextBlock() {

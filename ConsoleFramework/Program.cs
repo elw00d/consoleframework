@@ -13,13 +13,13 @@ namespace ConsoleFramework {
             XamlParser parser = new XamlParser(  );
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "ConsoleFramework.MainWindow.xml";
-            Window createdFromXaml;
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string result = reader.ReadToEnd();
-                createdFromXaml = ( Window ) XamlParser.CreateFromXaml(result);
-            }
+            //Window createdFromXaml;
+            //using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            //using (StreamReader reader = new StreamReader(stream))
+            //{
+            //    string result = reader.ReadToEnd();
+            //    createdFromXaml = ( Window ) XamlParser.CreateFromXaml(result);
+            //}
 
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();
@@ -133,7 +133,7 @@ namespace ConsoleFramework {
                     }
                 });
                 windowsHost.Show(window1);
-                windowsHost.Show(createdFromXaml);
+                //windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 application.Run(windowsHost);
             }

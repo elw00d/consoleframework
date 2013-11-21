@@ -39,6 +39,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\ConsoleFramework\ConsoleApplication.cs">
@@ -156,6 +157,21 @@
     <Compile Include="..\..\ConsoleFramework\Native\Win32.cs">
       <Link>ConsoleFramework\Native\Win32.cs</Link>
     </Compile>
+    <Compile Include="..\..\ConsoleFramework\Xaml\MarkupExtensionsParser.cs">
+      <Link>ConsoleFramework\Xaml\MarkupExtensionsParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Xaml\StringToBoolConverter.cs">
+      <Link>ConsoleFramework\Xaml\StringToBoolConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Xaml\TypeConvertersResolver.cs">
+      <Link>ConsoleFramework\Xaml\TypeConvertersResolver.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Xaml\XamlParser.cs">
+      <Link>ConsoleFramework\Xaml\XamlParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\ConsoleFramework\Controls\MessageBox.cs">
+      <Link>ConsoleFramework\Controls\MessageBox.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -175,5 +191,11 @@
   <ItemGroup>
     <Folder Include="ConsoleFramework\Native\" />
     <Folder Include="ConsoleFramework\Rendering\" />
+    <Folder Include="ConsoleFramework\Xaml\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\ConsoleFramework\MainWindow.xml">
+      <Link>ConsoleFramework\MainWindow.xml</Link>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
