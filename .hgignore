@@ -27,3 +27,5 @@ etc/ConsoleTestCpp/obj/
 etc/NCursesTestApp/bin/
 etc/NCursesTestApp/obj/
 etc/mono-ncurses-problem/TestApp/TestApp/bin/
+Binding/bin/
+Binding/obj/

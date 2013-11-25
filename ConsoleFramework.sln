@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PhonesBook", "PhonesBook\PhonesBook.csproj", "{9A6A824D-6993-4CD8-BE5D-A291A55C17E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Binding", "Binding\Binding.csproj", "{E1CD529B-E3F1-4660-AA4F-1670E0992553}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = ConsoleFramework.vsmdi
@@ -57,6 +59,16 @@ Global
 		{9A6A824D-6993-4CD8-BE5D-A291A55C17E5}.Release|Mixed Platforms.Build.0 = Release|x86
 		{9A6A824D-6993-4CD8-BE5D-A291A55C17E5}.Release|x86.ActiveCfg = Release|x86
 		{9A6A824D-6993-4CD8-BE5D-A291A55C17E5}.Release|x86.Build.0 = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.ActiveCfg = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.Build.0 = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|Any CPU.ActiveCfg = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|Mixed Platforms.Build.0 = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.ActiveCfg = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
