@@ -12,13 +12,13 @@ namespace Binding.Converters
  * Date: 26.06.13
  * Time: 21:46
  */
-    public class ConversionResult<T>
+    public class ConversionResult
     {
-        public T value;
+        public Object value;
         public bool success;
         public String failReason;
 
-        public ConversionResult(T value)
+        public ConversionResult(Object value)
         {
             this.value = value;
             this.success = true;

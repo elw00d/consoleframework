@@ -12,22 +12,28 @@ namespace Binding.Converters
  * @author igor.kostromin
  *         26.06.13 19:37
  */
-public class StringToIntegerConverter : IBindingConverter<String, int> {
-    public ConversionResult<int> convert(String s) {
+public class StringToIntegerConverter : IBindingConverter {
+    public Type getFirstClazz( ) {
+        return typeof ( String );
+    }
+
+    public Type getSecondClazz( ) {
+        return typeof ( int );
+    }
+
+    public ConversionResult convert(Object s) {
         try {
-            if (s == null) return new ConversionResult<int>( false, "String is null");
-            int value = int.Parse(s);
-            return new ConversionResult<int>(value);
+            if (s == null) return new ConversionResult( false, "String is null");
+            int value = int.Parse(( string ) s);
+            return new ConversionResult(value);
         } catch (FormatException e) {
-            return new ConversionResult<int>(false, "Incorrect number");
+            return new ConversionResult(false, "Incorrect number");
         }
     }
 
-    public ConversionResult<String> convertBack(int integer) {
-        return new ConversionResult<String>(integer.ToString(CultureInfo.InvariantCulture) );
+    public ConversionResult convertBack(Object integer) {
+        return new ConversionResult(((int)integer).ToString(CultureInfo.InvariantCulture) );
     }
-
-
 }
 
 }

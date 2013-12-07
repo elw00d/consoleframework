@@ -13,8 +13,13 @@ namespace Binding.Adapters
  *         26.06.13 17:50
  */
 
-    public interface IBindingAdapter< TTarget >
+    public interface IBindingAdapter
     {
+        /**
+     * Returns supported class object.
+     */
+        Type getTargetType( );
+
         /**
      * Returns class object of virtual property that can be used as binding Target.
      */
@@ -30,7 +35,7 @@ namespace Binding.Adapters
      * @param value Value to be set
      * @param <TValue> Value type argument
      */
-        void setValue< TValue >( TTarget target, String targetProperty, TValue value );
+        void setValue( Object target, String targetProperty, Object value );
 
         /**
      * Gets the value of target property. You should implement this method if you will use
@@ -41,7 +46,7 @@ namespace Binding.Adapters
      * @param targetProperty Property name
      * @param <TValue> Value type argument
      */
-        TValue getValue< TValue >( TTarget target, String targetProperty );
+        Object getValue(Object target, String targetProperty);
 
         /**
      * Subscribes to target object property change event. You should implement this method if you will use
@@ -52,7 +57,7 @@ namespace Binding.Adapters
      * @param listener Listener to be subscribed
      * @return Listener wrapper object or null if there is no wrapper need
      */
-        Object addPropertyChangedListener( TTarget target, IPropertyChangedListener listener );
+        Object addPropertyChangedListener(Object target, IPropertyChangedListener listener);
 
         /**
      * Unsubscribes property changed listener from target object. You should implement this method if you will use
@@ -62,7 +67,7 @@ namespace Binding.Adapters
      * @param target Target object
      * @param listenerWrapper Listener wrapper to be unsubscribed or null if no wrapper was returned when subscribed
      */
-        void removePropertyChangedListener( TTarget target, Object listenerWrapper );
+        void removePropertyChangedListener(Object target, Object listenerWrapper);
 
         /**
      * Returns default BindingMode for this Target class. This mode will be

@@ -16,12 +16,12 @@ namespace Binding.Validators
  * @author igor.kostromin
  *         26.06.13 17:50
  */
-    public interface IBindingValidator<T> : IBindingValidator
-    {
-        /**
-         * Validates value T.
-         */
-        //ValidationResult validate(T value);
-    }
+//    public interface IBindingValidator<T> : IBindingValidator
+//    {
+//        /**
+//         * Validates value T.
+//         */
+//        //ValidationResult validate(T value);
+//    }
 
 }

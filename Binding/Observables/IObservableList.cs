@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,19 +12,19 @@ namespace Binding.Observables
  * @author igor.kostromin
  *         28.06.13 17:09
  */
-public interface IObservableList<T> : IList<T> {
+public interface IObservableList : IList {
     /**
      * Adds a listener that is notified when the list changes.
      *
      * @param listener the listener to add
      */
-    void addObservableListListener(IObservableListListener<T> listener);
+    void addObservableListListener(IObservableListListener listener);
 
     /**
      * Removes a listener.
      *
      * @param listener the listener to remove
      */
-    void removeObservableListListener(IObservableListListener<T> listener);
+    void removeObservableListListener(IObservableListListener listener);
 }
 }

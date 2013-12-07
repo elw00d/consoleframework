@@ -32,14 +32,12 @@ public class BindingBase {
     private BindingSettingsBase settings;
     protected bool targetIsUi;
 
-    //actually IBindingAdapter
-    protected Object adapter;
+    protected IBindingAdapter adapter;
     private PropertyInfo targetPropertyInfo;
     private PropertyInfo sourcePropertyInfo;
 
     // converts target to source and back
-    // actually IBindingConverter
-    private Object converter;
+    private IBindingConverter converter;
 
     protected IPropertyChangedListener sourceListener;
     protected IPropertyChangedListener targetListener;
@@ -51,17 +49,14 @@ public class BindingBase {
     protected bool ignoreTargetListener;
 
     private IBindingResultListener resultListener;
-    // actually IBindingValidator
     private IBindingValidator validator;
 
     // collections synchronization support
     private bool sourceIsObservable;
     private bool targetIsObservable;
     protected SourceListListener sourceListListener;
-    // actually IObservableList
-    protected Object sourceList;
-    // actually IObservableList
-    protected Object targetList;
+    protected IObservableList sourceList;
+    protected IObservableList targetList;
     protected TargetListListener targetListListener;
 
     private bool updateSourceIfBindingFails = true;
@@ -167,12 +162,7 @@ public class BindingBase {
                 if (adapter == null) {
                     targetList = (IList) targetPropertyInfo.GetGetMethod().Invoke(target, null);
                 } else {
-                    targetList = ( IList ) adapter.GetType( ).GetMethod( "getValue" ).MakeGenericMethod( sourcePropertyInfo.PropertyType )
-                                                  .Invoke( adapter, new object[ ]
-                                                      {
-                                                          target, targetProperty
-                                                      } );
-                    //targetList = (List) adapter.getValue(target, targetProperty);
+                    targetList = ( IList ) adapter.getValue( target, targetProperty );
                 }
                 if ( sourceValue == null ) {
                     if (null != targetList ) targetList.Clear();
@@ -189,8 +179,8 @@ public class BindingBase {
                             sourceList.removeObservableListListener(sourceListListener);
                             sourceList = null;
                         }
-                        sourceList = (IObservableList< > ) sourceValue;
-                        sourceListListener = new SourceListListener(targetList);
+                        sourceList = (IObservableList) sourceValue;
+                        sourceListListener = new SourceListListener(this, targetList);
                         sourceList.addObservableListListener(sourceListListener);
                     } else {
                         // todo : debug : target list is null, ignoring sync operation
@@ -200,7 +190,7 @@ public class BindingBase {
                 Object converted = sourceValue;
                 // convert back if need
                 if (null != converter) {
-                    ConversionResult< > result = converter.convertBack( sourceValue );
+                    ConversionResult result = converter.convertBack( sourceValue );
                     if (!result.success) {
                         return;
                     }
@@ -208,105 +198,99 @@ public class BindingBase {
                 }
                 //
                 if (adapter == null)
-                    targetPropertyInfo.setter.invoke( target, converted);
+                    targetPropertyInfo.GetSetMethod().Invoke( target, new object[]{converted});
                 else
                     adapter.setValue( target, targetProperty, converted );
             }
-        } catch ( IllegalAccessException e ) {
-            throw new RuntimeException( e );
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException( e );
         } finally {
             ignoreTargetListener = false;
         }
     }
 
-    private class TargetListListener implements IObservableListListener {
+    protected class TargetListListener : IObservableListListener {
         // to avoid side effects from old listeners
         // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
-        boolean ban = false;
-        List sourceList;
+        bool ban = false;
+        IList sourceList;
+        private BindingBase self;
 
-        private TargetListListener(List sourceList) {
+        public TargetListListener(BindingBase self, IList sourceList) {
+            this.self = self;
             this.sourceList = sourceList;
         }
 
-        @Override
         public void listElementsAdded(IObservableList list, int index, int length) {
             if (ban) return;
-            ignoreSourceListener = true;
+            self.ignoreSourceListener = true;
             try {
-                for (int i = index; i < list.size(); i++) sourceList.add(list.get(i));
+                for (int i = index; i < list.Count; i++) sourceList.Add(list[i]);
             } finally {
-                ignoreSourceListener = false;
+                self.ignoreSourceListener = false;
             }
         }
 
-        @Override
-        public void listElementsRemoved(IObservableList list, int index, List oldElements) {
+        public void listElementsRemoved(IObservableList list, int index, IList oldElements) {
             if (ban) return;
-            ignoreSourceListener = true;
+            self.ignoreSourceListener = true;
             try {
-                for (Object item : oldElements)
-                    sourceList.remove(item);
+                foreach (Object item in oldElements)
+                    sourceList.Remove(item);
             } finally {
-                ignoreSourceListener = false;
+                self.ignoreSourceListener = false;
             }
         }
 
-        @Override
         public void listElementReplaced(IObservableList list, int index, Object oldElement) {
             if (ban) return;
-            ignoreSourceListener = true;
+            self.ignoreSourceListener = true;
             try {
-                sourceList.set(index, list.get(index));
+                sourceList[index] = list[index];
             } finally {
-                ignoreSourceListener = false;
+                self.ignoreSourceListener = false;
             }
         }
     }
 
-    private class SourceListListener : IObservableListListener {
+    protected class SourceListListener : IObservableListListener {
         // to avoid side effects from old listeners
         // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
-        boolean ban = false;
-        List targetList;
+        public bool ban = false;
+        IList targetList;
+        private BindingBase self;
 
-        private SourceListListener(List targetList) {
+        public SourceListListener(BindingBase self, IList targetList) {
             this.targetList = targetList;
+            this.self = self;
         }
 
-        @Override
         public void listElementsAdded(IObservableList list, int index, int length) {
             if (ban) return;
-            ignoreTargetListener = true;
+            self.ignoreTargetListener = true;
             try {
-                for (int i = index; i < list.size(); i++) targetList.add(list.get(i));
+                for (int i = index; i < list.Count; i++) targetList.Insert(index, list[i]);
             } finally {
-                ignoreTargetListener = false;
+                self.ignoreTargetListener = false;
             }
         }
 
-        @Override
-        public void listElementsRemoved(IObservableList list, int index, List oldElements) {
+        public void listElementsRemoved(IObservableList list, int index, IList oldElements) {
             if (ban) return;
-            ignoreTargetListener = true;
+            self.ignoreTargetListener = true;
             try {
-                for (Object item : oldElements)
-                    targetList.remove(item);
+                foreach (Object item in oldElements)
+                    targetList.Remove(item);
             } finally {
-                ignoreTargetListener = false;
+                self.ignoreTargetListener = false;
             }
         }
 
-        @Override
         public void listElementReplaced(IObservableList list, int index, Object oldElement) {
             if (ban) return;
-            ignoreTargetListener = true;
+            self.ignoreTargetListener = true;
             try {
-                targetList.set(index, list.get(index));
+                targetList[index] = list[index];
             } finally {
-                ignoreTargetListener = false;
+                self.ignoreTargetListener = false;
             }
         }
     }
@@ -316,23 +300,28 @@ public class BindingBase {
      */
     public void updateSource() {
         if (realMode != BindingMode.OneWayToSource && realMode != BindingMode.TwoWay)
-            throw new RuntimeException( String.format( "Cannot update source in %s binding mode.", realMode ) );
+            throw new ApplicationException( String.Format( "Cannot update source in {0} binding mode.", realMode ) );
         ignoreSourceListener = true;
         try {
             Object targetValue;
-            if (null == adapter)
-                targetValue = targetPropertyInfo.getter.invoke( target );
-            else
+            if ( null == adapter )
+                targetValue = targetPropertyInfo.GetGetMethod( ).Invoke( target, null );
+            else {
+
                 targetValue = adapter.getValue( target, targetProperty );
+            }
             //
             if ( targetIsObservable ) { // work with collection
-                final List sourceList = (List) sourcePropertyInfo.getter.invoke(source);
+                IList sourceList = (IList) sourcePropertyInfo.GetGetMethod().Invoke(source, null);
                 if (targetValue == null) {
-                    if (null != sourceList) sourceList.clear();
+                    if (null != sourceList) sourceList.Clear();
                 } else {
                     if (null != sourceList) {
-                        sourceList.clear();
-                        sourceList.addAll((Collection) targetValue);
+                        sourceList.Clear();
+                        //sourceList.AddAll((ICollection) targetValue);
+                        foreach ( object item in (ICollection) targetValue ) {
+                            sourceList.Add( item );
+                        }
 
                         // subscribe to source list
                         if (targetList != null ) {
@@ -341,7 +330,7 @@ public class BindingBase {
                             targetList = null;
                         }
                         targetList = (IObservableList) targetValue;
-                        targetListListener = new TargetListListener(sourceList);
+                        targetListListener = new TargetListListener(this, sourceList);
                         targetList.addObservableListListener(targetListListener);
                     } else {
                         // todo : debug : source list is null, ignoring sync operation
@@ -356,7 +345,7 @@ public class BindingBase {
                         if (null != resultListener)
                             resultListener.onBinding( new BindingResult( true, false, result.failReason ) );
                         if ( updateSourceIfBindingFails ) {
-                            sourcePropertyInfo.setter.invoke( source, (Object) null);
+                            sourcePropertyInfo.GetSetMethod().Invoke( source, new object[] {null});
                         }
                         return;
                     }
@@ -369,42 +358,33 @@ public class BindingBase {
                         if (null != resultListener)
                             resultListener.onBinding( new BindingResult( false, true, validationResult.message ) );
                         if ( updateSourceIfBindingFails ) {
-                            sourcePropertyInfo.setter.invoke( source, (Object) null);
+                            sourcePropertyInfo.GetSetMethod().Invoke( source, new object[]{ null});
                         }
                         return;
                     }
                 }
-                sourcePropertyInfo.setter.invoke( source, convertedValue );
+                sourcePropertyInfo.GetSetMethod().Invoke( source, new object[] {convertedValue} );
                 if (null != resultListener)
                     resultListener.onBinding( new BindingResult( false ) );
                 //
             }
-        } catch ( IllegalAccessException e ) {
-            throw new RuntimeException( e );
-        } catch (InvocationTargetException e) {
-            throw new RuntimeException( e );
         } finally {
             ignoreSourceListener =false;
         }
     }
 
-    public class TargetChangeListener implements IPropertyChangedListener {
+    public class TargetChangeListener : IPropertyChangedListener
+    {
+        private readonly BindingBase self;
+        public TargetChangeListener( BindingBase self ) {
+            this.self = self;
+        }
+
         public void propertyChanged( String propertyName ) {
-            if (!ignoreTargetListener && propertyName.equals( targetProperty ))
-                updateSource();
+            if (!self.ignoreTargetListener && propertyName == self.targetProperty )
+                self.updateSource();
         }
     }
-
-//    private UpdateSourceTrigger getRealUpdateSourceTrigger() {
-//        assert targetIsUi;
-//        if (updateSourceTrigger != UpdateSourceTrigger.Default)
-//            return updateSourceTrigger;
-//        else {
-//            UpdateSourceTrigger real = ((IUiBindingAdapter) adapter).getDefaultUpdateSourceTrigger();
-//            if (real == UpdateSourceTrigger.Default) throw new AssertionError("Adapter cannot return UpdateSourceTrigger.Default");
-//            return real;
-//        }
-//    }
 
     /**
      * Connects Source and Target objects.
@@ -412,7 +392,7 @@ public class BindingBase {
     public void bind() {
         // resolve binding mode and search converter if need
         if (targetIsUi) {
-            adapter = settings.getAdapterFor(target.getClass());
+            adapter = settings.getAdapterFor(target.GetType());
             if ( mode == BindingMode.Default) {
                 realMode = adapter.getDefaultMode();
             } else
@@ -424,56 +404,59 @@ public class BindingBase {
                 realMode = mode;
 
             if (realMode == BindingMode.TwoWay || realMode == BindingMode.OneWayToSource) {
-                if (! (target instanceof INotifyPropertyChanged))
-                    adapter = settings.getAdapterFor( target.getClass() );
+                if (! (target is INotifyPropertyChanged))
+                    adapter = settings.getAdapterFor( target.GetType() );
             }
         }
 
         // get properties info and check if they are collections
-        sourcePropertyInfo = PropertyUtils.getProperty( source.getClass(), sourceProperty );
-        if (null == adapter)
-            targetPropertyInfo = PropertyUtils.getProperty( target.getClass(), targetProperty );
+        sourcePropertyInfo = source.GetType( ).GetProperty( sourceProperty );
+        if ( null == adapter )
+            targetPropertyInfo = target.GetType( ).GetProperty( targetProperty );
 
-        Class<?> targetPropertyClass = (null == adapter) ? targetPropertyInfo.clazz : adapter.getTargetPropertyClazz(targetProperty);
+        Type targetPropertyClass = (null == adapter) ?
+            targetPropertyInfo.PropertyType : adapter.getTargetPropertyClazz(targetProperty);
 
-        sourceIsObservable = IObservableList.class.isAssignableFrom( sourcePropertyInfo.clazz );
-        targetIsObservable = IObservableList.class.isAssignableFrom( targetPropertyClass );
+        sourceIsObservable = typeof(IObservableList).IsAssignableFrom( sourcePropertyInfo.PropertyType );
+        targetIsObservable = typeof(IObservableList).IsAssignableFrom( targetPropertyClass );
 
         // we need converter if data will flow from non-observable property to property of another class
-        if (!targetPropertyClass.equals( sourcePropertyInfo.clazz )) {
-            boolean needConverter = false;
+        if (targetPropertyClass != sourcePropertyInfo.PropertyType) {
+            bool needConverter = false;
             if (realMode == BindingMode.OneTime || realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay)
                 needConverter |= !sourceIsObservable;
             if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay)
                 needConverter |= !targetIsObservable;
             //
             if (needConverter) {
-                converter = settings.getConverterFor( targetPropertyClass, sourcePropertyInfo.clazz );
+                converter = settings.getConverterFor( targetPropertyClass, sourcePropertyInfo.PropertyType );
                 if (converter == null )
-                    throw new RuntimeException( String.format("Converter for %s -> %s classes not found.",
-                            targetPropertyClass.getName(), sourcePropertyInfo.clazz.getName()) );
+                    throw new Exception( String.Format("Converter for {0} -> {1} classes not found.",
+                            targetPropertyClass.Name, sourcePropertyInfo.PropertyType.Name) );
             }
         }
 
         // verify properties getters and setters for specified binding mode
         if (realMode == BindingMode.OneTime || realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay) {
-            if (sourcePropertyInfo.getter == null) throw new RuntimeException( "Source property getter not found" );
+            if (sourcePropertyInfo.GetGetMethod() == null) throw new Exception( "Source property getter not found" );
             if (sourceIsObservable) {
-                if (null == adapter && targetPropertyInfo.getter == null) throw new RuntimeException( "Target property getter not found" );
-                if (!List.class.isAssignableFrom( targetPropertyClass ))
-                    throw new RuntimeException( "Target property class have to implement List" );
+                if (null == adapter && targetPropertyInfo.GetGetMethod() == null) throw new Exception( "Target property getter not found" );
+                if (!typeof(IList).IsAssignableFrom( targetPropertyClass ))
+                    throw new Exception( "Target property class have to implement IList" );
             } else {
-                if (null == adapter && targetPropertyInfo.setter == null) throw new RuntimeException( "Target property setter not found" );
+                if (null == adapter && targetPropertyInfo.GetSetMethod() == null)
+                    throw new Exception( "Target property setter not found" );
             }
         }
         if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay) {
-            if ( null == adapter && targetPropertyInfo.getter == null) throw new RuntimeException( "Target property getter not found" );
+            if ( null == adapter && targetPropertyInfo.GetGetMethod() == null)
+                throw new Exception( "Target property getter not found" );
             if ( targetIsObservable) {
-                if (sourcePropertyInfo.getter == null) throw new RuntimeException( "Source property getter not found" );
-                if (!List.class.isAssignableFrom( sourcePropertyInfo.clazz ))
-                    throw new RuntimeException( "Source property class have to implement List" );
+                if (sourcePropertyInfo.GetGetMethod() == null) throw new Exception( "Source property getter not found" );
+                if (!typeof(IList).IsAssignableFrom( sourcePropertyInfo.PropertyType ))
+                    throw new Exception( "Source property class have to implement IList" );
             } else {
-                if (sourcePropertyInfo.setter == null ) throw new RuntimeException( "Source property setter not found" );
+                if (sourcePropertyInfo.GetSetMethod() == null ) throw new Exception( "Source property setter not found" );
             }
         }
 
@@ -491,29 +474,29 @@ public class BindingBase {
 
     protected void connectSourceAndTarget() {
         switch ( realMode ) {
-            case OneTime:
+            case BindingMode.OneTime:
                 break;
-            case OneWay:
-                sourceListener = new SourceChangeListener();
+            case BindingMode.OneWay:
+                sourceListener = new SourceChangeListener(this);
                 source.addPropertyChangedListener( sourceListener );
                 break;
-            case OneWayToSource:
+            case BindingMode.OneWayToSource:
                 if (null == adapter) {
-                    targetListener = new TargetChangeListener();
+                    targetListener = new TargetChangeListener(this);
                     ((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener() );
+                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
                 }
                 break;
-            case TwoWay:
-                sourceListener = new SourceChangeListener();
+            case BindingMode.TwoWay:
+                sourceListener = new SourceChangeListener(this);
                 source.addPropertyChangedListener( sourceListener );
                 //
                 if (null == adapter) {
-                    targetListener = new TargetChangeListener();
+                    targetListener = new TargetChangeListener(this);
                     ((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener() );
+                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
                 }
                 break;
         }
@@ -569,7 +552,7 @@ public class BindingBase {
      * @param source New Source object
      */
     public void setSource(INotifyPropertyChanged source) {
-        if (null == source) throw new IllegalArgumentException( "source is null" );
+        if (null == source) throw new ArgumentNullException( "source" );
         if (bound) {
             unbind();
             this.source = source;
@@ -585,7 +568,7 @@ public class BindingBase {
      * @param target New Target object
      */
     public void setTarget(Object target) {
-        if (null == target) throw new IllegalArgumentException( "target is null" );
+        if (null == target) throw new ArgumentNullException( "target" );
         if (bound) {
             unbind();
             this.target = target;

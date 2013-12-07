@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Binding.Adapters;
 using Binding.Converters;
 
@@ -21,10 +19,8 @@ public class BindingSettingsBase {
         DEFAULT_SETTINGS.initializeDefault();
     }
 
-    // Object is IBindingConverter<T1,T2>
-    private Dictionary<Type, Dictionary<Type, Object>> converters = new Dictionary<Type, Dictionary<Type, Object>>(  );
-    // Object is IBindingAdapter<Target>
-    private Dictionary<Type, Object> adapters = new Dictionary<Type, Object>(  );
+    private Dictionary<Type, Dictionary<Type, IBindingConverter>> converters = new Dictionary<Type, Dictionary<Type, IBindingConverter>>();
+    private Dictionary<Type, IBindingAdapter> adapters = new Dictionary<Type, IBindingAdapter>();
 
     public BindingSettingsBase() {
     }
@@ -36,66 +32,72 @@ public class BindingSettingsBase {
         addConverter( new StringToIntegerConverter() );
     }
 
-    public  void addAdapter<T>(IBindingAdapter<T> adapter) {
-        Type targetClazz = adapter.GetType( ).GetGenericArguments( )[ 0 ];
+    public  void addAdapter<T>(IBindingAdapter adapter) {
+        Type targetClazz = adapter.getTargetType( );
         if ( adapters.ContainsKey( targetClazz ))
             throw new ApplicationException( String.Format( "Adapter for class {0} is already registered.", targetClazz.Name ) );
         adapters.Add( targetClazz, adapter );
     }
 
-    public Object getAdapterFor<T>(Type clazz) {
-        Object adapter = adapters[ clazz ];
+    public IBindingAdapter getAdapterFor(Type clazz) {
+        IBindingAdapter adapter = adapters[ clazz ];
         if (null == adapter) throw new ApplicationException(String.Format("Adapter for class {0} not found.", clazz.Name));
         return adapter;
     }
 
-    public void addConverter<TFirst, TSecond>( IBindingConverter<TFirst, TSecond> converter) {
+    public void addConverter( IBindingConverter converter) {
         registerConverter( converter );
-        registerConverter( new ReversedConverter<TSecond, TFirst>( converter ) );
+        registerConverter( new ReversedConverter( converter ) );
     }
 
-    private void registerConverter<TFirst, TSecond>(IBindingConverter<TFirst, TSecond> converter) {
-        Type first = converter.GetType( ).GetGenericArguments( )[ 0 ];
-        Type second = converter.GetType( ).GetGenericArguments( )[ 1 ];
+    private void registerConverter(IBindingConverter converter) {
+        Type first = converter.getFirstClazz( );
+        Type second = converter.getSecondClazz( );
         if (converters.ContainsKey( first )) {
-            Dictionary< Type, Object > firstClassConverters = converters[ first ];
+            Dictionary< Type, IBindingConverter > firstClassConverters = converters[ first ];
             if (firstClassConverters.ContainsKey( second )) {
                 throw new ApplicationException( String.Format( "Converter for {0} -> {1} classes is already registered.", first.Name, second.Name ) );
             }
             firstClassConverters.Add( second, converter );
         } else {
-            Dictionary<Type, Object> firstClassConverters = new Dictionary<Type, Object>(  );
+            Dictionary<Type, IBindingConverter> firstClassConverters = new Dictionary<Type, IBindingConverter>();
             firstClassConverters.Add( second, converter );
             converters.Add( first, firstClassConverters );
         }
     }
 
-    public IBindingConverter<TFirst, TSecond> getConverterFor<TFirst, TSecond>() {
-        Type first = typeof ( TFirst );
-        Type second = typeof ( TSecond );
-        if (!converters.ContainsKey( first ))
+    public IBindingConverter getConverterFor(Type first, Type second) {
+        if (!converters.ContainsKey(first))
             //throw new RuntimeException( String.format( "Converter for %s -> %s classes not found.", first.getName(), second.getName() ) );
             return null;
-        Dictionary<Type, Object> firstClassConverters = converters[first ];
-        if (!firstClassConverters.ContainsKey( second ))
+        Dictionary<Type, IBindingConverter> firstClassConverters = converters[first];
+        if (!firstClassConverters.ContainsKey(second))
             //throw new RuntimeException( String.format( "Converter for %s -> %s classes not found.", first.getName(), second.getName() ) );
             return null;
-        return ( IBindingConverter< TFirst, TSecond > ) firstClassConverters[ second ];
+        return firstClassConverters[second];
     }
 
-    private class ReversedConverter<TFirst, TSecond> : IBindingConverter<TFirst, TSecond> {
+    private class ReversedConverter : IBindingConverter {
 
-        IBindingConverter<TSecond, TFirst> converter;
+        IBindingConverter converter;
 
-        public ReversedConverter(IBindingConverter<TSecond, TFirst> converter) {
+        public ReversedConverter(IBindingConverter converter) {
             this.converter = converter;
         }
 
-        public ConversionResult<TSecond> convert(TFirst tFirst) {
+        public Type getFirstClazz( ) {
+            return converter.getSecondClazz( );
+        }
+
+        public Type getSecondClazz( ) {
+            return converter.getFirstClazz( );
+        }
+
+        public ConversionResult convert(object tFirst) {
             return converter.convertBack(tFirst);
         }
 
-        public ConversionResult<TFirst> convertBack(TSecond tSecond) {
+        public ConversionResult convertBack(object tSecond) {
             return converter.convert(tSecond);
         }
     }

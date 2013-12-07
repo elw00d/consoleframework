@@ -13,13 +13,13 @@ namespace Binding.Observables
  * @author igor.kostromin
  *         28.06.13 17:11
  */
-public class ObservableList<E> : IObservableList<E> {
-    private List<E> list;
-    private List<IObservableListListener<E>> listeners;
+public class ObservableList : IObservableList {
+    private IList list;
+    private List<IObservableListListener> listeners;
 
-    public ObservableList( List<E> list ) {
+    public ObservableList( IList list ) {
         this.list = list;
-        listeners = new List< IObservableListListener< E > >();
+        listeners = new List< IObservableListListener >();
     }
 
 
@@ -80,7 +80,7 @@ public class ObservableList<E> : IObservableList<E> {
 //    }
 //
 //    public void clear() {
-//        List<E> dup = new ArrayList<E>( list );
+//        List dup = new ArrayList( list );
 //        list.clear();
 //        modCount++;
 //
@@ -111,15 +111,15 @@ public class ObservableList<E> : IObservableList<E> {
 //            IObservableListListener listener ) {
 //        listeners.remove( listener );
 //    }
-    public void addObservableListListener( IObservableListListener< E > listener ) {
+    public void addObservableListListener( IObservableListListener listener ) {
         listeners.Add( listener );
     }
 
-    public void removeObservableListListener( IObservableListListener< E > listener ) {
+    public void removeObservableListListener( IObservableListListener listener ) {
         listeners.Remove( listener );
     }
 
-    public IEnumerator< E > GetEnumerator( ) {
+    public IEnumerator GetEnumerator( ) {
         return list.GetEnumerator( );
     }
 
@@ -127,79 +127,88 @@ public class ObservableList<E> : IObservableList<E> {
         return GetEnumerator( );
     }
 
-    public void Add( E item ) {
+    public int Add( Object item ) {
         int index = list.Count;
         list.Add( item );
 
         raiseListElementsAdded( index, 1 );
+        return index;
     }
 
     public void Clear( ) {
-        List<E> deleted = new List< E >(list);
+        ArrayList deleted = new ArrayList(list);
         list.Clear();
 
         raiseListElementsRemoved( 0, deleted );
     }
 
-    public bool Contains( E item ) {
+    public bool Contains( Object item ) {
         return list.Contains( item );
     }
 
-    public void CopyTo( E[ ] array, int arrayIndex ) {
+    public void CopyTo( object[ ] array, int arrayIndex ) {
         list.CopyTo( array, arrayIndex );
     }
 
-    public bool Remove( E item ) {
+    public void Remove( Object item ) {
         int index = list.IndexOf(item);
-        bool result = list.Remove( item );
+        /*bool result = */list.Remove( item );
         if (-1 != index)
-            raiseListElementsRemoved( index, new List< E >() {item} );
-        return result;
+            raiseListElementsRemoved( index, new ArrayList() {item} );
+        //return result;
     }
 
-    public int Count { get; private set; }
-    public bool IsReadOnly { get; private set; }
+    public void CopyTo( Array array, int index ) {
+        list.CopyTo( array, index );
+    }
 
-    public int IndexOf( E item ) {
+    // todo : делать с этим что-нибудь ?
+    public int Count { get; private set; }
+    public object SyncRoot { get; private set; }
+    public bool IsSynchronized { get; private set; }
+    public bool IsReadOnly { get; private set; }
+    public bool IsFixedSize { get; private set; }
+
+    public int IndexOf( Object item ) {
         return list.IndexOf( item );
     }
 
-    public void Insert( int index, E item ) {
+    public void Insert( int index, Object item ) {
         list.Insert( index, item );
         raiseListElementsAdded( index, 1 );
     }
 
     public void RemoveAt( int index ) {
-        E item = list[ index ];
+        Object item = list[ index ];
         list.RemoveAt( index );
-        raiseListElementsRemoved( index, new List< E >() {item} );
+        raiseListElementsRemoved( index, new ArrayList() {item} );
     }
 
-    public E this[ int index ] {
+    public Object this[ int index ] {
         get { return list[ index ]; }
         set {
-            E oldElement = list[index];
+            Object oldElement = list[index];
             list[ index ] = value;
             raiseListElementReplaced( index, oldElement );
         }
     }
 
     private void raiseListElementsAdded( int index, int length ) {
-        List< IObservableListListener< E > > copy = new List< IObservableListListener< E > >( this.listeners );
+        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
         foreach ( var listener in copy ) {
             listener.listElementsAdded( this, index, length );
         }
     }
 
-    private void raiseListElementsRemoved( int index, List< E > oldElements ) {
-        List< IObservableListListener< E > > copy = new List< IObservableListListener< E > >( this.listeners );
+    private void raiseListElementsRemoved( int index, IList oldElements ) {
+        List< IObservableListListener > copy = new List< IObservableListListener>( this.listeners );
         foreach ( var listener in copy ) {
             listener.listElementsRemoved( this, index, oldElements );
         }
     }
 
     private void raiseListElementReplaced( int index, Object oldElement ) {
-        List< IObservableListListener< E > > copy = new List< IObservableListListener< E > >( this.listeners );
+        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
         foreach ( var listener in copy ) {
             listener.listElementReplaced( this, index, oldElement );
         }
