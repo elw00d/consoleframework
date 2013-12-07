@@ -46,6 +46,7 @@ namespace TestProject1
         }
 
         [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
         public void TestEscaping() {
             MarkupExtensionsParser parser = new MarkupExtensionsParser(new TestResolver(),
                 "{}Just a string{{}}");

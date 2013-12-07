@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 
 namespace Binding.Observables
 {
@@ -22,95 +19,6 @@ public class ObservableList : IObservableList {
         listeners = new List< IObservableListListener >();
     }
 
-
-
-//    public E get( int index ) {
-//        return list[ index ];
-//    }
-//
-//    public int size() {
-//        return list.Count;
-//    }
-//
-//    public E set( int index, E element ) {
-//        E oldValue = list.set( index, element );
-//
-//        for ( IObservableListListener listener : listeners ) {
-//            listener.listElementReplaced( this, index, oldValue );
-//        }
-//
-//        return oldValue;
-//    }
-//
-//    public void add( int index, E element ) {
-//        list.add( index, element );
-//        modCount++;
-//
-//        for ( IObservableListListener listener : listeners ) {
-//            listener.listElementsAdded( this, index, 1 );
-//        }
-//    }
-//
-//    public E remove( int index ) {
-//        E oldValue = list.remove( index );
-//        modCount++;
-//
-//        for ( IObservableListListener listener : listeners ) {
-//            listener.listElementsRemoved( this, index,
-//                    java.util.Collections.singletonList( oldValue ) );
-//        }
-//
-//        return oldValue;
-//    }
-//
-//    public boolean addAll( Collection<? extends E> c ) {
-//        return addAll( size(), c );
-//    }
-//
-//    public boolean addAll( int index, Collection<? extends E> c ) {
-//        if ( list.addAll( index, c ) ) {
-//            modCount++;
-//
-//            for ( IObservableListListener listener : listeners ) {
-//                listener.listElementsAdded( this, index, c.size() );
-//            }
-//        }
-//
-//        return false;
-//    }
-//
-//    public void clear() {
-//        List dup = new ArrayList( list );
-//        list.clear();
-//        modCount++;
-//
-//        if ( dup.size() != 0 ) {
-//            for ( IObservableListListener listener : listeners ) {
-//                listener.listElementsRemoved( this, 0, dup );
-//            }
-//        }
-//    }
-//
-//    public boolean containsAll( Collection<?> c ) {
-//        return list.containsAll( c );
-//    }
-//
-//    public <T> T[] toArray( T[] a ) {
-//        return list.toArray( a );
-//    }
-//
-//    public Object[] toArray() {
-//        return list.toArray();
-//    }
-//
-//    public void addObservableListListener( IObservableListListener listener ) {
-//        listeners.add( listener );
-//    }
-//
-//    public void removeObservableListListener(
-//            IObservableListListener listener ) {
-//        listeners.remove( listener );
-//    }
     public void addObservableListListener( IObservableListListener listener ) {
         listeners.Add( listener );
     }
@@ -162,12 +70,12 @@ public class ObservableList : IObservableList {
         list.CopyTo( array, index );
     }
 
-    // todo : делать с этим что-нибудь ?
-    public int Count { get; private set; }
-    public object SyncRoot { get; private set; }
-    public bool IsSynchronized { get; private set; }
-    public bool IsReadOnly { get; private set; }
-    public bool IsFixedSize { get; private set; }
+    public int Count { get { return list.Count; } }
+
+    public object SyncRoot { get { return list.SyncRoot; } }
+    public bool IsSynchronized { get { return list.IsSynchronized; } }
+    public bool IsReadOnly { get { return list.IsReadOnly; } }
+    public bool IsFixedSize { get { return list.IsFixedSize; } }
 
     public int IndexOf( Object item ) {
         return list.IndexOf( item );
