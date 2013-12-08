@@ -21,26 +21,7 @@ namespace TestProject1.Binding
                 }
             }
 
-//            private void raisePropertyChanged(String propertyName)
-//            {
-//                foreach (IPropertyChangedListener listener in listeners)
-//                {
-//                    listener.propertyChanged(propertyName);
-//                }
-//            }
-
-//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
             private string targetStr;
-//
-//            public void addPropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Add(listener);
-//            }
-//
-//            public void removePropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Remove(listener);
-//            }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -65,26 +46,7 @@ namespace TestProject1.Binding
                 }
             }
 
-//            private void raisePropertyChanged(String propertyName)
-//            {
-//                foreach (IPropertyChangedListener listener in listeners)
-//                {
-//                    listener.propertyChanged(propertyName);
-//                }
-//            }
-
-//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
             private int sourceInt;
-
-//            public void addPropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Add(listener);
-//            }
-//
-//            public void removePropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Remove(listener);
-//            }
 
             public event PropertyChangedEventHandler PropertyChanged;
 

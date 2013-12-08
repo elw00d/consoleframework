@@ -43,8 +43,6 @@
     <Compile Include="Converters\ConversionResult.cs" />
     <Compile Include="Converters\IBindingConverter.cs" />
     <Compile Include="Converters\StringToIntegerConverter.cs" />
-    <Compile Include="INotifyPropertyChanged.cs" />
-    <Compile Include="IPropertyChangedListener.cs" />
     <Compile Include="Observables\IObservableList.cs" />
     <Compile Include="Observables\IObservableListListener.cs" />
     <Compile Include="Observables\ObservableList.cs" />

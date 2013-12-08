@@ -32,26 +32,6 @@ namespace TestProject1.Binding
 
             public ObservableList SourceItems { get; private set; }
 
-//            private void raisePropertyChanged(String propertyName)
-//            {
-//                foreach (IPropertyChangedListener listener in listeners)
-//                {
-//                    listener.propertyChanged(propertyName);
-//                }
-//            }
-//
-//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
-
-//            public void addPropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Add(listener);
-//            }
-//
-//            public void removePropertyChangedListener(IPropertyChangedListener listener)
-//            {
-//                listeners.Remove(listener);
-//            }
-
             public event PropertyChangedEventHandler PropertyChanged;
 
             protected virtual void raisePropertyChanged( string propertyName ) {
