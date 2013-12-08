@@ -34,7 +34,10 @@ public class BindingBase {
     private readonly BindingMode mode;
     protected BindingMode realMode;
     private readonly BindingSettingsBase settings;
-    protected bool targetIsUi;
+
+    // this may be initialized using true in inherited classes
+    // for specialized binding
+    protected bool needAdapterAnyway = false;
 
     protected IBindingAdapter adapter;
     private PropertyInfo targetPropertyInfo;
@@ -50,8 +53,6 @@ public class BindingBase {
     private bool ignoreSourceListener;
     protected bool ignoreTargetListener;
 
-    private IBindingValidator validator;
-
     // collections synchronization support
     private bool sourceIsObservable;
     private bool targetIsObservable;
@@ -61,6 +62,7 @@ public class BindingBase {
     protected TargetListListener targetListListener;
 
     private bool updateSourceIfBindingFails = true;
+    private IBindingValidator validator;
 
     /// <summary>
     /// If target value conversion or validation fails, the source property will be set to null
@@ -76,19 +78,40 @@ public class BindingBase {
     /// Event will be invoked when data go from target to source.
     /// </summary>
     public event OnBindingHandler OnBinding;
-    
-    /**
-     * Returns validator.
-     */
-    public IBindingValidator getValidator() {
-        return validator;
+
+    /// <summary>
+    /// Validator triggered when data flows from Target to Source.
+    /// </summary>
+    public IBindingValidator Validator {
+        get { return validator; }
+        set {
+            if (bound) throw new InvalidOperationException("Cannot change validator when binding is active.");
+            validator = value;
+        }
     }
 
-    /**
-     * Sets the validator.
-     */
-    public void setValidator( IBindingValidator validator ) {
-        this.validator = validator;
+    /// <summary>
+    /// BindingAdapter used as bridge to Target if Target doesn't
+    /// implement INotifyPropertyChanged.
+    /// </summary>
+    public IBindingAdapter Adapter {
+        get {return adapter;}
+        set {
+            if (bound) throw new InvalidOperationException("Cannot change adapter when binding is active.");
+            adapter = value;
+        }
+    }
+
+    /// <summary>
+    /// Converter used for values conversion between Source and Target if
+    /// declared properties types are different.
+    /// </summary>
+    public IBindingConverter Converter {
+        get {return converter;}
+        set {
+            if (bound) throw new InvalidOperationException("Cannot change converter when binding is active.");
+            converter = value;
+        }
     }
 
     public BindingBase( Object target, String targetProperty, INotifyPropertyChanged source, String sourceProperty ):
@@ -323,8 +346,8 @@ public class BindingBase {
                     convertedValue = result.value;
                 }
                 // validate if need
-                if (null != validator) {
-                    ValidationResult validationResult = validator.validate( convertedValue );
+                if (null != Validator) {
+                    ValidationResult validationResult = Validator.validate( convertedValue );
                     if (!validationResult.valid) {
                         if (null != OnBinding)
                             OnBinding.Invoke( new BindingResult( false, true, validationResult.message ) );
@@ -350,14 +373,16 @@ public class BindingBase {
      */
     public void bind() {
         // Resolve binding mode and search converter if need
-        if (targetIsUi) {
-            adapter = settings.getAdapterFor(target.GetType());
+        if (needAdapterAnyway) {
+            if (adapter == null)
+                adapter = settings.getAdapterFor(target.GetType());
             realMode = mode == BindingMode.Default ? adapter.getDefaultMode() : mode;
         } else {
             realMode = mode == BindingMode.Default ? BindingMode.TwoWay : mode;
             if (realMode == BindingMode.TwoWay || realMode == BindingMode.OneWayToSource) {
                 if (! (target is INotifyPropertyChanged))
-                    adapter = settings.getAdapterFor( target.GetType() );
+                    if (adapter == null)
+                        adapter = settings.getAdapterFor( target.GetType() );
             }
         }
 
@@ -381,7 +406,22 @@ public class BindingBase {
                 needConverter |= !targetIsObservable;
             //
             if (needConverter) {
-                converter = settings.getConverterFor( targetPropertyClass, sourcePropertyInfo.PropertyType );
+                if ( converter == null )
+                    converter = settings.getConverterFor( targetPropertyClass, sourcePropertyInfo.PropertyType );
+                else {
+                    // check if converter must be reversed
+                    if ( converter.getFirstClazz( ).IsAssignableFrom( targetPropertyClass ) &&
+                         converter.getSecondClazz( ).IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
+                        // nothing to do, it's ok
+                    } else if ( converter.getSecondClazz( ).IsAssignableFrom( targetPropertyClass ) &&
+                                converter.getFirstClazz( ).IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
+                        // should be reversed
+                        converter = new ReversedConverter( converter );
+                    } else {
+                        throw new Exception("Provided converter doesn't support conversion between " +
+                                            "specified properties.");
+                    }
+                }
                 if (converter == null )
                     throw new Exception( String.Format("Converter for {0} -> {1} classes not found.",
                             targetPropertyClass.Name, sourcePropertyInfo.PropertyType.Name) );
@@ -470,9 +510,6 @@ public class BindingBase {
 
         this.sourcePropertyInfo = null;
         this.targetPropertyInfo = null;
-
-        this.adapter = null;
-        this.converter = null;
 
         this.bound = false;
     }

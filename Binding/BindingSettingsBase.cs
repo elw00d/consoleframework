@@ -76,31 +76,5 @@ public class BindingSettingsBase {
             return null;
         return firstClassConverters[second];
     }
-
-    private class ReversedConverter : IBindingConverter {
-
-        IBindingConverter converter;
-
-        public ReversedConverter(IBindingConverter converter) {
-            this.converter = converter;
-        }
-
-        public Type getFirstClazz( ) {
-            return converter.getSecondClazz( );
-        }
-
-        public Type getSecondClazz( ) {
-            return converter.getFirstClazz( );
-        }
-
-        public ConversionResult convert(object tFirst) {
-            return converter.convertBack(tFirst);
-        }
-
-        public ConversionResult convertBack(object tSecond) {
-            return converter.convert(tSecond);
-        }
-    }
 }
-
 }

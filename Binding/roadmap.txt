@@ -6,3 +6,5 @@
 свойств, а лямбды вида () => m.MyProperty
 
 Сделать Generic-версию IObservableList<T> : IObservableList и реализацию для него
+
+Переделать комментарии из javadoc в .net-style.
