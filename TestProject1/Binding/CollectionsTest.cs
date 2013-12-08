@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,24 +32,31 @@ namespace TestProject1.Binding
 
             public ObservableList SourceItems { get; private set; }
 
-            private void raisePropertyChanged(String propertyName)
-            {
-                foreach (IPropertyChangedListener listener in listeners)
-                {
-                    listener.propertyChanged(propertyName);
-                }
-            }
+//            private void raisePropertyChanged(String propertyName)
+//            {
+//                foreach (IPropertyChangedListener listener in listeners)
+//                {
+//                    listener.propertyChanged(propertyName);
+//                }
+//            }
+//
+//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
 
-            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
+//            public void addPropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Add(listener);
+//            }
+//
+//            public void removePropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Remove(listener);
+//            }
 
-            public void addPropertyChangedListener(IPropertyChangedListener listener)
-            {
-                listeners.Add(listener);
-            }
+            public event PropertyChangedEventHandler PropertyChanged;
 
-            public void removePropertyChangedListener(IPropertyChangedListener listener)
-            {
-                listeners.Remove(listener);
+            protected virtual void raisePropertyChanged( string propertyName ) {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
             }
         }
 

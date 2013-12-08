@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
 
 namespace Binding.Adapters
 {
 /**
- * Adapter allows use thirt-party objects (that don't implement INotifyPropertyChange directly)
+ * Adapter allows use third-party objects (that don't implement INotifyPropertyChange directly)
  * in data binding scenarios.
  *
  * @author igor.kostromin
@@ -57,7 +55,7 @@ namespace Binding.Adapters
      * @param listener Listener to be subscribed
      * @return Listener wrapper object or null if there is no wrapper need
      */
-        Object addPropertyChangedListener(Object target, IPropertyChangedListener listener);
+        Object addPropertyChangedListener(Object target, PropertyChangedEventHandler listener);
 
         /**
      * Unsubscribes property changed listener from target object. You should implement this method if you will use

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Reflection;
 using Binding.Adapters;
 using Binding.Converters;
@@ -42,8 +43,8 @@ public class BindingBase {
     // converts target to source and back
     private IBindingConverter converter;
 
-    protected IPropertyChangedListener sourceListener;
-    protected IPropertyChangedListener targetListener;
+    protected PropertyChangedEventHandler sourceListener;
+    protected PropertyChangedEventHandler targetListener;
     // used instead targetListener if target does not implement INotifyPropertyChanged
     protected Object targetListenerWrapper;
 
@@ -118,19 +119,19 @@ public class BindingBase {
         this.settings = settings;
     }
 
-    // todo : mb refactor to lambda
-    public class SourceChangeListener : IPropertyChangedListener
-    {
-        private BindingBase holder;
-        public SourceChangeListener( BindingBase holder ) {
-            this.holder = holder;
-        }
-
-        public void propertyChanged( String propertyName ) {
-            if (!holder.ignoreSourceListener && propertyName == holder.sourceProperty )
-                holder.updateTarget();
-        }
-    }
+//    // todo : mb refactor to lambda
+//    public class SourceChangeListener : IPropertyChangedListener
+//    {
+//        private BindingBase holder;
+//        public SourceChangeListener( BindingBase holder ) {
+//            this.holder = holder;
+//        }
+//
+//        public void propertyChanged( String propertyName ) {
+//            if (!holder.ignoreSourceListener && propertyName == holder.sourceProperty )
+//                holder.updateTarget();
+//        }
+//    }
 
     /**
      * Forces a data transfer from the binding source property to the binding target property.
@@ -361,18 +362,18 @@ public class BindingBase {
         }
     }
 
-    public class TargetChangeListener : IPropertyChangedListener
-    {
-        private readonly BindingBase self;
-        public TargetChangeListener( BindingBase self ) {
-            this.self = self;
-        }
-
-        public void propertyChanged( String propertyName ) {
-            if (!self.ignoreTargetListener && propertyName == self.targetProperty )
-                self.updateSource();
-        }
-    }
+//    public class TargetChangeListener : IPropertyChangedListener
+//    {
+//        private readonly BindingBase self;
+//        public TargetChangeListener( BindingBase self ) {
+//            this.self = self;
+//        }
+//
+//        public void propertyChanged( String propertyName ) {
+//            if (!self.ignoreTargetListener && propertyName == self.targetProperty )
+//                self.updateSource();
+//        }
+//    }
 
     /**
      * Connects Source and Target objects.
@@ -458,29 +459,47 @@ public class BindingBase {
             case BindingMode.OneTime:
                 break;
             case BindingMode.OneWay:
-                sourceListener = new SourceChangeListener(this);
-                source.addPropertyChangedListener( sourceListener );
+                sourceListener = SourceListener;//new SourceChangeListener(this);
+                source.PropertyChanged += sourceListener;
+                //source.addPropertyChangedListener( sourceListener );
                 break;
             case BindingMode.OneWayToSource:
                 if (null == adapter) {
-                    targetListener = new TargetChangeListener(this);
-                    ((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
+                    targetListener = TargetListener;//new TargetChangeListener(this);
+                    //((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
+                    ((INotifyPropertyChanged)target).PropertyChanged += targetListener;
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
+                    //targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
+                    targetListenerWrapper = adapter.addPropertyChangedListener(target, TargetListener);
                 }
                 break;
             case BindingMode.TwoWay:
-                sourceListener = new SourceChangeListener(this);
-                source.addPropertyChangedListener( sourceListener );
+//                sourceListener = new SourceChangeListener(this);
+//                source.addPropertyChangedListener( sourceListener );
+                sourceListener = SourceListener;
+                source.PropertyChanged += sourceListener;
                 //
                 if (null == adapter) {
-                    targetListener = new TargetChangeListener(this);
-                    ((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
+//                    targetListener = new TargetChangeListener(this);
+//                    ((INotifyPropertyChanged) target).addPropertyChangedListener( targetListener );
+                    targetListener = TargetListener;
+                    ((INotifyPropertyChanged)target).PropertyChanged += targetListener;
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
+                    //targetListenerWrapper = adapter.addPropertyChangedListener( target, new TargetChangeListener(this) );
+                    targetListenerWrapper = adapter.addPropertyChangedListener(target, TargetListener);
                 }
                 break;
         }
+    }
+
+    private void TargetListener( object sender, PropertyChangedEventArgs args ) {
+        if (!ignoreTargetListener && args.PropertyName == targetProperty)
+            updateSource();
+    }
+
+    private void SourceListener( object sender, PropertyChangedEventArgs args ) {
+        if (!ignoreSourceListener && args.PropertyName == sourceProperty)
+            updateTarget();
     }
 
     /**
@@ -503,13 +522,15 @@ public class BindingBase {
     protected void disconnectSourceAndTarget() {
         if (realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay) {
             // remove source listener
-            source.removePropertyChangedListener( sourceListener );
+            //source.removePropertyChangedListener( sourceListener );
+            source.PropertyChanged -= sourceListener;
             this.sourceListener = null;
         }
         if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay) {
             // remove target listener
             if (adapter == null) {
-                ((INotifyPropertyChanged) target ).removePropertyChangedListener( targetListener );
+//                ((INotifyPropertyChanged) target ).removePropertyChangedListener( targetListener );
+                ((INotifyPropertyChanged)target).PropertyChanged -= targetListener;
                 targetListener = null;
             } else {
                 adapter.removePropertyChangedListener( target, targetListenerWrapper );

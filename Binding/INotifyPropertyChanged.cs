@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Binding
 {
+//    public delegate void PropertyChangedEventHandler ()
+
     /**
  * Notifies clients that a property value has changed.
  * All classes participates in data binding scenarios as data source must
@@ -13,17 +15,17 @@ namespace Binding
  * @author igor.kostromin
  *         26.06.13 15:59
  */
-    public interface INotifyPropertyChanged
-    {
-        /**
-         * Subscribes listener to property changed event.
-         */
-        void addPropertyChangedListener(IPropertyChangedListener listener);
-
-        /**
-         * Unsubscribes listener to property changed event.
-         */
-        void removePropertyChangedListener(IPropertyChangedListener listener);
-    }
+//    public interface INotifyPropertyChanged
+//    {
+//        /**
+//         * Subscribes listener to property changed event.
+//         */
+//        void addPropertyChangedListener(IPropertyChangedListener listener);
+//
+//        /**
+//         * Unsubscribes listener to property changed event.
+//         */
+//        void removePropertyChangedListener(IPropertyChangedListener listener);
+//    }
 
 }

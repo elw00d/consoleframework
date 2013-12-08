@@ -58,6 +58,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="readme.txt" />
     <Content Include="roadmap.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

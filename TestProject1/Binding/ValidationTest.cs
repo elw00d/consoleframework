@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using Binding;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,25 +21,32 @@ namespace TestProject1.Binding
                 }
             }
 
-            private void raisePropertyChanged(String propertyName)
-            {
-                foreach (IPropertyChangedListener listener in listeners)
-                {
-                    listener.propertyChanged(propertyName);
-                }
-            }
+//            private void raisePropertyChanged(String propertyName)
+//            {
+//                foreach (IPropertyChangedListener listener in listeners)
+//                {
+//                    listener.propertyChanged(propertyName);
+//                }
+//            }
 
-            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
+//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
             private string targetStr;
+//
+//            public void addPropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Add(listener);
+//            }
+//
+//            public void removePropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Remove(listener);
+//            }
 
-            public void addPropertyChangedListener(IPropertyChangedListener listener)
-            {
-                listeners.Add(listener);
-            }
+            public event PropertyChangedEventHandler PropertyChanged;
 
-            public void removePropertyChangedListener(IPropertyChangedListener listener)
-            {
-                listeners.Remove(listener);
+            protected virtual void raisePropertyChanged( string propertyName ) {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
             }
         }
 
@@ -57,25 +65,33 @@ namespace TestProject1.Binding
                 }
             }
 
-            private void raisePropertyChanged(String propertyName)
-            {
-                foreach (IPropertyChangedListener listener in listeners)
-                {
-                    listener.propertyChanged(propertyName);
-                }
-            }
+//            private void raisePropertyChanged(String propertyName)
+//            {
+//                foreach (IPropertyChangedListener listener in listeners)
+//                {
+//                    listener.propertyChanged(propertyName);
+//                }
+//            }
 
-            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
+//            private List<IPropertyChangedListener> listeners = new List<IPropertyChangedListener>();
             private int sourceInt;
 
-            public void addPropertyChangedListener(IPropertyChangedListener listener)
-            {
-                listeners.Add(listener);
-            }
+//            public void addPropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Add(listener);
+//            }
+//
+//            public void removePropertyChangedListener(IPropertyChangedListener listener)
+//            {
+//                listeners.Remove(listener);
+//            }
 
-            public void removePropertyChangedListener(IPropertyChangedListener listener)
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            protected virtual void raisePropertyChanged(string propertyName)
             {
-                listeners.Remove(listener);
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
             }
         }
 
