@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Binding
+﻿namespace Binding
 {
     /**
  * Determines how data will flow - from Source to Target,
