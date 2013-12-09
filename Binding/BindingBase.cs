@@ -10,9 +10,8 @@ using Binding.Validators;
 namespace Binding
 {
     /// <summary>
-    /// todo : mb rename to OnSourceUpdatedHandler ? and create OnTargetUpdatedHandler too
+    /// Handler of binding operation when data is transferred from Target to Source.
     /// </summary>
-    /// <param name="result"></param>
     public delegate void OnBindingHandler(BindingResult result);
 
 /**
@@ -35,8 +34,7 @@ public class BindingBase {
     protected BindingMode realMode;
     private readonly BindingSettingsBase settings;
 
-    // this may be initialized using true in inherited classes
-    // for specialized binding
+    // this may be initialized using true in inherited classes for specialized binding
     protected bool needAdapterAnyway = false;
 
     protected IBindingAdapter adapter;
@@ -75,7 +73,7 @@ public class BindingBase {
     }
 
     /// <summary>
-    /// Event will be invoked when data go from target to source.
+    /// Event will be invoked when data goes from Target to Source.
     /// </summary>
     public event OnBindingHandler OnBinding;
 
@@ -143,7 +141,7 @@ public class BindingBase {
     /**
      * Forces a data transfer from the binding source property to the binding target property.
      */
-    public void updateTarget() {
+    public void UpdateTarget() {
         if (realMode != BindingMode.OneTime && realMode != BindingMode.OneWay && realMode != BindingMode.TwoWay)
             throw new ApplicationException( String.Format( "Cannot update target in {0} binding mode.", realMode ) );
         ignoreTargetListener = true;
@@ -156,7 +154,7 @@ public class BindingBase {
                 if (adapter == null) {
                     targetListNow = (IList) targetPropertyInfo.GetGetMethod().Invoke(target, null);
                 } else {
-                    targetListNow = ( IList ) adapter.getValue( target, targetProperty );
+                    targetListNow = ( IList ) adapter.GetValue( target, targetProperty );
                 }
                 if ( sourceValue == null ) {
                     if (null != targetListNow ) targetListNow.Clear();
@@ -184,17 +182,17 @@ public class BindingBase {
                 Object converted = sourceValue;
                 // convert back if need
                 if (null != converter) {
-                    ConversionResult result = converter.convertBack( sourceValue );
-                    if (!result.success) {
+                    ConversionResult result = converter.ConvertBack( sourceValue );
+                    if (!result.Success) {
                         return;
                     }
-                    converted = result.value;
+                    converted = result.Value;
                 }
                 //
                 if (adapter == null)
                     targetPropertyInfo.GetSetMethod().Invoke( target, new object[]{converted});
                 else
-                    adapter.setValue( target, targetProperty, converted );
+                    adapter.SetValue( target, targetProperty, converted );
             }
         } finally {
             ignoreTargetListener = false;
@@ -292,7 +290,7 @@ public class BindingBase {
     /**
      * Sends the current binding target value to the binding source property in TwoWay or OneWayToSource bindings.
      */
-    public void updateSource() {
+    public void UpdateSource() {
         if (realMode != BindingMode.OneWayToSource && realMode != BindingMode.TwoWay)
             throw new ApplicationException( String.Format( "Cannot update source in {0} binding mode.", realMode ) );
         ignoreSourceListener = true;
@@ -302,7 +300,7 @@ public class BindingBase {
                 targetValue = targetPropertyInfo.GetGetMethod( ).Invoke( target, null );
             else {
 
-                targetValue = adapter.getValue( target, targetProperty );
+                targetValue = adapter.GetValue( target, targetProperty );
             }
             //
             if ( targetIsObservable ) { // work with collection
@@ -333,24 +331,24 @@ public class BindingBase {
                 Object convertedValue = targetValue;
                 // convert if need
                 if (null != converter) {
-                    ConversionResult result = converter.convert( targetValue );
-                    if (!result.success) {
+                    ConversionResult result = converter.Convert( targetValue );
+                    if (!result.Success) {
                         if (null != OnBinding)
-                            OnBinding.Invoke( new BindingResult( true, false, result.failReason ) );
+                            OnBinding.Invoke( new BindingResult( true, false, result.FailReason ) );
                         if ( updateSourceIfBindingFails ) {
                             // will update source using null or default(T) if T is primitive
                             sourcePropertyInfo.GetSetMethod().Invoke( source, new object[] {null});
                         }
                         return;
                     }
-                    convertedValue = result.value;
+                    convertedValue = result.Value;
                 }
                 // validate if need
                 if (null != Validator) {
-                    ValidationResult validationResult = Validator.validate( convertedValue );
-                    if (!validationResult.valid) {
+                    ValidationResult validationResult = Validator.Validate( convertedValue );
+                    if (!validationResult.Valid) {
                         if (null != OnBinding)
-                            OnBinding.Invoke( new BindingResult( false, true, validationResult.message ) );
+                            OnBinding.Invoke( new BindingResult( false, true, validationResult.Message ) );
                         if ( updateSourceIfBindingFails ) {
                             // will update source using null or default(T) if T is primitive
                             sourcePropertyInfo.GetSetMethod().Invoke( source, new object[]{ null});
@@ -371,18 +369,18 @@ public class BindingBase {
     /**
      * Connects Source and Target objects.
      */
-    public void bind() {
+    public void Bind() {
         // Resolve binding mode and search converter if need
         if (needAdapterAnyway) {
             if (adapter == null)
-                adapter = settings.getAdapterFor(target.GetType());
-            realMode = mode == BindingMode.Default ? adapter.getDefaultMode() : mode;
+                adapter = settings.GetAdapterFor(target.GetType());
+            realMode = mode == BindingMode.Default ? adapter.DefaultMode : mode;
         } else {
             realMode = mode == BindingMode.Default ? BindingMode.TwoWay : mode;
             if (realMode == BindingMode.TwoWay || realMode == BindingMode.OneWayToSource) {
                 if (! (target is INotifyPropertyChanged))
                     if (adapter == null)
-                        adapter = settings.getAdapterFor( target.GetType() );
+                        adapter = settings.GetAdapterFor( target.GetType() );
             }
         }
 
@@ -392,7 +390,7 @@ public class BindingBase {
             targetPropertyInfo = target.GetType( ).GetProperty( targetProperty );
 
         Type targetPropertyClass = (null == adapter) ?
-            targetPropertyInfo.PropertyType : adapter.getTargetPropertyClazz(targetProperty);
+            targetPropertyInfo.PropertyType : adapter.GetTargetPropertyClazz(targetProperty);
 
         sourceIsObservable = typeof(IObservableList).IsAssignableFrom( sourcePropertyInfo.PropertyType );
         targetIsObservable = typeof(IObservableList).IsAssignableFrom( targetPropertyClass );
@@ -407,14 +405,14 @@ public class BindingBase {
             //
             if (needConverter) {
                 if ( converter == null )
-                    converter = settings.getConverterFor( targetPropertyClass, sourcePropertyInfo.PropertyType );
+                    converter = settings.GetConverterFor( targetPropertyClass, sourcePropertyInfo.PropertyType );
                 else {
                     // check if converter must be reversed
-                    if ( converter.getFirstClazz( ).IsAssignableFrom( targetPropertyClass ) &&
-                         converter.getSecondClazz( ).IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
+                    if ( converter.FirstType.IsAssignableFrom( targetPropertyClass ) &&
+                         converter.SecondType.IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
                         // nothing to do, it's ok
-                    } else if ( converter.getSecondClazz( ).IsAssignableFrom( targetPropertyClass ) &&
-                                converter.getFirstClazz( ).IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
+                    } else if ( converter.SecondType.IsAssignableFrom( targetPropertyClass ) &&
+                                converter.FirstType.IsAssignableFrom( sourcePropertyInfo.PropertyType ) ) {
                         // should be reversed
                         converter = new ReversedConverter( converter );
                     } else {
@@ -453,18 +451,18 @@ public class BindingBase {
         }
 
         // subscribe to listeners
-        connectSourceAndTarget();
+        ConnectSourceAndTarget();
 
         // initial flush values
         if ( realMode == BindingMode.OneTime || realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay)
-            updateTarget();
+            UpdateTarget();
         if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay)
-            updateSource();
+            UpdateSource();
 
         this.bound = true;
     }
 
-    protected void connectSourceAndTarget() {
+    protected void ConnectSourceAndTarget() {
         switch ( realMode ) {
             case BindingMode.OneTime:
                 break;
@@ -475,7 +473,7 @@ public class BindingBase {
                 if (null == adapter) {
                     ((INotifyPropertyChanged)target).PropertyChanged += TargetListener;
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener(target, TargetListener);
+                    targetListenerWrapper = adapter.AddPropertyChangedListener(target, TargetListener);
                 }
                 break;
             case BindingMode.TwoWay:
@@ -484,7 +482,7 @@ public class BindingBase {
                 if (null == adapter) {
                     ((INotifyPropertyChanged)target).PropertyChanged += TargetListener;
                 } else {
-                    targetListenerWrapper = adapter.addPropertyChangedListener(target, TargetListener);
+                    targetListenerWrapper = adapter.AddPropertyChangedListener(target, TargetListener);
                 }
                 break;
         }
@@ -492,21 +490,21 @@ public class BindingBase {
 
     private void TargetListener( object sender, PropertyChangedEventArgs args ) {
         if (!ignoreTargetListener && args.PropertyName == targetProperty)
-            updateSource();
+            UpdateSource();
     }
 
     private void SourceListener( object sender, PropertyChangedEventArgs args ) {
         if (!ignoreSourceListener && args.PropertyName == sourceProperty)
-            updateTarget();
+            UpdateTarget();
     }
 
     /**
      * Disconnects Source and Target objects.
      */
-    public void unbind() {
+    public void Unbind() {
         if (!this.bound) return;
 
-        disconnectSourceAndTarget();
+        DisconnectSourceAndTarget();
 
         this.sourcePropertyInfo = null;
         this.targetPropertyInfo = null;
@@ -514,7 +512,7 @@ public class BindingBase {
         this.bound = false;
     }
 
-    protected void disconnectSourceAndTarget() {
+    protected void DisconnectSourceAndTarget() {
         if (realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay) {
             // remove source listener
             source.PropertyChanged -= SourceListener;
@@ -524,7 +522,7 @@ public class BindingBase {
             if (adapter == null) {
                 ((INotifyPropertyChanged)target).PropertyChanged -= TargetListener;
             } else {
-                adapter.removePropertyChangedListener( target, targetListenerWrapper );
+                adapter.RemovePropertyChangedListener( target, targetListenerWrapper );
                 targetListenerWrapper = null;
             }
         }
@@ -541,15 +539,15 @@ public class BindingBase {
 
     /**
      * Changes the binding Source object. If current binding state is bound,
-     * the {@link #unbind()} and {@link #bind()} methods will be called automatically.
+     * the {@link #Unbind()} and {@link #Bind()} methods will be called automatically.
      * @param source New Source object
      */
-    public void setSource(INotifyPropertyChanged source) {
+    public void SetSource(INotifyPropertyChanged source) {
         if (null == source) throw new ArgumentNullException( "source" );
         if (bound) {
-            unbind();
+            Unbind();
             this.source = source;
-            bind();
+            Bind();
         } else {
             this.source = source;
         }
@@ -557,15 +555,15 @@ public class BindingBase {
 
     /**
      * Changes the binding Target object. If current binding state is bound,
-     * the {@link #unbind()} and {@link #bind()} methods will be called automatically.
+     * the {@link #Unbind()} and {@link #Bind()} methods will be called automatically.
      * @param target New Target object
      */
-    public void setTarget(Object target) {
+    public void SetTarget(Object target) {
         if (null == target) throw new ArgumentNullException( "target" );
         if (bound) {
-            unbind();
+            Unbind();
             this.target = target;
-            bind();
+            Bind();
         } else {
             this.target = target;
         }

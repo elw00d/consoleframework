@@ -16,11 +16,11 @@ public class BindingSettingsBase {
 
     static BindingSettingsBase() {
         DEFAULT_SETTINGS = new BindingSettingsBase();
-        DEFAULT_SETTINGS.initializeDefault();
+        DEFAULT_SETTINGS.InitializeDefault();
     }
 
-    private Dictionary<Type, Dictionary<Type, IBindingConverter>> converters = new Dictionary<Type, Dictionary<Type, IBindingConverter>>();
-    private Dictionary<Type, IBindingAdapter> adapters = new Dictionary<Type, IBindingAdapter>();
+    private readonly Dictionary<Type, Dictionary<Type, IBindingConverter>> converters = new Dictionary<Type, Dictionary<Type, IBindingConverter>>();
+    private readonly Dictionary<Type, IBindingAdapter> adapters = new Dictionary<Type, IBindingAdapter>();
 
     public BindingSettingsBase() {
     }
@@ -28,31 +28,31 @@ public class BindingSettingsBase {
     /**
      * Adds default set of converters and ui adapters.
      */
-    public void initializeDefault() {
-        addConverter( new StringToIntegerConverter() );
+    public void InitializeDefault() {
+        AddConverter( new StringToIntegerConverter() );
     }
 
-    public  void addAdapter<T>(IBindingAdapter adapter) {
-        Type targetClazz = adapter.getTargetType( );
+    public void AddAdapter(IBindingAdapter adapter) {
+        Type targetClazz = adapter.TargetType;
         if ( adapters.ContainsKey( targetClazz ))
             throw new ApplicationException( String.Format( "Adapter for class {0} is already registered.", targetClazz.Name ) );
         adapters.Add( targetClazz, adapter );
     }
 
-    public IBindingAdapter getAdapterFor(Type clazz) {
+    public IBindingAdapter GetAdapterFor(Type clazz) {
         IBindingAdapter adapter = adapters[ clazz ];
         if (null == adapter) throw new ApplicationException(String.Format("Adapter for class {0} not found.", clazz.Name));
         return adapter;
     }
 
-    public void addConverter( IBindingConverter converter) {
-        registerConverter( converter );
-        registerConverter( new ReversedConverter( converter ) );
+    public void AddConverter( IBindingConverter converter) {
+        RegisterConverter( converter );
+        RegisterConverter( new ReversedConverter( converter ) );
     }
 
-    private void registerConverter(IBindingConverter converter) {
-        Type first = converter.getFirstClazz( );
-        Type second = converter.getSecondClazz( );
+    private void RegisterConverter(IBindingConverter converter) {
+        Type first = converter.FirstType;
+        Type second = converter.SecondType;
         if (converters.ContainsKey( first )) {
             Dictionary< Type, IBindingConverter > firstClassConverters = converters[ first ];
             if (firstClassConverters.ContainsKey( second )) {
@@ -66,7 +66,7 @@ public class BindingSettingsBase {
         }
     }
 
-    public IBindingConverter getConverterFor(Type first, Type second) {
+    public IBindingConverter GetConverterFor(Type first, Type second) {
         if (!converters.ContainsKey(first))
             //throw new RuntimeException( String.format( "Converter for %s -> %s classes not found.", first.getName(), second.getName() ) );
             return null;

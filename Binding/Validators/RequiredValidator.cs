@@ -13,7 +13,7 @@ namespace Binding.Validators
  * Time: 22:04
  */
 public class RequiredValidator : IBindingValidator {
-    public ValidationResult validate(Object value) {
+    public ValidationResult Validate(Object value) {
         if (value == null || value is String && ((String) value).Length == 0)
             return new ValidationResult(false, "Value is required");
         return new ValidationResult(true);

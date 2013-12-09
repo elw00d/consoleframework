@@ -67,7 +67,7 @@ namespace TestProject1.Binding
             binding.OnBinding += result => {
                 lastResult = result;
             };
-            binding.bind(  );
+            binding.Bind(  );
             target.TargetStr = "5";
             Assert.IsTrue( source.SourceInt == 5 );
             target.TargetStr = "invalid int";

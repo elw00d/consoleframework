@@ -13,15 +13,15 @@ namespace Binding.Converters
  *         26.06.13 19:37
  */
 public class StringToIntegerConverter : IBindingConverter {
-    public Type getFirstClazz( ) {
-        return typeof ( String );
+    public Type FirstType {
+        get { return typeof ( String ); }
     }
 
-    public Type getSecondClazz( ) {
-        return typeof ( int );
+    public Type SecondType {
+        get { return typeof ( int ); }
     }
 
-    public ConversionResult convert(Object s) {
+    public ConversionResult Convert(Object s) {
         try {
             if (s == null) return new ConversionResult( false, "String is null");
             int value = int.Parse(( string ) s);
@@ -31,7 +31,7 @@ public class StringToIntegerConverter : IBindingConverter {
         }
     }
 
-    public ConversionResult convertBack(Object integer) {
+    public ConversionResult ConvertBack(Object integer) {
         return new ConversionResult(((int)integer).ToString(CultureInfo.InvariantCulture) );
     }
 }

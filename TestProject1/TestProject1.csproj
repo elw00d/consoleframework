@@ -45,6 +45,7 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binding\AdapterTest.cs" />
     <Compile Include="Binding\CollectionsTest.cs" />
     <Compile Include="Binding\ExplicitConverterTest.cs" />
     <Compile Include="Binding\SimplePropertiesTest.cs" />

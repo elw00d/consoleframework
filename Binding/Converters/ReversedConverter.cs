@@ -11,20 +11,20 @@ namespace Binding
             this.converter = converter;
         }
 
-        public Type getFirstClazz( ) {
-            return converter.getSecondClazz( );
+        public Type FirstType {
+            get { return converter.SecondType; }
         }
 
-        public Type getSecondClazz( ) {
-            return converter.getFirstClazz( );
+        public Type SecondType {
+            get { return converter.FirstType; }
         }
 
-        public ConversionResult convert(object tFirst) {
-            return converter.convertBack(tFirst);
+        public ConversionResult Convert(object tFirst) {
+            return converter.ConvertBack(tFirst);
         }
 
-        public ConversionResult convertBack(object tSecond) {
-            return converter.convert(tSecond);
+        public ConversionResult ConvertBack(object tSecond) {
+            return converter.Convert(tSecond);
         }
     }
 }

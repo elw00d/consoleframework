@@ -46,7 +46,7 @@ namespace TestProject1.Binding
             SourceClass source = new SourceClass(  );
             TargetClass target = new TargetClass(  );
             BindingBase binding = new BindingBase( target, "Items", source, "SourceItems", BindingMode.OneWay );
-            binding.bind(  );
+            binding.Bind(  );
             source.SourceItems.Add( "1" );
             Assert.IsTrue( target.Items[0] == "1" );
             source.SourceItems.Remove( "1" );

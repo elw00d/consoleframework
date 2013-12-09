@@ -14,9 +14,21 @@ namespace Binding.Converters
  */
     public class ConversionResult
     {
-        public Object value;
-        public bool success;
-        public String failReason;
+        private readonly Object value;
+        private readonly bool success;
+        private readonly String failReason;
+
+        public object Value {
+            get { return value; }
+        }
+
+        public bool Success {
+            get { return success; }
+        }
+
+        public string FailReason {
+            get { return failReason; }
+        }
 
         public ConversionResult(Object value)
         {

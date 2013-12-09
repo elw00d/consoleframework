@@ -15,7 +15,7 @@ namespace Binding
     public enum BindingMode
     {
         /**
-         * Data will be synchronized one time in bind() call from Source to Target.
+         * Data will be synchronized one time in Bind() call from Source to Target.
          */
         OneTime,
         /**

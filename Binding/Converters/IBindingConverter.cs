@@ -16,22 +16,22 @@ namespace Binding.Converters
         /**
      * Returns class object for TFirst class.
      */
-        Type getFirstClazz();
+        Type FirstType { get; }
 
         /**
          * Returns class object for TSecond class.
          */
-        Type getSecondClazz();
+        Type SecondType { get; }
 
         /**
          * Converts value from TFirst class to TSecond.
          */
-        ConversionResult convert(Object first);
+        ConversionResult Convert(Object first);
 
         /**
          * Converts value from TSecond class to TFirst.
          */
-        ConversionResult convertBack(Object second);
+        ConversionResult ConvertBack(Object second);
     }
 
 }

@@ -14,8 +14,16 @@ namespace Binding.Validators
  */
     public class ValidationResult
     {
-        public bool valid;
-        public String message;
+        private readonly bool valid;
+        private readonly String message;
+
+        public bool Valid {
+            get { return valid; }
+        }
+
+        public string Message {
+            get { return message; }
+        }
 
         public ValidationResult(bool valid)
         {

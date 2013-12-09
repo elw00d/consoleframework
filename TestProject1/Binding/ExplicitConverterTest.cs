@@ -59,19 +59,19 @@ namespace TestProject1.Binding
 
         class DoubleToStringConverter : IBindingConverter
         {
-            public Type getFirstClazz( ) {
-                return typeof ( double );
+            public Type FirstType {
+                get { return typeof ( double ); }
             }
 
-            public Type getSecondClazz( ) {
-                return typeof ( String );
+            public Type SecondType {
+                get { return typeof ( String ); }
             }
 
-            public ConversionResult convert( object first ) {
+            public ConversionResult Convert( object first ) {
                 return new ConversionResult( (( double ) first).ToString( CultureInfo.InvariantCulture ) );
             }
 
-            public ConversionResult convertBack( object second ) {
+            public ConversionResult ConvertBack( object second ) {
                 String s = ( string ) second;
                 if (string.IsNullOrEmpty( s ))
                     return new ConversionResult( false, "String is null or empty" );
@@ -90,7 +90,7 @@ namespace TestProject1.Binding
             SourceClass source = new SourceClass(  );
             BindingBase binding = new BindingBase( target, "Text", source, "Val" );
             binding.Converter = new DoubleToStringConverter(  );
-            binding.bind(  );
+            binding.Bind(  );
             source.Val = 3.0f;
             Assert.IsTrue( target.Text == "3" );
             target.Text = "0.5";

@@ -78,7 +78,7 @@ namespace TestProject1.Binding
             SourceClass source = new SourceClass();
             TargetClass target = new TargetClass();
             BindingBase binding = new BindingBase(target, "Title", source, "Text", BindingMode.OneWay);
-            binding.bind();
+            binding.Bind();
             source.Text = "Text!";
             Assert.AreEqual( target.Title, source.Text );
         }
@@ -89,8 +89,8 @@ namespace TestProject1.Binding
             TargetClass target = new TargetClass();
             BindingBase binding = new BindingBase(target, "TargetInt", source, "SourceStr", BindingMode.OneWay);
             BindingBase binding2 = new BindingBase(target, "TargetStr", source, "SourceInt", BindingMode.OneWay);
-            binding.bind();
-            binding2.bind(  );
+            binding.Bind();
+            binding2.Bind(  );
             source.SourceInt = 5;
             source.SourceStr = "4";
             Assert.AreEqual(target.TargetInt, 4);
@@ -103,7 +103,7 @@ namespace TestProject1.Binding
             TargetClass target = new TargetClass();
             BindingBase binding = new BindingBase(target, "TargetStr", source, "SourceInt", BindingMode.OneWay);
             binding.UpdateSourceIfBindingFails = false;
-            binding.bind();
+            binding.Bind();
             target.TargetInt = 1;
             source.SourceStr = "invalid int";
             Assert.IsTrue( target.TargetInt == 1 );
