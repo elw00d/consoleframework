@@ -17,6 +17,7 @@ namespace ConsoleFramework.Controls
                 if ( title != value ) {
                     title = value;
                     Invalidate(  );
+                    RaisePropertyChanged( "Title" );
                 }
             }
         }

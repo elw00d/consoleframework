@@ -33,7 +33,8 @@ namespace TestProject1
 
             public String Property3 { get; set; }
 
-            public object ProvideValue( object context ) {
+            public object ProvideValue(IMarkupExtensionContext context)
+            {
                 return Property1 + "_" + Property2 + "_" + Property3;
             }
         }

@@ -6,14 +6,41 @@ using System.Text;
 
 namespace ConsoleFramework.Xaml
 {
+    /// <summary>
+    /// Контекст, доступный расширению разметки.
+    /// </summary>
+    public interface IMarkupExtensionContext
+    {
+        /// <summary>
+        /// Имя свойства, которое определяется при помощи расширения разметки.
+        /// </summary>
+        String PropertyName { get; }
+
+        /// <summary>
+        /// Ссылка на конфигурируемый объект.
+        /// </summary>
+        Object Object { get; }
+
+        /// <summary>
+        /// Возвращает активный для конфигурируемого объекта DataContext.
+        /// Если у текущего конфигурируемого объекта нет собственного DataContext'a,
+        /// будет взят контекст объекта выше по иерархии контролов, и так до главного элемента
+        /// дерева контролов.
+        /// </summary>
+        Object DataContext { get; }
+    }
+
+    /// <summary>
+    /// todo : comment
+    /// </summary>
     public interface IMarkupExtension
     {
         /// <summary>
-        /// todo : change Object context to some specialized interface
+        /// If ProvideValue returns null, it will not be assigned to object property.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        Object ProvideValue( Object context );
+        Object ProvideValue(IMarkupExtensionContext context);
     }
 
     public interface IMarkupExtensionsResolver
@@ -45,7 +72,7 @@ namespace ConsoleFramework.Xaml
             return text[ index ];
         }
 
-        public Object ProcessMarkupExtension( Object context ) {
+        public Object ProcessMarkupExtension( IMarkupExtensionContext context ) {
             // interpret as markup extension expression
             object result = processMarkupExtensionCore(context);
 
@@ -77,8 +104,8 @@ namespace ConsoleFramework.Xaml
         /// constructs and initializes it, and returns ProvideValue method result.
         /// </summary>
         /// <param name="context">Context object passed to ProvideValue method.</param>
-        private Object processMarkupExtensionCore( Object context) {
-            if (consumeChar( ) != '{') 
+        private Object processMarkupExtensionCore( IMarkupExtensionContext context) {
+            if (consumeChar( ) != '{')
                 throw new InvalidOperationException("Syntax error: '{{' token expected at 0.");
             processWhitespace( false );
             String markupExtensionName = processQualifiedName( );

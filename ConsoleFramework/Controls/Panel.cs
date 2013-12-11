@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -23,6 +27,11 @@ namespace ConsoleFramework.Controls
     public class Panel : Control {
         private void subscribe() {
 //            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(Panel_PreviewKeyDown), true);
+            collection.CollectionChanged += ( sender, args ) => {
+                foreach ( var newItem in args.NewItems ) {
+                    AddChild( ( Control ) newItem );
+                }
+            };
         }
 
         public Panel() {
@@ -50,6 +59,14 @@ namespace ConsoleFramework.Controls
                     this.Invalidate();
                 }
             }
+        }
+
+        private ObservableCollection<Control> collection = new ObservableCollection< Control >();
+        /// <summary>
+        /// todo : rename to Children
+        /// </summary>
+        public ICollection<Control> Content {
+            get { return collection; }
         }
 
         public new void AddChild(Control control) {
@@ -103,7 +120,7 @@ namespace ConsoleFramework.Controls
                 foreach (Control child in Children) {
                     int y = totalHeight;
                     int height = child.DesiredSize.Height;
-                    child.Arrange(new Rect(0, y, maxWidth, height));
+                    child.Arrange(new Rect(0, y, Math.Min(child.DesiredSize.Width, maxWidth), height));
                     totalHeight += height;
                 }
                 return finalSize;
@@ -117,7 +134,7 @@ namespace ConsoleFramework.Controls
                 foreach (Control child in Children) {
                     int x = totalWidth;
                     int width = child.DesiredSize.Width;
-                    child.Arrange(new Rect(x, 0, width, maxHeight));
+                    child.Arrange(new Rect(x, 0, width, Math.Min(child.DesiredSize.Height, maxHeight)));
                     totalWidth += width;
                 }
                 return finalSize;
@@ -148,7 +165,7 @@ namespace ConsoleFramework.Controls
         public override void Render(RenderingBuffer buffer) {
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
-                    buffer.SetPixel(x, y, ' ', Attr.BACKGROUND_BLUE |
+                    buffer.SetPixel(x, y, '+', Attr.BACKGROUND_BLUE |
                         Attr.BACKGROUND_GREEN | Attr.BACKGROUND_RED | Attr.FOREGROUND_BLUE |
                         Attr.FOREGROUND_GREEN | Attr.FOREGROUND_RED | Attr.FOREGROUND_INTENSITY);
                 }

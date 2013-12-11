@@ -1,22 +1,24 @@
-﻿<Window Name="window2" Title="Очень длинное название окна"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Window.Resources>
+﻿<Window Name="window2" Title="Очень длинное название окна">
+  <!--<Window.Resources>
     <item x:Key="str">Строка</item>
-  </Window.Resources>
-  <GroupBox Title="{Test Property1={Test Property1=\{\{test!\}\}}}">
-    <ScrollViewer VerticalAlignment="Stretch">
-      <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
-      <ListBox>
-        <ListBox.Items>
-          <item>{x:Resource str}</item>
-          <item>Длинный элемент 2</item>
-          <item>Длинный элемент 3</item>
-          <item>Длинный элемент 4</item>
-          <item>Длинный элемент 5</item>
-          <item>Длинный элемент 6</item>
-          <item>Длинный элемент 700</item>
-        </ListBox.Items>
-      </ListBox>
-    </ScrollViewer>
-  </GroupBox>
+  </Window.Resources>-->
+  <Panel>
+    <TextBox Text="{Binding Path=Str}"></TextBox>
+    <GroupBox Title="{Binding Path=Str, Mode=TwoWay}">
+      <ScrollViewer VerticalAlignment="Stretch">
+        <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
+        <ListBox>
+          <ListBox.Items>
+            <item>Длинный элемент 1</item>
+            <item>Длинный элемент 2</item>
+            <item>Длинный элемент 3</item>
+            <item>Длинный элемент 4</item>
+            <item>Длинный элемент 5</item>
+            <item>Длинный элемент 6</item>
+            <item>Длинный элемент 700</item>
+          </ListBox.Items>
+        </ListBox>
+      </ScrollViewer>
+    </GroupBox>
+  </Panel>
 </Window>

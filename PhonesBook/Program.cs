@@ -28,7 +28,7 @@ namespace PhonesBook
                 TextBox textBox = new TextBox() {
                     Name = "textBoxName",
                     TabOrder = 1,
-                    Size = 30,
+//                    Size = 30,
                     Margin = new Thickness(1, 0, 1, 0)
                 };
                 panelName.AddChild(textBox);
@@ -45,7 +45,7 @@ namespace PhonesBook
                     //Margin = new Thickness(1, 2, 1, 0)
                 });
                 TextBox textBoxPhone = new TextBox() {
-                    Size = 15,
+//                    Size = 15,
                     Margin = new Thickness(1, 0, 1, 0)
                 };
                 panelPhone.AddChild(textBoxPhone);

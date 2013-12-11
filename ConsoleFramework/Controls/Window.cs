@@ -145,7 +145,9 @@ namespace ConsoleFramework.Controls
         protected override Size ArrangeOverride(Size finalSize)
         {
             if (Content != null) {
-                Content.Arrange(new Rect(1, 1, finalSize.width - 4, finalSize.height - 3));
+                Content.Arrange(new Rect(1, 1, 
+                    Math.Min( Content.DesiredSize.Width, finalSize.width - 4),
+                    Math.Min( Content.DesiredSize.Height, finalSize.height - 3) ));
             }
             return finalSize;
         }

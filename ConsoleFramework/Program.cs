@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -9,17 +10,41 @@ using ConsoleFramework.Xaml;
 
 namespace ConsoleFramework {
     internal class Program {
+        class MyDataContext : INotifyPropertyChanged
+        {
+            private string str;
+            public String Str {
+                get { return str; }
+                set {
+                    if ( str != value ) {
+                        str = value;
+                        raisePropertyChanged( "Str" );
+                    }
+                }
+            }
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            protected virtual void raisePropertyChanged( string propertyName ) {
+                PropertyChangedEventHandler handler = PropertyChanged;
+                if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
+            }
+        }
+
         private static void Main(string[] args) {
             XamlParser parser = new XamlParser(  );
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "ConsoleFramework.MainWindow.xml";
-            //Window createdFromXaml;
-            //using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            //using (StreamReader reader = new StreamReader(stream))
-            //{
-            //    string result = reader.ReadToEnd();
-            //    createdFromXaml = ( Window ) XamlParser.CreateFromXaml(result);
-            //}
+            Window createdFromXaml;
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string result = reader.ReadToEnd();
+                // todo : try to specify dataContext
+                MyDataContext dataContext = new MyDataContext( );
+                dataContext.Str = "Введите заголовок";
+                createdFromXaml = (Window)XamlParser.CreateFromXaml(result, dataContext);
+            }
 
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();
@@ -38,7 +63,8 @@ namespace ConsoleFramework {
                     HorizontalAlignment = HorizontalAlignment.Right
                 });
                 TextBox textBox = new TextBox() {
-                    Size = 10, Width = 15
+                    Width = 15,
+                    Size = 10
                 };
                 Button button = new Button() {
                     Name = "button1",
@@ -133,7 +159,7 @@ namespace ConsoleFramework {
                     }
                 });
                 windowsHost.Show(window1);
-                //windowsHost.Show(createdFromXaml);
+                windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 application.Run(windowsHost);
             }

@@ -59,15 +59,34 @@ namespace ConsoleFramework.Xaml
 
             public String Property3 { get; set; }
 
-            public object ProvideValue( object context ) {
+            public object ProvideValue( IMarkupExtensionContext context ) {
                 return Property1 + "_" + Property2 + "_" + Property3;
             }
         }
 
         public class TestResolver : IMarkupExtensionsResolver
         {
+            // todo :
             public Type Resolve( string name ) {
-                return typeof(TestExtension);
+                if (name == "Test")
+                    return typeof(TestExtension);
+                if ( name == "Binding" )
+                    return typeof ( BindingMarkupExtension );
+                return null;
+            }
+        }
+
+        private class MarkupExtensionContext : IMarkupExtensionContext
+        {
+            public string PropertyName { get; private set; }
+            public object Object { get; private set; }
+            public object DataContext { get; private set; }
+
+            public MarkupExtensionContext( string propertyName,
+                object obj, object dataContext) {
+                PropertyName = propertyName;
+                Object = obj;
+                DataContext = dataContext;
             }
         }
 
@@ -77,7 +96,8 @@ namespace ConsoleFramework.Xaml
         /// если при парсинге или выполнении возникли ошибки. Если же str начинается c комбинации
         /// {}, то остаток строки возвращается просто строкой.
         /// </summary>
-        private static Object processText( String text ) {
+        private static Object processText( String text,
+            String currentProperty, object currentObject, object dataContext ) {
             if ( String.IsNullOrEmpty( text ) ) return String.Empty;
 
             if ( text[ 0 ] != '{' ) {
@@ -91,7 +111,8 @@ namespace ConsoleFramework.Xaml
                 MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
                     new TestResolver( ), text );
                 // todo : use real context
-                return markupExtensionsParser.ProcessMarkupExtension( null );
+                MarkupExtensionContext context = new MarkupExtensionContext( currentProperty, currentObject, dataContext );
+                return markupExtensionsParser.ProcessMarkupExtension(context);
             }
         }
 
@@ -100,7 +121,7 @@ namespace ConsoleFramework.Xaml
         /// </summary>
         /// <param name="xaml"></param>
         /// <returns></returns>
-        public static object CreateFromXaml( string xaml ) {
+        public static object CreateFromXaml( string xaml, object dataContext ) {
             if (null == xaml) throw new ArgumentNullException("xaml");
 
             object result = null;
@@ -154,10 +175,15 @@ namespace ConsoleFramework.Xaml
                                 while ( xmlReader.MoveToNextAttribute( ) ) {
                                     //
                                     PropertyInfo propertyInfo = top.type.GetProperty( xmlReader.Name );
-                                    Object value = processText(xmlReader.Value);
-                                    object convertedValue = convertValueIfNeed( value.GetType(  ), 
-                                        propertyInfo.PropertyType, value );
-                                    propertyInfo.SetValue( top.obj, convertedValue, null );
+                                    Object value = processText(xmlReader.Value,
+                                        xmlReader.Name,
+                                        top.obj,
+                                        dataContext);
+                                    if ( null != value ) {
+                                        object convertedValue = convertValueIfNeed( value.GetType( ),
+                                                                                    propertyInfo.PropertyType, value );
+                                        propertyInfo.SetValue( top.obj, convertedValue, null );
+                                    }
                                     //
                                 }
                                 xmlReader.MoveToElement( );
@@ -179,10 +205,15 @@ namespace ConsoleFramework.Xaml
                         // closed element having text content
                         if (top.currentPropertyText != null) {
                             PropertyInfo property = top.type.GetProperty(top.currentProperty);
-                            Object value = processText( top.currentPropertyText );
-                            Object convertedValue = convertValueIfNeed( value.GetType(  ),
-                                                                        property.PropertyType, value );
-                            property.SetValue( top.obj, convertedValue, null );
+                            Object value = processText( top.currentPropertyText,
+                                top.currentProperty,
+                                top.obj,
+                                dataContext);
+                            if ( value != null ) {
+                                Object convertedValue = convertValueIfNeed( value.GetType( ),
+                                                                            property.PropertyType, value );
+                                property.SetValue( top.obj, convertedValue, null );
+                            }
                             top.currentProperty = null;
                             top.currentPropertyText = null;
                         } else {
@@ -262,6 +293,9 @@ namespace ConsoleFramework.Xaml
             if ( source == typeof ( string ) && dest == typeof ( bool ) ) {
                 return new StringToBoolConverter( ).Convert( ( string ) value );
             }
+            if ( source == typeof ( string ) && dest == typeof ( int ) ) {
+                return int.Parse( ( string ) value );
+            }
             throw new NotSupportedException();
         }
 
@@ -276,6 +310,10 @@ namespace ConsoleFramework.Xaml
                     return typeof ( ScrollViewer );
                 case "ListBox":
                     return typeof ( ListBox );
+                case "Panel":
+                    return typeof ( Panel );
+                case "TextBox":
+                    return typeof ( TextBox );
             }
             return null;
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Core;
@@ -93,7 +94,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Base class for all controls.
     /// </summary>
-    public class Control {
+    public class Control : INotifyPropertyChanged {
 
         public Object DataContext { get; set; }
 
@@ -1120,6 +1121,13 @@ namespace ConsoleFramework.Controls
                 buffer.SetPixel(x + i, y, c, attr);
             }
             return Math.Min(s.Length, maxWidth);
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void RaisePropertyChanged( string propertyName ) {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
         }
     }
 }
