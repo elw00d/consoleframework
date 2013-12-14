@@ -87,6 +87,7 @@
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
     <Content Include="Events\Focus.txt" />
+    <Content Include="Xaml\xaml.txt" />
     <EmbeddedResource Include="MainWindow.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -97,6 +98,11 @@
       <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
       <Name>Binding</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Xaml\xaml.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

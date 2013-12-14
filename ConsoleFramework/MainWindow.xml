@@ -1,7 +1,8 @@
-﻿<Window Name="window2" Title="Очень длинное название окна">
-  <!--<Window.Resources>
-    <item x:Key="str">Строка</item>
-  </Window.Resources>-->
+﻿<Window Name="window2" Title="Очень длинное название окна"
+        xmlns:x="http://consoleframework.org/xaml.xsd">
+  <Window.Resources>
+    <item x:Key="1">Строка</item>
+  </Window.Resources>
   <Panel>
     <TextBox Text="{Binding Path=Str}"></TextBox>
     <GroupBox Title="{Binding Path=Str, Mode=TwoWay}">

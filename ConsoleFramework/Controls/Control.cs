@@ -98,6 +98,11 @@ namespace ConsoleFramework.Controls
 
         public Object DataContext { get; set; }
 
+        private Dictionary< String, Object > resources;
+        public Dictionary< String, Object > Resources {
+            get { return resources ?? ( resources = new Dictionary< string, object >( ) ); }
+        }
+
         public static RoutedEvent PreviewMouseMoveEvent = EventManager.RegisterRoutedEvent("PreviewMouseMove", RoutingStrategy.Tunnel, typeof(MouseEventHandler), typeof(Control));
         public static RoutedEvent MouseMoveEvent = EventManager.RegisterRoutedEvent("MouseMove", RoutingStrategy.Bubble, typeof(MouseEventHandler), typeof(Control));
         public static RoutedEvent PreviewMouseDownEvent = EventManager.RegisterRoutedEvent("PreviewMouseDown", RoutingStrategy.Tunnel, typeof(MouseButtonEventHandler), typeof(Control));
