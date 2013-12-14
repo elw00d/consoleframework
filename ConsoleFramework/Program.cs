@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -32,7 +33,6 @@ namespace ConsoleFramework {
         }
 
         private static void Main(string[] args) {
-            XamlParser parser = new XamlParser(  );
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "ConsoleFramework.MainWindow.xml";
             Window createdFromXaml;
@@ -43,7 +43,11 @@ namespace ConsoleFramework {
                 // todo : try to specify dataContext
                 MyDataContext dataContext = new MyDataContext( );
                 dataContext.Str = "Введите заголовок";
-                createdFromXaml = (Window)XamlParser.CreateFromXaml(result, dataContext);
+                XamlParser xamlParser = new XamlParser( new List< string >()
+                    {
+                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
+                    } );
+                createdFromXaml = (Window)xamlParser.CreateFromXaml(result, dataContext);
             }
 
             using (ConsoleApplication application = ConsoleApplication.Instance) {

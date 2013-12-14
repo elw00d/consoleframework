@@ -1,9 +1,10 @@
 ﻿<Window Name="window2" Title="Очень длинное название окна"
-        xmlns:x="http://consoleframework.org/xaml.xsd">
+        xmlns:x="http://consoleframework.org/xaml.xsd"
+        xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework">
   <Window.Resources>
     <item x:Key="1">Строка</item>
   </Window.Resources>
-  <Panel>
+  <my:Panel>
     <TextBox Text="{Binding Path=Str}"></TextBox>
     <GroupBox Title="{Binding Path=Str, Mode=TwoWay}">
       <ScrollViewer VerticalAlignment="Stretch">
@@ -21,5 +22,5 @@
         </ListBox>
       </ScrollViewer>
     </GroupBox>
-  </Panel>
+  </my:Panel>
 </Window>
