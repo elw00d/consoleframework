@@ -1,17 +1,21 @@
 ﻿<Window Name="window2" Title="Очень длинное название окна"
         xmlns:x="http://consoleframework.org/xaml.xsd"
-        xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework">
+        xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
+        xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding">
   <Window.Resources>
     <item x:Key="1">Строка</item>
+    <converters:StringToIntegerConverter x:Key="2" x:Id="str2int"></converters:StringToIntegerConverter>
   </Window.Resources>
   <my:Panel>
-    <TextBox Text="{Binding Path=Str}"></TextBox>
-    <GroupBox Title="{Binding Path=Str, Mode=TwoWay}">
+    <TextBox Text="{Binding Path=Str}" MaxLenght="{Convert Converter={Ref str2int}, Value=5}"></TextBox>
+    <GroupBox Title="{Ref Ref=testStr}">
       <ScrollViewer VerticalAlignment="Stretch">
         <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
         <ListBox>
+          <ListBox.Resources>
+            <item x:Key="testItem" x:Id="testStr">Тестовая строка</item>
+          </ListBox.Resources>
           <ListBox.Items>
-            <item>Длинный элемент 1</item>
             <item>Длинный элемент 2</item>
             <item>Длинный элемент 3</item>
             <item>Длинный элемент 4</item>

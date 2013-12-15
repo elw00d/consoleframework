@@ -41,9 +41,15 @@ namespace ConsoleFramework.Xaml
             /// </summary>
             public string currentPropertyText;
             /// <summary>
-            /// Ключ, задаваемый атрибутом x:Key (если есть).
+            /// Ключ, задаваемый атрибутом x:Key (если есть) - по этому ключу объект будет
+            /// положен в Dictionary-свойство родительского объекта.
             /// </summary>
             public string key;
+            /// <summary>
+            /// Ключ, задаваемый атрибутом x:Id (если есть). По этому ключу объект будет
+            /// доступен из расширений разметки по ссылкам (например, через Ref).
+            /// </summary>
+            public string id;
         }
 
         public class TestExtension : IMarkupExtension
@@ -85,8 +91,37 @@ namespace ConsoleFramework.Xaml
                     return typeof(TestExtension);
                 if ( name == "Binding" )
                     return typeof ( BindingMarkupExtension );
+                if ( name == "Ref" )
+                    return typeof ( RefMarkupExtension );
+                if ( name == "Convert" )
+                    return typeof ( ConvertMarkupExtension );
                 return null;
             }
+        }
+
+        private class FixupToken : IFixupToken
+        {
+            /// <summary>
+            /// Строковое представление расширения разметки, которое вернуло этот токен.
+            /// </summary>
+            public string Expression;
+            /// <summary>
+            /// Имя свойства, которое задано этим расширением разметки.
+            /// </summary>
+            public string PropertyName;
+            /// <summary>
+            /// Объект, свойство которого определяется расширением разметки.
+            /// </summary>
+            public object Object;
+            /// <summary>
+            /// Переданный в расширение разметки dataContext.
+            /// </summary>
+            public object DataContext;
+            /// <summary>
+            /// Список x:Id, которые не были найдены в текущем состоянии графа объектов,
+            /// но которые необходимы для полного выполнения ProvideValue.
+            /// </summary>
+            public IEnumerable<string> Ids;
         }
 
         private class MarkupExtensionContext : IMarkupExtensionContext
@@ -94,9 +129,41 @@ namespace ConsoleFramework.Xaml
             public string PropertyName { get; private set; }
             public object Object { get; private set; }
             public object DataContext { get; private set; }
+            private XamlParser self;
+            private string expression;
 
-            public MarkupExtensionContext( string propertyName,
-                object obj, object dataContext) {
+            public object GetObjectById( string id ) {
+                object value;
+                return self.objectsById.TryGetValue( id, out value ) ? value : null;
+            }
+
+            /// <summary>
+            /// fixupTokensAvailable = true означает, что парсинг ещё не закончен, и ещё можно
+            /// создать FixupToken, false означает, что парсинг уже завершён, и новых объектов
+            /// уже не появится, поэтому если расширение разметки не может обнаружить ссылку на
+            /// объект, то ему уже нечего делать, кроме как завершать работу выбросом исключения.
+            /// </summary>
+            public bool IsFixupTokenAvailable { get { return self.objects.Count != 0; } }
+
+            public IFixupToken GetFixupToken( IEnumerable< string > ids ) {
+                if (!IsFixupTokenAvailable)
+                    throw new InvalidOperationException("Fixup tokens are not available now.");
+                FixupToken fixupToken = new FixupToken(  );
+                fixupToken.Expression = expression;
+                fixupToken.PropertyName = PropertyName;
+                fixupToken.Object = Object;
+                fixupToken.DataContext = DataContext;
+                fixupToken.Ids = ids;
+                return fixupToken;
+            }
+
+            public MarkupExtensionContext( XamlParser self,
+                                           string expression,
+                                           string propertyName,
+                                           object obj,
+                                           object dataContext ) {
+                this.self = self;
+                this.expression = expression;
                 PropertyName = propertyName;
                 Object = obj;
                 DataContext = dataContext;
@@ -109,7 +176,7 @@ namespace ConsoleFramework.Xaml
         /// если при парсинге или выполнении возникли ошибки. Если же str начинается c комбинации
         /// {}, то остаток строки возвращается просто строкой.
         /// </summary>
-        private static Object processText( String text,
+        private Object processText( String text,
             String currentProperty, object currentObject, object dataContext ) {
             if ( String.IsNullOrEmpty( text ) ) return String.Empty;
 
@@ -123,14 +190,21 @@ namespace ConsoleFramework.Xaml
                 // todo : use real resolver
                 MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
                     new TestResolver( ), text );
-                // todo : use real context
-                MarkupExtensionContext context = new MarkupExtensionContext( currentProperty, currentObject, dataContext );
-                return markupExtensionsParser.ProcessMarkupExtension(context);
+                MarkupExtensionContext context = new MarkupExtensionContext(
+                    this, text, currentProperty, currentObject, dataContext);
+                object providedValue = markupExtensionsParser.ProcessMarkupExtension( context );
+                if ( providedValue is IFixupToken ) {
+                    fixupTokens.Add( ( FixupToken ) providedValue );
+                    // Null means no value will be assigned to target property
+                    return null;
+                }
+                return providedValue;
             }
         }
 
         // { prefix -> namespace }
         private readonly Dictionary<String, String> namespaces = new Dictionary<string, string>();
+
         private object dataContext;
         /// <summary>
         /// Стек конфигурируемых объектов. На верху стека всегда лежит
@@ -145,6 +219,18 @@ namespace ConsoleFramework.Xaml
         }
         // Result object
         private object result;
+
+        /// <summary>
+        /// Map { x:Id -> object } of fully configured objects available to reference from
+        /// markup extensions.
+        /// </summary>
+        private readonly Dictionary<String, Object> objectsById = new Dictionary< string, object >();
+
+        /// <summary>
+        /// List of fixup tokens used to defer objects by id resolving if markup extension
+        /// has forward references to objects declared later.
+        /// </summary>
+        private readonly List< FixupToken > fixupTokens = new List< FixupToken >();
 
         /// <summary>
         /// Creates the object graph using provided xaml.
@@ -202,6 +288,10 @@ namespace ConsoleFramework.Xaml
                 }
             }
 
+            // После обработки всех элементов последний раз обращаемся к
+            // расширениям разметки, ожидающим свои forward-references
+            processFixupTokens();
+
             return result;
         }
 
@@ -246,9 +336,12 @@ namespace ConsoleFramework.Xaml
                         throw new InvalidOperationException(
                             string.Format( "Unknown prefix {0}", attributePrefix ) );
                     string namespaceUrl = namespaces[ attributePrefix ];
-                    if ( namespaceUrl == "http://consoleframework.org/xaml.xsd"
-                         && attributeName == "Key" ) {
-                        Top.key = attributeValue;
+                    if ( namespaceUrl == "http://consoleframework.org/xaml.xsd" ) {
+                        if ( attributeName == "Key" ) {
+                            Top.key = attributeValue;
+                        } else if ( attributeName == "Id" ) {
+                            Top.id = attributeValue;
+                        }
                     }
                 } else {
                     // Process attribute as property assignment
@@ -265,6 +358,9 @@ namespace ConsoleFramework.Xaml
             }
         }
 
+        /// <summary>
+        /// Finishes configuring current object and assigns it to property of parent object.
+        /// </summary>
         private void processEndElement( ) {
             // closed element having text content
             if ( Top.currentPropertyText != null ) {
@@ -343,6 +439,47 @@ namespace ConsoleFramework.Xaml
                             }
                         }
                     }
+
+                    // Если у объекта задан x:Id, добавить его в objectsById
+                    if ( initialized.id != null ) {
+                        if (objectsById.ContainsKey( initialized.id ))
+                            throw new InvalidOperationException(string.Format("Object with Id={0} redefinition.", initialized.id));
+                        objectsById.Add( initialized.id, initialized.obj );
+
+                        processFixupTokens( );
+                    }
+                }
+            }
+        }
+
+        private void processFixupTokens( ) {
+            // Выполнить поиск fixup tokens, желания которых удовлетворены,
+            // и вызвать расширения разметки для них снова
+            List< FixupToken > tokens = new List< FixupToken >( fixupTokens );
+            fixupTokens.Clear(  );
+            foreach ( FixupToken token in tokens ) {
+                if ( token.Ids.All( id => objectsById.ContainsKey( id ) ) ) {
+                    // todo : use real resolver
+                    MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
+                        new TestResolver(), token.Expression);
+                    MarkupExtensionContext context = new MarkupExtensionContext(
+                        this, token.Expression, token.PropertyName, token.Object, token.DataContext);
+                    object providedValue = markupExtensionsParser.ProcessMarkupExtension(context);
+                    if ( providedValue is IFixupToken ) {
+                        fixupTokens.Add( ( FixupToken ) providedValue );
+                    } else {
+                        // assign providedValue to property of object
+                        if (null != providedValue) {
+                            PropertyInfo propertyInfo = token.Object.GetType(  ).GetProperty(
+                                token.PropertyName);
+                            object convertedValue = convertValueIfNeed(providedValue.GetType(),
+                                                                        propertyInfo.PropertyType,
+                                                                        providedValue);
+                            propertyInfo.SetValue(token.Object, convertedValue, null);
+                        }
+                    }
+                } else {
+                    fixupTokens.Add( token );
                 }
             }
         }

@@ -6,6 +6,10 @@ using System.Text;
 
 namespace ConsoleFramework.Xaml
 {
+    public interface IFixupToken
+    {
+    }
+
     /// <summary>
     /// Контекст, доступный расширению разметки.
     /// </summary>
@@ -28,6 +32,27 @@ namespace ConsoleFramework.Xaml
         /// дерева контролов.
         /// </summary>
         Object DataContext { get; }
+
+        /// <summary>
+        /// Returns already created object with specified x:Id attribute value or null if object with
+        /// this x:Id is not constructed yet. To resolve forward references use fixup tokens mechanism.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Object GetObjectById( String id );
+
+        /// <summary>
+        /// Gets a value that determines whether calling GetFixupToken is available
+        /// in order to resolve a name into a token for forward resolution.
+        /// </summary>
+        bool IsFixupTokenAvailable { get; }
+
+        /// <summary>
+        /// Returns an object that can correct for certain markup patterns that produce forward references.
+        /// </summary>
+        /// <param name="ids">A collection of ids that are possible forward references.</param>
+        /// <returns>An object that provides a token for lookup behavior to be evaluated later.</returns>
+        IFixupToken GetFixupToken(IEnumerable<String> ids);
     }
 
     /// <summary>
@@ -128,6 +153,8 @@ namespace ConsoleFramework.Xaml
                                                             " cannot be after property assignment.");
 
                     Object value = processMarkupExtensionCore( context );
+                    if ( value is IFixupToken )
+                        return value;
                     ctorArgs.Add( value );
                 } else {
                     String membernameOrString = processString( );
@@ -142,6 +169,8 @@ namespace ConsoleFramework.Xaml
                         object value = peekNextChar( ) == '{' 
                             ? processMarkupExtensionCore( context )
                             : processString( );
+
+                        if ( value is IFixupToken ) return value;
 
                         // construct object if not constructed yet
                         if ( obj == null ) obj = construct(type, ctorArgs);
