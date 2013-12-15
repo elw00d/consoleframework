@@ -509,7 +509,7 @@ namespace ConsoleFramework.Xaml
 
             // todo : default converters for primitives
             if ( source == typeof ( string ) && dest == typeof ( bool ) ) {
-                return new StringToBoolConverter( ).Convert( ( string ) value );
+                return bool.Parse( ( string ) value );
             }
             if ( source == typeof ( string ) && dest == typeof ( int ) ) {
                 return int.Parse( ( string ) value );

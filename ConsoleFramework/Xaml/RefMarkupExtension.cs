@@ -2,6 +2,11 @@
 
 namespace ConsoleFramework.Xaml
 {
+    /// <summary>
+    /// Returns an object that is referenced in expression. Example:
+    /// {Ref myObject} will return object with x:Id="myObject".
+    /// Forward-references are supported too.
+    /// </summary>
     class RefMarkupExtension : IMarkupExtension
     {
         public RefMarkupExtension( ) {

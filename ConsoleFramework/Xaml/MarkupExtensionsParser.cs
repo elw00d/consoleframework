@@ -100,6 +100,7 @@ namespace ConsoleFramework.Xaml
         public Object ProcessMarkupExtension( IMarkupExtensionContext context ) {
             // interpret as markup extension expression
             object result = processMarkupExtensionCore(context);
+            if ( result is IFixupToken ) return result;
 
             if ( hasNextChar( ) ) {
                 throw new InvalidOperationException(

@@ -59,25 +59,25 @@ namespace TestProject1
         [TestMethod]
         public void TestEscaping2() {
             MarkupExtensionsParser parser = new MarkupExtensionsParser( new TestResolver(  ),
-                "{xm:TestExtension Arg1, Arg2, Property3=\\=\\{\\}\\\\sdf}");
+                @"{xm:TestExtension Arg1, Arg2, Property3=\=\{\}\\sdf}");
             String result = (String)parser.ProcessMarkupExtension(null);
-            Assert.AreEqual( result, "Arg1_Arg2_={}\\sdf" );
+            Assert.AreEqual( result, @"Arg1_Arg2_={}\sdf" );
         }
 
         [TestMethod]
         public void TestInner( ) {
             MarkupExtensionsParser parser = new MarkupExtensionsParser(new TestResolver(),
-                "{xm:TestExtension Arg1, {TestExtension Property1=1}, Property3=\\=\\{\\}\\\\sdf}");
+                @"{xm:TestExtension Arg1, {TestExtension Property1=1}, Property3=\=\{\}\\sdf}");
             String result = (String)parser.ProcessMarkupExtension(null);
-            Assert.AreEqual(result, "Arg1_1___={}\\sdf");
+            Assert.AreEqual(result, @"Arg1_1___={}\sdf");
         }
 
         [TestMethod]
         public void TestInner2( ) {
             MarkupExtensionsParser parser = new MarkupExtensionsParser(new TestResolver(),
-                "{xm:TestExtension Arg1, Property3=\\=\\{\\}\\\\sdf, Property2={TestExtension Property1=1}}");
+                @"{xm:TestExtension Arg1, Property3=\=\{\}\\sdf, Property2={TestExtension Property1=1}}");
             String result = (String)parser.ProcessMarkupExtension(null);
-            Assert.AreEqual(result, "Arg1_1___={}\\sdf");
+            Assert.AreEqual(result, @"Arg1_1___={}\sdf");
         }
 
         [TestMethod]
