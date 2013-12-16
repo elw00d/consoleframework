@@ -274,12 +274,7 @@ namespace ConsoleFramework.Xaml
 
                     if ( xmlReader.NodeType == XmlNodeType.Text ) {
                         // this call moves xmlReader current element forward
-                        string content = xmlReader.ReadContentAsString( );
-                        if ( Top.name == "item" ) {
-                            Top.obj = content;
-                        } else {
-                            Top.currentPropertyText = content;
-                        }
+                        Top.currentPropertyText = xmlReader.ReadContentAsString();
                     }
 
                     if ( xmlReader.NodeType == XmlNodeType.EndElement ) {
@@ -296,33 +291,36 @@ namespace ConsoleFramework.Xaml
         }
 
         /// <summary>
-        /// todo : учитывать аргументы конструктора ?
-        /// todo : добавить встроенных типов ?
+        /// Алиасы для объектов-примитивов, чтобы не писать в XAML длинные формулировки вида
+        /// &lt;xaml:Primitive x:TypeArg1="{Type System.Double}"&gt;&lt;/xaml:Primitive&gt;
+        /// </summary>
+        private static readonly Dictionary<String, Type> aliases = new Dictionary< string, Type >( )
+            {
+                { "string", typeof ( Primitive< string > ) },
+                { "int", typeof ( Primitive< int > ) },
+                { "double", typeof ( Primitive< double > ) },
+                { "float", typeof ( Primitive< float > ) },
+                { "char", typeof ( Primitive< char > ) },
+                { "bool", typeof ( Primitive< bool > ) }
+            };
+
+        /// <summary>
+        /// todo : учитывать аргументы конструктора и типы-аргументы ?
         /// </summary>
         private ObjectInfo createObject( string name ) {
-            // object
-            if ( name == "item" ) {
-                // predefined string object
-                return new ObjectInfo( )
-                    {
-                        name = "item",
-                        type = typeof ( string )
-                    };
-            } else {
-                Type type = resolveType( name );
-                ConstructorInfo constructorInfo = type.GetConstructor( new Type[ 0 ] );
-                if ( null == constructorInfo ) {
-                    throw new ApplicationException(
-                        String.Format( "Type {0} has no default constructor.", type.FullName ) );
-                }
-                Object invoke = constructorInfo.Invoke( new object[ 0 ] );
-                return new ObjectInfo( )
-                    {
-                        name = name,
-                        obj = invoke,
-                        type = type
-                    };
+            Type type = aliases.ContainsKey(name) ? aliases[ name ] : resolveType( name );
+
+            ConstructorInfo constructorInfo = type.GetConstructor(new Type[0]);
+            if (null == constructorInfo) {
+                throw new ApplicationException(
+                    String.Format("Type {0} has no default constructor.", type.FullName));
             }
+            Object invoke = constructorInfo.Invoke(new object[0]);
+            return new ObjectInfo() {
+                name = name,
+                obj = invoke,
+                type = type
+            };
         }
 
         private void processAttribute( string attributePrefix, string attributeName, string attributeValue ) {
@@ -358,13 +356,22 @@ namespace ConsoleFramework.Xaml
             }
         }
 
+        private String getContentPropertyName( Type type ) {
+            // todo : determine name of content property
+            return "Content";
+        }
+
         /// <summary>
         /// Finishes configuring current object and assigns it to property of parent object.
         /// </summary>
         private void processEndElement( ) {
+            bool assignToParent;
+
             // closed element having text content
             if ( Top.currentPropertyText != null ) {
-                PropertyInfo property = Top.type.GetProperty( Top.currentProperty );
+                PropertyInfo property = Top.currentProperty != null
+                                            ? Top.type.GetProperty( Top.currentProperty )
+                                            : Top.type.GetProperty(getContentPropertyName(Top.type));
                 Object value = processText( Top.currentPropertyText,
                                             Top.currentProperty,
                                             Top.obj,
@@ -374,80 +381,94 @@ namespace ConsoleFramework.Xaml
                                                                 property.PropertyType, value );
                     property.SetValue( Top.obj, convertedValue, null );
                 }
-                Top.currentProperty = null;
+                if ( Top.currentProperty != null ) {
+                    Top.currentProperty = null;
+                    assignToParent = false;
+                } else {
+                    // Для объектов, задаваемых текстом ( <MyObject>text</MyObject> )
+                    // currentProperty равно null, и при встрече закрывающего тега </MyObject>
+                    // мы должны не только присвоить Content-свойству значение text, но и
+                    // присвоить созданный объект свойству родительского объекта, таким образом эта
+                    // запись будет эквивалентна выражению
+                    // <MyObject><MyObject.Content>text</MyObject.Content></MyObject>
+                    assignToParent = true;
+                }
                 Top.currentPropertyText = null;
             } else {
-                // closed element having sub-element content
-                if ( Top.currentProperty != null ) {
-                    // был закрыт один из тегов-свойств, дочерний элемент
-                    // уже присвоен свойству, поэтому ничего делать не нужно, кроме
-                    // обнуления currentProperty
-                    Top.currentProperty = null;
+                assignToParent = true;
+            }
+
+            if ( !assignToParent ) return;
+
+            // closed element having sub-element content
+            if ( Top.currentProperty != null ) {
+                // был закрыт один из тегов-свойств, дочерний элемент
+                // уже присвоен свойству, поэтому ничего делать не нужно, кроме
+                // обнуления currentProperty
+                Top.currentProperty = null;
+            } else {
+                // был закрыт основной тег текущего конструируемого объекта
+                // нужно получить объект уровнем выше и присвоить себя свойству этого
+                // объекта, либо добавить в свойство-коллекцию, если это коллекция
+                ObjectInfo initialized = objects.Pop( );
+
+                if ( initialized.obj is IPrimitive) {
+                    initialized.obj = ( ( IPrimitive ) initialized.obj ).ContentNonGeneric;
+                }
+
+                if ( objects.Count == 0 ) {
+                    result = initialized.obj;
                 } else {
-                    // был закрыт основной тег текущего конструируемого объекта
-                    // нужно получить объект уровнем выше и присвоить себя свойству этого
-                    // объекта, либо добавить в свойство-коллекцию, если это коллекция
-                    ObjectInfo initialized = objects.Pop( );
-                    if ( objects.Count == 0 ) {
-                        result = initialized.obj;
+                    string propertyName = Top.currentProperty ?? getContentPropertyName(Top.type);
+
+                    // If parent object property is ICollection<T>,
+                    // add current object into them as T (will conversion if need)
+                    PropertyInfo property = Top.type.GetProperty( propertyName );
+                    Type typeArg1 = property.PropertyType.IsGenericType
+                                        ? property.PropertyType.GetGenericArguments( )[ 0 ]
+                                        : null;
+                    if ( null != typeArg1 &&
+                            typeof ( ICollection< > ).MakeGenericType( typeArg1 ).IsAssignableFrom( property.PropertyType ) ) {
+                        object collection = property.GetValue( Top.obj, null );
+                        MethodInfo methodInfo = collection.GetType( ).GetMethod( "Add" );
+                        object converted = convertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
+                        methodInfo.Invoke( collection, new[ ] { converted } );
                     } else {
-                        string propertyName;
-                        if ( Top.currentProperty != null ) {
-                            propertyName = Top.currentProperty;
-                        } else {
-                            // todo : determine name of content property
-                            propertyName = "Content";
-                        }
-
-                        // If parent object property is ICollection<T>,
-                        // add current object into them as T (will conversion if need)
-                        PropertyInfo property = Top.type.GetProperty( propertyName );
-                        Type typeArg1 = property.PropertyType.IsGenericType
-                                            ? property.PropertyType.GetGenericArguments( )[ 0 ]
+                        // If parent object property is IDictionary<string, T>,
+                        // add current object into them (by x:Key value) 
+                        // with conversion to T if need
+                        Type typeArg2 = property.PropertyType.IsGenericType &&
+                                        property.PropertyType.GetGenericArguments( ).Length > 1
+                                            ? property.PropertyType.GetGenericArguments( )[ 1 ]
                                             : null;
-                        if ( null != typeArg1 &&
-                             typeof ( ICollection< > ).MakeGenericType( typeArg1 ).IsAssignableFrom( property.PropertyType ) ) {
-                            object collection = property.GetValue( Top.obj, null );
-                            MethodInfo methodInfo = collection.GetType( ).GetMethod( "Add" );
-                            object converted = convertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
-                            methodInfo.Invoke( collection, new[ ] { converted } );
+                        if ( null != typeArg1 && typeArg1 == typeof ( string )
+                                && null != typeArg2 &&
+                                typeof ( IDictionary< , > ).MakeGenericType( typeArg1, typeArg2 )
+                                                        .IsAssignableFrom( property.PropertyType ) ) {
+                            object dictionary = property.GetValue( Top.obj, null );
+                            MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
+                            object converted = convertValueIfNeed( initialized.obj.GetType( ),
+                                                                    typeArg2, initialized.obj );
+                            if ( null == initialized.key )
+                                throw new InvalidOperationException(
+                                    "Key is not specified for item of dictionary" );
+                            methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
                         } else {
-                            // If parent object property is IDictionary<string, T>,
-                            // add current object into them (by x:Key value) 
-                            // with conversion to T if need
-                            Type typeArg2 = property.PropertyType.IsGenericType &&
-                                            property.PropertyType.GetGenericArguments( ).Length > 1
-                                                ? property.PropertyType.GetGenericArguments( )[ 1 ]
-                                                : null;
-                            if ( null != typeArg1 && typeArg1 == typeof ( string )
-                                 && null != typeArg2 &&
-                                 typeof ( IDictionary< , > ).MakeGenericType( typeArg1, typeArg2 )
-                                                            .IsAssignableFrom( property.PropertyType ) ) {
-                                object dictionary = property.GetValue( Top.obj, null );
-                                MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
-                                object converted = convertValueIfNeed( initialized.obj.GetType( ),
-                                                                       typeArg2, initialized.obj );
-                                if ( null == initialized.key )
-                                    throw new InvalidOperationException(
-                                        "Key is not specified for item of dictionary" );
-                                methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
-                            } else {
-                                // Handle as property - call setter with conversion if need
-                                property.SetValue( Top.obj, convertValueIfNeed(
-                                    initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
-                                                   null );
-                            }
+                            // Handle as property - call setter with conversion if need
+                            property.SetValue( Top.obj, convertValueIfNeed(
+                                initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
+                                                null );
                         }
                     }
+                }
 
-                    // Если у объекта задан x:Id, добавить его в objectsById
-                    if ( initialized.id != null ) {
-                        if (objectsById.ContainsKey( initialized.id ))
-                            throw new InvalidOperationException(string.Format("Object with Id={0} redefinition.", initialized.id));
-                        objectsById.Add( initialized.id, initialized.obj );
+                // Если у объекта задан x:Id, добавить его в objectsById
+                if ( initialized.id != null ) {
+                    if (objectsById.ContainsKey( initialized.id ))
+                        throw new InvalidOperationException(string.Format("Object with Id={0} redefinition.", initialized.id));
+                    objectsById.Add( initialized.id, initialized.obj );
 
-                        processFixupTokens( );
-                    }
+                    processFixupTokens( );
                 }
             }
         }

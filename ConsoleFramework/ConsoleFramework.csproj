@@ -81,6 +81,7 @@
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
     <Compile Include="Xaml\MarkupExtensionsParser.cs" />
+    <Compile Include="Xaml\Primitives.cs" />
     <Compile Include="Xaml\RefMarkupExtension.cs" />
     <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>

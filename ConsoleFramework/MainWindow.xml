@@ -1,9 +1,10 @@
 ﻿<Window Name="window2" Title="Очень длинное название окна"
         xmlns:x="http://consoleframework.org/xaml.xsd"
         xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
-        xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding">
+        xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding"
+        xmlns:xaml="clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework">
   <Window.Resources>
-    <item x:Key="1">Строка</item>
+    <string x:Key="1">Строка</string>
     <converters:StringToIntegerConverter x:Key="2" x:Id="str2int"></converters:StringToIntegerConverter>
   </Window.Resources>
   <my:Panel>
@@ -13,15 +14,15 @@
         <ScrollViewer.HorizontalScrollEnabled>false</ScrollViewer.HorizontalScrollEnabled>
         <ListBox>
           <ListBox.Resources>
-            <item x:Key="testItem" x:Id="testStr">5</item>
+            <string x:Key="testItem" x:Id="testStr">5</string>
           </ListBox.Resources>
           <ListBox.Items>
-            <item>Длинный элемент 2</item>
-            <item>Длинный элемент 3</item>
-            <item>Длинный элемент 4</item>
-            <item>Длинный элемент 5</item>
-            <item>Длинный элемент 6</item>
-            <item>Длинный элемент 700</item>
+            <string>{Ref testStr}</string>
+            <string>Длинный элемент 3</string>
+            <string>Длинный элемент 4</string>
+            <string>Длинный элемент 5</string>
+            <string>Длинный элемент 6</string>
+            <string>Длинный элемент 700</string>
           </ListBox.Items>
         </ListBox>
       </ScrollViewer>
