@@ -6,6 +6,7 @@ namespace ConsoleFramework.Xaml
     /// Позволяет получить тип по имени. Имя может содержать аргументы-типы, например
     /// ConsoleFramework.Xaml.TestClass`1[System.String]
     /// </summary>
+    [MarkupExtension("Type")]
     class TypeMarkupExtension : IMarkupExtension
     {
         public TypeMarkupExtension( ) {

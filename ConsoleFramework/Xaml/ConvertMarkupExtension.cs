@@ -7,6 +7,7 @@ namespace ConsoleFramework.Xaml
     /// <summary>
     /// Converts Value to property type using specified converter.
     /// </summary>
+    [MarkupExtension("Convert")]
     class ConvertMarkupExtension : IMarkupExtension
     {
         /// <summary>

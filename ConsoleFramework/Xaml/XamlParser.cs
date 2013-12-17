@@ -9,7 +9,7 @@ using System.Xml;
 namespace ConsoleFramework.Xaml
 {
     /// <summary>
-    /// todo : comment
+    /// Provides XAML parsing and simultaneous object graph creation.
     /// todo : prohibit direct instance creation
     /// </summary>
     public class XamlParser
@@ -56,50 +56,16 @@ namespace ConsoleFramework.Xaml
             public string id;
         }
 
-        public class TestExtension : IMarkupExtension
+        public class MarkupExtensionsResolver : IMarkupExtensionsResolver
         {
-            public TestExtension( ) {
-                Property1 = String.Empty;
-                Property2 = String.Empty;
-                Property3 = String.Empty;
+            private readonly XamlParser self;
+
+            public MarkupExtensionsResolver( XamlParser self ) {
+                this.self = self;
             }
 
-            public TestExtension( String param1 ) {
-                Property1 = param1;
-                Property2 = String.Empty;
-                Property3 = String.Empty;
-            }
-
-            public TestExtension( String param1, String param2 ) {
-                Property1 = param1;
-                Property2 = param2;
-                Property3 = String.Empty;
-            }
-
-            public String Property1 { get; set; }
-
-            public String Property2 { get; set; }
-
-            public String Property3 { get; set; }
-
-            public object ProvideValue( IMarkupExtensionContext context ) {
-                return Property1 + "_" + Property2 + "_" + Property3;
-            }
-        }
-
-        public class TestResolver : IMarkupExtensionsResolver
-        {
-            // todo :
             public Type Resolve( string name ) {
-                if (name == "Test")
-                    return typeof(TestExtension);
-                if ( name == "Binding" )
-                    return typeof ( BindingMarkupExtension );
-                if ( name == "Ref" )
-                    return typeof ( RefMarkupExtension );
-                if ( name == "Convert" )
-                    return typeof ( ConvertMarkupExtension );
-                return null;
+                return self.resolveMarkupExtensionType( name );
             }
         }
 
@@ -133,8 +99,8 @@ namespace ConsoleFramework.Xaml
             public string PropertyName { get; private set; }
             public object Object { get; private set; }
             public object DataContext { get; private set; }
-            private XamlParser self;
-            private string expression;
+            private readonly XamlParser self;
+            private readonly string expression;
 
             public object GetObjectById( string id ) {
                 object value;
@@ -191,9 +157,8 @@ namespace ConsoleFramework.Xaml
                 // interpret the rest as string
                 return text.Length > 2 ? text.Substring(2) : String.Empty;
             } else {
-                // todo : use real resolver
                 MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
-                    new TestResolver( ), text );
+                    new MarkupExtensionsResolver( this ), text );
                 MarkupExtensionContext context = new MarkupExtensionContext(
                     this, text, currentProperty, currentObject, dataContext);
                 object providedValue = markupExtensionsParser.ProcessMarkupExtension( context );
@@ -482,9 +447,8 @@ namespace ConsoleFramework.Xaml
             fixupTokens.Clear(  );
             foreach ( FixupToken token in tokens ) {
                 if ( token.Ids.All( id => objectsById.ContainsKey( id ) ) ) {
-                    // todo : use real resolver
                     MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
-                        new TestResolver(), token.Expression);
+                        new MarkupExtensionsResolver(this), token.Expression);
                     MarkupExtensionContext context = new MarkupExtensionContext(
                         this, token.Expression, token.PropertyName, token.Object, token.DataContext);
                     object providedValue = markupExtensionsParser.ProcessMarkupExtension(context);
@@ -540,6 +504,43 @@ namespace ConsoleFramework.Xaml
             throw new NotSupportedException();
         }
 
+        private Type resolveMarkupExtensionType( string name ) {
+            string bindingName;
+            var namespacesToScan = getNamespacesToScan(name, out bindingName);
+
+            // Scan namespaces todo : cache types lists
+            Type resultType = null;
+            foreach ( string ns in namespacesToScan ) {
+                Regex regex = new Regex( "clr-namespace:(.+);assembly=(.+)" );
+                MatchCollection matchCollection = regex.Matches( ns );
+                if (matchCollection.Count == 0)
+                    throw new InvalidOperationException(string.Format("Invalid clr-namespace syntax: {0}", ns));
+                string namespaceName = matchCollection[ 0 ].Groups[ 1 ].Value;
+                string assemblyName = matchCollection[ 0 ].Groups[ 2 ].Value;
+
+                Assembly assembly = Assembly.Load( assemblyName );
+                List< Type > types = assembly.GetTypes( ).Where( type => {
+                    if (type.Namespace != namespaceName) return false;
+                    object[ ] attributes = type.GetCustomAttributes( typeof ( MarkupExtensionAttribute ), true );
+                    return ( attributes.Any( o => ( ( MarkupExtensionAttribute ) o ).Name == bindingName ) );
+                } ).ToList( );
+
+                if (types.Count > 1)
+                    throw new InvalidOperationException(string.Format( "More than one markup extension" +
+                                                        " for name {0} in namespace {1}.",
+                                                        name, ns));
+                else if ( types.Count == 1 ) {
+                    resultType = types[ 0 ];
+                    break;
+                }
+            }
+
+            if (resultType == null)
+                throw new InvalidOperationException(
+                    string.Format("Cannot resolve markup extension {0}.", name));
+            return resultType;
+        }
+
         /// <summary>
         /// Принимает на вход название типа и возвращает объект Type, ему соответствующий.
         /// Название типа может быть как с префиксом (qualified), так и без него.
@@ -549,23 +550,11 @@ namespace ConsoleFramework.Xaml
         /// задаются в конструкторе класса XamlParser.
         /// </summary>
         private Type resolveType( string name ) {
-            List< string > namespacesToScan;
             string typeName;
-
-            if ( name.Contains( ":" ) ) {
-                string prefix = name.Substring( 0, name.IndexOf( ':' ) );
-                if (name.IndexOf( ':' ) + 1 >= name.Length)
-                    throw new InvalidOperationException(string.Format("Invalid type name {0}", name));
-                typeName = name.Substring( name.IndexOf( ':' ) + 1 );
-                if ( !namespaces.ContainsKey( prefix ) )
-                    throw new InvalidOperationException( string.Format( "Unknown prefix {0}", prefix ) );
-                namespacesToScan = new List< string >() { namespaces[prefix] };
-            } else {
-                namespacesToScan = defaultNamespaces;
-                typeName = name;
-            }
+            var namespacesToScan = getNamespacesToScan( name, out typeName );
 
             // Scan namespaces todo : cache types lists
+            Type resultType = null;
             foreach ( string ns in namespacesToScan ) {
                 Regex regex = new Regex( "clr-namespace:(.+);assembly=(.+)" );
                 MatchCollection matchCollection = regex.Matches( ns );
@@ -577,14 +566,39 @@ namespace ConsoleFramework.Xaml
                 Assembly assembly = Assembly.Load( assemblyName );
                 List< Type > types = assembly.GetTypes( ).Where( type => type.Namespace == namespaceName
                     && type.Name == typeName ).ToList( );
-                if (types.Count == 0) 
-                    throw new InvalidOperationException(string.Format("Type {0} not found.", name));
                 if (types.Count > 1)
                     throw new InvalidOperationException("Assertion error.");
-                return types[ 0 ];
+                else if ( types.Count == 1 ) {
+                    resultType = types[ 0 ];
+                    break;
+                }
             }
 
-            throw new InvalidOperationException(string.Format("Cannot resolve type {0}", name));
+            if (resultType == null)
+                throw new InvalidOperationException(string.Format("Cannot resolve type {0}", name));
+            return resultType;
+        }
+
+        /// <summary>
+        /// Returns list of namespaces to scan for name.
+        /// If name is prefixed, namespaces will be that was registered for this prefix.
+        /// If name is without prefix, default namespaces will be returned.
+        /// </summary>
+        private IEnumerable< string > getNamespacesToScan( string name, out string unprefixedName ) {
+            List< string > namespacesToScan;
+            if ( name.Contains( ":" ) ) {
+                string prefix = name.Substring( 0, name.IndexOf( ':' ) );
+                if ( name.IndexOf( ':' ) + 1 >= name.Length )
+                    throw new InvalidOperationException( string.Format( "Invalid type name {0}", name ) );
+                unprefixedName = name.Substring(name.IndexOf(':') + 1);
+                if ( !namespaces.ContainsKey( prefix ) )
+                    throw new InvalidOperationException( string.Format( "Unknown prefix {0}", prefix ) );
+                namespacesToScan = new List< string >( ) { namespaces[ prefix ] };
+            } else {
+                namespacesToScan = defaultNamespaces;
+                unprefixedName = name;
+            }
+            return namespacesToScan;
         }
     }
 }

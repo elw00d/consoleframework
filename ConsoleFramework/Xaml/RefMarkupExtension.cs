@@ -7,6 +7,7 @@ namespace ConsoleFramework.Xaml
     /// {Ref myObject} will return object with x:Id="myObject".
     /// Forward-references are supported too.
     /// </summary>
+    [MarkupExtension("Ref")]
     class RefMarkupExtension : IMarkupExtension
     {
         public RefMarkupExtension( ) {

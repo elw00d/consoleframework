@@ -80,6 +80,7 @@
     <Compile Include="Events\RoutedEvent.cs" />
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
+    <Compile Include="Xaml\MarkupExtensionAttribute.cs" />
     <Compile Include="Xaml\MarkupExtensionsParser.cs" />
     <Compile Include="Xaml\Factories.cs" />
     <Compile Include="Xaml\RefMarkupExtension.cs" />

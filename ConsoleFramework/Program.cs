@@ -45,7 +45,9 @@ namespace ConsoleFramework {
                 dataContext.Str = "Введите заголовок";
                 XamlParser xamlParser = new XamlParser( new List< string >()
                     {
-                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
+                        
+                        "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
+                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                     } );
                 createdFromXaml = (Window)xamlParser.CreateFromXaml(result, dataContext);
             }

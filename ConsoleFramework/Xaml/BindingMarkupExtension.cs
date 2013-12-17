@@ -4,6 +4,7 @@ using Binding;
 
 namespace ConsoleFramework.Xaml
 {
+    [MarkupExtensionAttribute("Binding")]
     class BindingMarkupExtension : IMarkupExtension
     {
         public String Path { get; set; }
