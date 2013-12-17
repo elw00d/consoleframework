@@ -8,6 +8,10 @@ using System.Xml;
 
 namespace ConsoleFramework.Xaml
 {
+    /// <summary>
+    /// todo : comment
+    /// todo : prohibit direct instance creation
+    /// </summary>
     public class XamlParser
     {
         private readonly List< string > defaultNamespaces;
@@ -296,6 +300,7 @@ namespace ConsoleFramework.Xaml
         /// </summary>
         private static readonly Dictionary<String, Type> aliases = new Dictionary< string, Type >( )
             {
+                { "object", typeof(ObjectFactory) },
                 { "string", typeof ( Primitive< string > ) },
                 { "int", typeof ( Primitive< int > ) },
                 { "double", typeof ( Primitive< double > ) },
@@ -304,9 +309,6 @@ namespace ConsoleFramework.Xaml
                 { "bool", typeof ( Primitive< bool > ) }
             };
 
-        /// <summary>
-        /// todo : учитывать аргументы конструктора и типы-аргументы ?
-        /// </summary>
         private ObjectInfo createObject( string name ) {
             Type type = aliases.ContainsKey(name) ? aliases[ name ] : resolveType( name );
 
@@ -347,7 +349,7 @@ namespace ConsoleFramework.Xaml
                     Object value = processText( attributeValue, attributeName, Top.obj,
                                                 dataContext );
                     if ( null != value ) {
-                        object convertedValue = convertValueIfNeed( value.GetType( ),
+                        object convertedValue = ConvertValueIfNeed( value.GetType( ),
                                                                     propertyInfo.PropertyType,
                                                                     value );
                         propertyInfo.SetValue( Top.obj, convertedValue, null );
@@ -377,7 +379,7 @@ namespace ConsoleFramework.Xaml
                                             Top.obj,
                                             dataContext );
                 if ( value != null ) {
-                    Object convertedValue = convertValueIfNeed( value.GetType( ),
+                    Object convertedValue = ConvertValueIfNeed( value.GetType( ),
                                                                 property.PropertyType, value );
                     property.SetValue( Top.obj, convertedValue, null );
                 }
@@ -412,8 +414,8 @@ namespace ConsoleFramework.Xaml
                 // объекта, либо добавить в свойство-коллекцию, если это коллекция
                 ObjectInfo initialized = objects.Pop( );
 
-                if ( initialized.obj is IPrimitive) {
-                    initialized.obj = ( ( IPrimitive ) initialized.obj ).ContentNonGeneric;
+                if ( initialized.obj is IFactory) {
+                    initialized.obj = ( ( IFactory ) initialized.obj ).GetObject( );
                 }
 
                 if ( objects.Count == 0 ) {
@@ -431,7 +433,7 @@ namespace ConsoleFramework.Xaml
                             typeof ( ICollection< > ).MakeGenericType( typeArg1 ).IsAssignableFrom( property.PropertyType ) ) {
                         object collection = property.GetValue( Top.obj, null );
                         MethodInfo methodInfo = collection.GetType( ).GetMethod( "Add" );
-                        object converted = convertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
+                        object converted = ConvertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
                         methodInfo.Invoke( collection, new[ ] { converted } );
                     } else {
                         // If parent object property is IDictionary<string, T>,
@@ -447,7 +449,7 @@ namespace ConsoleFramework.Xaml
                                                         .IsAssignableFrom( property.PropertyType ) ) {
                             object dictionary = property.GetValue( Top.obj, null );
                             MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
-                            object converted = convertValueIfNeed( initialized.obj.GetType( ),
+                            object converted = ConvertValueIfNeed( initialized.obj.GetType( ),
                                                                     typeArg2, initialized.obj );
                             if ( null == initialized.key )
                                 throw new InvalidOperationException(
@@ -455,7 +457,7 @@ namespace ConsoleFramework.Xaml
                             methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
                         } else {
                             // Handle as property - call setter with conversion if need
-                            property.SetValue( Top.obj, convertValueIfNeed(
+                            property.SetValue( Top.obj, ConvertValueIfNeed(
                                 initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
                                                 null );
                         }
@@ -493,7 +495,7 @@ namespace ConsoleFramework.Xaml
                         if (null != providedValue) {
                             PropertyInfo propertyInfo = token.Object.GetType(  ).GetProperty(
                                 token.PropertyName);
-                            object convertedValue = convertValueIfNeed(providedValue.GetType(),
+                            object convertedValue = ConvertValueIfNeed(providedValue.GetType(),
                                                                         propertyInfo.PropertyType,
                                                                         providedValue);
                             propertyInfo.SetValue(token.Object, convertedValue, null);
@@ -512,7 +514,7 @@ namespace ConsoleFramework.Xaml
         /// <param name="source">Type of source value</param>
         /// <param name="dest">Type of destination</param>
         /// <param name="value">Source value</param>
-        private static object convertValueIfNeed( Type source, Type dest, object value ) {
+        public static object ConvertValueIfNeed( Type source, Type dest, object value ) {
             if ( dest.IsAssignableFrom( source ) ) {
                 return value;
             }
