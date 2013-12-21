@@ -217,21 +217,47 @@ namespace ConsoleFramework.Xaml
                         String name = xmlReader.Name;
                         
                         // explicit property syntax
-                        if ( Top != null && name.StartsWith( Top.name + "." ) ) {
+                        if ( Top != null && name.StartsWith( Top.type.Name + "." ) ) {
                             if ( Top.currentProperty != null )
                                 throw new ApplicationException( "Illegal syntax in property value definition." );
-                            string propertyName = name.Substring( Top.name.Length + 1 );
+                            string propertyName = name.Substring(Top.type.Name.Length + 1);
                             Top.currentProperty = propertyName;
                         } else {
+                            bool processingRootObject = (objects.Count == 0);
+
+                            // Process namespace attributes if processing root object
+                            if ( processingRootObject && xmlReader.HasAttributes ) {
+                                if ( xmlReader.HasAttributes ) {
+                                    while ( xmlReader.MoveToNextAttribute( ) ) {
+                                        //
+                                        string attributePrefix = xmlReader.Prefix;
+                                        string attributeName = xmlReader.LocalName;
+                                        string attributeValue = xmlReader.Value;
+
+                                        // If we have found xmlns-attributes on root object, register them
+                                        // in namespaces dictionary
+                                        if (attributePrefix == "xmlns") {
+                                            namespaces.Add(attributeName, attributeValue);
+                                        }
+                                        //
+                                    }
+                                    xmlReader.MoveToElement( );
+                                }
+                            }
+
                             objects.Push( createObject( name ) );
 
-                            // process attributes
+                            // Process attributes
                             if ( xmlReader.HasAttributes ) {
                                 while ( xmlReader.MoveToNextAttribute( ) ) {
                                     //
                                     string attributePrefix = xmlReader.Prefix;
                                     string attributeName = xmlReader.LocalName;
                                     string attributeValue = xmlReader.Value;
+
+                                    // Skip xmls attributes of root object
+                                    if (attributePrefix == "xmlns" && processingRootObject)
+                                        continue;
 
                                     processAttribute( attributePrefix, attributeName, attributeValue );
                                     //
@@ -291,34 +317,28 @@ namespace ConsoleFramework.Xaml
         }
 
         private void processAttribute( string attributePrefix, string attributeName, string attributeValue ) {
-            // If we have found xmlns-attributes on root object, register them
-            // in namespaces dictionary
-            if ( attributePrefix == "xmlns" && objects.Count == 1 ) {
-                namespaces.Add( attributeName, attributeValue );
+            if ( attributePrefix != string.Empty ) {
+                if ( !namespaces.ContainsKey( attributePrefix ) )
+                    throw new InvalidOperationException(
+                        string.Format( "Unknown prefix {0}", attributePrefix ) );
+                string namespaceUrl = namespaces[ attributePrefix ];
+                if ( namespaceUrl == "http://consoleframework.org/xaml.xsd" ) {
+                    if ( attributeName == "Key" ) {
+                        Top.key = attributeValue;
+                    } else if ( attributeName == "Id" ) {
+                        Top.id = attributeValue;
+                    }
+                }
             } else {
-                if ( attributePrefix != string.Empty ) {
-                    if ( !namespaces.ContainsKey( attributePrefix ) )
-                        throw new InvalidOperationException(
-                            string.Format( "Unknown prefix {0}", attributePrefix ) );
-                    string namespaceUrl = namespaces[ attributePrefix ];
-                    if ( namespaceUrl == "http://consoleframework.org/xaml.xsd" ) {
-                        if ( attributeName == "Key" ) {
-                            Top.key = attributeValue;
-                        } else if ( attributeName == "Id" ) {
-                            Top.id = attributeValue;
-                        }
-                    }
-                } else {
-                    // Process attribute as property assignment
-                    PropertyInfo propertyInfo = Top.type.GetProperty( attributeName );
-                    Object value = processText( attributeValue, attributeName, Top.obj,
-                                                dataContext );
-                    if ( null != value ) {
-                        object convertedValue = ConvertValueIfNeed( value.GetType( ),
-                                                                    propertyInfo.PropertyType,
-                                                                    value );
-                        propertyInfo.SetValue( Top.obj, convertedValue, null );
-                    }
+                // Process attribute as property assignment
+                PropertyInfo propertyInfo = Top.type.GetProperty( attributeName );
+                Object value = processText( attributeValue, attributeName, Top.obj,
+                                            dataContext );
+                if ( null != value ) {
+                    object convertedValue = ConvertValueIfNeed( value.GetType( ),
+                                                                propertyInfo.PropertyType,
+                                                                value );
+                    propertyInfo.SetValue( Top.obj, convertedValue, null );
                 }
             }
         }

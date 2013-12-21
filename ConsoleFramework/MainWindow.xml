@@ -1,4 +1,4 @@
-﻿<Window Name="window2" Title="Очень длинное название окна"
+﻿<my:Window Name="window2" Title="Очень длинное название окна"
         xmlns:x="http://consoleframework.org/xaml.xsd"
         xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
         xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding"
@@ -28,4 +28,4 @@
       </ScrollViewer>
     </GroupBox>
   </my:Panel>
-</Window>
+</my:Window>
