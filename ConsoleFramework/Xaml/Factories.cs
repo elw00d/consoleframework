@@ -58,7 +58,13 @@ namespace ConsoleFramework.Xaml
         }
 
         public object GetObject( ) {
+            if (string.IsNullOrEmpty( TypeName ))
+                throw new InvalidOperationException("TypeName is not specified.");
+
             Type type = Type.GetType( TypeName );
+            if (null == type) throw new TypeLoadException(string.Format( 
+                "Type {0} not found. Try to use assembly-qualified type name.",
+                TypeName));
 
             // Construct object accoring to passed ctor arguments
             List< CtorArg > ctorArgs = new List< CtorArg >( );

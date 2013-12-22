@@ -33,10 +33,6 @@ namespace ConsoleFramework.Xaml
             /// </summary>
             public object obj;
             /// <summary>
-            /// Название тега.
-            /// </summary>
-            public string name;
-            /// <summary>
             /// Текущее свойство, которое задаётся тегом с точкой в имени.
             /// </summary>
             public string currentProperty;
@@ -264,6 +260,8 @@ namespace ConsoleFramework.Xaml
                                 }
                                 xmlReader.MoveToElement( );
                             }
+
+                            if (xmlReader.IsEmptyElement) processEndElement(  );
                         }
                     }
 
@@ -310,7 +308,6 @@ namespace ConsoleFramework.Xaml
             }
             Object invoke = constructorInfo.Invoke(new object[0]);
             return new ObjectInfo() {
-                name = name,
                 obj = invoke,
                 type = type
             };

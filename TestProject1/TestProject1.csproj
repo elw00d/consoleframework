@@ -51,9 +51,10 @@
     <Compile Include="Binding\SimplePropertiesTest.cs" />
     <Compile Include="Binding\ValidationTest.cs" />
     <Compile Include="LayoutTests.cs" />
-    <Compile Include="MarkupExtensionsTest.cs" />
+    <Compile Include="Xaml\MarkupExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HitTestingTest.cs" />
+    <Compile Include="Xaml\XamlTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Binding\Binding.csproj">
@@ -64,6 +65,9 @@
       <Project>{2A59C284-2995-4F37-8D65-411C25C85493}</Project>
       <Name>ConsoleFramework</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Xaml\XamlObject1.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
