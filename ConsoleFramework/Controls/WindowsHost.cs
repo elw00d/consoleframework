@@ -153,7 +153,7 @@ namespace ConsoleFramework.Controls
             //
             if ( reinitFocus ) {
                 if ( window.ChildToFocus != null ) {
-                    Control child = VisualTreeHelper.FindChildByNameRecoursively( window, window.ChildToFocus );
+                    Control child = VisualTreeHelper.FindChildByName( window, window.ChildToFocus );
                     ConsoleApplication.Instance.FocusManager.SetFocus( child );
                 } else {
                     ConsoleApplication.Instance.FocusManager.SetFocusScope( window );

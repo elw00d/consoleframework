@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Threading;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using ConsoleFramework.Xaml;
 
 #if !WIN32
 using Mono.Unix;
@@ -19,6 +23,21 @@ namespace ConsoleFramework
     /// </summary>
     public sealed class ConsoleApplication : IDisposable {
 		
+        public static Control LoadFromXaml( string xamlResourceName, object dataContext ) {
+            var assembly = Assembly.GetEntryAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream(xamlResourceName))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                string result = reader.ReadToEnd();
+                XamlParser xamlParser = new XamlParser(new List<string>()
+                    {
+                        "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
+                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
+                    });
+                return (Control)xamlParser.CreateFromXaml(result, dataContext);
+            }
+        }
+
 		private bool usingLinux = false;
 		
         private ConsoleApplication(bool usingLinux) {

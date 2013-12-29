@@ -132,10 +132,13 @@ namespace ConsoleFramework.Controls
             return (WindowsHost) Parent;
         }
 
-        protected override Size MeasureOverride(Size availableSize)
-        {
-            if (Content == null)
-                return base.MeasureOverride(availableSize);
+        public static Size EMPTY_WINDOW_SIZE = new Size(12, 3);
+
+        protected override Size MeasureOverride(Size availableSize) {
+            if ( Content == null )
+                return new Size(
+                    Math.Min(availableSize.Width ,EMPTY_WINDOW_SIZE.Width + 4),
+                    Math.Min(availableSize.Height, EMPTY_WINDOW_SIZE.Height + 3));
             // reserve 2 pixels for frame and 2/1 pixels for shadow
             Content.Measure(new Size(availableSize.width - 4, availableSize.height - 3));
             var result = new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
@@ -146,8 +149,8 @@ namespace ConsoleFramework.Controls
         {
             if (Content != null) {
                 Content.Arrange(new Rect(1, 1, 
-                    Math.Min( Content.DesiredSize.Width, finalSize.width - 4),
-                    Math.Min( Content.DesiredSize.Height, finalSize.height - 3) ));
+                    finalSize.width - 4,
+                    finalSize.height - 3));
             }
             return finalSize;
         }

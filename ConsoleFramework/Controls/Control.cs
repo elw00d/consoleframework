@@ -198,8 +198,16 @@ namespace ConsoleFramework.Controls
             EventManager.RemoveHandler(this, routedEvent, @delegate);
         }
 
-        public Control FindChildByName(string name) {
+        public T FindChildByName<T>( string name ) where T:Control {
+            return (T) VisualTreeHelper.FindChildByName( this, name );
+        }
+
+        public Control FindDirectChildByName(string name) {
             return Children.FirstOrDefault(control => control.Name == name);
+        }
+
+        public T FindDirectChildByName< T >( string name ) where T:Control {
+            return (T) FindDirectChildByName( name );
         }
 
         internal LayoutInfo layoutInfo = new LayoutInfo();

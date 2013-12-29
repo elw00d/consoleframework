@@ -12,7 +12,7 @@ namespace ConsoleFramework.Core
         /// Рекурсивно ищёт дочерний элемент по указанному Name.
         /// Если в результате поиска подходящий элемент не был найден, возвращается null.
         /// </summary>
-        public static Control FindChildByNameRecoursively( Control control, string childName ) {
+        public static Control FindChildByName( Control control, string childName ) {
             if ( null == control )
                 throw new ArgumentNullException( "control" );
             if ( string.IsNullOrEmpty( childName ) )

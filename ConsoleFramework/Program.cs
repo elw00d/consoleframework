@@ -81,7 +81,7 @@ namespace ConsoleFramework {
                 button.OnClick += (sender, eventArgs) => {
                     Debug.WriteLine("Click");
                     MessageBox.Show( "Окно сообщения", "Внимание ! Тестовое сообщение", delegate( MessageBoxResult result ) {  } );
-                    Control label = panel.FindChildByName("label1");
+                    Control label = panel.FindDirectChildByName("label1");
                     if (label.Visibility == Visibility.Visible) {
                         label.Visibility = Visibility.Collapsed;
                     } else if (label.Visibility == Visibility.Collapsed) {

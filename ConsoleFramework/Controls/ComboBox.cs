@@ -21,11 +21,14 @@ namespace ConsoleFramework.Controls
     {
         private readonly bool shadow;
 
+        public ComboBox( ) : this(true) {
+        }
+
         /// <summary>
         /// Создаёт экземпляр комбобокса
         /// </summary>
         /// <param name="shadow">Отображать ли тень</param>
-        public ComboBox( bool shadow = true ) {
+        public ComboBox( bool shadow ) {
             this.shadow = shadow;
             Focusable = true;
             AddHandler( GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus) );
@@ -170,6 +173,8 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public int? ShownItemsCount { get; set; }
+
         private void openPopup( ) {
             if (opened) throw new InvalidOperationException("Assertion failed.");
             Window popup = new PopupWindow(Items, SelectedItemIndex, shadow);
@@ -179,9 +184,10 @@ namespace ConsoleFramework.Controls
             popup.Y = popupCoord.Y;
             popup.Width = shadow ? ActualWidth+1 : ActualWidth;
             if (Items.Count != 0)
-                popup.Height = Items.Count + (shadow ? 2 : 1); // 1 строка для прозначного "заголовка"
+                popup.Height = (ShownItemsCount != null ? ShownItemsCount.Value : Items.Count)
+                    + (shadow ? 2 : 1); // 1 строка для прозначного "заголовка"
             else popup.Height = shadow ? 3 : 2;
-            WindowsHost windowsHost = ((WindowsHost)this.Parent.Parent.Parent);
+            WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
             windowsHost.ShowModal(popup, true);
             opened = true;
             EventManager.AddHandler(popup, Window.ClosedEvent, new EventHandler(OnPopupClosed));
@@ -212,13 +218,19 @@ namespace ConsoleFramework.Controls
             Invalidate(  );
         }
 
-        public readonly List<String> Items = new List< string >();
+        private readonly List<String> items = new List< string >();
+        public List<String> Items {
+            get { return items; }
+        }
+
+
         public int SelectedItemIndex {
             get { return selectedItemIndex; }
             set {
                 if ( selectedItemIndex != value ) {
                     selectedItemIndex = value;
                     Invalidate(  );
+                    RaisePropertyChanged( "SelectedItemIndex" );
                 }
             }
         }
@@ -226,8 +238,10 @@ namespace ConsoleFramework.Controls
         private bool m_opened;
         private int selectedItemIndex;
 
+        public static Size EMPTY_SIZE = new Size(3, 1);
+
         protected override Size MeasureOverride(Size availableSize) {
-            if (Items.Count == 0) return new Size(0, 0);
+            if (Items.Count == 0) return EMPTY_SIZE;
             int maxLen = Items.Max(s => s.Length);
             // 1 пиксель слева от надписи, 1 справа, потом стрелка и ещё 1 пустой пиксель
             Size size = new Size(Math.Min(maxLen + 4, availableSize.Width), 1);
