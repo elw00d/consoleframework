@@ -33,12 +33,13 @@ namespace ConsoleFramework.Controls
         }
 
         public void ScrollContent( Direction direction, int delta ) {
+            for (int i = 0; i < delta; i++)
             switch ( direction ) {
                     case Direction.Left:
                     {
                         // сколько места сейчас оставлено дочернему контролу
                         int remainingWidth = ActualWidth - (verticalScrollVisible ? 1 : 0);
-                        while (deltaX < Content.RenderSize.Width - remainingWidth)
+                        if (deltaX < Content.RenderSize.Width - remainingWidth)
                         {
                             deltaX++;
                         }
@@ -47,7 +48,7 @@ namespace ConsoleFramework.Controls
                     }
                     case Direction.Right:
                     {
-                        while (deltaX > 0)
+                        if (deltaX > 0)
                         {
                             deltaX--;
                         }
@@ -58,7 +59,7 @@ namespace ConsoleFramework.Controls
                     {
                         // сколько места сейчас оставлено дочернему контролу
                         int remainingHeight = ActualHeight - (horizontalScrollVisible ? 1 : 0);
-                        while (deltaY < Content.RenderSize.Height - remainingHeight)
+                        if (deltaY < Content.RenderSize.Height - remainingHeight)
                         {
                             deltaY++;
                         }

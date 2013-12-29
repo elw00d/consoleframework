@@ -13,6 +13,12 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class ListBox : Control
     {
+        /// <summary>
+        /// Количество элементов, которое пропускается при обработке нажатий PgUp и PgDown.
+        /// По умолчанию null, и нажатие PgUp и PgDown эквивалентно нажатию Home и End.
+        /// </summary>
+        public int? PageSize { get; set; }
+
         private readonly List<string> items = new List<string>();
         public List<String>  Items {
             get { return items; }
@@ -64,6 +70,32 @@ namespace ConsoleFramework.Controls
             if ( items.Count == 0 ) {
                 args.Handled = true;
                 return;
+            }
+            if ( args.wVirtualKeyCode == 0x21 ) { // VK_PRIOR - PageUp
+                if ( PageSize == null ) {
+                    if ( SelectedItemIndex != 0 ) {
+                        SelectedItemIndex = 0;
+                        Invalidate( );
+                    }
+                } else {
+                    if ( SelectedItemIndex != 0 ) {
+                        SelectedItemIndex = Math.Max( 0, SelectedItemIndex - PageSize.Value );
+                        Invalidate(  );
+                    }
+                }
+            }
+            if ( args.wVirtualKeyCode == 0x22 ) { // VK_NEXT - PageDown
+                if ( PageSize == null ) {
+                    if ( SelectedItemIndex != items.Count - 1 ) {
+                        SelectedItemIndex = items.Count - 1;
+                        Invalidate( );
+                    }
+                } else {
+                    if ( SelectedItemIndex != items.Count - 1 ) {
+                        SelectedItemIndex = Math.Min( items.Count - 1, SelectedItemIndex + PageSize.Value );
+                        Invalidate(  );
+                    }
+                }
             }
             if (args.wVirtualKeyCode == 0x26) { // VK_UP
                 if ( SelectedItemIndex == 0 )

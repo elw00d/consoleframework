@@ -41,13 +41,20 @@ namespace ConsoleFramework.Controls
         {
             public int IndexSelected;
             private bool shadow;
+            private ListBox listbox;
+            private ScrollViewer scrollViewer;
 
-            public PopupWindow( IEnumerable< string > items, int selectedItemIndex, bool shadow  ) {
+            public PopupWindow( IEnumerable< string > items, 
+                int selectedItemIndex, bool shadow,
+                int? shownItemsCount)
+            {
                 this.shadow = shadow;
-                ScrollViewer scrollViewer = new ScrollViewer(  );
-                ListBox listbox = new ListBox(  );
+                scrollViewer = new ScrollViewer(  );
+                listbox = new ListBox(  );
                 listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
+                if ( shownItemsCount != null )
+                    listbox.PageSize = shownItemsCount.Value;
                 IndexSelected = selectedItemIndex;
                 listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.HorizontalScrollEnabled = false;
@@ -57,18 +64,7 @@ namespace ConsoleFramework.Controls
 
                 // todo : продумать более удобное API для взаимодействия с ScrollViewer
                 // todo : вынести этот код в ScrollableListBox
-                listbox.SelectedItemIndexChanged += ( sender, args ) => {
-                    int itemIndex = listbox.SelectedItemIndex;
-                    int deltaY = scrollViewer.DeltaY;
-                    int firstVisibleItemIndex = deltaY;
-                    int lastVisibleItemIndex = firstVisibleItemIndex + scrollViewer.ActualHeight -
-                                               ( scrollViewer.HorizontalScrollVisible ? 1 : 0 ) - 1;
-                    if ( itemIndex > lastVisibleItemIndex ) {
-                        scrollViewer.ScrollContent( ScrollViewer.Direction.Up, itemIndex - lastVisibleItemIndex );
-                    } else if ( itemIndex < firstVisibleItemIndex ) {
-                        scrollViewer.ScrollContent( ScrollViewer.Direction.Down, firstVisibleItemIndex - itemIndex );
-                    }
-                };
+                listbox.SelectedItemIndexChanged += ListboxOnSelectedItemIndexChanged;
 
                 // if click on the transparent header, close the popup
                 AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
@@ -92,6 +88,18 @@ namespace ConsoleFramework.Controls
                         }
                     }), true);
                 // todo : cleanup event handlers after popup closing
+            }
+
+            private void ListboxOnSelectedItemIndexChanged( object sender, EventArgs e ) {
+                int itemIndex = listbox.SelectedItemIndex;
+                int firstVisibleItemIndex = scrollViewer.DeltaY;
+                int lastVisibleItemIndex = firstVisibleItemIndex + scrollViewer.ActualHeight -
+                                            ( scrollViewer.HorizontalScrollVisible ? 1 : 0 ) - 1;
+                if ( itemIndex > lastVisibleItemIndex ) {
+                    scrollViewer.ScrollContent( ScrollViewer.Direction.Up, itemIndex - lastVisibleItemIndex );
+                } else if ( itemIndex < firstVisibleItemIndex ) {
+                    scrollViewer.ScrollContent( ScrollViewer.Direction.Down, firstVisibleItemIndex - itemIndex );
+                }
             }
 
             protected override void initialize( ) {
@@ -154,6 +162,11 @@ namespace ConsoleFramework.Controls
                         Content.Arrange(new Rect(new Point(1, 1),
                                                    new Size(finalSize.Width - 1, finalSize.Height - 1)));
                     }
+                    // При инициализации нужно установить корректные смещения scroll viewer для текущего
+                    // выбранного элемента. Но так как работа scroll viewer зависит от установленных
+                    // значений ActualWidth / ActualHeight, то это нужно выполнить после выполнения
+                    // этапа размещения (arrangement)
+                    ListboxOnSelectedItemIndexChanged(this, EventArgs.Empty);
                 }
                 return finalSize;
             }
@@ -177,7 +190,8 @@ namespace ConsoleFramework.Controls
 
         private void openPopup( ) {
             if (opened) throw new InvalidOperationException("Assertion failed.");
-            Window popup = new PopupWindow(Items, SelectedItemIndex, shadow);
+            Window popup = new PopupWindow(Items, SelectedItemIndex, shadow,
+                ShownItemsCount != null ? ShownItemsCount.Value - 1 : ( int? ) null);
             Point popupCoord = TranslatePoint(this, new Point(0, 0),
                 WindowsHost.FindWindowsHostParent(this));
             popup.X = popupCoord.X;
