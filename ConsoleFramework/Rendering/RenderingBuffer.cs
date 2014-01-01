@@ -81,13 +81,43 @@ namespace ConsoleFramework.Rendering
         public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset,
             Size childRenderSize, Rect renderSlotRect, Rect layoutClip) {
 
-            // finalRect - прямоугольник относительно parent, который нужно закрасить
+            ApplyChild( childBuffer, actualOffset, childRenderSize, renderSlotRect, layoutClip, null );
+        }
+
+        /// <summary>
+        /// Оверлоад для оптимизированного наложения в случае, когда известно, что в дочернем
+        /// контроле поменялась лишь часть, идентифицируемая параметром affectedRect.
+        /// Будет обработана только эта часть дочернего контрола, и количество операций уменьшится.
+        /// </summary>
+        /// <param name="childBuffer"></param>
+        /// <param name="actualOffset"></param>
+        /// <param name="childRenderSize"></param>
+        /// <param name="renderSlotRect"></param>
+        /// <param name="layoutClip"></param>
+        /// <param name="affectedRect">Прямоугольник в дочернем контроле, который был изменен.</param>
+        public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset,
+                               Size childRenderSize, Rect renderSlotRect,
+                               Rect layoutClip, Rect? affectedRect) {
+
+            // Считаем finalRect - прямоугольник относительно parent, который нужно закрасить
             Rect finalRect = layoutClip;
+
+            if (affectedRect != null)
+                finalRect.Intersect(affectedRect.Value);
+
+            // Если child.RenderSlotRect больше child.RenderSize, а rendering buffer
+            // дочернего контрола больше его RenderSize (такое бывает после уменьшения
+            // размеров контрола - т.к. буфер может только увеличиваться, но не уменьшаться) -
+            // то нам нужно либо передать в метод ApplyChild и child.RenderSize, либо
+            // выполнить пересечение заранее
             finalRect.Intersect(new Rect(new Point(0, 0), childRenderSize));
+
             // Because cannot call Offset() method of empty rect
             if ( finalRect.IsEmpty ) return;
+
             finalRect.Offset(actualOffset);
             finalRect.Intersect( renderSlotRect );
+
             // Нужно также учесть размеры буфера текущего контрола
             finalRect.Intersect( new Rect(new Point(0, 0), new Size(this.width, this.height)) );
 
@@ -134,197 +164,6 @@ namespace ConsoleFramework.Rendering
                     }
                 }
             }
-            
-
-            // Если child.RenderSlotRect больше child.RenderSize, а rendering buffer
-            // дочернего контрола больше его RenderSize (такое бывает после уменьшения
-            // размеров контрола - т.к. буфер может только увеличиваться, но не уменьшаться)
-            // - то нам нужно либо передать в метод ApplyChild и child.RenderSize, либо
-            // выполнить пересечение заранее
-//            Rect slotRect = new Rect(renderSlotRect.TopLeft,
-//                new Size(Math.Min(renderSlotRect.Width, childRenderSize.Width),
-//                    Math.Min(renderSlotRect.Height, childRenderSize.Height)));
-//
-//            for (int x = 0; x < slotRect.width; x++) {
-//                int parentX = x + slotRect.x;
-//                int childX = parentX - actualOffset.x;
-//                // поскольку renderSlotRect может выходить за рамки буфера родительского контрола
-//                // (если родительский контрол вызвал Arrange и указал в качестве аргумента большой Rect),
-//                // то мы должны обработать этот случай и предотвратить переполнение буфера
-//                if (parentX >= 0 && parentX < this.width && childX >= 0 && childX < childBuffer.width) {
-//                    for (int y = 0; y < slotRect.height; y++) {
-//                        int parentY = y + slotRect.y;
-//                        int childY = parentY - actualOffset.y;
-//                        if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
-//                            if (layoutClip.Contains(childX, childY)) {
-//                                CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
-//                                int opacity = childBuffer.opacityMatrix[childX, childY];
-//                                if (opacity == 0 || opacity == 4) {
-//                                    this.buffer[parentX, parentY] = charInfo;
-//                                    this.opacityMatrix[ parentX, parentY ] = opacity;
-//                                } else if (opacity == 1 || opacity == 5) {
-//                                    charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
-//                                    charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
-//                                    buffer[parentX, parentY] = charInfo;
-//                                } else if (opacity == 3 || opacity == 7) {
-//                                    // берем фоновые атрибуты символа из родительского буфера
-//                                    Attr parentAttr = buffer[parentX, parentY].Attributes;
-//                                    if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_BLUE;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_GREEN;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_RED;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_RED;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
-//                                    }
-//                                    buffer[parentX, parentY] = charInfo;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-        }
-
-        /// <summary>
-        /// Оверлоад для оптимизированного наложения в случае, когда известно, что в дочернем
-        /// контроле поменялась лишь часть, идентифицируемая параметром affectedRect.
-        /// Будет обработана только эта часть дочернего контрола, и количество операций уменьшится.
-        /// </summary>
-        /// <param name="childBuffer"></param>
-        /// <param name="actualOffset"></param>
-        /// <param name="childRenderSize"></param>
-        /// <param name="renderSlotRect"></param>
-        /// <param name="layoutClip"></param>
-        /// <param name="affectedRect">Прямоугольник в дочернем контроле, который был изменен.</param>
-        public void ApplyChild(RenderingBuffer childBuffer, Vector actualOffset,
-                               Size childRenderSize, Rect renderSlotRect,
-                               Rect layoutClip, Rect affectedRect) {
-
-            // finalRect - прямоугольник относительно parent, который нужно закрасить
-            Rect finalRect = layoutClip;
-            finalRect.Intersect( affectedRect );
-            finalRect.Intersect(new Rect(new Point(0, 0), childRenderSize));
-            // Because cannot call Offset() method of empty rect
-            if ( finalRect.IsEmpty ) return;
-            finalRect.Offset(actualOffset);
-            finalRect.Intersect( renderSlotRect );
-            // Нужно также учесть размеры буфера текущего контрола
-            finalRect.Intersect(new Rect(new Point(0, 0), new Size(this.width, this.height)));
-
-            for ( int x = finalRect.Left; x < finalRect.Right; x++ ) {
-                int parentX = x;
-                int childX = parentX - actualOffset.x;
-                for ( int y = finalRect.Top; y < finalRect.Bottom; y++ ) {
-                    int parentY = y;
-                    int childY = parentY - actualOffset.y;
-
-                    CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
-                    int opacity = childBuffer.opacityMatrix[childX, childY];
-                    if (opacity == 0 || opacity == 4) {
-                        this.buffer[parentX, parentY] = charInfo;
-                        this.opacityMatrix[ parentX, parentY ] = opacity;
-                    } else if (opacity == 1 || opacity == 5) {
-                        charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
-                        charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
-                        buffer[parentX, parentY] = charInfo;
-                    } else if (opacity == 3 || opacity == 7) {
-                        // берем фоновые атрибуты символа из родительского буфера
-                        Attr parentAttr = buffer[parentX, parentY].Attributes;
-                        if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
-                            charInfo.Attributes |= Attr.BACKGROUND_BLUE;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
-                        }
-                        if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
-                            charInfo.Attributes |= Attr.BACKGROUND_GREEN;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
-                        }
-                        if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
-                            charInfo.Attributes |= Attr.BACKGROUND_RED;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_RED;
-                        }
-                        if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
-                            charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
-                        }
-                        buffer[parentX, parentY] = charInfo;
-                    }
-                }
-            }
-
-            // Если child.RenderSlotRect больше child.RenderSize, а rendering buffer
-            // дочернего контрола больше его RenderSize (такое бывает после уменьшения
-            // размеров контрола - т.к. буфер может только увеличиваться, но не уменьшаться)
-            // - то нам нужно либо передать в метод ApplyChild и child.RenderSize, либо
-            // выполнить пересечение заранее
-//            Rect slotRect = new Rect(renderSlotRect.TopLeft,
-//                new Size(Math.Min(renderSlotRect.Width, childRenderSize.Width),
-//                    Math.Min(renderSlotRect.Height, childRenderSize.Height)));
-//
-//            for (int x = 0; x < affectedRect.width; x++) {
-//                int childX = x + affectedRect.x;
-//                int parentX = childX + actualOffset.x;
-//                if (parentX >= 0 && parentX < this.width && childX >= 0 && childX < childBuffer.width) {
-//                    for (int y = 0; y < affectedRect.height; y++) {
-//                        int childY = y + affectedRect.y;
-//                        int parentY = childY + actualOffset.y;
-//                        if (parentY >= 0 && parentY < this.height && childY >= 0 && childY < childBuffer.height) {
-//                            if (slotRect.Contains(parentX, parentY) && layoutClip.Contains(childX, childY)) {
-//                                CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
-//                                int opacity = childBuffer.opacityMatrix[childX, childY];
-//                                if (opacity == 0 || opacity == 4) {
-//                                    this.buffer[parentX, parentY] = charInfo;
-//                                    this.opacityMatrix[parentX, parentY] = opacity;
-//                                } else if (opacity == 1 || opacity == 5) {
-//                                    charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
-//                                    charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
-//                                    buffer[parentX, parentY] = charInfo;
-//                                } else if (opacity == 3 || opacity == 7) {
-//                                    // берем фоновые атрибуты символа из родительского буфера
-//                                    Attr parentAttr = buffer[parentX, parentY].Attributes;
-//                                    if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_BLUE;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_GREEN;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_RED;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_RED;
-//                                    }
-//                                    if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
-//                                        charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
-//                                    } else {
-//                                        charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
-//                                    }
-//                                    buffer[parentX, parentY] = charInfo;
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
 
         public void SetPixel(int x, int y, char c) {

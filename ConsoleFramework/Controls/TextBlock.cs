@@ -38,6 +38,7 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer) {
             Attr attr = Colors.Blend(Color.Black, Color.DarkYellow);
+            buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', attr);
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
                     if (y == 0 && x < text.Length) {
