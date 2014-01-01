@@ -43,6 +43,7 @@
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
     <Compile Include="Controls\MessageBox.cs" />
+    <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />

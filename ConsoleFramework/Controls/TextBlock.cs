@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using ConsoleFramework.Core;
-using ConsoleFramework.Events;
+﻿using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 
@@ -11,14 +8,6 @@ namespace ConsoleFramework.Controls
         private string text;
 
         private void initialize() {
-            AddHandler(KeyDownEvent, new KeyEventHandler(TextBlock_KeyDown));
-            // todo : remove after focus testing
-            Focusable = true;
-        }
-
-        public void TextBlock_KeyDown(object sender, KeyEventArgs args) {
-            Text = Text + "5";
-            args.Handled = true;
         }
 
         public TextBlock(Control parent) : base(parent) {

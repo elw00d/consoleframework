@@ -537,8 +537,8 @@ namespace ConsoleFramework.Xaml
                     return new Thickness(
                         int.Parse(parts[0]),
                         int.Parse(parts[1]),
-                        int.Parse(parts[3]),
-                        int.Parse(parts[4])
+                        int.Parse(parts[2]),
+                        int.Parse(parts[3])
                     );
                 }
             }
