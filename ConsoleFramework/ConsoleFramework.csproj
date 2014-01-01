@@ -91,6 +91,7 @@
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
     <Content Include="Events\Focus.txt" />
+    <EmbeddedResource Include="Layout.xml" />
     <Content Include="Xaml\xaml.txt" />
     <EmbeddedResource Include="MainWindow.xml">
       <SubType>Designer</SubType>

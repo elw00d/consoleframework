@@ -25,28 +25,24 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseEnterEvent, new MouseEventHandler(Button_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Button_MouseLeave));
             AddHandler( KeyDownEvent, new KeyEventHandler(Button_KeyDown) );
+            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
+            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
             Focusable = true;
         }
 
-        private void Button_KeyDown( object sender, KeyEventArgs args ) {
-            if ( args.wVirtualKeyCode == 13 ) {
-//                clicking = true;
-//                showPressed = true;
-//                this.Invalidate();
-                //
-                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
-                //
-                //clicking = false;
-                //if (showPressed)
-                //{
-                //    showPressed = false;
-                //    this.Invalidate();
-                //}
-                //args.Handled = true;
-            }
+        private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
+            Invalidate(  );
         }
 
-        // todo : add keydown event handler
+        private void OnGotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
+            Invalidate(  );
+        }
+
+        private void Button_KeyDown( object sender, KeyEventArgs args ) {
+            if ( args.wVirtualKeyCode == 13 ) { // VK_RETURN
+                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+            }
+        }
 
         private string caption;
         public string Caption {
@@ -69,7 +65,11 @@ namespace ConsoleFramework.Controls
         }
         
         public override void Render(RenderingBuffer buffer) {
-            Attr captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
+            Attr captionAttrs;
+            if (HasFocus)
+                captionAttrs = Colors.Blend(Color.White, Color.DarkGreen);
+            else
+                captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             if (showPressed) {
                 buffer.SetPixel(0, 0, ' ');
                 buffer.SetOpacity(0, 0, 3);

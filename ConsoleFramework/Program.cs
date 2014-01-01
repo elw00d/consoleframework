@@ -33,6 +33,18 @@ namespace ConsoleFramework {
         }
 
         private static void Main(string[] args) {
+//            Control window = ConsoleApplication.LoadFromXaml( "ConsoleFramework.Layout.xml", null );
+////            window.FindChildByName< TextBlock >( "text" ).MouseDown += ( sender, eventArgs ) => {
+////                window.FindChildByName< TextBlock >( "text" ).Text = "F";
+////                eventArgs.Handled = true;
+////            };
+////            window.MouseDown += ( sender, eventArgs ) => {
+////                window.Width = window.ActualWidth + 3;
+////                window.Invalidate(  );
+////            };
+//            ConsoleApplication.Instance.Run( window );
+//            return;
+
             var assembly = Assembly.GetExecutingAssembly();
             var resourceName = "ConsoleFramework.MainWindow.xml";
             Window createdFromXaml;

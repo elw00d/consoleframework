@@ -107,8 +107,8 @@ namespace ConsoleFramework.Rendering
                     foreach (Control child in control.Parent.Children) {
                         if (child.Visibility == Visibility.Visible) {
                             RenderingBuffer childBuffer = getOrCreateFullBufferForControl(child);
-                            fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, child.RenderSlotRect,
-                                                        child.LayoutClip);
+                            fullParentBuffer.ApplyChild(childBuffer, child.ActualOffset, 
+                                child.RenderSize, child.RenderSlotRect, child.LayoutClip);
                         }
                     }
                 }
@@ -118,18 +118,20 @@ namespace ConsoleFramework.Rendering
                 if (control.Visibility == Visibility.Visible) {
                     // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
                     if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
-                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
-                                                    control.LayoutClip);
+                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset,
+                            control.RenderSize, control.RenderSlotRect, control.LayoutClip);
                     } else {
-                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, control.RenderSlotRect,
-                                                    control.LayoutClip, affectedRect);
+                        fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset, 
+                            control.RenderSize, control.RenderSlotRect, control.LayoutClip,
+                            affectedRect);
                     }
                 }
                 // восстанавливаем изображение поверх обновленного контрола, если
                 // имеются контролы, лежащие выше по z-order
                 for (int i = controlIndex + 1; i < neighbors.Count; i++) {
                     Control neighbor = neighbors[i];
-                    fullParentBuffer.ApplyChild(getOrCreateFullBufferForControl(neighbor), neighbor.ActualOffset,
+                    fullParentBuffer.ApplyChild(getOrCreateFullBufferForControl(neighbor),
+                        neighbor.ActualOffset, neighbor.RenderSize,
                         neighbor.RenderSlotRect, neighbor.LayoutClip);
                 }
                 Rect parentAffectedRect = control.RenderSlotRect;
@@ -226,7 +228,9 @@ namespace ConsoleFramework.Rendering
             foreach (Control child in children) {
                 if (child.Visibility == Visibility.Visible) {
                     RenderingBuffer fullChildBuffer = processControl(child);
-                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, 
+                        child.RenderSize,
+                        child.RenderSlotRect, child.LayoutClip);
                 } else {
                     // чтобы следующий Invalidate перезаписал lastLayoutInfo
                     child.LayoutValidity = LayoutValidity.Render;
@@ -317,7 +321,8 @@ namespace ConsoleFramework.Rendering
             foreach (Control child in control.Children) {
                 if (child.Visibility == Visibility.Visible) {
                     RenderingBuffer fullChildBuffer = processControl(child);
-                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, child.RenderSlotRect, child.LayoutClip);
+                    fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset,
+                        child.RenderSize, child.RenderSlotRect, child.LayoutClip);
                 } else {
                     // чтобы следующий Invalidate для этого контрола
                     // перезаписал lastLayoutInfo

@@ -70,6 +70,13 @@ namespace ConsoleFramework.Core {
                                  });
         }
 
+        public Rect( Rect copy ) {
+            this.x = copy.x;
+            this.y = copy.y;
+            this.width = copy.width;
+            this.height = copy.height;
+        }
+
         public Rect(Point location, Size size) {
             if (size.IsEmpty) {
                 this = s_empty;
