@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controls\ComboBox.cs" />
+    <Compile Include="Controls\Grid.cs" />
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
     <Compile Include="Controls\MessageBox.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Events\RoutedEvent.cs" />
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
+    <Compile Include="Xaml\ContentPropertyAttribute.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
     <Compile Include="Xaml\MarkupExtensionAttribute.cs" />
     <Compile Include="Xaml\MarkupExtensionsParser.cs" />

@@ -7,7 +7,7 @@ namespace ConsoleFramework.Xaml
     /// by which they will be available in XAML.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    class MarkupExtensionAttribute : Attribute
+    public class MarkupExtensionAttribute : Attribute
     {
         public MarkupExtensionAttribute( ) {
         }

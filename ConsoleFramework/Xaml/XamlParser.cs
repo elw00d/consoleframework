@@ -342,8 +342,12 @@ namespace ConsoleFramework.Xaml
         }
 
         private String getContentPropertyName( Type type ) {
-            // todo : determine name of content property
-            return "Content";
+            object[] attributes = type.GetCustomAttributes(typeof(ContentPropertyAttribute), true);
+            if ( attributes.Length == 0 ) return "Content";
+            if (attributes.Length > 1)
+                throw new InvalidOperationException("Ambigious content property definition " +
+                                                    "- more than one ContentPropertyAttribute found.");
+            return ( ( ContentPropertyAttribute ) attributes[ 0 ] ).Name;
         }
 
         /// <summary>

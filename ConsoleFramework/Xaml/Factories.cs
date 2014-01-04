@@ -38,6 +38,7 @@ namespace ConsoleFramework.Xaml
     /// arguments and properties values. In XAML it can be used with convenient alias "object".
     /// You can read documentation to find usage examples.
     /// </summary>
+    [ContentProperty("ParametersAndProperties")]
     class ObjectFactory : IFactory
     {
         /// <summary>
@@ -49,7 +50,7 @@ namespace ConsoleFramework.Xaml
 
         private readonly Dictionary<String,Object> parametersAndProperties = new Dictionary< string, object >();
 
-        public Dictionary<String, Object> Content { get { return parametersAndProperties; } }
+        public Dictionary<String, Object> ParametersAndProperties { get { return parametersAndProperties; } }
 
         private struct CtorArg
         {
