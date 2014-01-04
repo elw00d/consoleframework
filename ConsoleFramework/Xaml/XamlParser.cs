@@ -547,6 +547,43 @@ namespace ConsoleFramework.Xaml
                 }
             }
 
+            // Process TypeConverterAttribute attributes if exist
+            if ( Type.GetTypeCode( source ) == TypeCode.Object ) {
+                object[ ] attributes = source.GetCustomAttributes( typeof ( TypeConverterAttribute ), true );
+                if (attributes.Length > 1)
+                    throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
+                if ( attributes.Length == 1 ) {
+                    TypeConverterAttribute attribute = ( TypeConverterAttribute ) attributes[ 0 ];
+                    Type typeConverterType = attribute.Type;
+                    ConstructorInfo ctor = typeConverterType.GetConstructor( new Type[0] );
+                    if (null == ctor)
+                        throw new InvalidOperationException(
+                            string.Format("No default constructor in {0} type", typeConverterType.Name));
+                    ITypeConverter converter = ( ITypeConverter ) ctor.Invoke( new object[ 0 ] );
+                    if ( converter.CanConvertTo( dest ) ) {
+                        return converter.ConvertTo( value, dest );
+                    }
+                }
+            }
+
+            if ( Type.GetTypeCode( dest ) == TypeCode.Object ) {
+                object[ ] attributes = dest.GetCustomAttributes( typeof ( TypeConverterAttribute ), true );
+                if (attributes.Length > 1)
+                    throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
+                if ( attributes.Length == 1 ) {
+                    TypeConverterAttribute attribute = (TypeConverterAttribute)attributes[0];
+                    Type typeConverterType = attribute.Type;
+                    ConstructorInfo ctor = typeConverterType.GetConstructor(new Type[0]);
+                    if (null == ctor)
+                        throw new InvalidOperationException(
+                            string.Format("No default constructor in {0} type", typeConverterType.Name));
+                    ITypeConverter converter = (ITypeConverter)ctor.Invoke(new object[0]);
+                    if ( converter.CanConvertFrom( source ) ) {
+                        return converter.ConvertFrom( value );
+                    }
+                }
+            }
+
             throw new NotSupportedException();
         }
 

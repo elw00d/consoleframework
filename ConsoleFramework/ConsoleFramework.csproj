@@ -83,10 +83,12 @@
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
     <Compile Include="Xaml\ContentPropertyAttribute.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
+    <Compile Include="Xaml\ITypeConverter.cs" />
     <Compile Include="Xaml\MarkupExtensionAttribute.cs" />
     <Compile Include="Xaml\MarkupExtensionsParser.cs" />
     <Compile Include="Xaml\Factories.cs" />
     <Compile Include="Xaml\RefMarkupExtension.cs" />
+    <Compile Include="Xaml\TypeConverterAttribute.cs" />
     <Compile Include="Xaml\TypeMarkupExtension.cs" />
     <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>

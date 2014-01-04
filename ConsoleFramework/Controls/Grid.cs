@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.ObjectModel;
 using ConsoleFramework.Core;
+using ConsoleFramework.Xaml;
 
 namespace ConsoleFramework.Controls
 {
@@ -28,6 +28,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Represents the length of elements that explicitly support Star unit types.
     /// </summary>
+    [TypeConverter(typeof(GridLengthTypeConverter))]
     public struct GridLength
     {
         private readonly GridUnitType gridUnitType;
@@ -65,10 +66,76 @@ namespace ConsoleFramework.Controls
         public int MaxHeight { get; set; }
     }
 
+    public class GridLengthTypeConverter : ITypeConverter
+    {
+        public bool CanConvertFrom( Type sourceType ) {
+            switch (Type.GetTypeCode(sourceType))
+            {
+                case TypeCode.Int16:
+                case TypeCode.UInt16:
+                case TypeCode.Int32:
+                case TypeCode.UInt32:
+                case TypeCode.Int64:
+                case TypeCode.UInt64:
+                case TypeCode.Single:
+                case TypeCode.Double:
+                case TypeCode.Decimal:
+                case TypeCode.String:
+                    return true;
+            }
+            return false;
+        }
+
+        public bool CanConvertTo( Type destinationType ) {
+            return destinationType == typeof ( string );
+        }
+
+        public object ConvertFrom( object value ) {
+            if ( value is string ) {
+                string s = ( string ) value;
+                if ( s == "Auto" ) {
+                    return new GridLength( GridUnitType.Auto, 0 );
+                } else if ( s.EndsWith( "*" ) ) {
+                    if ( s == "*" ) 
+                        return new GridLength( GridUnitType.Star, 1 );
+
+                    int num = Int32.Parse( s.Substring( 0, s.Length - 1 ) );
+                    return new GridLength( GridUnitType.Star, num );
+                } else {
+                    return new GridLength( GridUnitType.Pixel, Int32.Parse( s ) );
+                }
+            } else {
+                int num = Convert.ToInt32( value );
+                return new GridLength( GridUnitType.Pixel, num );
+            }
+        }
+
+        public object ConvertTo( object value, Type destinationType ) {
+            if ( destinationType == typeof ( string ) ) {
+                GridLength gl = ( GridLength ) value;
+                switch (gl.GridUnitType)
+                {
+                    case GridUnitType.Auto:
+                        return "Auto";
+
+                    case GridUnitType.Star:
+                        if (gl.Value == 1) {
+                            return "*";
+                        }
+                        return (Convert.ToString(gl.Value) + "*");
+                }
+                return Convert.ToString(gl.Value);
+            }
+            throw new NotSupportedException();
+        }
+    }
+
+    [ContentProperty("Controls")]
     public class Grid : Control
     {
         private readonly List< ColumnDefinition > columnDefinitions = new List< ColumnDefinition >();
         private readonly List< RowDefinition > rowDefinitions = new List< RowDefinition >();
+        private readonly ObservableCollection< Control > children = new ObservableCollection< Control >();
 
         public List< ColumnDefinition > ColumnDefinitions {
             get { return columnDefinitions; }
@@ -76,6 +143,23 @@ namespace ConsoleFramework.Controls
 
         public List< RowDefinition > RowDefinitions {
             get { return rowDefinitions; }
+        }
+
+        public IList<Control> Controls { get { return children; } }
+
+        public Grid( ) {
+            children.CollectionChanged += ( sender, args ) => {
+                if ( null != args.OldItems ) {
+                    foreach ( var oldItem in args.OldItems ) {
+                        RemoveChild( ( Control ) oldItem );
+                    }
+                }
+                if ( null != args.NewItems ) {
+                    foreach ( var newItem in args.NewItems ) {
+                        AddChild( ( Control ) newItem );
+                    }
+                }
+            };
         }
 
         protected override Size MeasureOverride( Size availableSize ) {

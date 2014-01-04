@@ -8,6 +8,13 @@
     <converters:StringToIntegerConverter x:Key="2" x:Id="str2int"></converters:StringToIntegerConverter>
   </Window.Resources>
   <my:Panel>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"></ColumnDefinition>
+      </Grid.ColumnDefinitions>
+      <TextBox Text="Text"></TextBox>
+      <TextBox Text="Text"></TextBox>
+    </Grid>
     <TextBox Text="{Binding Path=Str}" MaxLenght="{Convert Converter={Ref str2int}, Value={Ref testStr}}"></TextBox>
     <GroupBox Title="{Ref Ref=testStr}">
       <ScrollViewer VerticalAlignment="Stretch">
