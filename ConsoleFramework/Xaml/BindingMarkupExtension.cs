@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using Binding;
+using Binding.Converters;
 
 namespace ConsoleFramework.Xaml
 {
@@ -10,6 +11,11 @@ namespace ConsoleFramework.Xaml
         public String Path { get; set; }
 
         public String Mode { get; set; }
+
+        /// <summary>
+        /// Converter to be used.
+        /// </summary>
+        public IBindingConverter Converter { get; set; }
 
         public object ProvideValue(IMarkupExtensionContext context) {
             if ( null != context.DataContext && context.DataContext is INotifyPropertyChanged) {
@@ -25,6 +31,8 @@ namespace ConsoleFramework.Xaml
                 }
                 BindingBase binding = new BindingBase( context.Object, context.PropertyName,
                     (INotifyPropertyChanged) context.DataContext, Path, mode);
+                if ( Converter != null )
+                    binding.Converter = Converter;
                 binding.Bind(  );
                 // mb return actual property value ?
                 return null;

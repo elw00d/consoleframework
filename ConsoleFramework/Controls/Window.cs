@@ -143,7 +143,9 @@ namespace ConsoleFramework.Controls
                 // reserve 2 pixels for frame and 2/1 pixels for shadow
                 Content.Measure( new Size( availableSize.width - 4, availableSize.height - 3 ) );
             } else {
-                Content.Measure( availableSize );
+                int width = availableSize.Width != int.MaxValue ? availableSize.Width - 4 : int.MaxValue;
+                int height = availableSize.Height != int.MaxValue ? availableSize.Height - 3 : int.MaxValue;
+                Content.Measure( new Size(width, height));
             }
             var result = new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
             return result;
