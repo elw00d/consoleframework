@@ -63,6 +63,8 @@ namespace ConsoleFramework {
                     } );
                 createdFromXaml = (Window)xamlParser.CreateFromXaml(result, dataContext);
             }
+//            ConsoleApplication.Instance.Run(createdFromXaml);
+//            return;
 
             using (ConsoleApplication application = ConsoleApplication.Instance) {
                 Panel panel = new Panel();

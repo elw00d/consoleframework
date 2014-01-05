@@ -1,5 +1,4 @@
-﻿using System;
-using ConsoleFramework.Core;
+﻿using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
@@ -8,7 +7,8 @@ namespace ConsoleFramework.Controls
 {
     public class Button : Control {
 
-        public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Button));
+        public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click", 
+            RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Button));
 
         public event RoutedEventHandler OnClick {
             add {
@@ -70,79 +70,28 @@ namespace ConsoleFramework.Controls
                 captionAttrs = Colors.Blend(Color.White, Color.DarkGreen);
             else
                 captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
+            
             if (showPressed) {
-                buffer.SetPixel(0, 0, ' ');
-                buffer.SetOpacity(0, 0, 3);
-                buffer.FillRectangle(1, 0, ActualWidth - 1, 1, ' ', captionAttrs);
+                buffer.FillRectangle(1, 0, ActualWidth - 1, ActualHeight - 1, ' ', captionAttrs);
+                buffer.SetOpacityRect(0, 0, 1, ActualHeight, 3);
+                buffer.FillRectangle(0, 0, 1, ActualHeight, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
-                    int titleStartX = 2;
-                    bool renderTitle = false;
-                    string renderTitleString = null;
-                    int availablePixelsCount = ActualWidth - titleStartX * 2;
-                    if (availablePixelsCount > 0) {
-                        renderTitle = true;
-                        if (Caption.Length <= availablePixelsCount) {
-                            // dont truncate title
-                            titleStartX += (availablePixelsCount - Caption.Length) / 2;
-                            renderTitleString = Caption;
-                        } else {
-                            renderTitleString = Caption.Substring(0, availablePixelsCount);
-                            if (renderTitleString.Length > 2) {
-                                renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
-                            } else {
-                                renderTitle = false;
-                            }
-                        }
-                    }
-                    if (renderTitle) {
-                        // shift by 1 pixel
-                        titleStartX++;
-                        // assert !string.IsNullOrEmpty(renderingTitleString);
-                        buffer.SetPixel(titleStartX - 1, 0, ' ', (Attr)captionAttrs);
-                        for (int i = 0; i < renderTitleString.Length; i++) {
-                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (Attr)captionAttrs);
-                        }
-                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (Attr)captionAttrs);
-                    }
+                    RenderString(Caption, buffer, 2 + 1 +(ActualWidth - 2 * 2 - Caption.Length) / 2,
+                        (ActualHeight-1)/2, ActualWidth - 2 * 2, captionAttrs);
                 }
-                buffer.SetPixel(0, 1, ' ');
-                buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
-                buffer.FillRectangle(0, 1, ActualWidth, 1, ' ', Attr.NO_ATTRIBUTES);
+                buffer.SetOpacityRect(0, ActualHeight-1, ActualWidth, 1, 3);
+                buffer.FillRectangle(0, ActualHeight - 1, ActualWidth, 1, ' ', Attr.NO_ATTRIBUTES);
             } else {
-                buffer.FillRectangle(0, 0, ActualWidth - 1, 1, ' ', captionAttrs);
+                buffer.FillRectangle(0, 0, ActualWidth - 1, ActualHeight, ' ', captionAttrs);
                 if (!string.IsNullOrEmpty(Caption)) {
-                    int titleStartX = 2;
-                    bool renderTitle = false;
-                    string renderTitleString = null;
-                    int availablePixelsCount = ActualWidth - titleStartX*2;
-                    if (availablePixelsCount > 0) {
-                        renderTitle = true;
-                        if (Caption.Length <= availablePixelsCount) {
-                            // dont truncate title
-                            titleStartX += (availablePixelsCount - Caption.Length) / 2;
-                            renderTitleString = Caption;
-                        } else {
-                            renderTitleString = Caption.Substring(0, availablePixelsCount);
-                            if (renderTitleString.Length > 2) {
-                                renderTitleString = renderTitleString.Substring(0, renderTitleString.Length - 2) + "..";
-                            } else {
-                                renderTitle = false;
-                            }
-                        }
-                    }
-                    if (renderTitle) {
-                        // assert !string.IsNullOrEmpty(renderingTitleString);
-                        buffer.SetPixel(titleStartX - 1, 0, ' ', (Attr)captionAttrs);
-                        for (int i = 0; i < renderTitleString.Length; i++) {
-                            buffer.SetPixel(titleStartX + i, 0, renderTitleString[i], (Attr)captionAttrs);
-                        }
-                        buffer.SetPixel(titleStartX + renderTitleString.Length, 0, ' ', (Attr)captionAttrs);
-                    }
+                    RenderString(Caption, buffer, 2 + (ActualWidth - 2 * 2 - Caption.Length) / 2, 
+                        (ActualHeight - 1) / 2, ActualWidth - 2 * 2, captionAttrs);
                 }
-                buffer.SetPixel(0, 1, ' ');
-                buffer.SetOpacityRect(0, 1, ActualWidth, 1, 3);
-                buffer.FillRectangle(1, 1, ActualWidth - 1, 1, '\u2580', Attr.NO_ATTRIBUTES);
-                buffer.SetOpacity(ActualWidth - 1, 0, 3);
+                buffer.SetPixel(0, ActualHeight-1, ' ');
+                buffer.SetOpacityRect(0, ActualHeight -1, ActualWidth, 1, 3);
+                buffer.FillRectangle(1, ActualHeight-1, ActualWidth - 1, 1, '\u2580', Attr.NO_ATTRIBUTES);
+                buffer.SetOpacityRect(ActualWidth - 1, 0, 1, ActualHeight, 3);
+                buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 2, '\u2588', Attr.NO_ATTRIBUTES);
                 buffer.SetPixel(ActualWidth - 1, 0, '\u2584');
             }
         }

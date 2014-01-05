@@ -225,7 +225,10 @@ namespace ConsoleFramework.Controls
 
             for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
                 if ( ColumnDefinitions[ x ].Width.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    int maxWidth = 0;
+                    // todo : учесть MinWidth
+                    int maxWidth = ColumnDefinitions[ x ].Width.GridUnitType == GridUnitType.Pixel
+                                       ? ColumnDefinitions[ x ].Width.Value
+                                       : 0;
                     for ( int y = 0; y < RowDefinitions.Count; y++ ) {
                         if ( matrix[ x, y ].DesiredSize.Width > maxWidth )
                             maxWidth = matrix[ x, y ].DesiredSize.Width;
@@ -238,7 +241,10 @@ namespace ConsoleFramework.Controls
 
             for ( int y = 0; y < RowDefinitions.Count; y++ ) {
                 if ( RowDefinitions[ y ].Height.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    int maxHeight = 0;
+                    // todo : учесть MinHeight
+                    int maxHeight = RowDefinitions[ y ].Height.GridUnitType == GridUnitType.Pixel
+                                        ? RowDefinitions[ y ].Height.Value
+                                        : 0;
                     for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
                         if ( matrix[ x, y ].DesiredSize.Height > maxHeight )
                             maxHeight = matrix[ x, y ].DesiredSize.Height;
