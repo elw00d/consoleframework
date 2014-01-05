@@ -130,37 +130,46 @@ namespace ConsoleFramework.Rendering
 
                     CHAR_INFO charInfo = childBuffer.buffer[childX, childY];
                     int opacity = childBuffer.opacityMatrix[childX, childY];
-                    if (opacity == 0 || opacity == 4) {
-                        this.buffer[parentX, parentY] = charInfo;
+
+                    // Для полностью прозрачных пикселей родительского буфера - присваиваем и значение
+                    // пикселя, и значение opacity, дальше дело за следующим родителем
+                    if ( this.opacityMatrix[ parentX, parentY ] == 2 || this.opacityMatrix[ parentX, parentY ] == 6 ) {
+                        this.buffer[ parentX, parentY ] = charInfo;
                         this.opacityMatrix[ parentX, parentY ] = opacity;
-                    } else if (opacity == 1 || opacity == 5) {
-                        charInfo.Attributes = Colors.Blend(Color.DarkGray, Color.Black);
-                        charInfo.UnicodeChar = buffer[parentX, parentY].UnicodeChar;
-                        buffer[parentX, parentY] = charInfo;
-                    } else if (opacity == 3 || opacity == 7) {
-                        // берем фоновые атрибуты символа из родительского буфера
-                        Attr parentAttr = buffer[parentX, parentY].Attributes;
-                        if ((parentAttr & Attr.BACKGROUND_BLUE) == Attr.BACKGROUND_BLUE) {
-                            charInfo.Attributes |= Attr.BACKGROUND_BLUE;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
+                    } else {
+                        // В остальных случаях opacity родительского буфера остаётся, а
+                        // сам пиксель зависит от opacity дочернего элемента
+                        if ( opacity == 0 || opacity == 4 ) {
+                            this.buffer[ parentX, parentY ] = charInfo;
+                        } else if ( opacity == 1 || opacity == 5 ) {
+                            charInfo.Attributes = Colors.Blend( Color.DarkGray, Color.Black );
+                            charInfo.UnicodeChar = buffer[ parentX, parentY ].UnicodeChar;
+                            buffer[ parentX, parentY ] = charInfo;
+                        } else if ( opacity == 3 || opacity == 7 ) {
+                            // берем фоновые атрибуты символа из родительского буфера
+                            Attr parentAttr = buffer[ parentX, parentY ].Attributes;
+                            if ( ( parentAttr & Attr.BACKGROUND_BLUE ) == Attr.BACKGROUND_BLUE ) {
+                                charInfo.Attributes |= Attr.BACKGROUND_BLUE;
+                            } else {
+                                charInfo.Attributes &= ~Attr.BACKGROUND_BLUE;
+                            }
+                            if ( ( parentAttr & Attr.BACKGROUND_GREEN ) == Attr.BACKGROUND_GREEN ) {
+                                charInfo.Attributes |= Attr.BACKGROUND_GREEN;
+                            } else {
+                                charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
+                            }
+                            if ( ( parentAttr & Attr.BACKGROUND_RED ) == Attr.BACKGROUND_RED ) {
+                                charInfo.Attributes |= Attr.BACKGROUND_RED;
+                            } else {
+                                charInfo.Attributes &= ~Attr.BACKGROUND_RED;
+                            }
+                            if ( ( parentAttr & Attr.BACKGROUND_INTENSITY ) == Attr.BACKGROUND_INTENSITY ) {
+                                charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
+                            } else {
+                                charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
+                            }
+                            buffer[ parentX, parentY ] = charInfo;
                         }
-                        if ((parentAttr & Attr.BACKGROUND_GREEN) == Attr.BACKGROUND_GREEN) {
-                            charInfo.Attributes |= Attr.BACKGROUND_GREEN;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_GREEN;
-                        }
-                        if ((parentAttr & Attr.BACKGROUND_RED) == Attr.BACKGROUND_RED) {
-                            charInfo.Attributes |= Attr.BACKGROUND_RED;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_RED;
-                        }
-                        if ((parentAttr & Attr.BACKGROUND_INTENSITY) == Attr.BACKGROUND_INTENSITY) {
-                            charInfo.Attributes |= Attr.BACKGROUND_INTENSITY;
-                        } else {
-                            charInfo.Attributes &= ~Attr.BACKGROUND_INTENSITY;
-                        }
-                        buffer[parentX, parentY] = charInfo;
                     }
                 }
             }

@@ -128,11 +128,11 @@ namespace ConsoleFramework.Controls
                 buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
                 buffer.SetOpacityRect( 0, 1, 1, ActualHeight-1, 6 );
                 if ( shadow ) {
-                    buffer.SetOpacity( 1, ActualHeight - 1, 6 );
-                    buffer.SetOpacity( ActualWidth - 1, 0, 2 );
-                    buffer.SetOpacityRect( ActualWidth - 1, 1, 1, ActualHeight - 1, 1 );
+                    buffer.SetOpacity( 1, ActualHeight - 1, 2+4 );
+                    buffer.SetOpacity( ActualWidth - 1, 0, 2+4 );
+                    buffer.SetOpacityRect( ActualWidth - 1, 1, 1, ActualHeight - 1, 1+4 );
                     buffer.FillRectangle( ActualWidth - 1, 1, 1, ActualHeight - 1, '\u2588', borderAttrs );
-                    buffer.SetOpacityRect( 2, ActualHeight - 1, ActualWidth - 2, 1, 3 );
+                    buffer.SetOpacityRect( 2, ActualHeight - 1, ActualWidth - 2, 1, 3+4 );
                     buffer.FillRectangle( 2, ActualHeight - 1, ActualWidth - 2, 1, '\u2580',
                                           Attr.NO_ATTRIBUTES );
                     //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );

@@ -308,11 +308,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render( RenderingBuffer buffer ) {
-            // todo : заставить работать через SetOpacityRect !
-            // в данный момент оно не работает корректно, поскольку OpacityRect не переходят
-            // из буфера дочернего контрола в буфер Grid, и тени от вложенных в грид кнопок игнорируются
-            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', Colors.Blend(Color.Black, Color.Gray));
-            //buffer.SetOpacityRect( 0, 0, ActualWidth, ActualHeight, 2 );
+            buffer.SetOpacityRect( 0, 0, ActualWidth, ActualHeight, 2 );
         }
     }
 }
