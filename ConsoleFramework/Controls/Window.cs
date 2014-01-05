@@ -139,8 +139,12 @@ namespace ConsoleFramework.Controls
                 return new Size(
                     Math.Min(availableSize.Width ,EMPTY_WINDOW_SIZE.Width + 4),
                     Math.Min(availableSize.Height, EMPTY_WINDOW_SIZE.Height + 3));
-            // reserve 2 pixels for frame and 2/1 pixels for shadow
-            Content.Measure(new Size(availableSize.width - 4, availableSize.height - 3));
+            if ( availableSize.Width != int.MaxValue && availableSize.Height != int.MaxValue ) {
+                // reserve 2 pixels for frame and 2/1 pixels for shadow
+                Content.Measure( new Size( availableSize.width - 4, availableSize.height - 3 ) );
+            } else {
+                Content.Measure( availableSize );
+            }
             var result = new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
             return result;
         }

@@ -46,7 +46,7 @@ namespace ConsoleFramework {
 //            return;
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "ConsoleFramework.MainWindow.xml";
+            var resourceName = "ConsoleFramework.GridTest.xml";
             Window createdFromXaml;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))

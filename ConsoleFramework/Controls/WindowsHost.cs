@@ -22,16 +22,14 @@ namespace ConsoleFramework.Controls
             }) );
         }
 
-        public static readonly Size MaxWindowSize = new Size(500, 500);
-
         protected override Size MeasureOverride(Size availableSize)
         {
-            // дочерние окна могут занимать сколько угодно пространства,
-            // но не более того, что предусмотрено константой MaxWindowSize
-            foreach (Control control in Children)
-            {
+            // Дочерние окна могут занимать сколько угодно пространства,
+            // но при заданных Width/Height их размеры будут учтены
+            // системой размещения автоматически
+            foreach (Control control in Children) {
                 Window window = (Window) control;
-                window.Measure(MaxWindowSize);
+                window.Measure(new Size(int.MaxValue, int.MaxValue));
             }
             return availableSize;
         }

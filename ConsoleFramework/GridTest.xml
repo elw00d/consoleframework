@@ -1,0 +1,21 @@
+﻿<my:Window Name="window2" Title="Очень длинное название окна"
+        xmlns:x="http://consoleframework.org/xaml.xsd"
+        xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
+        xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding"
+        xmlns:xaml="clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework"
+           >
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="10"></ColumnDefinition>
+      <ColumnDefinition Width="*"></ColumnDefinition>
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition/>
+      <RowDefinition/>
+    </Grid.RowDefinitions>
+    <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
+    <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
+    <Button Caption="Button"></Button>
+    <Button HorizontalAlignment="Right" Caption="Long Button"></Button>
+  </Grid>
+</my:Window>
