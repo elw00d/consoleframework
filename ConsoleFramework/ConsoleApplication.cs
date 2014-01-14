@@ -68,6 +68,22 @@ namespace ConsoleFramework
         private IntPtr stdInputHandle;
         private IntPtr stdOutputHandle;
         private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+        private readonly EventWaitHandle invokeWaitHandle = new EventWaitHandle( false, EventResetMode.ManualReset );
+        private int? mainThreadId;
+        
+        private struct ActionInfo
+        {
+            public readonly Action action;
+            public readonly EventWaitHandle waitHandle;
+
+            public ActionInfo( Action action, EventWaitHandle waitHandle ) {
+                this.action = action;
+                this.waitHandle = waitHandle;
+            }
+        }
+
+        private List<ActionInfo> actionsToBeInvoked = new List< ActionInfo >();
+        private Object actionsLocker = new object(  );
 
         /// <summary>
         /// Signals the message loop to be finished.
@@ -458,12 +474,14 @@ namespace ConsoleFramework
 		
         private void runWindows(Control control) {
             this.mainControl = control;
+            this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
             //
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
             IntPtr[] handles = new[] {
                 exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
-                stdInputHandle
+                stdInputHandle,
+                invokeWaitHandle.SafeWaitHandle.DangerousGetHandle(  )
             };
 
             // set console mode to enable mouse and window resizing events
@@ -492,13 +510,19 @@ namespace ConsoleFramework
             HideCursor();
             
             while (true) {
-                uint waitResult = Win32.WaitForMultipleObjects(2, handles, false, Win32.INFINITE);
+                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, Win32.INFINITE);
                 if (waitResult == 0) {
                     break;
                 }
                 if (waitResult == 1) {
                     processInput();
+                    processInvokeActions( );
                     renderer.UpdateRender();
+                    continue;
+                }
+                if ( waitResult == 2 ) {
+                    processInvokeActions( );
+                    renderer.UpdateRender(  );
                     continue;
                 }
                 // if we received WAIT_TIMEOUT or WAIT_FAILED
@@ -514,6 +538,18 @@ namespace ConsoleFramework
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
 
             // todo : restore attributes of console output
+        }
+
+        private void processInvokeActions( ) {
+            List<ActionInfo> actionsCopy;
+            lock ( actionsLocker ) {
+                actionsCopy = new List< ActionInfo >( actionsToBeInvoked );
+                actionsToBeInvoked.Clear(  );
+            }
+            foreach ( ActionInfo action in actionsCopy ) {
+                action.action.Invoke(  );
+                action.waitHandle.Set( );
+            }
         }
 
         private void processInput() {
@@ -537,6 +573,36 @@ namespace ConsoleFramework
                 return;
             }
             eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);
+        }
+
+        /// <summary>
+        /// Checks if current thread is same thread from which Run() method
+        /// was called.
+        /// todo : add Linux support
+        /// </summary>
+        /// <returns></returns>
+        public bool IsUiThread( ) {
+            return Thread.CurrentThread.ManagedThreadId == this.mainThreadId;
+        }
+
+        /// <summary>
+        /// Invokes action in UI thread synchronously.
+        /// todo : add Linux support
+        /// </summary>
+        /// <param name="action"></param>
+        public void Invoke( Action action ) {
+            // If run loop is not started, invoke action directly
+            if ( this.mainThreadId == null ) {
+                action.Invoke( );
+                return;
+            }
+            using ( EventWaitHandle waitHandle = new EventWaitHandle( false, EventResetMode.ManualReset ) ) {
+                lock ( actionsLocker ) {
+                    actionsToBeInvoked.Add( new ActionInfo( action, waitHandle ) );
+                }
+                invokeWaitHandle.Set( );
+                waitHandle.WaitOne( );
+            }
         }
 
         /// <summary>

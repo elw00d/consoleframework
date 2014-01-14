@@ -225,10 +225,13 @@ namespace ConsoleFramework.Controls
 
             for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
                 if ( ColumnDefinitions[ x ].Width.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    // todo : учесть MinWidth
                     int maxWidth = ColumnDefinitions[ x ].Width.GridUnitType == GridUnitType.Pixel
                                        ? ColumnDefinitions[ x ].Width.Value
                                        : 0;
+                    // Учитываем MinWidth. MaxWidth учитывать специально не нужно, поскольку мы это
+                    // уже сделали при первом Measure, и DesiredSize не может быть больше MaxWidth
+                    if ( ColumnDefinitions[ x ].MinWidth != null && maxWidth < ColumnDefinitions[ x ].MinWidth.Value )
+                        maxWidth = ColumnDefinitions[ x ].MinWidth.Value;
                     for ( int y = 0; y < RowDefinitions.Count; y++ ) {
                         if ( matrix[ x, y ].DesiredSize.Width > maxWidth )
                             maxWidth = matrix[ x, y ].DesiredSize.Width;
@@ -241,10 +244,11 @@ namespace ConsoleFramework.Controls
 
             for ( int y = 0; y < RowDefinitions.Count; y++ ) {
                 if ( RowDefinitions[ y ].Height.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    // todo : учесть MinHeight
                     int maxHeight = RowDefinitions[ y ].Height.GridUnitType == GridUnitType.Pixel
                                         ? RowDefinitions[ y ].Height.Value
                                         : 0;
+                    if ( RowDefinitions[ y ].MinHeight != null && maxHeight < RowDefinitions[ y ].MinHeight.Value )
+                        maxHeight = RowDefinitions[ y ].MinHeight.Value;
                     for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
                         if ( matrix[ x, y ].DesiredSize.Height > maxHeight )
                             maxHeight = matrix[ x, y ].DesiredSize.Height;
