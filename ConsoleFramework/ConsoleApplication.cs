@@ -541,15 +541,32 @@ namespace ConsoleFramework
         }
 
         private void processInvokeActions( ) {
-            List<ActionInfo> actionsCopy;
-            lock ( actionsLocker ) {
-                actionsCopy = new List< ActionInfo >( actionsToBeInvoked );
-                actionsToBeInvoked.Clear(  );
+            for ( ;; ) {
+                ActionInfo top;
+                lock ( actionsLocker ) {
+                    if ( actionsToBeInvoked.Count != 0 ) {
+                        top = actionsToBeInvoked[ 0 ];
+                        actionsToBeInvoked.RemoveAt( 0 );
+                    } else {
+                        break;
+                    }
+                }
+                top.action.Invoke(  );
+                if ( top.waitHandle != null ) {
+                    top.waitHandle.Set( );
+                }
             }
-            foreach ( ActionInfo action in actionsCopy ) {
-                action.action.Invoke(  );
-                action.waitHandle.Set( );
-            }
+//            List<ActionInfo> actionsCopy;
+//            lock ( actionsLocker ) {
+//                actionsCopy = new List< ActionInfo >( actionsToBeInvoked );
+//                actionsToBeInvoked.Clear(  );
+//            }
+//            foreach ( ActionInfo action in actionsCopy ) {
+//                action.action.Invoke(  );
+//                if ( null != action.waitHandle ) {
+//                    action.waitHandle.Set( );
+//                }
+//            }
         }
 
         private void processInput() {
@@ -587,13 +604,18 @@ namespace ConsoleFramework
 
         /// <summary>
         /// Invokes action in UI thread synchronously.
+        /// If run loop was not started yet, nothing will be done.
         /// todo : add Linux support
         /// </summary>
         /// <param name="action"></param>
-        public void Invoke( Action action ) {
-            // If run loop is not started, invoke action directly
+        public void RunOnUiThread( Action action ) {
+            // If run loop is not started, do nothing
             if ( this.mainThreadId == null ) {
-                action.Invoke( );
+                return;
+            }
+            // If current thread is UI thread, invoke action directly
+            if ( IsUiThread( ) ) {
+                action.Invoke(  );
                 return;
             }
             using ( EventWaitHandle waitHandle = new EventWaitHandle( false, EventResetMode.ManualReset ) ) {
@@ -603,6 +625,24 @@ namespace ConsoleFramework
                 invokeWaitHandle.Set( );
                 waitHandle.WaitOne( );
             }
+        }
+
+        /// <summary>
+        /// Invokes action in main loop thread asynchronously.
+        /// If run loop was not started yet, nothing will be done.
+        /// todo : add Linux support
+        /// </summary>
+        /// <param name="action"></param>
+        public void Post( Action action ) {
+            // If run loop is not started, nothing to do
+            if ( this.mainThreadId == null ) {
+                return;
+            }
+            lock ( actionsLocker ) {
+                actionsToBeInvoked.Add( new ActionInfo( action, null ) );
+            }
+            if (!IsUiThread())
+                invokeWaitHandle.Set();
         }
 
         /// <summary>
