@@ -14,13 +14,15 @@ public interface IObservableList : IList {
      *
      * @param listener the listener to add
      */
-    void addObservableListListener(IObservableListListener listener);
+//    void addObservableListListener(IObservableListListener listener);
+//
+//    /**
+//     * Removes a listener.
+//     *
+//     * @param listener the listener to remove
+//     */
+//    void removeObservableListListener(IObservableListListener listener);
 
-    /**
-     * Removes a listener.
-     *
-     * @param listener the listener to remove
-     */
-    void removeObservableListListener(IObservableListListener listener);
+    event ListChangedHandler ListChanged;
 }
 }

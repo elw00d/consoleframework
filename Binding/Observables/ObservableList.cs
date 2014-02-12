@@ -6,26 +6,27 @@ namespace Binding.Observables
 {
     /**
  * {@link IObservableList} implementation.
- *
+ *todo : implement methods like RemoveRange
+     *todo : throw exception in reordering methods like Reverse or Sort
  * @author igor.kostromin
  *         28.06.13 17:11
  */
 public class ObservableList : IObservableList {
     private IList list;
-    private List<IObservableListListener> listeners;
+//    private List<IObservableListListener> listeners;
 
     public ObservableList( IList list ) {
         this.list = list;
-        listeners = new List< IObservableListListener >();
+//        listeners = new List< IObservableListListener >();
     }
 
-    public void addObservableListListener( IObservableListListener listener ) {
-        listeners.Add( listener );
-    }
-
-    public void removeObservableListListener( IObservableListListener listener ) {
-        listeners.Remove( listener );
-    }
+//    public void addObservableListListener( IObservableListListener listener ) {
+//        listeners.Add( listener );
+//    }
+//
+//    public void removeObservableListListener( IObservableListListener listener ) {
+//        listeners.Remove( listener );
+//    }
 
     public IEnumerator GetEnumerator( ) {
         return list.GetEnumerator( );
@@ -44,10 +45,10 @@ public class ObservableList : IObservableList {
     }
 
     public void Clear( ) {
-        ArrayList deleted = new ArrayList(list);
+        int count = list.Count;
         list.Clear();
 
-        raiseListElementsRemoved( 0, deleted );
+        raiseListElementsRemoved( 0, count );
     }
 
     public bool Contains( Object item ) {
@@ -62,7 +63,7 @@ public class ObservableList : IObservableList {
         int index = list.IndexOf(item);
         /*bool result = */list.Remove( item );
         if (-1 != index)
-            raiseListElementsRemoved( index, new ArrayList() {item} );
+            raiseListElementsRemoved( index, 1 );
         //return result;
     }
 
@@ -87,40 +88,49 @@ public class ObservableList : IObservableList {
     }
 
     public void RemoveAt( int index ) {
-        Object item = list[ index ];
         list.RemoveAt( index );
-        raiseListElementsRemoved( index, new ArrayList() {item} );
+        raiseListElementsRemoved( index, 1 );
     }
 
     public Object this[ int index ] {
         get { return list[ index ]; }
         set {
-            Object oldElement = list[index];
             list[ index ] = value;
-            raiseListElementReplaced( index, oldElement );
+            raiseListElementReplaced( index );
         }
     }
 
     private void raiseListElementsAdded( int index, int length ) {
-        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
-        foreach ( var listener in copy ) {
-            listener.listElementsAdded( this, index, length );
+        if (null != ListChanged) {
+            ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemsInserted, index, length));
         }
+//        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
+//        foreach ( var listener in copy ) {
+//            listener.listElementsAdded( this, index, length );
+//        }
     }
 
-    private void raiseListElementsRemoved( int index, IList oldElements ) {
-        List< IObservableListListener > copy = new List< IObservableListListener>( this.listeners );
-        foreach ( var listener in copy ) {
-            listener.listElementsRemoved( this, index, oldElements );
+    private void raiseListElementsRemoved( int index, int length ) {
+        if (null != ListChanged) {
+            ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemsRemoved, index, length));
         }
+//        List< IObservableListListener > copy = new List< IObservableListListener>( this.listeners );
+//        foreach ( var listener in copy ) {
+//            listener.listElementsRemoved( this, index, oldElements );
+//        }
     }
 
-    private void raiseListElementReplaced( int index, Object oldElement ) {
-        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
-        foreach ( var listener in copy ) {
-            listener.listElementReplaced( this, index, oldElement );
+    private void raiseListElementReplaced( int index ) {
+        if (null != ListChanged) {
+            ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemReplaced, index, 1));
         }
+//        List< IObservableListListener> copy = new List< IObservableListListener>( this.listeners );
+//        foreach ( var listener in copy ) {
+//            listener.listElementReplaced( this, index, oldElement );
+//        }
     }
+
+    public event ListChangedHandler ListChanged;
 }
 
 }

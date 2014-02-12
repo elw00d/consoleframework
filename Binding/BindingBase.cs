@@ -6,6 +6,7 @@ using Binding.Adapters;
 using Binding.Converters;
 using Binding.Observables;
 using Binding.Validators;
+using ListChangedEventArgs = Binding.Observables.ListChangedEventArgs;
 
 namespace Binding
 {
@@ -54,10 +55,8 @@ public class BindingBase {
     // collections synchronization support
     private bool sourceIsObservable;
     private bool targetIsObservable;
-    protected SourceListListener sourceListListener;
-    protected IObservableList sourceList;
-    protected IObservableList targetList;
-    protected TargetListListener targetListListener;
+    protected IList sourceList;
+    protected IList targetList;
 
     private bool updateSourceIfBindingFails = true;
     private IBindingValidator validator;
@@ -165,15 +164,13 @@ public class BindingBase {
                             targetListNow.Add( x );
                         }
 
-                        // subscribe to source list
+                        // subscribe
                         if (sourceList != null ) {
-                            sourceListListener.ban = true;
-                            sourceList.removeObservableListListener(sourceListListener);
-                            sourceList = null;
+                            ((IObservableList) sourceList).ListChanged -= sourceListChanged;
                         }
                         sourceList = (IObservableList) sourceValue;
-                        sourceListListener = new SourceListListener(this, targetListNow);
-                        sourceList.addObservableListListener(sourceListListener);
+                        targetList = targetListNow;
+                        ((IObservableList) sourceList).ListChanged += sourceListChanged;
                     } else {
                         // todo : debug : target list is null, ignoring sync operation
                     }
@@ -199,91 +196,72 @@ public class BindingBase {
         }
     }
 
-    protected class TargetListListener : IObservableListListener {
-        // to avoid side effects from old listeners
-        // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
-        bool ban = false;
-        IList sourceList;
-        private BindingBase self;
+    // to avoid side effects from old listeners
+    // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
+    private bool ignoreSourceListChanges = false;
+    private bool ignoreTargetListChanges = false;
 
-        public TargetListListener(BindingBase self, IList sourceList) {
-            this.self = self;
-            this.sourceList = sourceList;
-        }
+    private void sourceListChanged(object sender, ListChangedEventArgs args) {
+        // To avoid side effects from old listeners
+        // (can be reproduced if call raisePropertyChanged inside another ObservableList handler)
+        // propertyChanged will cause re-subscription to ListChanged, but
+        // old list still can call ListChanged when enumerates event handlers
+        if (!ReferenceEquals(sender, sourceList)) return;
 
-        public void listElementsAdded(IObservableList list, int index, int length) {
-            if (ban) return;
-            self.ignoreSourceListener = true;
-            try {
-                for (int i = index; i < list.Count; i++) sourceList.Add(list[i]);
-            } finally {
-                self.ignoreSourceListener = false;
+        ignoreTargetListener = true;
+        try {
+            switch (args.Type) {
+                case ListChangedEventType.ItemsInserted: {
+                    for (int i = 0; i < args.N; i++)
+                        targetList.Insert(args.Index + i, sourceList[i]);
+                    break;
+                }
+                case ListChangedEventType.ItemsRemoved: {
+                    for (int i = 0; i < args.N; i++)
+                        targetList.RemoveAt(args.Index);
+                    break;
+                }
+                case ListChangedEventType.ItemReplaced: {
+                    targetList[args.Index] = sourceList[args.Index];
+                    break;
+                }
+                default:
+                    throw new InvalidOperationException();
             }
-        }
-
-        public void listElementsRemoved(IObservableList list, int index, IList oldElements) {
-            if (ban) return;
-            self.ignoreSourceListener = true;
-            try {
-                foreach (Object item in oldElements)
-                    sourceList.Remove(item);
-            } finally {
-                self.ignoreSourceListener = false;
-            }
-        }
-
-        public void listElementReplaced(IObservableList list, int index, Object oldElement) {
-            if (ban) return;
-            self.ignoreSourceListener = true;
-            try {
-                sourceList[index] = list[index];
-            } finally {
-                self.ignoreSourceListener = false;
-            }
+        } finally {
+            ignoreTargetListener = false;
         }
     }
 
-    protected class SourceListListener : IObservableListListener {
-        // to avoid side effects from old listeners
-        // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
-        public bool ban = false;
-        IList targetList;
-        private BindingBase self;
+    private void targetListChanged(object sender, ListChangedEventArgs args) {
+        // To avoid side effects from old listeners
+        // (can be reproduced if call raisePropertyChanged inside another ObservableList handler)
+        // propertyChanged will cause re-subscription to ListChanged, but
+        // old list still can call ListChanged when enumerates event handlers
+        if (!ReferenceEquals(sender, targetList)) return;
 
-        public SourceListListener(BindingBase self, IList targetList) {
-            this.targetList = targetList;
-            this.self = self;
-        }
-
-        public void listElementsAdded(IObservableList list, int index, int length) {
-            if (ban) return;
-            self.ignoreTargetListener = true;
-            try {
-                for (int i = index; i < list.Count; i++) targetList.Insert(index, list[i]);
-            } finally {
-                self.ignoreTargetListener = false;
+        ignoreSourceListener = true;
+        try {
+            switch (args.Type) {
+                case ListChangedEventType.ItemsInserted: {
+                        for (int i = 0; i < args.N; i++)
+                            sourceList.Insert(args.Index + i, targetList[i]);
+                        break;
+                    }
+                case ListChangedEventType.ItemsRemoved: {
+                        for (int i = 0; i < args.N; i++)
+                            sourceList.RemoveAt(args.Index);
+                        break;
+                    }
+                case ListChangedEventType.ItemReplaced: {
+                        sourceList[args.Index] = targetList[args.Index];
+                        break;
+                    }
+                default:
+                    throw new InvalidOperationException();
             }
-        }
-
-        public void listElementsRemoved(IObservableList list, int index, IList oldElements) {
-            if (ban) return;
-            self.ignoreTargetListener = true;
-            try {
-                foreach (Object item in oldElements)
-                    targetList.Remove(item);
-            } finally {
-                self.ignoreTargetListener = false;
-            }
-        }
-
-        public void listElementReplaced(IObservableList list, int index, Object oldElement) {
-            if (ban) return;
-            self.ignoreTargetListener = true;
-            try {
-                targetList[index] = list[index];
-            } finally {
-                self.ignoreTargetListener = false;
-            }
+        } finally {
+            ignoreSourceListener = false;
         }
     }
 
@@ -314,15 +292,13 @@ public class BindingBase {
                             sourceListNow.Add( item );
                         }
 
-                        // subscribe to source list
+                        // subscribe
                         if (targetList != null ) {
-                            sourceListListener.ban = true;
-                            targetList.removeObservableListListener(sourceListListener);
-                            targetList = null;
+                            ((IObservableList) targetList).ListChanged -= targetListChanged;
                         }
                         targetList = (IObservableList) targetValue;
-                        targetListListener = new TargetListListener(this, sourceListNow);
-                        targetList.addObservableListListener(targetListListener);
+                        sourceList = sourceListNow;
+                        ((IObservableList) targetList).ListChanged += targetListChanged;
                     } else {
                         // todo : debug : source list is null, ignoring sync operation
                     }
@@ -527,12 +503,12 @@ public class BindingBase {
             }
         }
 
-        if (sourceList != null) {
-            sourceList.removeObservableListListener(sourceListListener);
+        if (sourceList != null && sourceIsObservable) {
+            ((IObservableList) sourceList).ListChanged -= sourceListChanged;
             sourceList = null;
         }
-        if (targetList != null) {
-            targetList.removeObservableListListener(targetListListener);
+        if (targetList != null && targetIsObservable) {
+            ((IObservableList) targetList).ListChanged -= targetListChanged;
             targetList = null;
         }
     }
