@@ -27,10 +27,10 @@ namespace TestProject1.Binding
         class SourceClass : INotifyPropertyChanged
         {
             public SourceClass( ) {
-                SourceItems = new ObservableList( new List<String>() );
+                SourceItems = new ObservableList<String>( new List<String>() );
             }
 
-            public ObservableList SourceItems { get; private set; }
+            public ObservableList<String> SourceItems { get; private set; }
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -50,6 +50,18 @@ namespace TestProject1.Binding
             source.SourceItems.Add( "1" );
             Assert.IsTrue( target.Items[0] == "1" );
             source.SourceItems.Remove( "1" );
+            Assert.IsTrue(target.Items.Count == 0);
+        }
+
+        [TestMethod]
+        public void TestListBinding2() {
+            SourceClass source = new SourceClass();
+            TargetClass target = new TargetClass();
+            BindingBase binding = new BindingBase(target, "Items", source, "SourceItems", BindingMode.OneWay);
+            source.SourceItems.Add("1");
+            binding.Bind();
+            Assert.IsTrue(target.Items[0] == "1");
+            source.SourceItems.Remove("1");
             Assert.IsTrue(target.Items.Count == 0);
         }
     }

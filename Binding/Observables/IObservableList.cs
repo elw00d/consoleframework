@@ -1,28 +1,37 @@
-﻿using System.Collections;
+﻿using System;
 
-namespace Binding.Observables
-{
-    /**
- * A {@link List} that notifies listeners of changes.
- *
- * @author igor.kostromin
- *         28.06.13 17:09
- */
-public interface IObservableList : IList {
-    /**
-     * Adds a listener that is notified when the list changes.
-     *
-     * @param listener the listener to add
-     */
-//    void addObservableListListener(IObservableListListener listener);
-//
-//    /**
-//     * Removes a listener.
-//     *
-//     * @param listener the listener to remove
-//     */
-//    void removeObservableListListener(IObservableListListener listener);
+namespace Binding.Observables {
 
-    event ListChangedHandler ListChanged;
-}
+    /// <summary>
+    /// Marks the IList or IList&lt;T&gt; with notifications support.
+    /// It is not derived from IList and IList&lt;T&gt; to allow
+    /// to create both generic and nongeneric implementations.
+    /// </summary>
+    public interface IObservableList
+    {
+        event ListChangedHandler ListChanged;
+    }
+
+    public delegate void ListChangedHandler(object sender, ListChangedEventArgs args);
+
+    public enum ListChangedEventType
+    {
+        ItemsInserted,
+        ItemsRemoved,
+        ItemReplaced
+    }
+
+    public class ListChangedEventArgs : EventArgs
+    {
+        public ListChangedEventArgs(ListChangedEventType type, int index, int count) {
+            this.Type = type;
+            this.Index = index;
+            this.Count = count;
+        }
+
+        public readonly ListChangedEventType Type;
+        public readonly int Index;
+        public readonly int Count;
+    }
+    
 }

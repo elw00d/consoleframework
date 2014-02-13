@@ -47,8 +47,8 @@
     <Compile Include="Converters\IBindingConverter.cs" />
     <Compile Include="Converters\StringToIntegerConverter.cs" />
     <Compile Include="Observables\IObservableList.cs" />
-    <Compile Include="Observables\IObservableListListener.cs" />
     <Compile Include="Observables\ObservableList.cs" />
+    <Compile Include="Observables\ObservableListOfT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Converters\ReversedConverter.cs" />
     <Compile Include="Validators\IBindingValidator.cs" />

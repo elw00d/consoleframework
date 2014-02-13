@@ -54,9 +54,10 @@ public class BindingBase {
 
     // collections synchronization support
     private bool sourceIsObservable;
+    private IList targetList;
+
     private bool targetIsObservable;
-    protected IList sourceList;
-    protected IList targetList;
+    private IList sourceList;
 
     private bool updateSourceIfBindingFails = true;
     private IBindingValidator validator;
@@ -151,16 +152,16 @@ public class BindingBase {
                 // we should take target list and initialize it using source items
                 IList targetListNow;
                 if (adapter == null) {
-                    targetListNow = (IList) targetPropertyInfo.GetGetMethod().Invoke(target, null);
+                    targetListNow = ( IList ) targetPropertyInfo.GetGetMethod().Invoke(target, null);
                 } else {
-                    targetListNow = ( IList ) adapter.GetValue( target, targetProperty );
+                    targetListNow = ( IList ) adapter.GetValue(target, targetProperty);
                 }
                 if ( sourceValue == null ) {
                     if (null != targetListNow ) targetListNow.Clear();
                 } else {
                     if (null != targetListNow) {
                         targetListNow.Clear();
-                        foreach ( Object x in ((IList) sourceValue) ) {
+                        foreach ( Object x in ((IEnumerable) sourceValue) ) {
                             targetListNow.Add( x );
                         }
 
@@ -168,7 +169,7 @@ public class BindingBase {
                         if (sourceList != null ) {
                             ((IObservableList) sourceList).ListChanged -= sourceListChanged;
                         }
-                        sourceList = (IObservableList) sourceValue;
+                        sourceList = (IList) sourceValue;
                         targetList = targetListNow;
                         ((IObservableList) sourceList).ListChanged += sourceListChanged;
                     } else {
@@ -196,11 +197,6 @@ public class BindingBase {
         }
     }
 
-    // to avoid side effects from old listeners
-    // (can be reproduced if call raisePropertyChanged inside ObservableList handler)
-    private bool ignoreSourceListChanges = false;
-    private bool ignoreTargetListChanges = false;
-
     private void sourceListChanged(object sender, ListChangedEventArgs args) {
         // To avoid side effects from old listeners
         // (can be reproduced if call raisePropertyChanged inside another ObservableList handler)
@@ -212,12 +208,12 @@ public class BindingBase {
         try {
             switch (args.Type) {
                 case ListChangedEventType.ItemsInserted: {
-                    for (int i = 0; i < args.N; i++)
+                    for (int i = 0; i < args.Count; i++)
                         targetList.Insert(args.Index + i, sourceList[i]);
                     break;
                 }
                 case ListChangedEventType.ItemsRemoved: {
-                    for (int i = 0; i < args.N; i++)
+                    for (int i = 0; i < args.Count; i++)
                         targetList.RemoveAt(args.Index);
                     break;
                 }
@@ -244,12 +240,12 @@ public class BindingBase {
         try {
             switch (args.Type) {
                 case ListChangedEventType.ItemsInserted: {
-                        for (int i = 0; i < args.N; i++)
+                        for (int i = 0; i < args.Count; i++)
                             sourceList.Insert(args.Index + i, targetList[i]);
                         break;
                     }
                 case ListChangedEventType.ItemsRemoved: {
-                        for (int i = 0; i < args.N; i++)
+                        for (int i = 0; i < args.Count; i++)
                             sourceList.RemoveAt(args.Index);
                         break;
                     }
@@ -277,18 +273,17 @@ public class BindingBase {
             if ( null == adapter )
                 targetValue = targetPropertyInfo.GetGetMethod( ).Invoke( target, null );
             else {
-
                 targetValue = adapter.GetValue( target, targetProperty );
             }
             //
             if ( targetIsObservable ) { // work with collection
-                IList sourceListNow = (IList) sourcePropertyInfo.GetGetMethod().Invoke(source, null);
+                IList sourceListNow = ( IList ) sourcePropertyInfo.GetGetMethod().Invoke(source, null);
                 if (targetValue == null) {
                     if (null != sourceListNow) sourceListNow.Clear();
                 } else {
                     if (null != sourceListNow) {
                         sourceListNow.Clear();
-                        foreach ( object item in (IList) targetValue ) {
+                        foreach ( object item in (IEnumerable) targetValue ) {
                             sourceListNow.Add( item );
                         }
 
@@ -296,7 +291,7 @@ public class BindingBase {
                         if (targetList != null ) {
                             ((IObservableList) targetList).ListChanged -= targetListChanged;
                         }
-                        targetList = (IObservableList) targetValue;
+                        targetList = (IList)targetValue;
                         sourceList = sourceListNow;
                         ((IObservableList) targetList).ListChanged += targetListChanged;
                     } else {
@@ -369,7 +364,7 @@ public class BindingBase {
             targetPropertyInfo.PropertyType : adapter.GetTargetPropertyClazz(targetProperty);
 
         sourceIsObservable = typeof(IObservableList).IsAssignableFrom( sourcePropertyInfo.PropertyType );
-        targetIsObservable = typeof(IObservableList).IsAssignableFrom( targetPropertyClass );
+        targetIsObservable = typeof(IObservableList).IsAssignableFrom(targetPropertyClass);
 
         // We need converter if data will flow from non-observable property to property of another class
         if (targetPropertyClass != sourcePropertyInfo.PropertyType) {
@@ -504,11 +499,11 @@ public class BindingBase {
         }
 
         if (sourceList != null && sourceIsObservable) {
-            ((IObservableList) sourceList).ListChanged -= sourceListChanged;
+            ((IObservableList)sourceList).ListChanged -= sourceListChanged;
             sourceList = null;
         }
         if (targetList != null && targetIsObservable) {
-            ((IObservableList) targetList).ListChanged -= targetListChanged;
+            ((IObservableList)targetList).ListChanged -= targetListChanged;
             targetList = null;
         }
     }
