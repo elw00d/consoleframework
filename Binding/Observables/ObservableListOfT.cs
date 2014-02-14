@@ -31,22 +31,12 @@ namespace Binding.Observables
             raiseListElementsAdded(index, 1);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         int IList.Add( object value ) {
             int count = this.Count;
             Add( (T) value );
             return count;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         bool IList.Contains( object value ) {
             return Contains( ( T ) value );
         }
@@ -58,28 +48,14 @@ namespace Binding.Observables
             raiseListElementsRemoved(0, count);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         int IList.IndexOf( object value ) {
             return IndexOf( ( T ) value );
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="value"></param>
         void IList.Insert( int index, object value ) {
             Insert( index, ( T ) value );
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
         void IList.Remove( object value ) {
             Remove( ( T ) value );
         }
@@ -102,11 +78,6 @@ namespace Binding.Observables
             return false;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="array"></param>
-        /// <param name="index"></param>
         void ICollection.CopyTo( Array array, int index ) {
             ((ICollection) list).CopyTo( array, index );
         }
@@ -117,14 +88,8 @@ namespace Binding.Observables
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         object ICollection.SyncRoot { get { return ((ICollection) list).SyncRoot; } }
 
-        /// <summary>
-        /// 
-        /// </summary>
         bool ICollection.IsSynchronized { get { return ((ICollection)list).IsSynchronized; } }
 
         public bool IsReadOnly {
@@ -133,9 +98,6 @@ namespace Binding.Observables
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         bool IList.IsFixedSize { get { return ((IList) list).IsFixedSize; } }
 
         public int IndexOf(T item) {
@@ -152,11 +114,6 @@ namespace Binding.Observables
             raiseListElementsRemoved(index, 1);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
         object IList.this[ int index ] {
             get { return this[ index ]; }
             set { this[ index ] = (T) value; }

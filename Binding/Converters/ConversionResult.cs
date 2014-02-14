@@ -2,13 +2,9 @@
 
 namespace Binding.Converters
 {
-    /**
- * Represents value conversion result.
- *
- * User: igor.kostromin
- * Date: 26.06.13
- * Time: 21:46
- */
+    /// <summary>
+    /// Represents value conversion result.
+    /// </summary>
     public class ConversionResult
     {
         private readonly Object value;

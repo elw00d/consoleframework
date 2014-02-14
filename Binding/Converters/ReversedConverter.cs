@@ -1,11 +1,9 @@
 ﻿using System;
-using Binding.Converters;
 
-namespace Binding
+namespace Binding.Converters
 {
     public class ReversedConverter : IBindingConverter {
-
-        IBindingConverter converter;
+        readonly IBindingConverter converter;
 
         public ReversedConverter(IBindingConverter converter) {
             this.converter = converter;

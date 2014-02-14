@@ -2,13 +2,9 @@
 
 namespace Binding.Validators
 {
-    /**
- * Represents the result of data binding validation.
- *
- * User: igor.kostromin
- * Date: 26.06.13
- * Time: 21:53
- */
+    /// <summary>
+    /// Represents the result of data binding validation.
+    /// </summary>
     public class ValidationResult
     {
         private readonly bool valid;

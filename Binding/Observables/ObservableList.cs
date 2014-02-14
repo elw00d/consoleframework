@@ -2,11 +2,9 @@
 using System.Collections;
 
 namespace Binding.Observables {
-    /**
- * {@link IObservableList} implementation.
- * @author igor.kostromin
- *         28.06.13 17:11
- */
+    /// <summary>
+    /// Non-generic <see cref="IObservableList"/> implementation.
+    /// </summary>
     public class ObservableList : IObservableList, IList {
         private readonly IList list;
 

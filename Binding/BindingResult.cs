@@ -2,16 +2,12 @@
 
 namespace Binding
 {
-    /**
- * Represents result of one synchronization operation from Target to Source.
- * If hasConversionError is true, message will represent conversion error message.
- * If hasValidationError is true, message will represent validation error message.
- * Both hasConversionError and hasValidationError cannot be set to true.
- *
- * User: igor.kostromin
- * Date: 26.06.13
- * Time: 21:57
- */
+    /// <summary>
+    /// Represents result of one synchronization operation from Target to Source.
+    /// If hasConversionError is true, message will represent conversion error message.
+    /// If hasValidationError is true, message will represent validation error message.
+    /// Both hasConversionError and hasValidationError cannot be set to true.
+    /// </summary>
     public class BindingResult
     {
         public bool hasError;

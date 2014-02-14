@@ -2,32 +2,29 @@
 
 namespace Binding.Converters
 {
-    /**
- * Provides value conversion logic from first class to second and back.
- *
- * @author igor.kostromin
- *         26.06.13 16:37
- */
+    /// <summary>
+    /// Provides value conversion logic from first class to second and back.
+    /// </summary>
     public interface IBindingConverter
     {
-        /**
-     * Returns class object for TFirst class.
-     */
+        /// <summary>
+        /// Returns class object for TFirst class.
+        /// </summary>
         Type FirstType { get; }
 
-        /**
-         * Returns class object for TSecond class.
-         */
+        /// <summary>
+        /// Returns class object for TSecond class.
+        /// </summary>
         Type SecondType { get; }
 
-        /**
-         * Converts value from TFirst class to TSecond.
-         */
+        /// <summary>
+        /// Converts value from TFirst class to TSecond.
+        /// </summary>
         ConversionResult Convert(Object first);
 
-        /**
-         * Converts value from TSecond class to TFirst.
-         */
+        /// <summary>
+        /// Converts value from TSecond class to TFirst.
+        /// </summary>
         ConversionResult ConvertBack(Object second);
     }
 
