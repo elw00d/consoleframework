@@ -38,10 +38,27 @@ namespace ConsoleFramework
             }
         }
 
-		private bool usingLinux = false;
+		private static readonly bool usingLinux;
+
+        static ConsoleApplication() {
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                case PlatformID.Win32S:
+                case PlatformID.Win32Windows:
+                case PlatformID.WinCE:
+                    usingLinux = false;
+                    break;
+                case PlatformID.Unix:
+                    usingLinux = true;
+                    break;
+                case PlatformID.MacOSX:
+                case PlatformID.Xbox:
+                    throw new NotSupportedException();
+            }
+        }
 		
-        private ConsoleApplication(bool usingLinux) {
-			this.usingLinux = usingLinux;
+        private ConsoleApplication() {
             eventManager = new EventManager();
             focusManager = new FocusManager(eventManager);
         }
@@ -57,7 +74,7 @@ namespace ConsoleFramework
                 if (instance == null) {
                     lock (syncRoot) {
                         if (instance == null) {
-                            instance = new ConsoleApplication(true);
+                            instance = new ConsoleApplication();
                         }
                     }
                 }
