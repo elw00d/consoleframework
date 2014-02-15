@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linux", "Linux\Linux.csproj", "{7F4926FC-252F-455F-828B-7748DDD4029F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Binding", "..\Binding\Binding.csproj", "{E1CD529B-E3F1-4660-AA4F-1670E0992553}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{7F4926FC-252F-455F-828B-7748DDD4029F}.Debug|x86.Build.0 = Debug|x86
 		{7F4926FC-252F-455F-828B-7748DDD4029F}.Release|x86.ActiveCfg = Release|x86
 		{7F4926FC-252F-455F-828B-7748DDD4029F}.Release|x86.Build.0 = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.ActiveCfg = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.Build.0 = Debug|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.ActiveCfg = Release|x86
+		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Linux\Linux.csproj

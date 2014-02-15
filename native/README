@@ -1,0 +1,7 @@
+To build from sources you should install gcc, g++, make tools and ncurses library (development version).
+
+Package names are different in different linux distros.
+
+Then use command
+
+    $make
