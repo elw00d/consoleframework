@@ -9,7 +9,7 @@ namespace ConsoleFramework.Native
     /// </summary>
     public static class LibTermKey
     {
-        [DllImport( "libtermkey.so" )]
+		[DllImport( "libtermkey.so" )]
         public static extern IntPtr termkey_new( int fd, TermKeyFlag flags );
 		
 		public static TermKeyResult termkey_getkey_force(IntPtr termKey, ref TermKeyKey key) {

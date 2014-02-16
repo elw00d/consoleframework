@@ -223,6 +223,7 @@
     <None Include="..\..\ConsoleFramework\Xaml\xaml.xsd">
       <Link>ConsoleFramework\Xaml\xaml.xsd</Link>
     </None>
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Binding\Binding.csproj">

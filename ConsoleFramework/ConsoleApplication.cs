@@ -261,7 +261,10 @@ namespace ConsoleFramework
 			fds [0] = fd;
 			
 			fds [1] = new pollfd ();
-			eventfd = Libc.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
+			//eventfd = Libc.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
+			int[] pipeFds = new int[2];
+			Libc.pipe (pipeFds);
+			eventfd = pipeFds [1];
 			if (eventfd == -1) {
 				Console.WriteLine ("Cannot create eventfd\n");
 				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
@@ -604,6 +607,7 @@ namespace ConsoleFramework
                 renderer.Canvas.Width = dwSize.X;
                 renderer.Canvas.Height = dwSize.Y;
                 renderer.RootElementRect = new Rect(0, 0, dwSize.X, dwSize.Y);
+				File.AppendAllText ("log.txt", "Size is changed !\n");
                 return;
             }
             eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);

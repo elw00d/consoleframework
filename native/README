@@ -5,3 +5,11 @@ Package names are different in different linux distros.
 Then use command
 
     $make
+    
+If you want to build a fat binaries (dual-exe: for x86 and x86_64 both) add to makefile's CCFLAGS and
+LDFLAGS next options:
+
+    -arch i386 -arch x86_64
+    
+( For MacOS X it is critical, because mono is 32-bit, but built with default settings libtermkey is 64-bit.
+You will be confused when DllNotFoundException will thrown. )
