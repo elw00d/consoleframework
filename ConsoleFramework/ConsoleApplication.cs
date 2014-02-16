@@ -12,6 +12,7 @@ using ConsoleFramework.Xaml;
 
 #if !WIN32
 using Mono.Unix;
+using Mono.Unix.Native;
 #endif
 
 namespace ConsoleFramework
@@ -52,11 +53,13 @@ namespace ConsoleFramework
                     break;
                 case PlatformID.Unix:
 					usingLinux = true;
-					Mono.Unix.Native.Utsname uname;
-					Mono.Unix.Native.Syscall.uname(out uname);
+#if !WIN32
+					Utsname uname;
+					Syscall.uname(out uname);
 					if (uname.sysname == "Darwin") {
 						isDarwin = true;
 					}
+#endif
                     break;
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
