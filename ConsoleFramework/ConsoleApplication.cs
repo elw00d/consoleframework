@@ -39,6 +39,7 @@ namespace ConsoleFramework
         }
 
 		private static readonly bool usingLinux;
+		private static readonly bool isDarwin;
 
         static ConsoleApplication() {
             switch (Environment.OSVersion.Platform)
@@ -50,7 +51,12 @@ namespace ConsoleFramework
                     usingLinux = false;
                     break;
                 case PlatformID.Unix:
-                    usingLinux = true;
+					usingLinux = true;
+					Mono.Unix.Native.Utsname uname;
+					Mono.Unix.Native.Syscall.uname(out uname);
+					if (uname.sysname == "Darwin") {
+						isDarwin = true;
+					}
                     break;
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
@@ -336,8 +342,8 @@ namespace ConsoleFramework
 						inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
 						
 						winsize ws;
-						Libc.ioctl (Libc.STDIN_FILENO, Libc.TIOCGWINSZ, out ws);
-						
+						Libc.ioctl (1, isDarwin ? Libc.TIOCGWINSZ_DARWIN : Libc.TIOCGWINSZ_LINUX, out ws);
+
 						inputRecord.WindowBufferSizeEvent.dwSize.X = (short)ws.ws_col;
 						inputRecord.WindowBufferSizeEvent.dwSize.Y = (short)ws.ws_row;
 						processInputEvent (inputRecord);

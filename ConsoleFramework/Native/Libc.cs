@@ -64,7 +64,13 @@ namespace ConsoleFramework.Native
 		
 		// Used in terminal size retrieving
 		public const Int32 STDIN_FILENO = 0;
-		public const Int32 TIOCGWINSZ = 0x5413;
+
+		// For Linux it hardcoded to this constant
+		public const Int32 TIOCGWINSZ_LINUX = 0x5413;
+
+		// For Mac OS it is different
+		// https://groups.google.com/forum/#!msg/golang-nuts/eZgB_2RUDmQ/nv9wgeIoja4J
+		public const Int32 TIOCGWINSZ_DARWIN = 0x40087468;
 		
 		/// <summary>
 		/// Used in terminal size retrieving.
