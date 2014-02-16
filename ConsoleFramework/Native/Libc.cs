@@ -12,22 +12,28 @@ namespace ConsoleFramework.Native
         /// <summary>
 		/// See the &lt;sys/poll.h&gt; and &lt;bits/poll.h&gt;
 		/// </summary>
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int poll( pollfd[] fds, int fdsCount, int timeout);
 
-		[DllImport("libc.so", SetLastError = true)]
+		/// <summary>
+		/// Creates a pipe object. fds must be initialized array of 2 items.
+		/// fds[0] will store descriptor for reading
+		/// fds[1] will store descriptor for writing
+		/// </summary>
+		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int pipe (int[] fds);
+
 		/// <summary>
 		/// Creates the eventfd kernel object. Returns file descriptor for
 		/// created eventfd object.
 		/// </summary>
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int eventfd(uint initval, EVENTFD_FLAGS flags);
 		
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		private static extern int read(int fd, out UInt64 buf, int count);
 		
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		private static extern int write(int fd, ref UInt64 buf, int count);
 		
 		/// <summary>
@@ -53,7 +59,7 @@ namespace ConsoleFramework.Native
 		/// <summary>
 		/// Close the specified file descriptor.
 		/// </summary>
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int close(int fd);
 		
 		// Used in terminal size retrieving
@@ -63,7 +69,7 @@ namespace ConsoleFramework.Native
 		/// <summary>
 		/// Used in terminal size retrieving.
 		/// </summary>
-		[DllImport("libc.so", SetLastError = true)]
+		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int ioctl(int fd, int cmd, out winsize ws);
     }
 	

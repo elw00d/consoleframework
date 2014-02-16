@@ -108,7 +108,9 @@ namespace ConsoleFramework
         /// </summary>
         public void Exit() {
 			if (usingLinux) {
-				int res = Libc.writeInt64(eventfd, 1);
+				//int res = Libc.writeInt64(eventfd, 1);
+				int res = Libc.writeInt64(pipeFds[1], 1);
+
 				//Console.WriteLine("write(1) returned {0}\n", res);
 				//if (res == -1) {
 				//	int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
@@ -217,7 +219,8 @@ namespace ConsoleFramework
 			}
 		}
 		
-		private int eventfd = -1;
+		//private int eventfd = -1;
+		private int[] pipeFds;
 		private IntPtr termkeyHandle = IntPtr.Zero;
 		
 		private void runLinux (Control control)
@@ -262,15 +265,16 @@ namespace ConsoleFramework
 			
 			fds [1] = new pollfd ();
 			//eventfd = Libc.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
-			int[] pipeFds = new int[2];
+			pipeFds = new int[2];
 			Libc.pipe (pipeFds);
-			eventfd = pipeFds [1];
-			if (eventfd == -1) {
-				Console.WriteLine ("Cannot create eventfd\n");
-				int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
-				Console.WriteLine ("Last error is {0}\n", lastError);
-			}	
-			fds [1].fd = eventfd;
+			//eventfd = pipeFds [0];
+			//if (eventfd == -1) {
+			//	Console.WriteLine ("Cannot create eventfd\n");
+			//	int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
+			//	Console.WriteLine ("Last error is {0}\n", lastError);
+			//}	
+			//fds [1].fd = eventfd;
+			fds [1].fd = pipeFds[0];
 			fds [1].events = POLL_EVENTS.POLLIN;
 			
 #if !WIN32
@@ -283,7 +287,8 @@ namespace ConsoleFramework
 					// Wait for a signal to be delivered
 					int index = UnixSignal.WaitAny (signals, -1);
 					Mono.Unix.Native.Signum signal = signals [index].Signum;
-					Libc.writeInt64 (eventfd, 2);
+					//Libc.writeInt64 (eventfd, 2);
+					Libc.writeInt64 (pipeFds[1], 2);
 				}
 			}
 			);
@@ -356,7 +361,9 @@ namespace ConsoleFramework
 			}
 			
 			LibTermKey.termkey_destroy (termkeyHandle);
-			Libc.close (eventfd);
+			//Libc.close (eventfd);
+			Libc.close (pipeFds[0]);
+			Libc.close (pipeFds[1]);
 			Console.Write ("\x1B[?1002l");
 			
 			// restore cursor visibility before exit
@@ -607,7 +614,6 @@ namespace ConsoleFramework
                 renderer.Canvas.Width = dwSize.X;
                 renderer.Canvas.Height = dwSize.Y;
                 renderer.RootElementRect = new Rect(0, 0, dwSize.X, dwSize.Y);
-				File.AppendAllText ("log.txt", "Size is changed !\n");
                 return;
             }
             eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);

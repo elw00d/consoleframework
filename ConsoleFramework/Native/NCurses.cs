@@ -15,7 +15,7 @@ namespace ConsoleFramework.Native
 		/// If no terms has created manually returns stdscr.
 		/// stdscr is used to set colors and attributes.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern IntPtr initscr();
 		
 		/// <summary>
@@ -24,47 +24,47 @@ namespace ConsoleFramework.Native
 		/// (prefixed with KEY_MOUSE). Otherwise, mouse events cannot be
 		/// correctly interpreted (garbage key codes in getch).
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int keypad(IntPtr window, bool bf);
 		
 		/// <summary>
 		/// Enters the cbreak mode (no lines buffering in input).
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int cbreak();
 		
 		/// <summary>
 		/// Should be called to disable echo.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int noecho();
 		
 		/// <summary>
 		/// To avoid that addch('\') affects current symbol position.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int nonl();
 		
 		/// <summary>
 		/// Set this option to true to avoid problems with keyboard input buffer
 		/// flushing and inconsistent data displaying.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int intrflush(IntPtr window, bool bf);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern void refresh();
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern void clear();
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int getch();
 		
 		/// <summary>
 		/// Set specified cursor visibility.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int curs_set(CursorVisibility cursorVisibility);
 		
 		/// <summary>
@@ -72,45 +72,45 @@ namespace ConsoleFramework.Native
 		/// This routine does not move the physical cursor of the terminal until refresh is called.
 		/// The position specified is relative to the upper left-hand corner of the window, which is (0,0).
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int move(int y, int x);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern void endwin();
 		
 		/// <summary>
 		/// We should call this function right after initscr()
 		/// to enable the color subsystem.
 		/// </summary>
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int start_color();
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int init_color(short color, short r, short g, short b);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int init_pair(short i, short foregroundColor, short backgroundColor);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int addstr(string str);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int mvaddstr(int x, int y, string str);
 		
 		// doesn't work with UTF
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int mvaddch(int x, int y, char ch);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int attron(int attrs);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int attrset(int attrs);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int color_set(short color, IntPtr opts);
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern int attroff(int attrs);
 		
 		internal const short NCURSES_ATTR_SHIFT = 8;
@@ -271,7 +271,7 @@ namespace ConsoleFramework.Native
 		internal static bool	BUTTON_TRIPLE_CLICK(UInt64 e, int x) { return	((e) & NCURSES_MOUSE_MASK(x, 020)) != 0; }
 		internal static bool	BUTTON_RESERVED_EVENT( UInt64 e, int x) { return ((e) & NCURSES_MOUSE_MASK(x, 040)) != 0; }
 		
-		[DllImport("libncurses.so")]
+		[DllImport("libncursesw.so.5")]
 		internal static extern UInt64 mousemask(UInt64 mask, IntPtr currentMaskPtr);
 		
 		internal const int KEY_MOUSE = 409;
