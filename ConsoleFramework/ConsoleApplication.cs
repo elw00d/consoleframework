@@ -108,8 +108,8 @@ namespace ConsoleFramework
             }
         }
 
-        private List<ActionInfo> actionsToBeInvoked = new List< ActionInfo >();
-        private Object actionsLocker = new object(  );
+        private readonly List<ActionInfo> actionsToBeInvoked = new List< ActionInfo >();
+        private readonly Object actionsLocker = new object(  );
 
         /// <summary>
         /// Signals the message loop to be finished.
@@ -117,20 +117,14 @@ namespace ConsoleFramework
         /// </summary>
         public void Exit() {
 			if (usingLinux) {
-				//int res = Libc.writeInt64(eventfd, 1);
 				int res = Libc.writeInt64(pipeFds[1], 1);
-
-				//Console.WriteLine("write(1) returned {0}\n", res);
-				//if (res == -1) {
-				//	int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
-				//	Console.WriteLine("Last error is {0}\n", lastError);
-				//}
+                if (-1 == res) throw new InvalidOperationException("Cannot write to self-pipe.");
 			} else {
             	exitWaitHandle.Set();
 			}
         }
 
-        private Renderer renderer = new Renderer();
+        private readonly Renderer renderer = new Renderer();
         public Renderer Renderer {
             get {
                 return renderer;
@@ -145,8 +139,8 @@ namespace ConsoleFramework
         }
 
         private Control mainControl;
-        private EventManager eventManager;
-        private FocusManager focusManager;
+        private readonly EventManager eventManager;
+        private readonly FocusManager focusManager;
 
         public FocusManager FocusManager {
             get {
@@ -228,24 +222,28 @@ namespace ConsoleFramework
 			}
 		}
 		
-		//private int eventfd = -1;
-		private int[] pipeFds;
+		/// <summary>
+		/// File descriptors for self-pipe.
+		/// First descriptor is used to read from pipe, second - to write.
+		/// </summary>
+		private readonly int[] pipeFds = new int[2];
 		private IntPtr termkeyHandle = IntPtr.Zero;
 		
 		private void runLinux (Control control)
 		{
 			this.mainControl = control;
-			//
+			// todo : create physical canvas with actual terminal size
+            // or with user-defined settings
 			PhysicalCanvas canvas = new PhysicalCanvas (100, 35);
 			renderer.Canvas = canvas;
-			renderer.RootElementRect = new Rect (0, 0, 80, 25);
+			renderer.RootElementRect = new Rect (new Size(canvas.Width, canvas.Height));
 			renderer.RootElement = mainControl;
-			// initialize default focus
+			// Initialize default focus
 			focusManager.AfterAddElementToTree (mainControl);
 			//
 			mainControl.Invalidate ();
 			
-			// terminal initialization sequence
+			// Terminal initialization sequence
 			
 			// This is magic workaround to avoid messing up terminal after program finish
 			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
@@ -260,124 +258,106 @@ namespace ConsoleFramework
 			NCurses.start_color ();
 			
 			HideCursor ();
-			renderer.UpdateRender ();
-			
-			termkeyHandle = LibTermKey.termkey_new (0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL);
-			// setup the input mode
-			Console.Write ("\x1B[?1002h");
-			pollfd fd = new pollfd ();
-			fd.fd = 0;
-			fd.events = POLL_EVENTS.POLLIN;
-			
-			pollfd[] fds = new pollfd[2];
-			fds [0] = fd;
-			
-			fds [1] = new pollfd ();
-			//eventfd = Libc.eventfd (0, EVENTFD_FLAGS.EFD_CLOEXEC);
-			pipeFds = new int[2];
-			Libc.pipe (pipeFds);
-			//eventfd = pipeFds [0];
-			//if (eventfd == -1) {
-			//	Console.WriteLine ("Cannot create eventfd\n");
-			//	int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
-			//	Console.WriteLine ("Last error is {0}\n", lastError);
-			//}	
-			//fds [1].fd = eventfd;
-			fds [1].fd = pipeFds[0];
-			fds [1].events = POLL_EVENTS.POLLIN;
-			
-#if !WIN32
-			// catch SIGWINCH to handle terminal resizing
-			UnixSignal[] signals = new UnixSignal [] {
-			    new UnixSignal (Mono.Unix.Native.Signum.SIGWINCH)
-			};
-			Thread signal_thread = new Thread (delegate () {
-				while (true) {
-					// Wait for a signal to be delivered
-					int index = UnixSignal.WaitAny (signals, -1);
-					Mono.Unix.Native.Signum signal = signals [index].Signum;
-					//Libc.writeInt64 (eventfd, 2);
-					Libc.writeInt64 (pipeFds[1], 2);
-				}
-			}
-			);
-			signal_thread.IsBackground = false;
-			signal_thread.Start ();
-#endif
-			
-			TermKeyKey key = new TermKeyKey ();
-			while (true) {
-				int pollRes = Libc.poll (fds, 2, -1);
-				if (0 == pollRes) {
-					// timed out
-					Console.WriteLine ("Timed out");
-					if (LibTermKey.termkey_getkey_force (termkeyHandle, ref key) == TermKeyResult.TERMKEY_RES_KEY) {
-						Console.WriteLine ("got TERMKEY_RES_KEY");
-					}					
-				} else if (-1 == pollRes) {
-					int errorCode = System.Runtime.InteropServices.Marshal.GetLastWin32Error ();
-					//Console.WriteLine(string.Format("ErrorCode = {0}", errorCode));
-					// todo : write to debug console if error code differs from 4
-				}
-				
-				if (fds [1].revents != POLL_EVENTS.NONE) {
-					UInt64 u;
-					Libc.readInt64 (fds [1].fd, out u);
-					//Console.WriteLine ("Readed eventfd counter : {0}\n", u);
-					if (u == 1) {
-						// exit from application
-#if !WIN32
-						signal_thread.Abort ();
-#endif
-						break;
-					}
-					if (u == 2) {
-						// reinitializing ncurses to deal with new dimensions
-						// http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
-						NCurses.endwin ();
-						// Needs to be called after an endwin() so ncurses will initialize
-						// itself with the new terminal dimensions.
-						NCurses.refresh ();
-						NCurses.clear ();
-						
-						// get new term size and process appropriate INPUT_RECORD event
-						INPUT_RECORD inputRecord = new INPUT_RECORD ();
-						inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
-						
-						winsize ws;
-						Libc.ioctl (1, isDarwin ? Libc.TIOCGWINSZ_DARWIN : Libc.TIOCGWINSZ_LINUX, out ws);
+		    try {
+		        renderer.UpdateRender( );
 
-						inputRecord.WindowBufferSizeEvent.dwSize.X = (short)ws.ws_col;
-						inputRecord.WindowBufferSizeEvent.dwSize.Y = (short)ws.ws_row;
-						processInputEvent (inputRecord);
-						
-						renderer.UpdateRender ();
-					}
-				}
-				
-				if ((fds [0].revents & POLL_EVENTS.POLLIN) == POLL_EVENTS.POLLIN ||
-					(fds [0].revents & POLL_EVENTS.POLLHUP) == POLL_EVENTS.POLLHUP ||
-					(fds [0].revents & POLL_EVENTS.POLLERR) == POLL_EVENTS.POLLERR) {
-					// todo : log return value
-					LibTermKey.termkey_advisereadable (termkeyHandle);
-				}
-				
-				TermKeyResult result;
-				while ((result = LibTermKey.termkey_getkey(termkeyHandle, ref key)) == TermKeyResult.TERMKEY_RES_KEY) {
-					processLinuxInput (key);
-					renderer.UpdateRender ();
-				}
-			}
-			
-			LibTermKey.termkey_destroy (termkeyHandle);
-			//Libc.close (eventfd);
-			Libc.close (pipeFds[0]);
-			Libc.close (pipeFds[1]);
-			Console.Write ("\x1B[?1002l");
-			
-			// restore cursor visibility before exit
-			ShowCursor ();
-			NCurses.endwin ();
+		        termkeyHandle = LibTermKey.termkey_new( 0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
+		        // Setup the input mode
+		        Console.Write( "\x1B[?1002h" );
+		        pollfd fd = new pollfd( );
+		        fd.fd = 0;
+		        fd.events = POLL_EVENTS.POLLIN;
+
+		        pollfd[ ] fds = new pollfd[ 2 ];
+		        fds[ 0 ] = fd;
+		        fds[ 1 ] = new pollfd( );
+		        int pipeResult = Libc.pipe( pipeFds );
+		        if ( pipeResult == -1 ) {
+		            throw new InvalidOperationException( "Cannot create self-pipe." );
+		        }
+		        fds[ 1 ].fd = pipeFds[ 0 ];
+		        fds[ 1 ].events = POLL_EVENTS.POLLIN;
+
+		        try {
+#if !WIN32
+                    // catch SIGWINCH to handle terminal resizing
+			        UnixSignal[] signals = new UnixSignal [] {
+			            new UnixSignal (Signum.SIGWINCH)
+			        };
+			        Thread signal_thread = new Thread (delegate () {
+				        while (true) {
+					        // Wait for a signal to be delivered
+					        int index = UnixSignal.WaitAny (signals, -1);
+					        Signum signal = signals [index].Signum;
+					        Libc.writeInt64 (pipeFds[1], 2);
+				        }
+			        }
+			        );
+			        signal_thread.IsBackground = false;
+			        signal_thread.Start ();
+#endif
+		            TermKeyKey key = new TermKeyKey( );
+		            while ( true ) {
+		                int pollRes = Libc.poll( fds, 2, -1 );
+		                if ( pollRes <= 0 ) throw new InvalidOperationException( "Assertion failed." );
+
+		                if ( fds[ 1 ].revents != POLL_EVENTS.NONE ) {
+		                    UInt64 u;
+		                    Libc.readInt64( fds[ 1 ].fd, out u );
+		                    if ( u == 1 ) {
+		                        // Exit from application
+#if !WIN32
+						        signal_thread.Abort ();
+#endif
+		                        break;
+		                    }
+		                    if ( u == 2 ) {
+		                        // Reinitializing ncurses to deal with new dimensions
+		                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
+		                        NCurses.endwin( );
+		                        // Needs to be called after an endwin() so ncurses will initialize
+		                        // itself with the new terminal dimensions.
+		                        NCurses.refresh( );
+		                        NCurses.clear( );
+
+		                        // get new term size and process appropriate INPUT_RECORD event
+		                        INPUT_RECORD inputRecord = new INPUT_RECORD( );
+		                        inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
+
+		                        winsize ws;
+		                        Libc.ioctl( 1, isDarwin ? Libc.TIOCGWINSZ_DARWIN : Libc.TIOCGWINSZ_LINUX, out ws );
+
+		                        inputRecord.WindowBufferSizeEvent.dwSize.X = ( short ) ws.ws_col;
+		                        inputRecord.WindowBufferSizeEvent.dwSize.Y = ( short ) ws.ws_row;
+		                        processInputEvent( inputRecord );
+
+		                        renderer.UpdateRender( );
+		                    }
+		                }
+
+		                if ( ( fds[ 0 ].revents & POLL_EVENTS.POLLIN ) == POLL_EVENTS.POLLIN ||
+		                     ( fds[ 0 ].revents & POLL_EVENTS.POLLHUP ) == POLL_EVENTS.POLLHUP ||
+		                     ( fds[ 0 ].revents & POLL_EVENTS.POLLERR ) == POLL_EVENTS.POLLERR ) {
+		                    LibTermKey.termkey_advisereadable( termkeyHandle );
+		                }
+
+		                while ( ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) ) == TermKeyResult.TERMKEY_RES_KEY ) {
+		                    processLinuxInput( key );
+		                    renderer.UpdateRender( );
+		                }
+		            }
+
+		        } finally {
+		            LibTermKey.termkey_destroy( termkeyHandle );
+		            Libc.close( pipeFds[ 0 ] );
+		            Libc.close( pipeFds[ 1 ] );
+		            Console.Write( "\x1B[?1002l" );
+		        }
+		    } finally {
+		        // Restore cursor visibility before exit
+		        ShowCursor( );
+		        NCurses.endwin( );
+		    }
 		}
 		
 		private void processLinuxInput (TermKeyKey key)
@@ -592,17 +572,6 @@ namespace ConsoleFramework
                     top.waitHandle.Set( );
                 }
             }
-//            List<ActionInfo> actionsCopy;
-//            lock ( actionsLocker ) {
-//                actionsCopy = new List< ActionInfo >( actionsToBeInvoked );
-//                actionsToBeInvoked.Clear(  );
-//            }
-//            foreach ( ActionInfo action in actionsCopy ) {
-//                action.action.Invoke(  );
-//                if ( null != action.waitHandle ) {
-//                    action.waitHandle.Set( );
-//                }
-//            }
         }
 
         private void processInput() {
