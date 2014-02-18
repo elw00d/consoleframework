@@ -77,6 +77,12 @@ namespace ConsoleFramework.Native
 		/// </summary>
 		[DllImport("libc.so.6", SetLastError = true)]
 		public static extern int ioctl(int fd, int cmd, out winsize ws);
+
+        /// <summary>
+        /// Interrupted system call. If after poll() error code is EINTR, this means
+        /// that a signal was caught during poll().
+        /// </summary>
+        public const Int32 EINTR = 4;
     }
 	
 	/// <summary>

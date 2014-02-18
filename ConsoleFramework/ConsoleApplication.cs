@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
@@ -299,7 +300,13 @@ namespace ConsoleFramework
 		            TermKeyKey key = new TermKeyKey( );
 		            while ( true ) {
 		                int pollRes = Libc.poll( fds, 2, -1 );
-		                if ( pollRes <= 0 ) throw new InvalidOperationException( "Assertion failed." );
+		                if ( pollRes == 0 ) throw new InvalidOperationException( "Assertion failed." );
+                        if ( pollRes == -1 ) {
+                            int errorCode = Marshal.GetLastWin32Error();
+                            if ( errorCode != Libc.EINTR ) {
+                                throw new InvalidOperationException(string.Format("poll() returned with error code {0}", errorCode));
+                            }
+                        }
 
 		                if ( fds[ 1 ].revents != POLL_EVENTS.NONE ) {
 		                    UInt64 u;
