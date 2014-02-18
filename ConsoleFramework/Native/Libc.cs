@@ -83,6 +83,17 @@ namespace ConsoleFramework.Native
         /// that a signal was caught during poll().
         /// </summary>
         public const Int32 EINTR = 4;
+
+        /// <summary>
+        /// Returns actual terminal width and height.
+        /// </summary>
+        /// <param name="isDarwin">True if application is executed under Mac OS X.</param>
+        /// <returns></returns>
+        public static winsize GetTerminalSize( bool isDarwin ) {
+            winsize ws;
+            ioctl(STDIN_FILENO, isDarwin ? TIOCGWINSZ_DARWIN : TIOCGWINSZ_LINUX, out ws);
+            return ws;
+        }
     }
 	
 	/// <summary>

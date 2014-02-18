@@ -217,11 +217,19 @@ namespace ConsoleFramework
         /// <param name="control"></param>
 		public void Run(Control control) {
 			if (usingLinux) {
-				runLinux(control);
+				runLinux(control, Size.Empty, Rect.Empty);
 			} else {
-				runWindows(control);
+				runWindows(control, Size.Empty, Rect.Empty);
 			}
 		}
+
+        public void Run( Control control, Size canvasSize, Rect rectToUse ) {
+            if (usingLinux) {
+				runLinux(control, canvasSize, rectToUse);
+			} else {
+				runWindows(control, canvasSize, rectToUse);
+			}
+        }
 		
 		/// <summary>
 		/// File descriptors for self-pipe.
@@ -230,14 +238,22 @@ namespace ConsoleFramework
 		private readonly int[] pipeFds = new int[2];
 		private IntPtr termkeyHandle = IntPtr.Zero;
 		
-		private void runLinux (Control control)
-		{
+		private void runLinux (Control control, Size canvasSize, Rect rectToUse) {
 			this.mainControl = control;
-			// todo : create physical canvas with actual terminal size
-            // or with user-defined settings
-			PhysicalCanvas canvas = new PhysicalCanvas (100, 35);
-			renderer.Canvas = canvas;
-			renderer.RootElementRect = new Rect (new Size(canvas.Width, canvas.Height));
+			
+			PhysicalCanvas canvas;
+		    if ( canvasSize.IsEmpty ) {
+		        // Create physical canvas with actual terminal size
+		        winsize ws = Libc.GetTerminalSize( isDarwin );
+		        canvas = new PhysicalCanvas( ws.ws_col, ws.ws_row );
+		    } else {
+		        canvas = new PhysicalCanvas( canvasSize.Width, canvasSize.Height );
+		    }
+		    renderer.Canvas = canvas;
+		    if ( rectToUse.IsEmpty )
+		        renderer.RootElementRect = new Rect( new Size( canvas.Width, canvas.Height ) );
+		    else
+		        renderer.RootElementRect = rectToUse;
 			renderer.RootElement = mainControl;
 			// Initialize default focus
 			focusManager.AfterAddElementToTree (mainControl);
@@ -331,8 +347,7 @@ namespace ConsoleFramework
 		                        INPUT_RECORD inputRecord = new INPUT_RECORD( );
 		                        inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
 
-		                        winsize ws;
-		                        Libc.ioctl( 1, isDarwin ? Libc.TIOCGWINSZ_DARWIN : Libc.TIOCGWINSZ_LINUX, out ws );
+		                        winsize ws = Libc.GetTerminalSize( isDarwin );
 
 		                        inputRecord.WindowBufferSizeEvent.dwSize.X = ( short ) ws.ws_col;
 		                        inputRecord.WindowBufferSizeEvent.dwSize.Y = ( short ) ws.ws_row;
@@ -495,7 +510,7 @@ namespace ConsoleFramework
 			}
 		}
 		
-        private void runWindows(Control control) {
+        private void runWindows(Control control, Size canvasSize, Rect rectToUse) {
             this.mainControl = control;
             this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
             //
@@ -518,10 +533,19 @@ namespace ConsoleFramework
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
-            PhysicalCanvas canvas = new PhysicalCanvas(screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle);
+            PhysicalCanvas canvas;
+            if ( canvasSize.IsEmpty ) {
+                canvas = new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle );
+            } else {
+                canvas = new PhysicalCanvas( canvasSize.Width, canvasSize.Height, stdOutputHandle);
+            }
             renderer.Canvas = canvas;
             // fill the canvas by default
-            renderer.RootElementRect = new Rect(0, 0, canvas.Width, canvas.Height);
+            if ( rectToUse.IsEmpty ) {
+                renderer.RootElementRect = new Rect( 0, 0, canvas.Width, canvas.Height );
+            } else {
+                renderer.RootElementRect = rectToUse;
+            }
             renderer.RootElement = mainControl;
             // initialize default focus
             focusManager.AfterAddElementToTree(mainControl);

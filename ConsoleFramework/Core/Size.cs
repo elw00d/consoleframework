@@ -4,7 +4,6 @@ namespace ConsoleFramework.Core {
     public struct Size {
         internal int width;
         internal int height;
-        private static readonly Size s_empty;
 
         public static bool operator ==(Size size1, Size size2) {
             return ((size1.Width == size2.Width) && (size1.Height == size2.Height));
@@ -57,13 +56,13 @@ namespace ConsoleFramework.Core {
 
         public static Size Empty {
             get {
-                return s_empty;
+                return CreateEmptySize(  );
             }
         }
 
         public bool IsEmpty {
             get {
-                return (this.width < 0);
+                return (this.width <= 0);
             }
         }
 
@@ -72,9 +71,9 @@ namespace ConsoleFramework.Core {
                 return this.width;
             }
             set {
-                if (this.IsEmpty) {
-                    throw new InvalidOperationException("Size_CannotModifyEmptySize");
-                }
+                //if (this.IsEmpty) {
+                //    throw new InvalidOperationException("Size_CannotModifyEmptySize");
+                //}
                 if (value < 0) {
                     throw new ArgumentException("Size_WidthCannotBeNegative");
                 }
@@ -87,9 +86,9 @@ namespace ConsoleFramework.Core {
                 return this.height;
             }
             set {
-                if (this.IsEmpty) {
-                    throw new InvalidOperationException("Size_CannotModifyEmptySize");
-                }
+                //if (this.IsEmpty) {
+                //    throw new InvalidOperationException("Size_CannotModifyEmptySize");
+                //}
                 if (value < 0) {
                     throw new ArgumentException("Size_HeightCannotBeNegative");
                 }
@@ -111,10 +110,6 @@ namespace ConsoleFramework.Core {
                 height = 0
             };
             return size;
-        }
-
-        static Size() {
-            s_empty = CreateEmptySize();
         }
 
         public override string ToString() {
