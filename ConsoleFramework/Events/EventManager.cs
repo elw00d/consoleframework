@@ -187,7 +187,7 @@ namespace ConsoleFramework.Events {
 
         private readonly List<Control> prevMouseOverStack = new List<Control>();
 
-        public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement, Rect rootElementRect) {
+        public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
 //                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)

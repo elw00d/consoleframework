@@ -224,7 +224,7 @@ namespace ConsoleFramework.Rendering
         public void CopyToPhysicalCanvas(PhysicalCanvas canvas, Rect affectedRect, Point offset) {
             Rect rectToCopy = affectedRect;
             Rect bufferRect = new Rect(new Point(0, 0), new Size(this.width, this.height));
-            Rect canvasRect = new Rect(new Point(-offset.X, -offset.Y), new Size(canvas.Width, canvas.Height));
+            Rect canvasRect = new Rect(new Point(-offset.X, -offset.Y), canvas.Size);
             rectToCopy.Intersect(canvasRect);
             rectToCopy.Intersect(bufferRect);
             //

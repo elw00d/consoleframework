@@ -181,7 +181,11 @@ namespace ConsoleFramework {
                 windowsHost.Show(window1);
                 windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
-                application.Run(windowsHost);
+                application.TerminalSizeChanged += ( sender, eventArgs ) => {
+                    application.CanvasSize = new Size(eventArgs.Width, eventArgs.Height);
+                    application.RootElementRect = new Rect(new Size(eventArgs.Width, eventArgs.Height));
+                };
+                application.Run(windowsHost, new Size(80, 30), Rect.Empty);
             }
         }
     }

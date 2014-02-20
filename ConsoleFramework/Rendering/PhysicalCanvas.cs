@@ -13,14 +13,12 @@ namespace ConsoleFramework.Rendering
         private readonly IntPtr stdOutputHandle = IntPtr.Zero;
 		
 		public PhysicalCanvas(int width, int height) {
-			this.width = width;
-			this.height = height;
+			this.size = new Size(width, height);
 			this.buffer = new CHAR_INFO[height, width];
 		}
 		
         public PhysicalCanvas(int width, int height, IntPtr stdOutputHandle) {
-            this.width = width;
-            this.height = height;
+            this.size = new Size(width, height);
             this.stdOutputHandle = stdOutputHandle;
             this.buffer = new CHAR_INFO[height, width];
         }
@@ -35,28 +33,19 @@ namespace ConsoleFramework.Rendering
         /// </summary>
         private readonly Dictionary<int, NestedIndexer> cachedIndexers = new Dictionary<int, NestedIndexer>();
 
-        private int width;
-        public int Width {
-            get {
-                return width;
-            }
+        private Size size;
+        public Size Size {
+            get { return size; }
             set {
-                if (width != value) {
-                    width = value;
-                    buffer = new CHAR_INFO[height, width];
-                }
-            }
-        }
-
-        private int height;
-        public int Height {
-            get {
-                return height;
-            }
-            set {
-                if (height != value) {
-                    height = value;
-                    buffer = new CHAR_INFO[height, width];
+                if ( value != size ) {
+                    CHAR_INFO[,] oldBuffer = buffer;
+                    buffer = new CHAR_INFO[value.Height, value.Width];
+                    for ( int x = 0, w = Math.Min( size.Width, value.Width ); x < w; x++ ) {
+                        for ( int y = 0, h = Math.Min( size.Height, value.Height ); y < h ; y++ ) {
+                            buffer[ y, x ] = oldBuffer[ y, x ];
+                        }
+                    }
+                    size = value;
                 }
             }
         }
@@ -76,7 +65,7 @@ namespace ConsoleFramework.Rendering
 
             public CHAR_INFO_ref this[int index] {
                 get {
-                    if (index < 0 || index >= canvas.height) {
+                    if (index < 0 || index >= canvas.size.Height) {
                         throw new IndexOutOfRangeException("index exceeds specified buffer height.");
                     }
                     if (references.ContainsKey(index)) {
@@ -148,7 +137,7 @@ namespace ConsoleFramework.Rendering
 
         public NestedIndexer this[int index] {
             get {
-                if (index < 0 || index >= width) {
+                if (index < 0 || index >= size.width) {
                     throw new IndexOutOfRangeException("index exceeds specified buffer width.");
                 }
                 if (cachedIndexers.ContainsKey(index)) {
@@ -164,7 +153,7 @@ namespace ConsoleFramework.Rendering
         /// Writes collected data to console screen buffer.
         /// </summary>
         public void Flush() {
-            Flush(new Rect(0, 0, width, height));
+            Flush(new Rect(new Point(0, 0), size));
         }
 
         /// <summary>
@@ -175,7 +164,7 @@ namespace ConsoleFramework.Rendering
 				// we are in windows environment
 	            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
 	                (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
-	            if (!Win32.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) width, (short) height),
+	            if (!Win32.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) size.Width, (short) size.Height),
 	                new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
 	                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", Win32.GetLastErrorMessage()));
 	            }

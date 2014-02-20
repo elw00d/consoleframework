@@ -72,7 +72,7 @@ namespace ConsoleFramework.Rendering
                 // affected rect relative to canvas
                 Rect affectedRectAbsolute = new Rect(affectedRect.x + RootElementRect.x, affectedRect.y + RootElementRect.y, affectedRect.width, affectedRect.height);
                 // clip according to real canvas size
-                affectedRectAbsolute.Intersect(new Rect(new Point(0, 0), new Size(Canvas.Width, Canvas.Height)));
+                affectedRectAbsolute.Intersect(new Rect(new Point(0, 0), Canvas.Size));
                 Canvas.Flush(affectedRectAbsolute);
             }
             // if anything changed in layout - update displaying cursor state

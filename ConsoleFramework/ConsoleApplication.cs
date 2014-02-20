@@ -18,13 +18,77 @@ using Mono.Unix.Native;
 
 namespace ConsoleFramework
 {
+    public class TerminalSizeChangedEventArgs : EventArgs
+    {
+        public readonly int Width;
+        public readonly int Height;
+
+        public TerminalSizeChangedEventArgs( int width, int height ) {
+            Width = width;
+            Height = height;
+        }
+    }
+
+    public delegate void TerminalSizeChangedHandler( object sender, TerminalSizeChangedEventArgs args );
+
     /// <summary>
     /// Console application entry point.
     /// Encapsulates messages loop and application lifecycle.
     /// Supports Windows and Linux.
     /// </summary>
-    public sealed class ConsoleApplication : IDisposable {
-		
+    public sealed class ConsoleApplication : IDisposable
+    {
+        public event TerminalSizeChangedHandler TerminalSizeChanged;
+
+        /// <summary>
+        /// Default TerminalSizeChanged event handler. Invoked when
+        /// initial CanvasSize and RootElementRect are empty and no another
+        /// TerminalSizeChanged handler is attached.
+        /// </summary>
+        public void OnTerminalSizeChangedDefault( object sender, TerminalSizeChangedEventArgs args ) {
+            if (!this.userCanvasSize.IsEmpty) throw new InvalidOperationException("Assertion failed.");
+            if (!this.userRootElementRect.IsEmpty) throw new InvalidOperationException("Assertion failed.");
+            if (this.TerminalSizeChanged != null) throw new InvalidOperationException("Assertion failed.");
+
+            canvas.Size = new Size(args.Width, args.Height);
+            renderer.RootElementRect = new Rect(canvas.Size);
+            renderer.UpdateRender();
+        }
+
+        private Size userCanvasSize;
+        public Size CanvasSize {
+            get {
+                if ( running && userCanvasSize.IsEmpty )
+                    return canvas.Size;
+                return userCanvasSize;
+            }
+            set {
+                if ( running && value != canvas.Size ) {
+                    canvas.Size = value;
+                }
+                userCanvasSize = value;
+            }
+        }
+
+        private Rect userRootElementRect;
+        public Rect RootElementRect {
+            get {
+                if ( running && userRootElementRect.IsEmpty ) {
+                    return renderer.RootElementRect;
+                }
+                return userRootElementRect;
+            }
+            set {
+                if ( running && value != renderer.RootElementRect ) {
+                    renderer.RootElementRect = value;
+                }
+                userRootElementRect = value;
+            }
+        }
+
+        private bool running;
+        private PhysicalCanvas canvas;
+
         public static Control LoadFromXaml( string xamlResourceName, object dataContext ) {
             var assembly = Assembly.GetEntryAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(xamlResourceName))
@@ -237,11 +301,10 @@ namespace ConsoleFramework
 		/// </summary>
 		private readonly int[] pipeFds = new int[2];
 		private IntPtr termkeyHandle = IntPtr.Zero;
-		
-		private void runLinux (Control control, Size canvasSize, Rect rectToUse) {
+
+        private void runLinux (Control control, Size canvasSize, Rect rectToUse) {
 			this.mainControl = control;
 			
-			PhysicalCanvas canvas;
 		    if ( canvasSize.IsEmpty ) {
 		        // Create physical canvas with actual terminal size
 		        winsize ws = Libc.GetTerminalSize( isDarwin );
@@ -251,7 +314,7 @@ namespace ConsoleFramework
 		    }
 		    renderer.Canvas = canvas;
 		    if ( rectToUse.IsEmpty )
-		        renderer.RootElementRect = new Rect( new Size( canvas.Width, canvas.Height ) );
+		        renderer.RootElementRect = new Rect( canvas.Size );
 		    else
 		        renderer.RootElementRect = rectToUse;
 			renderer.RootElement = mainControl;
@@ -335,14 +398,6 @@ namespace ConsoleFramework
 		                        break;
 		                    }
 		                    if ( u == 2 ) {
-		                        // Reinitializing ncurses to deal with new dimensions
-		                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
-		                        NCurses.endwin( );
-		                        // Needs to be called after an endwin() so ncurses will initialize
-		                        // itself with the new terminal dimensions.
-		                        NCurses.refresh( );
-		                        NCurses.clear( );
-
 		                        // get new term size and process appropriate INPUT_RECORD event
 		                        INPUT_RECORD inputRecord = new INPUT_RECORD( );
 		                        inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
@@ -352,8 +407,6 @@ namespace ConsoleFramework
 		                        inputRecord.WindowBufferSizeEvent.dwSize.X = ( short ) ws.ws_col;
 		                        inputRecord.WindowBufferSizeEvent.dwSize.Y = ( short ) ws.ws_row;
 		                        processInputEvent( inputRecord );
-
-		                        renderer.UpdateRender( );
 		                    }
 		                }
 
@@ -511,6 +564,7 @@ namespace ConsoleFramework
 		}
 		
         private void runWindows(Control control, Size canvasSize, Rect rectToUse) {
+            this.running = true;
             this.mainControl = control;
             this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
             //
@@ -533,7 +587,6 @@ namespace ConsoleFramework
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
-            PhysicalCanvas canvas;
             if ( canvasSize.IsEmpty ) {
                 canvas = new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle );
             } else {
@@ -542,7 +595,7 @@ namespace ConsoleFramework
             renderer.Canvas = canvas;
             // fill the canvas by default
             if ( rectToUse.IsEmpty ) {
-                renderer.RootElementRect = new Rect( 0, 0, canvas.Width, canvas.Height );
+                renderer.RootElementRect = new Rect( new Point(0, 0), canvas.Size );
             } else {
                 renderer.RootElementRect = rectToUse;
             }
@@ -585,6 +638,8 @@ namespace ConsoleFramework
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
 
             // todo : restore attributes of console output
+
+            this.running = false;
         }
 
         private void processInvokeActions( ) {
@@ -620,12 +675,39 @@ namespace ConsoleFramework
         private void processInputEvent(INPUT_RECORD inputRecord) {
             if ( inputRecord.EventType == EventType.WINDOW_BUFFER_SIZE_EVENT ) {
                 COORD dwSize = inputRecord.WindowBufferSizeEvent.dwSize;
-                renderer.Canvas.Width = dwSize.X;
-                renderer.Canvas.Height = dwSize.Y;
-                renderer.RootElementRect = new Rect(0, 0, dwSize.X, dwSize.Y);
+                if ( TerminalSizeChanged == null
+                     && userCanvasSize.IsEmpty
+                     && userRootElementRect.IsEmpty ) {
+                    
+                    if ( usingLinux ) {
+                        // Reinitializing ncurses to deal with new dimensions
+                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
+                        NCurses.endwin();
+                        // Needs to be called after an endwin() so ncurses will initialize
+                        // itself with the new terminal dimensions.
+                        NCurses.refresh();
+                        NCurses.clear();
+                    }
+
+                    OnTerminalSizeChangedDefault(this, new TerminalSizeChangedEventArgs( dwSize.X, dwSize.Y ));
+                } else if ( TerminalSizeChanged != null ) {
+                    TerminalSizeChanged.Invoke(this, new TerminalSizeChangedEventArgs(dwSize.X, dwSize.Y));
+
+                    if ( usingLinux ) {
+                        // Reinitializing ncurses to deal with new dimensions
+                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
+                        NCurses.endwin();
+                        // Needs to be called after an endwin() so ncurses will initialize
+                        // itself with the new terminal dimensions.
+                        NCurses.refresh();
+                        NCurses.clear();
+                    }
+
+                    renderer.UpdateRender(  );
+                }
                 return;
             }
-            eventManager.ProcessInput(inputRecord, mainControl, renderer.RootElementRect);
+            eventManager.ProcessInput(inputRecord, mainControl);
         }
 
         /// <summary>
