@@ -53,7 +53,7 @@ namespace ConsoleFramework.Rendering
         /// Определяет, какие области экрана необходимо обновить и выполняет перерисовку
         /// экрана консоли.
         /// </summary>
-        public void UpdateRender() {
+        public void UpdateRender(bool forceRepaintAll = false) {
             renderingUpdatedControls.Clear();
             // invalidate layout and fill renderingUpdatedControls list
             InvalidateLayout();
@@ -66,6 +66,7 @@ namespace ConsoleFramework.Rendering
                 Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
                 affectedRect.Union(currentAffectedRect);
             }
+			if (forceRepaintAll) affectedRect = new Rect(rootElementRect.Size);
             if (!affectedRect.IsEmpty) {
                 // flush stored image (with this.RootElementRect offset)
 

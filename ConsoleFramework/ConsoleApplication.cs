@@ -56,6 +56,11 @@ namespace ConsoleFramework
         }
 
         private Size userCanvasSize;
+
+		/// <summary>
+		/// Gets or sets a size of canvas. Whet set, old canvas image will be
+		/// copied to new one.
+		/// </summary>
         public Size CanvasSize {
             get {
                 if ( running && userCanvasSize.IsEmpty )
@@ -71,6 +76,10 @@ namespace ConsoleFramework
         }
 
         private Rect userRootElementRect;
+		/// <summary>
+		/// Gets or sets the root element rect.
+		/// When set, root element will be added to invalidation queue automatically.
+		/// </summary>
         public Rect RootElementRect {
             get {
                 if ( running && userRootElementRect.IsEmpty ) {
@@ -280,19 +289,22 @@ namespace ConsoleFramework
         /// </summary>
         /// <param name="control"></param>
 		public void Run(Control control) {
-			if (usingLinux) {
-				runLinux(control, Size.Empty, Rect.Empty);
-			} else {
-				runWindows(control, Size.Empty, Rect.Empty);
+			this.running = true;
+			try {
+				if (usingLinux) {
+					runLinux(control);
+				} else {
+					runWindows(control);
+				}
+			} finally {
+				this.running = false;
 			}
 		}
 
         public void Run( Control control, Size canvasSize, Rect rectToUse ) {
-            if (usingLinux) {
-				runLinux(control, canvasSize, rectToUse);
-			} else {
-				runWindows(control, canvasSize, rectToUse);
-			}
+			userCanvasSize = canvasSize;
+			userRootElementRect = rectToUse;
+			Run(control);
         }
 		
 		/// <summary>
@@ -302,21 +314,21 @@ namespace ConsoleFramework
 		private readonly int[] pipeFds = new int[2];
 		private IntPtr termkeyHandle = IntPtr.Zero;
 
-        private void runLinux (Control control, Size canvasSize, Rect rectToUse) {
+        private void runLinux (Control control) {
 			this.mainControl = control;
 			
-		    if ( canvasSize.IsEmpty ) {
+		    if ( userCanvasSize.IsEmpty ) {
 		        // Create physical canvas with actual terminal size
 		        winsize ws = Libc.GetTerminalSize( isDarwin );
 		        canvas = new PhysicalCanvas( ws.ws_col, ws.ws_row );
 		    } else {
-		        canvas = new PhysicalCanvas( canvasSize.Width, canvasSize.Height );
+				canvas = new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height );
 		    }
 		    renderer.Canvas = canvas;
-		    if ( rectToUse.IsEmpty )
+		    if ( userRootElementRect.IsEmpty )
 		        renderer.RootElementRect = new Rect( canvas.Size );
 		    else
-		        renderer.RootElementRect = rectToUse;
+				renderer.RootElementRect = userRootElementRect;
 			renderer.RootElement = mainControl;
 			// Initialize default focus
 			focusManager.AfterAddElementToTree (mainControl);
@@ -563,8 +575,7 @@ namespace ConsoleFramework
 			}
 		}
 		
-        private void runWindows(Control control, Size canvasSize, Rect rectToUse) {
-            this.running = true;
+        private void runWindows(Control control) {
             this.mainControl = control;
             this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
             //
@@ -587,19 +598,19 @@ namespace ConsoleFramework
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
-            if ( canvasSize.IsEmpty ) {
+            if ( userCanvasSize.IsEmpty ) {
                 canvas = new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle );
             } else {
-                canvas = new PhysicalCanvas( canvasSize.Width, canvasSize.Height, stdOutputHandle);
+				canvas = new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height, stdOutputHandle);
             }
             renderer.Canvas = canvas;
             // fill the canvas by default
-            if ( rectToUse.IsEmpty ) {
+            if ( userRootElementRect.IsEmpty ) {
                 renderer.RootElementRect = new Rect( new Point(0, 0), canvas.Size );
             } else {
-                renderer.RootElementRect = rectToUse;
-            }
-            renderer.RootElement = mainControl;
+				renderer.RootElementRect = userRootElementRect;
+			}
+			renderer.RootElement = mainControl;
             // initialize default focus
             focusManager.AfterAddElementToTree(mainControl);
             //
@@ -638,8 +649,6 @@ namespace ConsoleFramework
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
 
             // todo : restore attributes of console output
-
-            this.running = false;
         }
 
         private void processInvokeActions( ) {
@@ -674,37 +683,32 @@ namespace ConsoleFramework
 
         private void processInputEvent(INPUT_RECORD inputRecord) {
             if ( inputRecord.EventType == EventType.WINDOW_BUFFER_SIZE_EVENT ) {
-                COORD dwSize = inputRecord.WindowBufferSizeEvent.dwSize;
+
+				if ( usingLinux ) {
+					// Reinitializing ncurses to deal with new dimensions
+					// http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
+					NCurses.endwin();
+					// Needs to be called after an endwin() so ncurses will initialize
+					// itself with the new terminal dimensions.
+					NCurses.refresh();
+					NCurses.clear();
+				}
+				
+				COORD dwSize = inputRecord.WindowBufferSizeEvent.dwSize;
+
+				// Invoke default handler if no custom handlers attached and
+				// userCanvasSize and userRootElementRect are not defined
                 if ( TerminalSizeChanged == null
                      && userCanvasSize.IsEmpty
                      && userRootElementRect.IsEmpty ) {
-                    
-                    if ( usingLinux ) {
-                        // Reinitializing ncurses to deal with new dimensions
-                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
-                        NCurses.endwin();
-                        // Needs to be called after an endwin() so ncurses will initialize
-                        // itself with the new terminal dimensions.
-                        NCurses.refresh();
-                        NCurses.clear();
-                    }
-
                     OnTerminalSizeChangedDefault(this, new TerminalSizeChangedEventArgs( dwSize.X, dwSize.Y ));
                 } else if ( TerminalSizeChanged != null ) {
-                    TerminalSizeChanged.Invoke(this, new TerminalSizeChangedEventArgs(dwSize.X, dwSize.Y));
-
-                    if ( usingLinux ) {
-                        // Reinitializing ncurses to deal with new dimensions
-                        // http://stackoverflow.com/questions/13707137/ncurses-resizing-glitch
-                        NCurses.endwin();
-                        // Needs to be called after an endwin() so ncurses will initialize
-                        // itself with the new terminal dimensions.
-                        NCurses.refresh();
-                        NCurses.clear();
-                    }
-
-                    renderer.UpdateRender(  );
+					TerminalSizeChanged.Invoke(this, new TerminalSizeChangedEventArgs(dwSize.X, dwSize.Y));					
                 }
+
+				// Refresh whole display
+				renderer.UpdateRender( true );
+
                 return;
             }
             eventManager.ProcessInput(inputRecord, mainControl);
