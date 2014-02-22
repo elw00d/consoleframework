@@ -22,8 +22,8 @@ namespace Examples.AsyncUiUpdate
                     ConsoleApplication.Instance.Post( new Action(( ) => {
                         textBlock.Text = i.ToString();
                     }) );
-                    i++;
                     Thread.Sleep( 1000 );
+					i++;
                 }
             } );
             thread.IsBackground = true;

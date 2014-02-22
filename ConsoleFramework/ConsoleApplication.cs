@@ -95,7 +95,7 @@ namespace ConsoleFramework
             }
         }
 
-        private bool running;
+        private volatile bool running;
         private PhysicalCanvas canvas;
 
         public static Control LoadFromXaml( string xamlResourceName, object dataContext ) {
@@ -289,7 +289,6 @@ namespace ConsoleFramework
         /// </summary>
         /// <param name="control"></param>
 		public void Run(Control control) {
-			this.running = true;
 			try {
 				if (usingLinux) {
 					runLinux(control);
@@ -298,6 +297,7 @@ namespace ConsoleFramework
 				}
 			} finally {
 				this.running = false;
+				this.mainThreadId = null;
 			}
 		}
 
@@ -387,6 +387,10 @@ namespace ConsoleFramework
 			        signal_thread.Start ();
 #endif
 		            TermKeyKey key = new TermKeyKey( );
+					//
+					this.running = true;
+					this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
+					//
 		            while ( true ) {
 		                int pollRes = Libc.poll( fds, 2, -1 );
 		                if ( pollRes == 0 ) throw new InvalidOperationException( "Assertion failed." );
@@ -397,6 +401,7 @@ namespace ConsoleFramework
                             }
                         }
 
+						bool needProcessInvokeActions = false;
 		                if ( fds[ 1 ].revents != POLL_EVENTS.NONE ) {
 		                    UInt64 u;
 		                    Libc.readInt64( fds[ 1 ].fd, out u );
@@ -418,6 +423,9 @@ namespace ConsoleFramework
 		                        inputRecord.WindowBufferSizeEvent.dwSize.Y = ( short ) ws.ws_row;
 		                        processInputEvent( inputRecord );
 		                    }
+							if (u == 3 ) {
+								needProcessInvokeActions = true;
+							}
 		                }
 
 		                if ( ( fds[ 0 ].revents & POLL_EVENTS.POLLIN ) == POLL_EVENTS.POLLIN ||
@@ -428,8 +436,10 @@ namespace ConsoleFramework
 
 		                while ( ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) ) == TermKeyResult.TERMKEY_RES_KEY ) {
 		                    processLinuxInput( key );
-		                    renderer.UpdateRender( );
 		                }
+						if (needProcessInvokeActions)
+							processInvokeActions();
+						renderer.UpdateRender( );
 		            }
 
 		        } finally {
@@ -575,7 +585,6 @@ namespace ConsoleFramework
 		
         private void runWindows(Control control) {
             this.mainControl = control;
-            this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
             //
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
@@ -613,6 +622,9 @@ namespace ConsoleFramework
             // initially hide the console cursor
             HideCursor();
             
+			this.running = true;
+			this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
+			//
             while (true) {
                 uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, Win32.INFINITE);
                 if (waitResult == 0) {
@@ -725,7 +737,7 @@ namespace ConsoleFramework
         /// <param name="action"></param>
         public void RunOnUiThread( Action action ) {
             // If run loop is not started, do nothing
-            if ( this.mainThreadId == null ) {
+            if ( !this.running ) {
                 return;
             }
             // If current thread is UI thread, invoke action directly
@@ -737,7 +749,12 @@ namespace ConsoleFramework
                 lock ( actionsLocker ) {
                     actionsToBeInvoked.Add( new ActionInfo( action, waitHandle ) );
                 }
-                invokeWaitHandle.Set( );
+				if (usingLinux) {
+					Libc.writeInt64 (pipeFds[1], 3);
+				} else {
+                	invokeWaitHandle.Set( );
+				}
+
                 waitHandle.WaitOne( );
             }
         }
@@ -750,14 +767,19 @@ namespace ConsoleFramework
         /// <param name="action"></param>
         public void Post( Action action ) {
             // If run loop is not started, nothing to do
-            if ( this.mainThreadId == null ) {
+            if ( !this.running ) {
                 return;
             }
             lock ( actionsLocker ) {
                 actionsToBeInvoked.Add( new ActionInfo( action, null ) );
             }
-            if (!IsUiThread())
-                invokeWaitHandle.Set();
+            if (!IsUiThread()) {
+				if (usingLinux) {
+					Libc.writeInt64 (pipeFds[1], 3);
+				} else {
+                	invokeWaitHandle.Set();
+				}
+			}
         }
 
         /// <summary>
