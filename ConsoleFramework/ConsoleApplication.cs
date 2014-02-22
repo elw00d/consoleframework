@@ -167,8 +167,8 @@ namespace ConsoleFramework
 
         private IntPtr stdInputHandle;
         private IntPtr stdOutputHandle;
-        private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-        private readonly EventWaitHandle invokeWaitHandle = new EventWaitHandle( false, EventResetMode.ManualReset );
+        private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+        private readonly EventWaitHandle invokeWaitHandle = new EventWaitHandle( false, EventResetMode.AutoReset );
         private int? mainThreadId;
         
         private struct ActionInfo
@@ -325,10 +325,8 @@ namespace ConsoleFramework
 				canvas = new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height );
 		    }
 		    renderer.Canvas = canvas;
-		    if ( userRootElementRect.IsEmpty )
-		        renderer.RootElementRect = new Rect( canvas.Size );
-		    else
-				renderer.RootElementRect = userRootElementRect;
+		    renderer.RootElementRect = userRootElementRect.IsEmpty 
+                ? new Rect( canvas.Size ) : userRootElementRect;
 			renderer.RootElement = mainControl;
 			// Initialize default focus
 			focusManager.AfterAddElementToTree (mainControl);
@@ -598,18 +596,13 @@ namespace ConsoleFramework
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
-            if ( userCanvasSize.IsEmpty ) {
-                canvas = new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle );
-            } else {
-				canvas = new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height, stdOutputHandle);
-            }
+            canvas = userCanvasSize.IsEmpty 
+                ? new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle ) 
+                : new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height, stdOutputHandle);
             renderer.Canvas = canvas;
             // fill the canvas by default
-            if ( userRootElementRect.IsEmpty ) {
-                renderer.RootElementRect = new Rect( new Point(0, 0), canvas.Size );
-            } else {
-				renderer.RootElementRect = userRootElementRect;
-			}
+            renderer.RootElementRect = userRootElementRect.IsEmpty 
+                ? new Rect( new Point(0, 0), canvas.Size ) : userRootElementRect;
 			renderer.RootElement = mainControl;
             // initialize default focus
             focusManager.AfterAddElementToTree(mainControl);

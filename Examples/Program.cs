@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using ConsoleFramework;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
-using ConsoleFramework.Native;
 using ConsoleFramework.Xaml;
 
-namespace ConsoleFramework {
-    internal class Program {
-        class MyDataContext : INotifyPropertyChanged
+namespace Examples
+{
+    internal class Program
+    {
+    class MyDataContext : INotifyPropertyChanged
         {
             private string str;
             public String Str {
@@ -46,7 +50,7 @@ namespace ConsoleFramework {
 //            return;
 
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "ConsoleFramework.GridTest.xml";
+            var resourceName = "Examples.GridTest.xml";
             Window createdFromXaml;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))

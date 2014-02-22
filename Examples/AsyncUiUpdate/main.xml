@@ -1,0 +1,3 @@
+﻿<Window>
+  <TextBlock Name="text"></TextBlock>
+</Window>

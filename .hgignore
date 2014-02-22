@@ -29,3 +29,5 @@ etc/NCursesTestApp/obj/
 etc/mono-ncurses-problem/TestApp/TestApp/bin/
 Binding/bin/
 Binding/obj/
+Examples/bin/
+Examples/obj/
