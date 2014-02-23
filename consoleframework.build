@@ -11,8 +11,14 @@
 
   <target name="init-variables">
     <property name="project.build.is-mono" value="${string::contains(framework::get-target-framework(), 'mono')}"/>
+    <if test="${project.build.is-mono}">
+    	<property name="nant.settings.currentframework" value="mono-4.0" />
+    </if>
+    <if test="${not project.build.is-mono}">
+    	<property name="nant.settings.currentframework" value="net-4.0" />
+    </if>
 
-    <!-- define project version info depending on debug/release build -->
+        <!-- define project version info depending on debug/release build -->
     <if test="${project.is-debug}">
       <property name="project.version.info" value="${framework::get-target-framework()} debug" />
       <property name="project.output.dir" value="build/debug" />
@@ -66,7 +72,7 @@
         <include name="System.dll"/>
         <include name="System.Core.dll"/>
         <include name="System.Xml.dll"/>
-        <include name="Mono.Posix.dll" unless="${project.build.is-mono}"/>
+        <include name="Mono.Posix.dll" if="${project.build.is-mono}"/>
         <include name="${project.output.dir}/Binding.dll"/>
       </references>
 
@@ -120,6 +126,7 @@
   </target>
 
   <target name="build" depends="init-variables, clean, build-binding, build-consoleframework, build-examples">
+    <echo message="${project.build.is-mono}"/>
   </target>
 
   <target name="build-debug">
