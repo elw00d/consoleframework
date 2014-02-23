@@ -50,6 +50,15 @@ ln -s ./libtermkey.1.dylib libtermkey.so
 
 Console Framework expects that libraries will be available strictly by this names. If your system already has symlinks *libc.so.6* and *libncursesw.so.5*, you can skip this step.
 
+Running examples
+--
+
+```sh
+mono Example_HelloWorld.exe
+```
+
+Press Ctrl+D to exit application.
+
 Terminal emulators in Mac OS X
 --
 Standard terminal emulator is not very good for console applications deals with mouse. My recommendation is to use [ITerm2]. ITerm2 provides a good emulation with mouse support. If you want to see how console framework renders in various Mac emulators, visit [http://elwood.su/2014/02/console-framework-on-mac/]
