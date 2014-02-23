@@ -126,7 +126,6 @@
   </target>
 
   <target name="build" depends="init-variables, clean, build-binding, build-consoleframework, build-examples">
-    <echo message="${project.build.is-mono}"/>
   </target>
 
   <target name="build-debug">
