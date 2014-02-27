@@ -1,3 +1,7 @@
 ﻿<Window>
-  <TextBlock Name="text"></TextBlock>
+  <Panel>
+    <TextBlock Name="text"></TextBlock>
+    <Button Name="btnMaximize" Caption="Maximize"></Button>
+    <Button Name="btnRestore" Caption="Restore"></Button>
+  </Panel>
 </Window>

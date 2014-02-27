@@ -68,6 +68,24 @@ namespace ConsoleFramework.Native
             FormatMessage(dwFlags, null, ret2, 0, strLastErrorMessage, strLastErrorMessage.Capacity, null);
             return strLastErrorMessage.ToString();
         }
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        public static extern bool IsZoomed(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsIconic(IntPtr hwnd);
+
+        public const UInt32 WM_SYSCOMMAND = 0x0112;
+
+        public static readonly IntPtr SC_MAXIMIZE = new IntPtr( 0xF030 );
+
+        public static readonly IntPtr SC_RESTORE = new IntPtr( 0xF120 );
     }
 
     public enum StdHandleType {

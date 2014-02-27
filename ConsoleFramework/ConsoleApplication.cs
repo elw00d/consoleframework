@@ -38,6 +38,70 @@ namespace ConsoleFramework
     /// </summary>
     public sealed class ConsoleApplication : IDisposable
     {
+        private bool maximized;
+        private Size savedBufferSize;
+        private Rect savedWindowRect;
+
+        private IntPtr consoleWindowHwnd;
+        private IntPtr getConsoleWindowHwnd( ) {
+            if ( IntPtr.Zero == consoleWindowHwnd ) {
+                consoleWindowHwnd = Win32.GetConsoleWindow(  );
+            }
+            return consoleWindowHwnd;
+        }
+
+        /// <summary>
+        /// Maximizes the terminal window size and terminal buffer size.
+        /// Current size is stored.
+        /// </summary>
+        public void Maximize( ) {
+            if ( usingLinux ) throw new NotSupportedException("Not implemented yet");
+            
+            if ( maximized ) return;
+            //
+            savedWindowRect = new Rect( new Point( Console.WindowLeft, Console.WindowTop ),
+                                        new Size( Console.WindowWidth, Console.WindowHeight ) );
+            savedBufferSize = new Size(Console.BufferWidth, Console.BufferHeight);
+            Win32.SendMessage(getConsoleWindowHwnd(), Win32.WM_SYSCOMMAND,
+                Win32.SC_MAXIMIZE, IntPtr.Zero);
+            int maxWidth = Console.LargestWindowWidth;
+            int maxHeight = Console.LargestWindowHeight;
+            Console.SetWindowPosition( 0, 0 );
+            Console.SetBufferSize(maxWidth, maxHeight);
+            Console.SetWindowSize(maxWidth, maxHeight);
+            //
+            maximized = true;
+        }
+
+        /// <summary>
+        /// Restores the terminal window size and terminal buffer to stored state.
+        /// </summary>
+        public void Restore( ) {
+            if (usingLinux) throw new NotSupportedException("Not implemented yet");
+
+            if ( !maximized ) return;
+            //
+            Win32.SendMessage(getConsoleWindowHwnd(), Win32.WM_SYSCOMMAND, 
+                Win32.SC_RESTORE, IntPtr.Zero);
+            Console.SetWindowPosition( 0, 0 );
+            Console.SetBufferSize( savedBufferSize.Width, savedBufferSize.Height );
+
+            // Get largest size again - because resolution of screen can change
+            // between maximize and restore calls
+            int maxWidth = Console.LargestWindowWidth;
+            int maxHeight = Console.LargestWindowHeight;
+
+            Console.SetWindowSize(
+                Math.Min( savedWindowRect.Width, maxWidth),
+                Math.Min(savedWindowRect.Height, maxHeight));
+            Console.SetWindowPosition(savedWindowRect.Left, savedWindowRect.Top);
+            //
+            maximized = false;
+        }
+
+        /// <summary>
+        /// Fires when console buffer size is changed.
+        /// </summary>
         public event TerminalSizeChangedHandler TerminalSizeChanged;
 
         /// <summary>
@@ -594,14 +658,14 @@ namespace ConsoleFramework
                 invokeWaitHandle.SafeWaitHandle.DangerousGetHandle(  )
             };
 
-            // set console mode to enable mouse and window resizing events
+            // Set console mode to enable mouse and window resizing events
             const uint ENABLE_WINDOW_INPUT = 0x0008;
             const uint ENABLE_MOUSE_INPUT = 0x0010;
             uint consoleMode;
             Win32.GetConsoleMode( stdInputHandle, out consoleMode );
             Win32.SetConsoleMode(stdInputHandle, consoleMode | ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
 
-            // get console screen buffer size
+            // Get console screen buffer size
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
@@ -609,24 +673,27 @@ namespace ConsoleFramework
                 ? new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle ) 
                 : new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height, stdOutputHandle);
             renderer.Canvas = canvas;
-            // fill the canvas by default
+            // Fill the canvas by default
             renderer.RootElementRect = userRootElementRect.IsEmpty 
                 ? new Rect( new Point(0, 0), canvas.Size ) : userRootElementRect;
 			renderer.RootElement = mainControl;
-            // initialize default focus
+            // Initialize default focus
             focusManager.AfterAddElementToTree(mainControl);
             //
             mainControl.Invalidate();
             renderer.UpdateRender();
 
-            // initially hide the console cursor
+            // Initially hide the console cursor
             HideCursor();
             
 			this.running = true;
 			this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
-			//
+            //
             while (true) {
-                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, Win32.INFINITE);
+                // 100 ms instead of Win32.INFINITE to check console window Zoomed and Iconic
+                // state periodically (because if user presses Maximize/Restore button
+                // there are no input event generated).
+                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, 100);
                 if (waitResult == 0) {
                     break;
                 }
@@ -641,16 +708,29 @@ namespace ConsoleFramework
                     renderer.UpdateRender(  );
                     continue;
                 }
-                // if we received WAIT_TIMEOUT or WAIT_FAILED
-                if (waitResult == 0x00000102 || waitResult == 0xFFFFFFFF) {
+                // If we received WAIT_TIMEOUT - check window Zoomed and Iconic state
+                // and correct buffer size and console window size
+                if ( waitResult == 0x00000102 ) {
+                    IntPtr consoleWindow = getConsoleWindowHwnd( );
+                    bool isZoomed = Win32.IsZoomed(consoleWindow);
+                    bool isIconic = Win32.IsIconic(consoleWindow);
+                    if (maximized != isZoomed && !isIconic) {
+                        if (isZoomed) 
+                            Maximize();
+                        else
+                            Restore();
+                    }
+                }
+                // WAIT_FAILED
+                if ( waitResult == 0xFFFFFFFF) {
                     throw new InvalidOperationException("Invalid wait result of WaitForMultipleObjects.");
                 }
             }
 
-            // restore cursor visibility before exit
+            // Restore cursor visibility before exit
             ShowCursor();
 
-            // restore console mode before exit
+            // Restore console mode before exit
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
 
             // todo : restore attributes of console output
@@ -681,6 +761,7 @@ namespace ConsoleFramework
             if (!bReaded) {
                 throw new InvalidOperationException("ReadConsoleInput method failed.");
             }
+            
             for (int i = 0; i < read; ++i) {
                 processInputEvent(buffer[i]);
             }
@@ -722,7 +803,6 @@ namespace ConsoleFramework
         /// <summary>
         /// Checks if current thread is same thread from which Run() method
         /// was called.
-        /// todo : add Linux support
         /// </summary>
         /// <returns></returns>
         public bool IsUiThread( ) {
@@ -732,7 +812,6 @@ namespace ConsoleFramework
         /// <summary>
         /// Invokes action in UI thread synchronously.
         /// If run loop was not started yet, nothing will be done.
-        /// todo : add Linux support
         /// </summary>
         /// <param name="action"></param>
         public void RunOnUiThread( Action action ) {
@@ -762,7 +841,6 @@ namespace ConsoleFramework
         /// <summary>
         /// Invokes action in main loop thread asynchronously.
         /// If run loop was not started yet, nothing will be done.
-        /// todo : add Linux support
         /// </summary>
         /// <param name="action"></param>
         public void Post( Action action ) {

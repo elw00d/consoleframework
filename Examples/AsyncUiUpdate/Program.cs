@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using ConsoleFramework;
@@ -11,6 +12,8 @@ namespace Examples.AsyncUiUpdate
     class Program
     {
         public static void Main( string[ ] args ) {
+            
+
             WindowsHost windowsHost = new WindowsHost( );
             Window mainWindow = ( Window ) ConsoleApplication.LoadFromXaml( "Examples.AsyncUiUpdate.main.xml", null );
             windowsHost.Show( mainWindow );
@@ -28,6 +31,14 @@ namespace Examples.AsyncUiUpdate
             } );
             thread.IsBackground = true;
             thread.Start();
+
+            mainWindow.FindChildByName< Button >( "btnMaximize" ).OnClick += ( sender, eventArgs ) => {
+                ConsoleApplication.Instance.Maximize();
+            };
+            mainWindow.FindChildByName< Button >( "btnRestore" ).OnClick += ( sender, eventArgs ) => {
+                ConsoleApplication.Instance.Restore();
+            };
+
             ConsoleApplication.Instance.Run( windowsHost );
         }
     }
