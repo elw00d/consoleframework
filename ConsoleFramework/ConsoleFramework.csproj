@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ButtonBase.cs" />
+    <Compile Include="Controls\CheckBox.cs" />
     <Compile Include="Controls\ComboBox.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Controls\GroupBox.cs" />

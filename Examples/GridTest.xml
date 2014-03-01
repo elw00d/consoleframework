@@ -15,7 +15,7 @@
     </Grid.RowDefinitions>
     <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
     <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
-    <TextBox></TextBox>
+    <CheckBox></CheckBox>
     <Button Margin="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Caption="Long Button"></Button>
   </Grid>
 </my:Window>

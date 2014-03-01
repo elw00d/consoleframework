@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncUiUpdate\Program.cs" />
+    <Compile Include="CheckBoxes\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -68,6 +69,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AsyncUiUpdate\main.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CheckBoxes\main.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

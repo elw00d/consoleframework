@@ -330,6 +330,9 @@ namespace ConsoleFramework.Xaml
             } else {
                 // Process attribute as property assignment
                 PropertyInfo propertyInfo = Top.type.GetProperty( attributeName );
+                if ( null == propertyInfo ) {
+                    throw new InvalidOperationException(string.Format("Property {0} not found.", attributeName));
+                }
                 Object value = processText( attributeValue, attributeName, Top.obj,
                                             dataContext );
                 if ( null != value ) {

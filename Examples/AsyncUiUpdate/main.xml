@@ -1,6 +1,6 @@
 ﻿<Window>
   <Panel>
-    <TextBlock Name="text"></TextBlock>
+    <TextBlock Name="text" HorizontalAlignment="Center"></TextBlock>
     <Button Name="btnMaximize" Caption="Maximize"></Button>
     <Button Name="btnRestore" Caption="Restore"></Button>
   </Panel>

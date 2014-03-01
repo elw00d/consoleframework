@@ -5,43 +5,8 @@ using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {
-    public class Button : Control {
-
-        public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click", 
-            RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Button));
-
-        public event RoutedEventHandler OnClick {
-            add {
-                AddHandler(ClickEvent, value);
-            }
-            remove {
-                RemoveHandler(ClickEvent, value);
-            }
-        }
-
+    public class Button : ButtonBase {
         public Button() {
-            AddHandler(MouseDownEvent, new MouseButtonEventHandler(Button_OnMouseDown));
-            AddHandler(MouseUpEvent, new MouseButtonEventHandler(Button_OnMouseUp));
-            AddHandler(MouseEnterEvent, new MouseEventHandler(Button_MouseEnter));
-            AddHandler(MouseLeaveEvent, new MouseEventHandler(Button_MouseLeave));
-            AddHandler( KeyDownEvent, new KeyEventHandler(Button_KeyDown) );
-            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
-            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
-            Focusable = true;
-        }
-
-        private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
-        private void OnGotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
-        private void Button_KeyDown( object sender, KeyEventArgs args ) {
-            if ( args.wVirtualKeyCode == 13 ) { // VK_RETURN
-                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
-            }
         }
 
         private string caption;
@@ -51,11 +16,9 @@ namespace ConsoleFramework.Controls
             }
             set {
                 caption = value;
+                Invalidate(  );
             }
         }
-
-        private bool clicking;
-        private bool showPressed;
 
         protected override Size MeasureOverride(Size availableSize) {
             if (!string.IsNullOrEmpty(caption)) {
@@ -71,7 +34,7 @@ namespace ConsoleFramework.Controls
             else
                 captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             
-            if (showPressed) {
+            if (pressed) {
                 buffer.FillRectangle(1, 0, ActualWidth - 1, ActualHeight - 1, ' ', captionAttrs);
                 buffer.SetOpacityRect(0, 0, 1, ActualHeight, 3);
                 buffer.FillRectangle(0, 0, 1, ActualHeight, ' ', captionAttrs);
@@ -93,49 +56,6 @@ namespace ConsoleFramework.Controls
                 buffer.SetOpacityRect(ActualWidth - 1, 0, 1, ActualHeight, 3);
                 buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 2, '\u2588', Attr.NO_ATTRIBUTES);
                 buffer.SetPixel(ActualWidth - 1, 0, '\u2584');
-            }
-        }
-
-        private void Button_MouseEnter(object sender, MouseEventArgs args) {
-            if (clicking) {
-                if (!showPressed) {
-                    showPressed = true;
-                    Invalidate();
-                }
-            }
-        }
-
-        private void Button_MouseLeave(object sender, MouseEventArgs args) {
-            if (clicking) {
-                if (showPressed) {
-                    showPressed = false;
-                    Invalidate();
-                }
-            }
-        }
-
-        public void Button_OnMouseDown(object sender, MouseButtonEventArgs args) {
-            if (!clicking) {
-                clicking = true;
-                showPressed = true;
-                ConsoleApplication.Instance.BeginCaptureInput(this);
-                this.Invalidate();
-                args.Handled = true;
-            }
-        }
-
-        public void Button_OnMouseUp(object sender, MouseButtonEventArgs args) {
-            if (clicking) {
-                clicking = false;
-                if (showPressed) {
-                    showPressed = false;
-                    this.Invalidate();
-                }
-                if (HitTest(args.RawPosition)) {
-                    RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
-                }
-                ConsoleApplication.Instance.EndCaptureInput(this);
-                args.Handled = true;
             }
         }
     }
