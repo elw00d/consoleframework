@@ -1,15 +1,28 @@
 To build from sources you should install gcc, g++, make tools and ncurses library (development version).
 
-Package names are different in different linux distros.
+Package names are different in Mac OS X and  different linux distros, but it is easy to search.
 
 Then use command
 
     $make
     
-If you want to build a fat binaries (dual-exe: for x86 and x86_64 both) add to makefile's CCFLAGS and
-LDFLAGS next options:
+If build successes go to .libs directory and take *.so (or *.dylib in Mac).
+    
+In Mac OS X you can build a universal binaries (fat dual-exe binary: contains x86 and x86_64 both).
+To do this add to makefile's CFLAGS and LDFLAGS next options:
 
     -arch i386 -arch x86_64
     
-( For MacOS X it is critical, because mono is 32-bit, but built with default settings libtermkey is 64-bit.
+( For MacOS X it is important, because mono is 32-bit, but built with default settings libtermkey is 64-bit.
 You will be confused when DllNotFoundException will thrown. )
+
+Linux ELF format currently doesn't support fat binaries, but you can cross-compile, for example, 64-bit
+image using 32-bit base system. You need gcc-multilib installed. To compile 32-bit binary add
+
+    -m32
+    
+to CFLAGS or 
+
+    -m64
+    
+if you want to build 64-bit image.
