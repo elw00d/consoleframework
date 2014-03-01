@@ -55,7 +55,11 @@ namespace ConsoleFramework
         /// Current size is stored.
         /// </summary>
         public void Maximize( ) {
-            if ( usingLinux ) throw new NotSupportedException("Not implemented yet");
+            if ( usingLinux ) {
+				// Doesn't work in Konsole
+				Console.Write ("\x1B[9;1t");
+				return;
+			}
             
             if ( maximized ) return;
             //
@@ -77,7 +81,11 @@ namespace ConsoleFramework
         /// Restores the terminal window size and terminal buffer to stored state.
         /// </summary>
         public void Restore( ) {
-            if (usingLinux) throw new NotSupportedException("Not implemented yet");
+            if (usingLinux) {
+				// Doesn't work in Konsole
+				Console.Write ("\x1B[9;0t");
+				return;
+			}
 
             if ( !maximized ) return;
             //
