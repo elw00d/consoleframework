@@ -134,7 +134,6 @@ namespace ConsoleFramework.Events
         public void SetFocusScope(Control scope)
         {
             SetFocus(scope, null);
-
         }
 
         /// <summary>

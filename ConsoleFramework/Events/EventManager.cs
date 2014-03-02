@@ -214,7 +214,7 @@ namespace ConsoleFramework.Events {
                     MouseButtonState middleMouseButtonState = getMiddleButtonState(mouseEvent.dwButtonState);
                     MouseButtonState rightMouseButtonState = getRightButtonState(mouseEvent.dwButtonState);
                     //
-                    MouseEventArgs mouseEventArgs = new MouseEventArgs(source, Control.MouseMoveEvent,
+                    MouseEventArgs mouseEventArgs = new MouseEventArgs(source, Control.PreviewMouseMoveEvent,
                                                                        rawPosition,
                                                                        leftMouseButtonState,
                                                                        middleMouseButtonState,
@@ -453,10 +453,10 @@ namespace ConsoleFramework.Events {
                 if (routedEvent == Control.PreviewMouseMoveEvent) {
                     MouseEventArgs argsNew = new MouseEventArgs(
                         args.Source, Control.MouseMoveEvent,
-                        ((MouseButtonEventArgs)args).RawPosition,
-                        ((MouseButtonEventArgs)args).LeftButton,
-                        ((MouseButtonEventArgs)args).MiddleButton,
-                        ((MouseButtonEventArgs)args).RightButton
+                        ((MouseEventArgs)args).RawPosition,
+                        ((MouseEventArgs)args).LeftButton,
+                        ((MouseEventArgs)args).MiddleButton,
+                        ((MouseEventArgs)args).RightButton
                         );
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);

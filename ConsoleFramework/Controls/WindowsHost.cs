@@ -15,44 +15,80 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class WindowsHost : Control
     {
+        private Menu mainMenu;
+        public Menu MainMenu
+        {
+            get { return mainMenu; }
+            set {
+                if ( mainMenu != value ) {
+                    if ( mainMenu != null ) {
+                        RemoveChild( mainMenu );
+                    }
+                    if ( value != null ) {
+                        InsertChildAt(0, value);
+                    }
+                    mainMenu = value;
+                }
+            }
+        }
+
         public WindowsHost() {
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDown), true);
+            AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove), true );
             AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
                 //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
             }) );
         }
 
-        protected override Size MeasureOverride(Size availableSize)
-        {
+        private void onPreviewMouseMove( object sender, MouseEventArgs args ) {
+            if ( args.LeftButton == MouseButtonState.Pressed ) {
+                OnPreviewMouseDown( sender, args );
+            }
+        }
+
+        protected override Size MeasureOverride(Size availableSize) {
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                mainMenu.Measure( new Size(availableSize.Width, 1) );
+                windowsStartIndex++;
+            }
+
             // Дочерние окна могут занимать сколько угодно пространства,
             // но при заданных Width/Height их размеры будут учтены
             // системой размещения автоматически
-            foreach (Control control in Children) {
-                Window window = (Window) control;
-                window.Measure(new Size(int.MaxValue, int.MaxValue));
+            for ( int index = windowsStartIndex; index < Children.Count; index++ ) {
+                Control control = Children[ index ];
+                Window window = ( Window ) control;
+                window.Measure( new Size( int.MaxValue, int.MaxValue ) );
             }
             return availableSize;
         }
 
-        protected override Size ArrangeOverride(Size finalSize)
-        {
+        protected override Size ArrangeOverride(Size finalSize) {
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                mainMenu.Arrange( new Rect(0, 0, finalSize.Width, 1) );
+                windowsStartIndex++;
+            }
             // сколько дочерние окна хотели - столько и получают
-            foreach (Control control in Children)
-            {
-                Window window = (Window) control;
+            for ( int index = windowsStartIndex; index < Children.Count; index++ ) {
+                Control control = Children[ index ];
+                Window window = ( Window ) control;
                 int x;
                 if ( window.X.HasValue ) {
                     x = window.X.Value;
                 } else {
-                    x = (finalSize.Width - window.DesiredSize.Width)/2;
+                    x = ( finalSize.Width - window.DesiredSize.Width )/2;
                 }
                 int y;
                 if ( window.Y.HasValue ) {
                     y = window.Y.Value;
                 } else {
-                    y = (finalSize.Height - window.DesiredSize.Height)/2;
+                    y = ( finalSize.Height - window.DesiredSize.Height )/2;
                 }
-                window.Arrange(new Rect(x, y, window.DesiredSize.Width, window.DesiredSize.Height));
+                window.Arrange( new Rect( x, y, window.DesiredSize.Width, window.DesiredSize.Height ) );
             }
             return finalSize;
         }
@@ -87,7 +123,13 @@ namespace ConsoleFramework.Controls
         }
         
         private bool isTopWindowModal( ) {
-            if ( Children.Count == 0 ) return false;
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                windowsStartIndex++;
+            }
+
+            if ( Children.Count == windowsStartIndex ) return false;
             return windowInfos[ (Window) Children[ Children.Count - 1 ] ].Modal;
         }
 
@@ -98,7 +140,7 @@ namespace ConsoleFramework.Controls
         /// Handled в True, либо закрывает модальное окно, если оно было показано с флагом
         /// OutsideClickClosesWindow.
         /// </summary>
-        public void OnPreviewMouseDown(object sender, MouseButtonEventArgs args) {
+        public void OnPreviewMouseDown(object sender, MouseEventArgs args) {
             bool handle = false;
             if ( isTopWindowModal( ) ) {
                 Window modalWindow = ( Window ) Children[ Children.Count - 1 ];
@@ -124,8 +166,19 @@ namespace ConsoleFramework.Controls
                 Window windowClicked = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
                 if ( null != windowClicked ) {
                     activateWindow( windowClicked );
+                } else {
+                    Menu menu = VisualTreeHelper.FindClosestParent< Menu >( ( Control ) args.Source );
+                    if ( null != menu ) {
+                        activateMenu(  );
+                    }
                 }
             }
+        }
+
+        private void activateMenu( ) {
+            assert( mainMenu != null );
+            if (ConsoleApplication.Instance.FocusManager.CurrentScope != mainMenu)
+                ConsoleApplication.Instance.FocusManager.SetFocusScope( mainMenu );
         }
 
         private void initializeFocusOnActivatedWindow( Window window ) {
@@ -186,11 +239,25 @@ namespace ConsoleFramework.Controls
             showCore( window, false, false );
         }
 
-        private void showCore( Window window, bool modal, bool outsideClickWillCloseWindow ) {
-            if ( Children.Count != 0 ) {
-                Control topWindow = Children[ Children.Count - 1 ];
-                topWindow.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( topWindow, Window.DeactivatedEvent ) );
+        private Window getTopWindow( ) {
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                windowsStartIndex++;
             }
+            if ( Children.Count > windowsStartIndex ) {
+                return ( Window ) Children[ Children.Count - 1 ];
+            }
+            return null;
+        }
+
+        private void showCore( Window window, bool modal, bool outsideClickWillCloseWindow ) {
+            Control topWindow = getTopWindow(  );
+            if ( null != topWindow ) {
+                topWindow.RaiseEvent( Window.DeactivatedEvent,
+                                        new RoutedEventArgs( topWindow, Window.DeactivatedEvent ) );
+            }
+
             AddChild(window);
             window.RaiseEvent( Window.ActivatedEvent, new RoutedEventArgs( window, Window.ActivatedEvent ) );
             initializeFocusOnActivatedWindow(window);
@@ -207,7 +274,14 @@ namespace ConsoleFramework.Controls
             window.RaiseEvent( Window.ClosedEvent, new RoutedEventArgs( window, Window.ClosedEvent ) );
             // после удаления окна активизировать то, которое было активным до него
             List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
-            if ( childrenOrderedByZIndex.Count != 0 ) {
+
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                windowsStartIndex++;
+            }
+
+            if ( childrenOrderedByZIndex.Count > windowsStartIndex ) {
                 Window topWindow = ( Window ) childrenOrderedByZIndex[ childrenOrderedByZIndex.Count - 1 ];
                 topWindow.RaiseEvent( Window.ActivatedEvent, new RoutedEventArgs( topWindow, Window.ActivatedEvent ) );
                 initializeFocusOnActivatedWindow(topWindow);

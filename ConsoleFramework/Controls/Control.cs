@@ -232,11 +232,23 @@ namespace ConsoleFramework.Controls
             set;
         }
 
+        // todo : make Children protected read-only collection (IEnumerable)
         internal readonly List<Control> Children = new List<Control>();
 
         public Control Parent {
             get;
             protected set;
+        }
+
+        protected void InsertChildAt( int index, Control child ) {
+            if (null == child)
+                throw new ArgumentNullException("child");
+            if (null != child.Parent)
+                throw new ArgumentException("Specified child already has parent.");
+            Children.Insert(index, child);
+            child.Parent = this;
+            ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
+            Invalidate();
         }
 
         protected void AddChild(Control child) {
@@ -958,7 +970,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override string ToString() {
-            return string.Format("Control: {0}", Name);
+            return string.Format("{0}: {1}", GetType(  ), Name);
         }
 
         /// <summary>
@@ -1141,6 +1153,10 @@ namespace ConsoleFramework.Controls
         protected virtual void RaisePropertyChanged( string propertyName ) {
             PropertyChangedEventHandler handler = PropertyChanged;
             if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
+        }
+
+        protected static void assert( bool assertion ) {
+            if (!assertion) throw new InvalidOperationException("Assertion failed.");
         }
     }
 }

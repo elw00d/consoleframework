@@ -65,7 +65,7 @@ namespace ConsoleFramework.Controls
         /// <summary>
         /// todo : rename to Children
         /// </summary>
-        public ICollection<Control> Content {
+        public IList<Control> Content {
             get { return collection; }
         }
 

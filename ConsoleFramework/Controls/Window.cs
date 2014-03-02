@@ -87,8 +87,6 @@ namespace ConsoleFramework.Controls
         {
             if (args.wVirtualKeyCode == 09)
             {
-                Debug.WriteLine("Tab");
-                
                 ConsoleApplication.Instance.FocusManager.MoveFocusNext();
 
                 args.Handled = true;

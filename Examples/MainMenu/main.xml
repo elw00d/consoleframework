@@ -1,0 +1,6 @@
+﻿<Window>
+  <Panel>
+    <CheckBox Name="checkbox" Caption="Check me" Checked="True"></CheckBox>
+    <CheckBox Name="checkbox" Caption="Check me too"></CheckBox>
+  </Panel>
+</Window>

@@ -49,6 +49,7 @@
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
+    <Compile Include="Controls\Menu.cs" />
     <Compile Include="Controls\MessageBox.cs" />
     <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />

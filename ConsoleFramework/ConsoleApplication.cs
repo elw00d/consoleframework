@@ -172,16 +172,19 @@ namespace ConsoleFramework
 
         public static Control LoadFromXaml( string xamlResourceName, object dataContext ) {
             var assembly = Assembly.GetEntryAssembly();
-            using (Stream stream = assembly.GetManifestResourceStream(xamlResourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                string result = reader.ReadToEnd();
-                XamlParser xamlParser = new XamlParser(new List<string>()
-                    {
-                        "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
-                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
-                    });
-                return (Control)xamlParser.CreateFromXaml(result, dataContext);
+            using ( Stream stream = assembly.GetManifestResourceStream( xamlResourceName ) ) {
+                if ( null == stream ) {
+                    throw new ArgumentException("Resource not found.", "xamlResourceName");
+                }
+                using ( StreamReader reader = new StreamReader( stream ) ) {
+                    string result = reader.ReadToEnd( );
+                    XamlParser xamlParser = new XamlParser( new List< string >( )
+                        {
+                            "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
+                            "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
+                        } );
+                    return ( Control ) xamlParser.CreateFromXaml( result, dataContext );
+                }
             }
         }
 

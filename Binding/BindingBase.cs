@@ -205,7 +205,7 @@ namespace Binding
                 switch (args.Type) {
                     case ListChangedEventType.ItemsInserted: {
                         for (int i = 0; i < args.Count; i++)
-                            targetList.Insert(args.Index + i, sourceList[i]);
+                            targetList.Insert(args.Index + i, sourceList[args.Index + i]);
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved: {
@@ -237,7 +237,7 @@ namespace Binding
                 switch (args.Type) {
                     case ListChangedEventType.ItemsInserted: {
                             for (int i = 0; i < args.Count; i++)
-                                sourceList.Insert(args.Index + i, targetList[i]);
+                                sourceList.Insert(args.Index + i, targetList[args.Index + i]);
                             break;
                         }
                     case ListChangedEventType.ItemsRemoved: {

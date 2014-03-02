@@ -1,0 +1,12 @@
+﻿<WindowsHost>
+  <WindowsHost.MainMenu>
+    <Menu>
+      <Menu.Items>
+        <MenuItem Title="File"></MenuItem>
+        <MenuItem Title="Edit"></MenuItem>
+        <Separator></Separator>
+        <MenuItem Title="No Item"></MenuItem>
+      </Menu.Items>
+    </Menu>
+  </WindowsHost.MainMenu>
+</WindowsHost>
