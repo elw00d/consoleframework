@@ -68,7 +68,7 @@ namespace ConsoleFramework.Controls
 
                 // if click on the transparent header, close the popup
                 AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
-                    if ( !listbox.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
+                    if ( !scrollViewer.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
                         Close();
                         args.Handled = true;
                     }

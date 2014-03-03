@@ -4,8 +4,12 @@
       <Menu.Items>
         <MenuItem Title="File"></MenuItem>
         <MenuItem Title="Edit"></MenuItem>
-        <Separator></Separator>
-        <MenuItem Title="No Item"></MenuItem>
+        <MenuItem Type="Submenu" Title="About">
+          <MenuItem.Items>
+            <MenuItem Title="File"></MenuItem>
+            <MenuItem Title="Edit"></MenuItem>
+          </MenuItem.Items>
+        </MenuItem>
       </Menu.Items>
     </Menu>
   </WindowsHost.MainMenu>
