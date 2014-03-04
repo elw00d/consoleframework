@@ -272,6 +272,10 @@ namespace ConsoleFramework.Controls
                 if (!this.Children.Remove(child))
                     throw new InvalidOperationException("Assertion failed.");
                 child.Parent = null;
+
+                // Remove it from invalidation queue if already added
+                ConsoleApplication.Instance.Renderer.ControlRemovedFromTree( child);
+
                 Invalidate();
             }
         }

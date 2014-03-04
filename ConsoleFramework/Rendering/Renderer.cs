@@ -41,7 +41,7 @@ namespace ConsoleFramework.Rendering
         // buffers containing full control render (with children render applied)
         private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
         // queue of controls marked for layout invalidation
-        private readonly Queue<Control> invalidatedControls = new Queue<Control>();
+        private readonly List<Control> invalidatedControls = new List<Control>();
 
         // список контролов, у которых обновилось содержимое full render buffer
         // актуален только при вызове UpdateRender, после вызова очищается
@@ -161,7 +161,9 @@ namespace ConsoleFramework.Rendering
         /// </summary>
         internal void InvalidateLayout() {
             while (invalidatedControls.Count != 0) {
-                Control control = invalidatedControls.Dequeue();
+                // Dequeue next control
+                Control control = invalidatedControls[ invalidatedControls.Count - 1 ];
+                invalidatedControls.RemoveAt( invalidatedControls.Count - 1 );
                 // set previous results of layout passes dirty
                 control.ResetValidity();
                 //
@@ -345,7 +347,7 @@ namespace ConsoleFramework.Rendering
             if (!invalidatedControls.Contains(control)) {
                 // add to queue only if it has parent or it is root element
                 if (control.Parent != null || control == RootElement) {
-                    invalidatedControls.Enqueue(control);
+                    invalidatedControls.Add(control);
                 }
             }
         }
@@ -378,6 +380,15 @@ namespace ConsoleFramework.Rendering
         /// </summary>
         internal int getControlOpacityAt( Control control, int x, int y ) {
             return buffers[ control ].GetOpacityAt( x, y );
+        }
+
+        public void ControlRemovedFromTree( Control child ) {
+            if ( invalidatedControls.Contains( child ) ) {
+                invalidatedControls.Remove( child );
+            }
+            foreach ( var nestedChild in child.Children ) {
+                ControlRemovedFromTree( nestedChild );
+            }
         }
     }
 }

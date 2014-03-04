@@ -73,6 +73,13 @@ namespace ConsoleFramework.Controls
             base.AddChild(control);
         }
 
+        public void ClearChilds( ) {
+            List< Control > children = new List< Control >(this.Children);
+            foreach ( var child in children ) {
+                RemoveChild(child);
+            }
+        }
+
         /// <summary>
         /// Размещает элементы вертикально, самым простым методом.
         /// </summary>

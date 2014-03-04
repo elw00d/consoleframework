@@ -139,6 +139,9 @@ namespace ConsoleFramework.Controls
                 }));
 
                 // todo : cleanup event handlers after popup closing
+                AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
+                    panel.ClearChilds(  );
+                }) );
             }
 
             protected override void initialize()
