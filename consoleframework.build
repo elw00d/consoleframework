@@ -50,6 +50,29 @@
     </csc>
   </target>
 
+  <target name="build-xaml">
+    <property name="assembly-name" value="Xaml" overwrite="true"  />
+    <property name="assembly-description" value=".NET simple XAML library" overwrite="true"  />
+
+    <csc target="library" output="${project.output.dir}/${assembly-name}.dll" debug="${project.is-debug}"
+		optimize="${project.is-optimized}"
+        doc="${project.output.dir}/${assembly-name}.xml">
+      <nowarn>
+        <warning number="1591"/>
+      </nowarn>
+      <sources>
+        <include name="Xaml/**.cs"/>
+      </sources>
+      <references>
+        <include name="System.dll"/>
+		<include name="System.Core.dll"/>
+		<include name="System.Xml.dll"/>
+      </references>
+
+      <arg value="/filealign:${project.file-alignment}" unless="${project.build.is-mono}"/>
+    </csc>
+  </target>
+
   <target name="build-consoleframework" >
     <property name="assembly-name" value="ConsoleFramework" overwrite="true"  />
     <property name="assembly-description" value="Console framework library" overwrite="true"  />
@@ -71,9 +94,9 @@
       <references>
         <include name="System.dll"/>
         <include name="System.Core.dll"/>
-        <include name="System.Xml.dll"/>
         <include name="Mono.Posix.dll" if="${project.build.is-mono}"/>
         <include name="${project.output.dir}/Binding.dll"/>
+        <include name="${project.output.dir}/Xaml.dll"/>
       </references>
 
       <arg value="/filealign:${project.file-alignment}" unless="${project.build.is-mono}"/>
@@ -97,6 +120,7 @@
       <references>
         <include name="System.dll"/>
         <include name="System.Core.dll"/>
+		<include name="${project.output.dir}/Xaml.dll"/>
         <include name="${project.output.dir}/ConsoleFramework.dll"/>
       </references>
       <resources dynamicprefix="true" prefix="">
@@ -125,7 +149,7 @@
     <delete dir="${project.output.dir}"/>
   </target>
 
-  <target name="build" depends="init-variables, clean, build-binding, build-consoleframework, build-examples">
+  <target name="build" depends="init-variables, clean, build-binding, build-xaml, build-consoleframework, build-examples">
   </target>
 
   <target name="build-debug">
