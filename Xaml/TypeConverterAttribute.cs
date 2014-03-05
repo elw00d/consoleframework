@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleFramework.Xaml
+namespace Xaml
 {
     /// <summary>
     /// Specifies type of converter to be used to convert from or to current type.

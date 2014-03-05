@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleFramework.Xaml
+namespace Xaml
 {
     /// <summary>
     /// Attribute to specify name of content property of any type to be created

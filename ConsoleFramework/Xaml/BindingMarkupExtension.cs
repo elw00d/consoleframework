@@ -2,10 +2,11 @@
 using System.ComponentModel;
 using Binding;
 using Binding.Converters;
+using Xaml;
 
 namespace ConsoleFramework.Xaml
 {
-    [MarkupExtensionAttribute("Binding")]
+    [MarkupExtension("Binding")]
     class BindingMarkupExtension : IMarkupExtension
     {
         public String Path { get; set; }

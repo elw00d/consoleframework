@@ -10,11 +10,11 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 using ConsoleFramework.Xaml;
-
 #if !WIN32
 using Mono.Unix;
 using Mono.Unix.Native;
 #endif
+using Xaml;
 
 namespace ConsoleFramework
 {
@@ -180,6 +180,7 @@ namespace ConsoleFramework
                     string result = reader.ReadToEnd( );
                     XamlParser xamlParser = new XamlParser( new List< string >( )
                         {
+                            "clr-namespace:Xaml;assembly=Xaml",
                             "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                             "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                         } );

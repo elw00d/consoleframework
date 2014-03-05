@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleFramework.Xaml
+namespace Xaml
 {
     /// <summary>
     /// Attribute marks the markup extensions and specifies the names

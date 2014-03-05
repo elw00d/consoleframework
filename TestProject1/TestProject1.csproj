@@ -66,6 +66,10 @@
       <Project>{2A59C284-2995-4F37-8D65-411C25C85493}</Project>
       <Name>ConsoleFramework</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Xaml\Xaml.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>Xaml</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Xaml\XamlObject1.xml" />

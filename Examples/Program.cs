@@ -10,6 +10,7 @@ using ConsoleFramework;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 using ConsoleFramework.Xaml;
+using Xaml;
 
 namespace Examples
 {
@@ -61,7 +62,7 @@ namespace Examples
                 dataContext.Str = "Введите заголовок";
                 XamlParser xamlParser = new XamlParser( new List< string >()
                     {
-                        
+                        "clr-namespace:Xaml;assembly=Xaml",
                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                     } );

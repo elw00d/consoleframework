@@ -5,6 +5,7 @@ using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Rendering;
 using ConsoleFramework.Xaml;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {

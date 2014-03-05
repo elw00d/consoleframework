@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ConsoleFramework.Xaml
+namespace Xaml
 {
     public interface ITypeConverter
     {

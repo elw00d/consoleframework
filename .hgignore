@@ -33,3 +33,5 @@ Examples/bin/
 Examples/obj/
 ConsoleFrameworkMono.userprefs
 build/
+Xaml/bin/
+Xaml/obj/

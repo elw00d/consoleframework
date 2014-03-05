@@ -3,8 +3,8 @@ using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
 using Binding.Observables;
-using ConsoleFramework.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xaml;
 
 namespace TestProject1.Xaml
 {

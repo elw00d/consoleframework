@@ -88,21 +88,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Events\RoutedEvent.cs" />
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
-    <Compile Include="Xaml\ContentPropertyAttribute.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
-    <Compile Include="Xaml\ITypeConverter.cs" />
-    <Compile Include="Xaml\MarkupExtensionAttribute.cs" />
-    <Compile Include="Xaml\MarkupExtensionsParser.cs" />
-    <Compile Include="Xaml\Factories.cs" />
-    <Compile Include="Xaml\RefMarkupExtension.cs" />
-    <Compile Include="Xaml\TypeConverterAttribute.cs" />
-    <Compile Include="Xaml\TypeMarkupExtension.cs" />
-    <Compile Include="Xaml\XamlParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />
     <Content Include="Events\Focus.txt" />
-    <Content Include="Xaml\xaml.txt" />
     <Content Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -110,11 +100,10 @@
       <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
       <Name>Binding</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Xaml\xaml.xsd">
-      <SubType>Designer</SubType>
-    </None>
+    <ProjectReference Include="..\Xaml\Xaml.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>Xaml</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

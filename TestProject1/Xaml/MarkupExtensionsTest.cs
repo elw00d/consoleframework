@@ -1,6 +1,6 @@
 ﻿using System;
-using ConsoleFramework.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xaml;
 
 namespace TestProject1
 {

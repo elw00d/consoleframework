@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Binding.Converters;
+using Xaml;
 
 namespace ConsoleFramework.Xaml
 {
