@@ -52,11 +52,7 @@ namespace TestProject1.Xaml
             using (StreamReader reader = new StreamReader(stream))
             {
                 string result = reader.ReadToEnd();
-                XamlParser xamlParser = new XamlParser(new List<string>()
-                    {
-                        //"clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
-                    });
-                createdFromXaml = (XamlObject)xamlParser.CreateFromXaml(result, null);
+                createdFromXaml = XamlParser.CreateFromXaml<XamlObject>(result, null, new List<string>());
             }
             Assert.IsTrue( createdFromXaml.X == 5 );
             Assert.IsTrue(createdFromXaml.StrProp == "str");

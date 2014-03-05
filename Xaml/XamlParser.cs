@@ -10,23 +10,38 @@ namespace Xaml
 {
     /// <summary>
     /// Provides XAML parsing and simultaneous object graph creation.
-    /// todo : prohibit direct instance creation
     /// </summary>
     public class XamlParser
     {
-        private readonly List< string > defaultNamespaces;
-
         /// <summary>
+        /// Creates the object graph using provided xaml and dataContext.
+        /// 
+        /// DataContext will be passed to markup extensions and can be null if you don't want to
+        /// use binding markup extensions.
+        /// 
         /// Default namespaces are used to search types (by tag name) and
         /// markup extensions (all classes marked with MarkupExtensionAttribute are scanned).
         /// If don't specify default namespaces, you should specify namespaces (with prefixes)
         /// explicitly in XAML root element.
         /// </summary>
-        public XamlParser(List<string> defaultNamespaces ) {
+        /// <typeparam name="T"></typeparam>
+        /// <param name="xaml">Xaml markup</param>
+        /// <param name="dataContext">Object that will be passed to markup extensions</param>
+        /// <param name="defaultNamespaces">Namespaces can be used without explicit prefixes</param>
+        /// <returns></returns>
+        public static T CreateFromXaml<T>(string xaml, object dataContext, List<string> defaultNamespaces) {
+            if (null == xaml) throw new ArgumentNullException("xaml");
+            XamlParser parser = new XamlParser(defaultNamespaces);
+            return (T) parser.createFromXaml(xaml, dataContext);
+        }
+
+        private XamlParser(List<string> defaultNamespaces) {
             if (null == defaultNamespaces)
                 throw new ArgumentNullException("defaultNamespaces");
             this.defaultNamespaces = defaultNamespaces;
         }
+
+        private readonly List<string> defaultNamespaces;
 
         private class ObjectInfo
         {
@@ -209,8 +224,7 @@ namespace Xaml
         /// <param name="xaml"></param>
         /// <param name="dataContext"></param>
         /// <returns></returns>
-        public object CreateFromXaml( string xaml, object dataContext ) {
-            if (null == xaml) throw new ArgumentNullException("xaml");
+        private object createFromXaml( string xaml, object dataContext ) {
             this.dataContext = dataContext;
             
             using ( XmlReader xmlReader = XmlReader.Create( new StringReader( xaml ) ) ) {
@@ -508,7 +522,7 @@ namespace Xaml
         /// <param name="source">Type of source value</param>
         /// <param name="dest">Type of destination</param>
         /// <param name="value">Source value</param>
-        public static object ConvertValueIfNeed( Type source, Type dest, object value ) {
+        internal static object ConvertValueIfNeed( Type source, Type dest, object value ) {
             if ( dest.IsAssignableFrom( source ) ) {
                 return value;
             }

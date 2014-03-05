@@ -9,7 +9,6 @@ using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
-using ConsoleFramework.Xaml;
 #if !WIN32
 using Mono.Unix;
 using Mono.Unix.Native;
@@ -178,13 +177,12 @@ namespace ConsoleFramework
                 }
                 using ( StreamReader reader = new StreamReader( stream ) ) {
                     string result = reader.ReadToEnd( );
-                    XamlParser xamlParser = new XamlParser( new List< string >( )
-                        {
-                            "clr-namespace:Xaml;assembly=Xaml",
-                            "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
-                            "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
-                        } );
-                    return ( Control ) xamlParser.CreateFromXaml( result, dataContext );
+                    return XamlParser.CreateFromXaml<Control>(result, dataContext, new List<string>()
+                    {
+                        "clr-namespace:Xaml;assembly=Xaml",
+                        "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
+                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
+                    });
                 }
             }
         }

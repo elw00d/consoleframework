@@ -60,13 +60,12 @@ namespace Examples
                 // todo : try to specify dataContext
                 MyDataContext dataContext = new MyDataContext( );
                 dataContext.Str = "Введите заголовок";
-                XamlParser xamlParser = new XamlParser( new List< string >()
+                createdFromXaml = XamlParser.CreateFromXaml<Window>(result, dataContext, new List<string>()
                     {
                         "clr-namespace:Xaml;assembly=Xaml",
                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
-                    } );
-                createdFromXaml = (Window)xamlParser.CreateFromXaml(result, dataContext);
+                    });
             }
 //            ConsoleApplication.Instance.Run(createdFromXaml);
 //            return;
