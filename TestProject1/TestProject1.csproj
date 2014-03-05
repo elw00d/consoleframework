@@ -52,6 +52,7 @@
     <Compile Include="Binding\SimplePropertiesTest.cs" />
     <Compile Include="Binding\ValidationTest.cs" />
     <Compile Include="LayoutTests.cs" />
+    <Compile Include="Xaml\EnumsTest\EnumsTest.cs" />
     <Compile Include="Xaml\MarkupExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HitTestingTest.cs" />
@@ -73,6 +74,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Xaml\XamlObject1.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Xaml\EnumsTest\ObjectToCreate.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -14,15 +14,15 @@ namespace Xaml
     public class XamlParser
     {
         /// <summary>
-        /// Creates the object graph using provided xaml and dataContext.
-        /// 
-        /// DataContext will be passed to markup extensions and can be null if you don't want to
-        /// use binding markup extensions.
-        /// 
-        /// Default namespaces are used to search types (by tag name) and
+        /// <para>Creates the object graph using provided xaml and dataContext.</para>
+        /// <para>DataContext will be passed to markup extensions and can be null if you don't want to
+        /// use binding markup extensions.</para>
+        /// <para>Default namespaces are used to search types (by tag name) and
         /// markup extensions (all classes marked with MarkupExtensionAttribute are scanned).
         /// If don't specify default namespaces, you should specify namespaces (with prefixes)
-        /// explicitly in XAML root element.
+        /// explicitly in XAML root element.</para>
+        /// <para>Example of defaultNamespaces item:</para>
+        /// <para><code>clr-namespace:TestProject1.Xaml.EnumsTest;assembly=TestProject1</code></para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="xaml">Xaml markup</param>
@@ -527,12 +527,12 @@ namespace Xaml
                 return value;
             }
 
-            // process enumerations
+            // Process enumerations
             if ( source == typeof ( String ) && dest.IsEnum ) {
-                string[ ] enumNames = dest.GetEnumNames( );
+                string[ ] enumNames = Enum.GetNames(dest);
                 for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
                     if ( enumNames[i] == (String) value ) {
-                        return Enum.ToObject( dest, dest.GetEnumValues( ).GetValue( i ) );
+                        return Enum.GetValues(dest).GetValue(i);
                     }
                 }
                 throw new ApplicationException("Specified enum value not found.");

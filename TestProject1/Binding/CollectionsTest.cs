@@ -48,9 +48,13 @@ namespace TestProject1.Binding
             BindingBase binding = new BindingBase( target, "Items", source, "SourceItems", BindingMode.OneWay );
             binding.Bind(  );
             source.SourceItems.Add( "1" );
+            Assert.IsTrue(target.Items[0] == "1");
+            source.SourceItems.Add( "2" );
             Assert.IsTrue( target.Items[0] == "1" );
+            Assert.IsTrue(target.Items[1] == "2");
             source.SourceItems.Remove( "1" );
-            Assert.IsTrue(target.Items.Count == 0);
+            Assert.IsTrue(target.Items.Count == 1);
+            Assert.IsTrue(target.Items[0] == "2");
         }
 
         [TestMethod]
