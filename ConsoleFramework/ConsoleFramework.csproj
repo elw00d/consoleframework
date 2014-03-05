@@ -55,6 +55,7 @@
     <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
+    <Compile Include="Core\ThicknessConverter.cs" />
     <Compile Include="Core\VisualTreeHelper.cs" />
     <Compile Include="Events\KeyboardFocusChangedEventArgs.cs" />
     <Compile Include="Events\KeyEventArgs.cs" />

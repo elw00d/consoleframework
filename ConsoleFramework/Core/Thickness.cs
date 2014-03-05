@@ -1,10 +1,12 @@
 ﻿using System;
+using ConsoleFramework.Xaml;
 
 namespace ConsoleFramework.Core
 {
     /// <summary>
     /// WPF Thickness analog but using integers instead doubles.
     /// </summary>
+    [TypeConverter(typeof(ThicknessConverter))]
     public struct Thickness : IEquatable<Thickness> {
         private int left;
         private int top;

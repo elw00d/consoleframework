@@ -15,7 +15,7 @@ namespace ConsoleFramework.Xaml
     /// приходит значение примитива, которое можно задавать различными способами (в том числе
     /// и с использованием расширений разметки).
     /// </summary>
-    interface IFactory
+    public interface IFactory
     {
         object GetObject( );
     }

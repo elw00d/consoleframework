@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
-using ConsoleFramework.Core;
 
 namespace ConsoleFramework.Xaml
 {
@@ -17,6 +16,12 @@ namespace ConsoleFramework.Xaml
     {
         private readonly List< string > defaultNamespaces;
 
+        /// <summary>
+        /// Default namespaces are used to search types (by tag name) and
+        /// markup extensions (all classes marked with MarkupExtensionAttribute are scanned).
+        /// If don't specify default namespaces, you should specify namespaces (with prefixes)
+        /// explicitly in XAML root element.
+        /// </summary>
         public XamlParser(List<string> defaultNamespaces ) {
             if (null == defaultNamespaces)
                 throw new ArgumentNullException("defaultNamespaces");
@@ -528,26 +533,6 @@ namespace ConsoleFramework.Xaml
             }
             if ( source == typeof ( string ) && dest == typeof ( int? ) ) {
                 return int.Parse((string)value);
-            }
-            if ( source == typeof ( string ) && dest == typeof ( Thickness ) ) {
-                string[ ] parts = ( ( string ) value ).Split( ',' );
-                if ( parts.Length == 1 ) {
-                    return new Thickness( int.Parse( ( string ) value ) );
-                } else if ( parts.Length == 2 ) {
-                    return new Thickness(
-                        int.Parse( parts[ 0 ] ),
-                        int.Parse( parts[ 1 ] ),
-                        int.Parse( parts[ 0 ] ),
-                        int.Parse( parts[ 1 ] )
-                    );
-                } else if ( parts.Length == 4 ) {
-                    return new Thickness(
-                        int.Parse(parts[0]),
-                        int.Parse(parts[1]),
-                        int.Parse(parts[2]),
-                        int.Parse(parts[3])
-                    );
-                }
             }
 
             // Process TypeConverterAttribute attributes if exist
