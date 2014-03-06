@@ -94,7 +94,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Base class for all controls.
     /// </summary>
-    public class Control : INotifyPropertyChanged {
+    public partial class Control : INotifyPropertyChanged {
 
         public Object DataContext { get; set; }
 

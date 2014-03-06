@@ -243,6 +243,32 @@ namespace ConsoleFramework.Controls
             get { return items; }
         }
 
+        // todo : to BindingBase
+//        public static void ApplyChanges<T>(IList<T> destList, ObservableList<T> srcList, ListChangedEventArgs args) {
+//            switch (args.Type) {
+//                case ListChangedEventType.ItemsInserted: {
+//                        for (int i = 0; i < args.Count; i++) {
+//                            MenuItemBase item = items[args.Index + i];
+//                            if (item is Separator)
+//                                throw new InvalidOperationException("Separator cannot be added to root menu.");
+//                            stackPanel.Content.Insert(args.Index + i, item);
+//                        }
+//                        break;
+//                    }
+//                case ListChangedEventType.ItemsRemoved:
+//                    for (int i = 0; i < args.Count; i++)
+//                        stackPanel.Content.RemoveAt(args.Index);
+//                    break;
+//                case ListChangedEventType.ItemReplaced: {
+//                        MenuItemBase item = items[args.Index];
+//                        if (item is Separator)
+//                            throw new InvalidOperationException("Separator cannot be added to root menu.");
+//                        stackPanel.Content[args.Index] = item;
+//                        break;
+//                    }
+//            }
+//        }
+
         public Menu( ) {
             Panel stackPanel = new Panel( );
             stackPanel.Orientation = Orientation.Horizontal;
@@ -260,14 +286,15 @@ namespace ConsoleFramework.Controls
                         }
                         break;
                     }
-                    case ListChangedEventType.ItemsRemoved:
+                    case ListChangedEventType.ItemsRemoved: // todo : test
                         for (int i = 0; i < args.Count; i++)
                             stackPanel.Content.RemoveAt(args.Index);
                         break;
-                    case ListChangedEventType.ItemReplaced: {
+                    case ListChangedEventType.ItemReplaced: { // todo : test
                         MenuItemBase item = items[ args.Index ];
                         if (item is Separator)
                             throw new InvalidOperationException("Separator cannot be added to root menu.");
+
                         stackPanel.Content[args.Index] = item;
                         break;
                     }

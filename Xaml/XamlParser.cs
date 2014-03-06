@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -445,30 +446,36 @@ namespace Xaml
                         object converted = ConvertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
                         methodInfo.Invoke( collection, new[ ] { converted } );
                     } else {
-                        // If parent object property is IDictionary<string, T>,
-                        // add current object into them (by x:Key value) 
-                        // with conversion to T if need
-                        Type typeArg2 = property.PropertyType.IsGenericType &&
-                                        property.PropertyType.GetGenericArguments( ).Length > 1
-                                            ? property.PropertyType.GetGenericArguments( )[ 1 ]
-                                            : null;
-                        if ( null != typeArg1 && typeArg1 == typeof ( string )
-                                && null != typeArg2 &&
-                                typeof ( IDictionary< , > ).MakeGenericType( typeArg1, typeArg2 )
-                                                        .IsAssignableFrom( property.PropertyType ) ) {
-                            object dictionary = property.GetValue( Top.obj, null );
-                            MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
-                            object converted = ConvertValueIfNeed( initialized.obj.GetType( ),
-                                                                    typeArg2, initialized.obj );
-                            if ( null == initialized.key )
-                                throw new InvalidOperationException(
-                                    "Key is not specified for item of dictionary" );
-                            methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
+                        // If parent object property is IList add current object into them without conversion
+                        if (typeof (IList).IsAssignableFrom(property.PropertyType)) {
+                            IList list = (IList) property.GetValue(Top.obj, null);
+                            list.Add(initialized.obj);
                         } else {
-                            // Handle as property - call setter with conversion if need
-                            property.SetValue( Top.obj, ConvertValueIfNeed(
-                                initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
-                                                null );
+                            // If parent object property is IDictionary<string, T>,
+                            // add current object into them (by x:Key value) 
+                            // with conversion to T if need
+                            Type typeArg2 = property.PropertyType.IsGenericType &&
+                                            property.PropertyType.GetGenericArguments( ).Length > 1
+                                                ? property.PropertyType.GetGenericArguments( )[ 1 ]
+                                                : null;
+                            if ( null != typeArg1 && typeArg1 == typeof ( string )
+                                    && null != typeArg2 &&
+                                    typeof ( IDictionary< , > ).MakeGenericType( typeArg1, typeArg2 )
+                                                            .IsAssignableFrom( property.PropertyType ) ) {
+                                object dictionary = property.GetValue( Top.obj, null );
+                                MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
+                                object converted = ConvertValueIfNeed( initialized.obj.GetType( ),
+                                                                        typeArg2, initialized.obj );
+                                if ( null == initialized.key )
+                                    throw new InvalidOperationException(
+                                        "Key is not specified for item of dictionary" );
+                                methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
+                            } else {
+                                // Handle as property - call setter with conversion if need
+                                property.SetValue( Top.obj, ConvertValueIfNeed(
+                                    initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
+                                                    null );
+                            }
                         }
                     }
                 }

@@ -26,15 +26,10 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class Panel : Control {
         private void subscribe() {
-//            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(Panel_PreviewKeyDown), true);
-            collection.CollectionChanged += ( sender, args ) => {
-                foreach ( var newItem in args.NewItems ) {
-                    AddChild( ( Control ) newItem );
-                }
-            };
         }
 
         public Panel() {
+            collection = new UIElementCollection(this);
             subscribe();
         }
 
@@ -61,11 +56,11 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private ObservableCollection<Control> collection = new ObservableCollection< Control >();
+        private readonly UIElementCollection collection;
         /// <summary>
         /// todo : rename to Children
         /// </summary>
-        public IList<Control> Content {
+        public UIElementCollection Content {
             get { return collection; }
         }
 

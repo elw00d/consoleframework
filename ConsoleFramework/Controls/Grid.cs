@@ -146,7 +146,7 @@ namespace ConsoleFramework.Controls
     {
         private readonly List< ColumnDefinition > columnDefinitions = new List< ColumnDefinition >();
         private readonly List< RowDefinition > rowDefinitions = new List< RowDefinition >();
-        private readonly ObservableCollection< Control > children = new ObservableCollection< Control >();
+        private readonly UIElementCollection children;
         private int[ ] columnsWidths;
         private int[ ] rowsHeights;
 
@@ -158,21 +158,22 @@ namespace ConsoleFramework.Controls
             get { return rowDefinitions; }
         }
 
-        public IList<Control> Controls { get { return children; } }
+        public UIElementCollection Controls { get { return children; } }
 
         public Grid( ) {
-            children.CollectionChanged += ( sender, args ) => {
-                if ( null != args.OldItems ) {
-                    foreach ( var oldItem in args.OldItems ) {
-                        RemoveChild( ( Control ) oldItem );
-                    }
-                }
-                if ( null != args.NewItems ) {
-                    foreach ( var newItem in args.NewItems ) {
-                        AddChild( ( Control ) newItem );
-                    }
-                }
-            };
+            children = new UIElementCollection(this);
+//            children.CollectionChanged += ( sender, args ) => {
+//                if ( null != args.OldItems ) {
+//                    foreach ( var oldItem in args.OldItems ) {
+//                        RemoveChild( ( Control ) oldItem );
+//                    }
+//                }
+//                if ( null != args.NewItems ) {
+//                    foreach ( var newItem in args.NewItems ) {
+//                        AddChild( ( Control ) newItem );
+//                    }
+//                }
+//            };
         }
 
         protected override Size MeasureOverride( Size availableSize ) {
