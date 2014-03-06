@@ -25,18 +25,17 @@ namespace ConsoleFramework.Controls
 
         public Window() {
             this.IsFocusScope = true;
+            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
             initialize(  );
         }
 
         protected virtual void initialize( ) {
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
-            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
             //AddHandler(PreviewLostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_PreviewLostKeyboardFocus));
             AddHandler(Button.ClickEvent, new RoutedEventHandler(Window_Click));
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
-
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_OnLostFocus));
         }
 

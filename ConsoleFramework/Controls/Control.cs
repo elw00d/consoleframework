@@ -248,6 +248,7 @@ namespace ConsoleFramework.Controls
             Children.Insert(index, child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
+            child.Invalidate(  );
             Invalidate();
         }
 
@@ -259,6 +260,7 @@ namespace ConsoleFramework.Controls
             Children.Add(child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
+            child.Invalidate();
             Invalidate();
         }
 
