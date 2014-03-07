@@ -158,21 +158,40 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
 
+        protected void RenderBorders( RenderingBuffer buffer, Point a, Point b, bool singleOrDouble, Attr attrs ) {
+            if ( singleOrDouble ) {
+                // Corners
+                buffer.SetPixel(a.X, a.Y, UnicodeTable.SingleFrameTopLeftCorner, attrs);
+                buffer.SetPixel(b.X, b.Y, UnicodeTable.SingleFrameBottomRightCorner, attrs);
+                buffer.SetPixel(a.X, b.Y, UnicodeTable.SingleFrameBottomLeftCorner, attrs);
+                buffer.SetPixel(b.X, a.Y, UnicodeTable.SingleFrameTopRightCorner, attrs);
+                // Horizontal & vertical frames
+                buffer.FillRectangle(a.X + 1, a.Y, b.X - a.X - 1, 1, UnicodeTable.SingleFrameHorizontal, attrs);
+                buffer.FillRectangle(a.X + 1, b.Y, b.X - a.X - 1, 1, UnicodeTable.SingleFrameHorizontal, attrs);
+                buffer.FillRectangle(a.X, a.Y + 1, 1, b.Y - a.Y - 1, UnicodeTable.SingleFrameVertical, attrs);
+                buffer.FillRectangle(b.X, a.Y + 1, 1, b.Y - a.Y - 1, UnicodeTable.SingleFrameVertical, attrs);
+            } else {
+                // Corners
+                buffer.SetPixel( a.X, a.Y, UnicodeTable.DoubleFrameTopLeftCorner, attrs );
+                buffer.SetPixel( b.X, b.Y, UnicodeTable.DoubleFrameBottomRightCorner, attrs );
+                buffer.SetPixel( a.X, b.Y, UnicodeTable.DoubleFrameBottomLeftCorner, attrs );
+                buffer.SetPixel( b.X, a.Y, UnicodeTable.DoubleFrameTopRightCorner, attrs );
+                // Horizontal & vertical frames
+                buffer.FillRectangle( a.X + 1, a.Y, b.X - a.X - 1, 1, UnicodeTable.DoubleFrameHorizontal, attrs );
+                buffer.FillRectangle( a.X + 1, b.Y, b.X - a.X - 1, 1, UnicodeTable.DoubleFrameHorizontal, attrs );
+                buffer.FillRectangle( a.X, a.Y + 1, 1, b.Y - a.Y - 1, UnicodeTable.DoubleFrameVertical, attrs );
+                buffer.FillRectangle( b.X, a.Y + 1, 1, b.Y - a.Y - 1, UnicodeTable.DoubleFrameVertical, attrs );
+            }
+        }
+
         public override void Render(RenderingBuffer buffer)
         {
             Attr borderAttrs = moving ? Colors.Blend(Color.Green, Color.Gray) : Colors.Blend(Color.White, Color.Gray);
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
-            // corners
-            buffer.SetPixel(0, 0, UnicodeTable.DoubleFrameTopLeftCorner, borderAttrs);
-            buffer.SetPixel(ActualWidth - 3, ActualHeight - 2, UnicodeTable.DoubleFrameBottomRightCorner, borderAttrs);
-            buffer.SetPixel(0, ActualHeight - 2, UnicodeTable.DoubleFrameBottomLeftCorner, borderAttrs);
-            buffer.SetPixel(ActualWidth - 3, 0, UnicodeTable.DoubleFrameTopRightCorner, borderAttrs);
-            // horizontal & vertical frames
-            buffer.FillRectangle(1, 0, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
-            buffer.FillRectangle(1, ActualHeight - 2, ActualWidth - 4, 1, UnicodeTable.DoubleFrameHorizontal, borderAttrs);
-            buffer.FillRectangle(0, 1, 1, ActualHeight - 3, UnicodeTable.DoubleFrameVertical, borderAttrs);
-            buffer.FillRectangle(ActualWidth - 3, 1, 1, ActualHeight -3 , UnicodeTable.DoubleFrameVertical, borderAttrs);
+            // Borders
+            RenderBorders(buffer, new Point(0, 0), new Point(ActualWidth - 3, ActualHeight - 2),
+                this.moving || this.resizing, borderAttrs);
             // close button
             if (ActualWidth > 4) {
                 buffer.SetPixel(2, 0, '[');

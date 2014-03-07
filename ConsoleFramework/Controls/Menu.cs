@@ -43,6 +43,9 @@ namespace ConsoleFramework.Controls
 
             AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
+
+            // Stretch by default
+            HorizontalAlignment = HorizontalAlignment.Stretch;
         }
 
         // todo : make Focusable controls to be invalidated automatically
@@ -110,8 +113,9 @@ namespace ConsoleFramework.Controls
             if (HasFocus || this.expanded)
                 captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             else
-                captionAttrs = Colors.Blend(Color.Black, Color.DarkGray);
+                captionAttrs = Colors.Blend(Color.Black, Color.Gray);
 
+            buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', captionAttrs );
             if (null != Title)
                 RenderString( " " + Title + " ", buffer, 0, 0, ActualWidth, captionAttrs );
         }
@@ -184,6 +188,9 @@ namespace ConsoleFramework.Controls
                                           Attr.NO_ATTRIBUTES);
                     //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );
                 }
+
+                RenderBorders( buffer, new Point(1, 1), new Point(ActualWidth - 3, ActualHeight - 2),
+                    true, borderAttrs);
             }
 
             protected override Size MeasureOverride(Size availableSize)
@@ -192,11 +199,13 @@ namespace ConsoleFramework.Controls
                 if ( shadow ) {
                     // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает Content
                     Content.Measure( new Size( availableSize.Width - 3, availableSize.Height - 4 ) );
-                    return new Size( Content.DesiredSize.Width + 3, Content.DesiredSize.Height + 4 );
+                    // +2 for left empty space and right
+                    return new Size( Content.DesiredSize.Width + 3 + 2, Content.DesiredSize.Height + 4 );
                 } else {
                     // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает Content
                     Content.Measure(new Size(availableSize.Width - 2, availableSize.Height - 3));
-                    return new Size(Content.DesiredSize.Width + 2, Content.DesiredSize.Height + 3);
+                    // +2 for left empty space and right
+                    return new Size(Content.DesiredSize.Width + 2 + 2, Content.DesiredSize.Height + 3);
                 }
             }
 
@@ -206,13 +215,13 @@ namespace ConsoleFramework.Controls
                         // 1 pixel from all borders - for popup padding
                         // 1 pixel from top - for transparent region
                         // Additional pixel from right and bottom - for shadow
-                        Content.Arrange( new Rect( new Point( 1, 2 ),
-                                                   new Size( finalSize.Width - 3, finalSize.Height - 4 ) ) );
+                        Content.Arrange( new Rect( new Point( 2, 2 ),
+                                                   new Size( finalSize.Width - 5, finalSize.Height - 4 ) ) );
                     } else {
                         // 1 pixel from all borders - for popup padding
                         // 1 pixel from top - for transparent region
-                        Content.Arrange(new Rect(new Point(1, 2),
-                                                   new Size(finalSize.Width - 2, finalSize.Height - 3)));
+                        Content.Arrange(new Rect(new Point(2, 2),
+                                                   new Size(finalSize.Width - 4, finalSize.Height - 3)));
                     }
                 }
                 return finalSize;
@@ -227,6 +236,9 @@ namespace ConsoleFramework.Controls
     {
         public Separator( ) {
             Focusable = false;
+
+            // Stretch by default
+            HorizontalAlignment = HorizontalAlignment.Stretch;
         }
 
         protected override Size MeasureOverride(Size availableSize) {
@@ -238,9 +250,9 @@ namespace ConsoleFramework.Controls
             if (HasFocus)
                 captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             else
-                captionAttrs = Colors.Blend(Color.Black, Color.DarkGray);
+                captionAttrs = Colors.Blend(Color.Black, Color.Gray);
 
-            buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, '-', captionAttrs );
+            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, UnicodeTable.SingleFrameHorizontal, captionAttrs);
         }
     }
 

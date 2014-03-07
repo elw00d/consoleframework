@@ -6,8 +6,18 @@
         <MenuItem Title="Edit"></MenuItem>
         <MenuItem Type="Submenu" Title="About">
           <MenuItem.Items>
-            <MenuItem Title="File"></MenuItem>
-            <MenuItem Title="Edit"></MenuItem>
+            <MenuItem Title="Mode"></MenuItem>
+            <MenuItem Title="Compiler..."></MenuItem>
+            <MenuItem Title="Memory sizes..."></MenuItem>
+            <MenuItem Title="Linker..."></MenuItem>
+            <MenuItem Title="Debugger..."></MenuItem>
+            <MenuItem Title="Directories..."></MenuItem>
+            <Separator></Separator>
+            <MenuItem Title="Environment ..." Type="Submenu"></MenuItem>
+            <Separator></Separator>
+            <MenuItem Title="Open..."></MenuItem>
+            <MenuItem Title="Save"></MenuItem>
+            <MenuItem Title="Save as..."></MenuItem>
           </MenuItem.Items>
         </MenuItem>
       </Menu.Items>
