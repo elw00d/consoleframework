@@ -202,7 +202,7 @@ __<p style="color: red">Важно!</p>__
 ##### Type
 Позволяет получить тип (объект типа `Type`) по имени:
 ```
-{Type TestProject1.Xaml.XamlTest+XamlObject, TestProject1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null}
+{xaml:Type TestProject1.Xaml.TypeExtensionTest.ObjectToCreate\, TestProject1\, Version\=1.0.0.0\, Culture\=neutral\, PublicKeyToken\=null}
 ```
 
 ## Отличия от WPF

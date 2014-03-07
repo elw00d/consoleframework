@@ -49,10 +49,6 @@
     <Compile Include="XamlParser.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="readme.txt" />
-    <Content Include="xaml.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="xaml.xsd">
       <SubType>Designer</SubType>
     </None>

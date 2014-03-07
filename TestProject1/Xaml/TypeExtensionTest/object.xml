@@ -1,0 +1,3 @@
+﻿<ObjectToCreate xmlns:xaml="clr-namespace:Xaml;assembly=Xaml">
+  <ObjectToCreate.Type>{xaml:Type TestProject1.Xaml.TypeExtensionTest.ObjectToCreate\, TestProject1\, Version\=1.0.0.0\, Culture\=neutral\, PublicKeyToken\=null}</ObjectToCreate.Type>
+</ObjectToCreate>
