@@ -74,7 +74,7 @@ namespace Xaml
             public string id;
         }
 
-        public class MarkupExtensionsResolver : IMarkupExtensionsResolver
+        private class MarkupExtensionsResolver : IMarkupExtensionsResolver
         {
             private readonly XamlParser self;
 
