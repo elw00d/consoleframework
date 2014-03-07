@@ -1,1 +1,0 @@
-﻿todo : make assembly compatible with .NET 3.5 (or 2.0)
