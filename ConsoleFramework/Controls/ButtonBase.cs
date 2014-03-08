@@ -35,17 +35,7 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseEnterEvent, new MouseEventHandler(Button_MouseEnter));
             AddHandler(MouseLeaveEvent, new MouseEventHandler(Button_MouseLeave));
             AddHandler( KeyDownEvent, new KeyEventHandler(Button_KeyDown) );
-            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
-            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
             Focusable = true;
-        }
-
-        private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
-        private void OnGotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
         }
 
         private void Button_KeyDown( object sender, KeyEventArgs args ) {

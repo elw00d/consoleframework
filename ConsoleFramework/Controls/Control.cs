@@ -302,10 +302,9 @@ namespace ConsoleFramework.Controls
         }
 
         private void Control_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
-            Debug.WriteLine(string.Format("GotKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
-                args.OldFocus != null ? args.OldFocus.Name : "null",
-                args.NewFocus.Name));
-            //args.Handled = true;
+            // Focusable controls invalidated automatically when aquire focus
+            if (this.Focusable)
+                Invalidate(  );
         }
 
         /// <summary>
@@ -323,6 +322,10 @@ namespace ConsoleFramework.Controls
                 this.StoredFocus = args.OldFocus;
             else
                 this.StoredFocus = null;
+
+            // Focusable controls invalidated automatically when lose focus
+            if (this.Focusable)
+                Invalidate(  );
         }
 
         public Control() {
@@ -1181,5 +1184,32 @@ namespace ConsoleFramework.Controls
         /// восстановления фокуса на том элементе, на котором он был.
         /// </summary>
         internal Control StoredFocus = null;
+
+        /// <summary>
+        /// Определяет дочерний элемент, находящийся под курсором мыши,
+        /// и передаёт на него фокус, если он - Focusable и Visible.
+        /// </summary>
+        protected void PassFocusToChildUnderPoint( MouseEventArgs args ) {
+            Control tofocus = null;
+            Control parent = this;
+            Control hitTested = null;
+            do
+            {
+                Point position = args.GetPosition(parent);
+                hitTested = parent.GetTopChildAtPoint(position);
+                if (null != hitTested)
+                {
+                    parent = hitTested;
+                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
+                    {
+                        tofocus = hitTested;
+                    }
+                }
+            } while (hitTested != null);
+            if (tofocus != null)
+            {
+                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
+            }
+        }
     }
 }

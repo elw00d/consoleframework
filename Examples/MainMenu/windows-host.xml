@@ -2,7 +2,22 @@
   <WindowsHost.MainMenu>
     <Menu>
       <Menu.Items>
-        <MenuItem Title="File"></MenuItem>
+        <MenuItem Title="File" Type="Submenu">
+          <MenuItem Title="New"/>
+          <MenuItem Title="New from template..."/>
+          <MenuItem Title="Open"/>
+          <MenuItem Title="Reload"/>
+          <MenuItem Title="Save"/>
+          <MenuItem Title="Save as..."/>
+          <MenuItem Title="Save all" Disabled="True"/>
+          <Separator/>
+          <MenuItem Title="Print"/>
+          <MenuItem Title="Print setup"/>
+          <Separator/>
+          <MenuItem Title="Change dir..."/>
+          <MenuItem Title="Command shell"/>
+          <MenuItem Title="Exit"/>
+        </MenuItem>
         <MenuItem Title="Edit"></MenuItem>
         <MenuItem Type="Submenu" Title="About">
           <MenuItem.Items>

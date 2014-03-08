@@ -44,26 +44,7 @@ namespace ConsoleFramework.Controls
         /// </summary>
         private void Window_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Control tofocus = null;
-            Control parent = this;
-            Control hitTested = null;
-            do
-            {
-                Point position = e.GetPosition(parent);
-                hitTested = parent.GetTopChildAtPoint(position);
-                if (null != hitTested)
-                {
-                    parent = hitTested;
-                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
-                    {
-                        tofocus = hitTested;
-                    }
-                }
-            } while (hitTested != null);
-            if (tofocus != null)
-            {
-                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
-            }
+            PassFocusToChildUnderPoint( e );
         }
 
         protected void OnKeyDown(object sender, KeyEventArgs args)

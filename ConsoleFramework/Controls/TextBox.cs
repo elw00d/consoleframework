@@ -14,8 +14,6 @@ namespace ConsoleFramework.Controls {
         public TextBox() {
             KeyDown += TextBox_KeyDown;
             MouseDown += OnMouseDown;
-            GotKeyboardFocus += OnGotKeyboardFocus;
-            LostKeyboardFocus += OnLostKeyboardFocus;
             CursorVisible = true;
             CursorPosition = new Point(1, 0);
             Focusable = true;
@@ -35,12 +33,6 @@ namespace ConsoleFramework.Controls {
                 }
                 args.Handled = true;
             }
-        }
-
-        private void OnLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
-        }
-
-        private void OnGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs args) {

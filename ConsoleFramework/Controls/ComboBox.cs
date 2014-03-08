@@ -31,8 +31,6 @@ namespace ConsoleFramework.Controls
         public ComboBox( bool shadow ) {
             this.shadow = shadow;
             Focusable = true;
-            AddHandler( GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus) );
-            AddHandler( LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus) );
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
             AddHandler( KeyDownEvent, new KeyEventHandler(OnKeyDown) );
         }
@@ -222,14 +220,6 @@ namespace ConsoleFramework.Controls
             opened = false;
             this.SelectedItemIndex = ( ( PopupWindow ) o ).IndexSelected;
             EventManager.RemoveHandler(o, Window.ClosedEvent, new EventHandler(OnPopupClosed));
-        }
-
-        private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
-        private void OnGotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
         }
 
         private readonly List<String> items = new List< string >();

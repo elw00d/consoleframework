@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -37,45 +35,45 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private bool disabled;
+        public bool Disabled {
+            get { return disabled; }
+            set {
+                if ( disabled != value ) {
+                    disabled = value;
+                    Invalidate(  );
+                }
+            }
+        }
+
         public MenuItem( ) {
             Focusable = true;
 
             AddHandler( MouseDownEvent, new MouseEventHandler(onMouseDown) );
-            AddHandler( MouseMoveEvent, new MouseEventHandler(onMouseMove) );
-
-            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnGotKeyboardFocus));
-            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(OnLostKeyboardFocus));
+            AddHandler( MouseMoveEvent, new MouseEventHandler( onMouseMove ) );
 
             // Stretch by default
             HorizontalAlignment = HorizontalAlignment.Stretch;
         }
-
-        // todo : make Focusable controls to be invalidated automatically
-        private void OnLostKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
-        private void OnGotKeyboardFocus( object sender, KeyboardFocusChangedEventArgs args ) {
-            Invalidate(  );
-        }
-
+        
         private void onMouseMove( object sender, MouseEventArgs args ) {
-            if ( args.LeftButton == MouseButtonState.Pressed ) {
+            // Mouse move opens the submenus only in root level
+            if ( !disabled && args.LeftButton == MouseButtonState.Pressed /*&& Parent.Parent is Menu*/ ) {
                 openMenu(  );
             }
         }
 
         private void onMouseDown( object sender, MouseEventArgs args ) {
-            openMenu(  );
+            if (!disabled)
+                openMenu(  );
         }
 
         private void openMenu( ) {
             if ( expanded ) return;
 
             if ( this.Type == MenuItemType.Submenu ) {
-                Popup popup = new Popup( this.Items, true, true );
+                Popup popup = new Popup( this.Items, true, true, this.ActualWidth );
                 WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
-                popup.Title = "TTTTTTTTT";
                 Point point = TranslatePoint( this, new Point( 0, 0 ), windowsHost );
                 popup.X = point.X;
                 popup.Y = point.Y;
@@ -116,6 +114,8 @@ namespace ConsoleFramework.Controls
                 captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             else
                 captionAttrs = Colors.Blend(Color.Black, Color.Gray);
+            if ( disabled )
+                captionAttrs = Colors.Blend( Color.DarkGray, Color.Gray );
 
             buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', captionAttrs );
             if (null != Title)
@@ -126,9 +126,11 @@ namespace ConsoleFramework.Controls
         {
             private readonly bool shadow;
             private readonly bool border;
+            private readonly int width; // Размер непрозрачной области
 
-            public Popup( List<MenuItemBase> menuItems, bool shadow, bool border )
-            {
+            public Popup( List<MenuItemBase> menuItems, bool shadow, bool border,
+                int width) {
+                this.width = width;
                 this.shadow = shadow;
                 this.border = border;
                 Panel panel = new Panel();
@@ -140,10 +142,12 @@ namespace ConsoleFramework.Controls
                 Content = panel;
                 
                 // if click on the transparent header, close the popup
-                AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
+                AddHandler( PreviewMouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
                     if ( Content != null && !Content.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
                         Close();
-                        args.Handled = true;
+                        if ( new Rect( new Size( width, 1 ) ).Contains( args.GetPosition( this ) ) ) {
+                            args.Handled = true;
+                        }
                     }
                 }));
 
@@ -151,6 +155,13 @@ namespace ConsoleFramework.Controls
                 AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
                     panel.ClearChilds(  );
                 }) );
+                EventManager.AddHandler(panel, PreviewMouseMoveEvent, new MouseEventHandler(onPanelMouseMove));
+            }
+
+            private void onPanelMouseMove( object sender, MouseEventArgs e ) {
+                if ( e.LeftButton == MouseButtonState.Pressed ) {
+                    PassFocusToChildUnderPoint( e );
+                }
             }
 
             protected override void initialize()
@@ -326,31 +337,18 @@ namespace ConsoleFramework.Controls
             this.IsFocusScope = true;
 
             this.AddHandler( KeyDownEvent, new KeyEventHandler(onKeyDown) );
+            this.AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove) );
             this.AddHandler( PreviewMouseDownEvent, new MouseEventHandler(onPreviewMouseDown) );
         }
 
-        // todo: remove copy-paste from Window
-        private void onPreviewMouseDown( object sender, MouseEventArgs e ) {
-            Control tofocus = null;
-            Control parent = this;
-            Control hitTested = null;
-            do
-            {
-                Point position = e.GetPosition(parent);
-                hitTested = parent.GetTopChildAtPoint(position);
-                if (null != hitTested)
-                {
-                    parent = hitTested;
-                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
-                    {
-                        tofocus = hitTested;
-                    }
-                }
-            } while (hitTested != null);
-            if (tofocus != null)
-            {
-                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
+        private void onPreviewMouseMove( object sender, MouseEventArgs args ) {
+            if ( args.LeftButton == MouseButtonState.Pressed ) {
+                onPreviewMouseDown( sender, args );
             }
+        }
+
+        private void onPreviewMouseDown( object sender, MouseEventArgs e ) {
+            PassFocusToChildUnderPoint( e );
         }
 
         private void onKeyDown( object sender, KeyEventArgs args ) {

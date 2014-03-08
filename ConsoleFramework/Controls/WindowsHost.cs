@@ -113,12 +113,16 @@ namespace ConsoleFramework.Controls
             }
             Children[Children.Count - 1] = window;
             
+            // If need to change top window
             if (oldTopWindow != window)
             {
                 oldTopWindow.RaiseEvent( Window.DeactivatedEvent, new RoutedEventArgs( oldTopWindow, Window.DeactivatedEvent ) );
                 window.RaiseEvent(Window.ActivatedEvent, new RoutedEventArgs(window, Window.ActivatedEvent));
+            }
+            // If need to change focus (it is not only when need to change top window)
+            // It may be need to change focus from menu to window, for example
+            if ( ConsoleApplication.Instance.FocusManager.CurrentScope != window ) {
                 initializeFocusOnActivatedWindow( window );
-                Invalidate();
             }
         }
         
