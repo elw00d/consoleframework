@@ -182,34 +182,37 @@ namespace ConsoleFramework.Controls
         }
 
         private void initializeFocusOnActivatedWindow( Window window ) {
-            bool reinitFocus = false;
-            if ( window.StoredFocus != null ) {
-                // проверяем, не удалён ли StoredFocus и является ли он Visible & Focusable
-                if ( !VisualTreeHelper.IsConnectedToRoot( window.StoredFocus ) ) {
-                    // todo : log warn about disconnected control
-                    reinitFocus = true;
-                } else if ( window.StoredFocus.Visibility != Visibility.Visible ) {
-                    // todo : log warn about invizible control to be focused
-                    reinitFocus = true;
-                }
-                else if ( !window.StoredFocus.Focusable ) {
-                    // todo : log warn
-                    reinitFocus = true;
-                } else {
-                    ConsoleApplication.Instance.FocusManager.SetFocus( window, window.StoredFocus );
-                }
-            } else {
-                reinitFocus = true;
-            }
-            //
-            if ( reinitFocus ) {
-                if ( window.ChildToFocus != null ) {
-                    Control child = VisualTreeHelper.FindChildByName( window, window.ChildToFocus );
-                    ConsoleApplication.Instance.FocusManager.SetFocus( child );
-                } else {
-                    ConsoleApplication.Instance.FocusManager.SetFocusScope( window );
-                }
-            }
+            ConsoleApplication.Instance.FocusManager.SetFocusScope(window);
+            // todo : add window.ChildToFocus support again
+//
+//            bool reinitFocus = false;
+//            if ( window.StoredFocus != null ) {
+//                // проверяем, не удалён ли StoredFocus и является ли он Visible & Focusable
+//                if ( !VisualTreeHelper.IsConnectedToRoot( window.StoredFocus ) ) {
+//                    // todo : log warn about disconnected control
+//                    reinitFocus = true;
+//                } else if ( window.StoredFocus.Visibility != Visibility.Visible ) {
+//                    // todo : log warn about invizible control to be focused
+//                    reinitFocus = true;
+//                }
+//                else if ( !window.StoredFocus.Focusable ) {
+//                    // todo : log warn
+//                    reinitFocus = true;
+//                } else {
+//                    ConsoleApplication.Instance.FocusManager.SetFocus( window, window.StoredFocus );
+//                }
+//            } else {
+//                reinitFocus = true;
+//            }
+//            //
+//            if ( reinitFocus ) {
+//                if ( window.ChildToFocus != null ) {
+//                    Control child = VisualTreeHelper.FindChildByName( window, window.ChildToFocus );
+//                    ConsoleApplication.Instance.FocusManager.SetFocus( child );
+//                } else {
+//                    ConsoleApplication.Instance.FocusManager.SetFocusScope( window );
+//                }
+//            }
         }
 
         private class WindowInfo

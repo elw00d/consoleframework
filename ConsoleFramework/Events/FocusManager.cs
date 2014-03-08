@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Controls;
+using ConsoleFramework.Core;
 
 namespace ConsoleFramework.Events
 {
@@ -207,7 +208,28 @@ namespace ConsoleFramework.Events
             }
             else
             {
-                tofocus = children[0];
+                bool reinitFocus = false;
+                // Try to restore focus from StoredFocus field
+                if ( scope.StoredFocus != null ) {
+                    // проверяем, не удалён ли StoredFocus и является ли он Visible & Focusable
+                    if ( !VisualTreeHelper.IsConnectedToRoot( scope.StoredFocus ) ) {
+                        // todo : log warn about disconnected control
+                        reinitFocus = true;
+                    } else if ( scope.StoredFocus.Visibility != Visibility.Visible ) {
+                        // todo : log warn about invizible control to be focused
+                        reinitFocus = true;
+                    } else if ( !scope.StoredFocus.Focusable ) {
+                        // todo : log warn
+                        reinitFocus = true;
+                    }
+                } else {
+                    reinitFocus = true;
+                }
+                if (reinitFocus)
+                    tofocus = children[0];
+                else {
+                    tofocus = scope.StoredFocus;
+                }
             }
 
             if (tryChangeFocusedElementTo(tofocus))

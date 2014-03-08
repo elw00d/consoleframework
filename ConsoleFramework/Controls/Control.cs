@@ -308,11 +308,21 @@ namespace ConsoleFramework.Controls
             //args.Handled = true;
         }
 
+        /// <summary>
+        /// Если один из дочерних контролов окна теряет фокус, то будет вызван этот обработчик
+        /// </summary>
         private void Control_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
             //Debug.WriteLine(string.Format("LostKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
             //    args.OldFocus != null ? args.OldFocus.Name : "null",
             //    args.NewFocus.Name));
             //args.Handled = true;
+
+            // Если текущий контрол является FocusScope, то мы должны сохранить элемент,
+            // который имел фокус, чтобы восстановить его, когда FocusScope получит его обратно
+            if ( this.IsFocusScope )
+                this.StoredFocus = args.OldFocus;
+            else
+                this.StoredFocus = null;
         }
 
         public Control() {
@@ -1164,5 +1174,12 @@ namespace ConsoleFramework.Controls
         protected static void assert( bool assertion ) {
             if (!assertion) throw new InvalidOperationException("Assertion failed.");
         }
+
+        /// <summary>
+        /// Тут хранится ссылка на дочерний элемент окна, который потерял фокус последним.
+        /// При восстановлении фокуса на самом окне WindowsHost использует это поле для
+        /// восстановления фокуса на том элементе, на котором он был.
+        /// </summary>
+        internal Control StoredFocus = null;
     }
 }

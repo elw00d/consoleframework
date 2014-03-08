@@ -7,6 +7,7 @@ using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {
@@ -22,6 +23,7 @@ namespace ConsoleFramework.Controls
         
     }
 
+    [ContentProperty("Items")]
     public class MenuItem : MenuItemBase
     {
         private bool _expanded;

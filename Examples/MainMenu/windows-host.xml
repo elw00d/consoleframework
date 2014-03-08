@@ -13,7 +13,14 @@
             <MenuItem Title="Debugger..."></MenuItem>
             <MenuItem Title="Directories..."></MenuItem>
             <Separator></Separator>
-            <MenuItem Title="Environment ..." Type="Submenu"></MenuItem>
+            <MenuItem Title="Environment ..." Type="Submenu">
+              <MenuItem Title="Preferences..."></MenuItem>
+              <MenuItem Title="Editor..."></MenuItem>
+              <MenuItem Title="CodeComplete..."></MenuItem>
+              <MenuItem Title="CodeTemplates..."></MenuItem>
+              <MenuItem Title="Desktop..."></MenuItem>
+              <MenuItem Title="Keyboard &amp; mouse"></MenuItem>
+            </MenuItem>
             <Separator></Separator>
             <MenuItem Title="Open..."></MenuItem>
             <MenuItem Title="Save"></MenuItem>

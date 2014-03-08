@@ -36,22 +36,6 @@ namespace ConsoleFramework.Controls
             //AddHandler(PreviewLostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_PreviewLostKeyboardFocus));
             AddHandler(Button.ClickEvent, new RoutedEventHandler(Window_Click));
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
-            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_OnLostFocus));
-        }
-
-        /// <summary>
-        /// Тут хранится ссылка на дочерний элемент окна, который потерял фокус последним.
-        /// При восстановлении фокуса на самом окне WindowsHost использует это поле для
-        /// восстановления фокуса на том элементе, на котором он был.
-        /// </summary>
-        internal Control StoredFocus = null;
-
-        /// <summary>
-        /// Если один из дочерних контролов окна теряет фокус, то будет вызван этот обработчик
-        /// </summary>
-        private void Window_OnLostFocus(object sender, KeyboardFocusChangedEventArgs args)
-        {
-            StoredFocus = args.OldFocus;
         }
 
         /// <summary>
