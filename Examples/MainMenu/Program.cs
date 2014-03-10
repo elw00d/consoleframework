@@ -1,5 +1,7 @@
-﻿using ConsoleFramework;
+﻿using System.Collections.Generic;
+using ConsoleFramework;
 using ConsoleFramework.Controls;
+using ConsoleFramework.Core;
 
 namespace Examples.MainMenu
 {
@@ -13,6 +15,14 @@ namespace Examples.MainMenu
             checkBox.OnClick += ( sender, eventArgs ) => {
                 eventArgs.Handled = true;
             };
+            List< Control > menuItems = VisualTreeHelper.FindAllChilds( windowsHost.MainMenu, control => control is MenuItem );
+            foreach ( Control menuItem in menuItems ) {
+                ( ( MenuItem ) menuItem ).Click += ( sender, eventArgs ) => {
+                    MessageBox.Show( "", "", result => {
+                        //
+                    } );
+                };
+            }
             ConsoleApplication.Instance.Run( windowsHost );
         }
     }

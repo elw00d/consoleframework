@@ -18,7 +18,22 @@
           <MenuItem Title="Command shell"/>
           <MenuItem Title="Exit"/>
         </MenuItem>
-        <MenuItem Title="Edit"></MenuItem>
+        <MenuItem Title="Edit" Type="Submenu">
+          <MenuItem Title="Undo" Disabled="True"/>
+          <MenuItem Title="Redo" Disabled="True"/>
+          <Separator/>
+          <MenuItem Title="Cut" Disabled="True"/>
+          <MenuItem Title="Copy" Disabled="True"/>
+          <MenuItem Title="Paste" Disabled="True"/>
+          <MenuItem Title="Clear" Disabled="True"/>
+          <MenuItem Title="Select All" Disabled="True"/>
+          <MenuItem Title="Unselect" Disabled="True"/>
+          <Separator/>
+          <MenuItem Title="Show clipboard"/>
+          <Separator/>
+          <MenuItem Title="Copy to Windows"/>
+          <MenuItem Title="Copy from Windows"/>
+        </MenuItem>
         <MenuItem Type="Submenu" Title="About">
           <MenuItem.Items>
             <MenuItem Title="Mode"></MenuItem>
@@ -42,6 +57,7 @@
             <MenuItem Title="Save as..."></MenuItem>
           </MenuItem.Items>
         </MenuItem>
+        <MenuItem Title="Go"/>
       </Menu.Items>
     </Menu>
   </WindowsHost.MainMenu>

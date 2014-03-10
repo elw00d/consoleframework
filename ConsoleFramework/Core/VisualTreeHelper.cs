@@ -1,13 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ConsoleFramework.Controls;
 
 namespace ConsoleFramework.Core
 {
     public class VisualTreeHelper
     {
+        public static List<Control> FindAllChilds( Control control, Func< Control, bool > predicate ) {
+            // todo : check args
+
+            List<Control> queue = new List< Control >();
+            findAllChildsRecoursively( queue, control, predicate );
+
+            return queue;
+        }
+
+        private static void findAllChildsRecoursively(List<Control> queue,
+            Control control, Func<Control, bool> predicate)
+        {
+            foreach ( Control child in control.Children ) {
+                if ( predicate(child) ) {
+                    queue.Add( child );
+                } 
+                findAllChildsRecoursively(queue, child, predicate);
+            }
+        }
+
         /// <summary>
         /// Рекурсивно ищёт дочерний элемент по указанному Name.
         /// Если в результате поиска подходящий элемент не был найден, возвращается null.

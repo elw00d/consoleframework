@@ -24,6 +24,18 @@ namespace ConsoleFramework.Controls
     [ContentProperty("Items")]
     public class MenuItem : MenuItemBase
     {
+        public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click",
+            RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(MenuItem));
+
+        public event RoutedEventHandler Click {
+            add {
+                AddHandler(ClickEvent, value);
+            }
+            remove {
+                RemoveHandler(ClickEvent, value);
+            }
+        }
+
         private bool _expanded;
         private bool expanded {
             get { return _expanded; }
@@ -51,11 +63,18 @@ namespace ConsoleFramework.Controls
 
             AddHandler( MouseDownEvent, new MouseEventHandler(onMouseDown) );
             AddHandler( MouseMoveEvent, new MouseEventHandler( onMouseMove ) );
+            AddHandler( MouseUpEvent, new MouseEventHandler(onMouseUp) );
 
             // Stretch by default
             HorizontalAlignment = HorizontalAlignment.Stretch;
         }
-        
+
+        private void onMouseUp( object sender, MouseEventArgs mouseEventArgs ) {
+            if ( Type == MenuItemType.Item ) {
+                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+            }
+        }
+
         private void onMouseMove( object sender, MouseEventArgs args ) {
             // Mouse move opens the submenus only in root level
             if ( !disabled && args.LeftButton == MouseButtonState.Pressed /*&& Parent.Parent is Menu*/ ) {
@@ -128,6 +147,7 @@ namespace ConsoleFramework.Controls
             private readonly bool border;
             private readonly int width; // Размер непрозрачной области
 
+            // todo : rename width
             public Popup( List<MenuItemBase> menuItems, bool shadow, bool border,
                 int width) {
                 this.width = width;
@@ -141,7 +161,7 @@ namespace ConsoleFramework.Controls
                 //panel.Margin = new Thickness(1);
                 Content = panel;
                 
-                // if click on the transparent header, close the popup
+                // If click on the transparent header, close the popup
                 AddHandler( PreviewMouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
                     if ( Content != null && !Content.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
                         Close();
@@ -188,7 +208,14 @@ namespace ConsoleFramework.Controls
                 buffer.FillRectangle(0, 1, this.ActualWidth, this.ActualHeight - 1, ' ',
                     borderAttrs);
 
-                buffer.SetOpacityRect(0, 0, ActualWidth, 1, 2);
+                // Первые width пикселей первой строки - прозрачные, но события мыши не пропускают
+                // По нажатию на них мы закрываем всплывающее окно вручную
+                buffer.SetOpacityRect(0, 0, width, 1, 2);
+                // Оставшиеся пиксели первой строки - пропускают события мыши
+                // И WindowsHost закроет всплывающее окно автоматически при нажатии или
+                // перемещении нажатого курсора над этим местом
+                buffer.SetOpacityRect( width, 0, ActualWidth - width, 1, 6 );
+
                 //buffer.SetOpacityRect(0, 1, 1, ActualHeight - 1, 6);
                 if (shadow)
                 {
