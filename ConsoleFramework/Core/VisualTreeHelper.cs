@@ -7,7 +7,10 @@ namespace ConsoleFramework.Core
     public class VisualTreeHelper
     {
         public static List<Control> FindAllChilds( Control control, Func< Control, bool > predicate ) {
-            // todo : check args
+            if (null == control)
+                throw new ArgumentNullException("control");
+            if (null == predicate)
+                throw new ArgumentNullException("predicate");
 
             List<Control> queue = new List< Control >();
             findAllChildsRecoursively( queue, control, predicate );

@@ -146,6 +146,7 @@ namespace ConsoleFramework.Controls
         /// </summary>
         public void OnPreviewMouseDown(object sender, MouseEventArgs args) {
             bool handle = false;
+            check:
             if ( isTopWindowModal( ) ) {
                 Window modalWindow = ( Window ) Children[ Children.Count - 1 ];
                 Window windowClicked = VisualTreeHelper.FindClosestParent<Window>((Control)args.Source);
@@ -156,6 +157,11 @@ namespace ConsoleFramework.Controls
 
                         // далее обрабатываем событие как обычно
                         handle = true;
+
+                        // Если дальше снова модальное окно, проверку нужно повторить, и закрыть
+                        // его тоже, и так далее. Можно отрефакторить как вызов подпрограммы
+                        // вида while (closeTopModalWindowIfNeed()) ;
+                        goto check;
                     } else {
                         // прекращаем распространение события (правда, контролы, подписавшиеся с флагом
                         // handledEventsToo, получат его в любом случае) и генерацию соответствующего

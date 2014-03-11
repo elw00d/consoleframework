@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -37,9 +38,9 @@ namespace ConsoleFramework.Controls
         }
 
         private bool _expanded;
-        private bool expanded {
+        internal bool expanded {
             get { return _expanded; }
-            set {
+            private set {
                 if ( _expanded != value ) {
                     _expanded = value;
                     Invalidate();
@@ -87,11 +88,13 @@ namespace ConsoleFramework.Controls
                 openMenu(  );
         }
 
+        private Popup popup;
+
         private void openMenu( ) {
             if ( expanded ) return;
 
             if ( this.Type == MenuItemType.Submenu ) {
-                Popup popup = new Popup( this.Items, true, true, this.ActualWidth );
+                popup = new Popup( this.Items, true, true, this.ActualWidth );
                 WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
                 Point point = TranslatePoint( this, new Point( 0, 0 ), windowsHost );
                 popup.X = point.X;
@@ -107,6 +110,7 @@ namespace ConsoleFramework.Controls
         private void onPopupClosed( object sender, EventArgs eventArgs ) {
             assert( expanded );
             expanded = false;
+            popup = null;
         }
 
         public string Title { get; set; }
@@ -267,6 +271,11 @@ namespace ConsoleFramework.Controls
                 return finalSize;
             }
         }
+
+        internal void Close( ) {
+            assert( expanded );
+            popup.Close(  );
+        }
     }
 
     /// <summary>
@@ -366,6 +375,36 @@ namespace ConsoleFramework.Controls
             this.AddHandler( KeyDownEvent, new KeyEventHandler(onKeyDown) );
             this.AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove) );
             this.AddHandler( PreviewMouseDownEvent, new MouseEventHandler(onPreviewMouseDown) );
+
+            
+        }
+
+        protected override void OnParentChanged( ) {
+            if ( Parent != null ) {
+                assert( Parent is WindowsHost );
+
+                // Вешаем на WindowsHost обработчик события MenuItem.ClickEvent,
+                // чтобы ловить момент выбора пункта меню в одном из модальных всплывающих окошек
+                // Дело в том, что эти окошки не являются дочерними элементами контрола Menu,
+                // а напрямую являются дочерними элементами WindowsHost (т.к. именно он создаёт
+                // окна). И событие выбора пункта меню из всплывающего окошка может быть поймано 
+                // в WindowsHost, но не в Menu. А нам нужно повесить обработчик, который закроет
+                // все показанные попапы.
+                EventManager.AddHandler( Parent, MenuItem.ClickEvent, new RoutedEventHandler( ( sender, args ) => {
+                    List<MenuItem> expandedSubmenus = new List< MenuItem >();
+                    MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(
+                        item => item is MenuItem && ((MenuItem)item).expanded);
+                    while ( null != currentItem ) {
+                        expandedSubmenus.Add( currentItem );
+                        currentItem = (MenuItem)currentItem.Items.SingleOrDefault(
+                            item => item is MenuItem && ((MenuItem)item).expanded);
+                    }
+                    expandedSubmenus.Reverse( );
+                    foreach ( MenuItem expandedSubmenu in expandedSubmenus ) {
+                        expandedSubmenu.Close( );
+                    }
+                } ), true );
+            }
         }
 
         private void onPreviewMouseMove( object sender, MouseEventArgs args ) {

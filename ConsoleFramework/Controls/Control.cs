@@ -240,6 +240,13 @@ namespace ConsoleFramework.Controls
             protected set;
         }
 
+        /// <summary>
+        /// Called when control is added to some parent or removed from.
+        /// Default implementation does nothing.
+        /// </summary>
+        protected virtual void OnParentChanged( ) {
+        }
+
         protected void InsertChildAt( int index, Control child ) {
             if (null == child)
                 throw new ArgumentNullException("child");
@@ -248,6 +255,7 @@ namespace ConsoleFramework.Controls
             Children.Insert(index, child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
+            child.OnParentChanged(  );
             child.Invalidate(  );
             Invalidate();
         }
@@ -260,6 +268,7 @@ namespace ConsoleFramework.Controls
             Children.Add(child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
+            child.OnParentChanged();
             child.Invalidate();
             Invalidate();
         }
@@ -277,6 +286,8 @@ namespace ConsoleFramework.Controls
 
                 // Remove it from invalidation queue if already added
                 ConsoleApplication.Instance.Renderer.ControlRemovedFromTree( child);
+
+                child.OnParentChanged();
 
                 Invalidate();
             }
