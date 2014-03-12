@@ -33,17 +33,12 @@ namespace ConsoleFramework.Controls
         }
 
         public WindowsHost() {
-            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDown), true);
+            AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(onPreviewMouseDown), true);
             AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove), true );
+            AddHandler(PreviewMouseUpEvent, new MouseEventHandler(onPreviewMouseUp), true);
             AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
                 //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
             }) );
-        }
-
-        private void onPreviewMouseMove( object sender, MouseEventArgs args ) {
-            if ( args.LeftButton == MouseButtonState.Pressed ) {
-                OnPreviewMouseDown( sender, args );
-            }
         }
 
         protected override Size MeasureOverride(Size availableSize) {
@@ -137,21 +132,37 @@ namespace ConsoleFramework.Controls
             return windowInfos[ (Window) Children[ Children.Count - 1 ] ].Modal;
         }
 
+        private void onPreviewMouseMove(object sender, MouseEventArgs args) {
+            onPreviewMouseEvents(sender, args, 2);
+        }
+
+        private void onPreviewMouseDown(object sender, MouseEventArgs args) {
+            onPreviewMouseEvents(sender, args, 0);
+        }
+
+        private void onPreviewMouseUp(object sender, MouseEventArgs args) {
+            onPreviewMouseEvents(sender, args, 1);
+        }
+
         /// <summary>
         /// Обработчик отвечает за вывод на передний план неактивных окон, на которые нажали мышкой,
         /// и за обработку мыши, когда имеется модальное окно - в этом случае обработчик не пропускает
         /// события, которые идут мимо модального окна, дальше по дереву (Tunneling) - устанавливая
         /// Handled в True, либо закрывает модальное окно, если оно было показано с флагом
         /// OutsideClickClosesWindow.
+        /// eventType = 0 - PreviewMouseDown
+        /// eventType = 1 - PreviewMouseUp
+        /// eventType = 2 - PreviewMouseMove
         /// </summary>
-        public void OnPreviewMouseDown(object sender, MouseEventArgs args) {
+        private void onPreviewMouseEvents(object sender, MouseEventArgs args, int eventType) {
             bool handle = false;
             check:
             if ( isTopWindowModal( ) ) {
                 Window modalWindow = ( Window ) Children[ Children.Count - 1 ];
                 Window windowClicked = VisualTreeHelper.FindClosestParent<Window>((Control)args.Source);
                 if ( windowClicked != modalWindow ) {
-                    if ( windowInfos[ modalWindow ].OutsideClickClosesWindow ) {
+                    if ( windowInfos[ modalWindow ].OutsideClickClosesWindow
+                        && (eventType == 0 || eventType == 2 && args.LeftButton == MouseButtonState.Pressed) ) {
                         // закрываем текущее модальное окно
                         CloseWindow( modalWindow );
 
@@ -172,7 +183,7 @@ namespace ConsoleFramework.Controls
             } else {
                 handle = true;
             }
-            if (handle) {
+            if (handle && (eventType == 0 || eventType == 2 && args.LeftButton == MouseButtonState.Pressed)) {
                 Window windowClicked = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
                 if ( null != windowClicked ) {
                     activateWindow( windowClicked );
