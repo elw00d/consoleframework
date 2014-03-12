@@ -5,7 +5,7 @@
         <MenuItem Title="File" Type="Submenu">
           <MenuItem Title="New"/>
           <MenuItem Title="New from template..."/>
-          <MenuItem Title="Open"/>
+          <MenuItem Title="Open" TitleRight="F3"/>
           <MenuItem Title="Reload"/>
           <MenuItem Title="Save"/>
           <MenuItem Title="Save as..."/>

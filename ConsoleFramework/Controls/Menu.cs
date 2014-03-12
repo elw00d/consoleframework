@@ -13,6 +13,7 @@ namespace ConsoleFramework.Controls
     public enum MenuItemType
     {
         Item,
+        RootSubmenu,
         Submenu,
         Separator
     }
@@ -93,7 +94,7 @@ namespace ConsoleFramework.Controls
         private void openMenu( ) {
             if ( expanded ) return;
 
-            if ( this.Type == MenuItemType.Submenu ) {
+            if ( this.Type == MenuItemType.Submenu || Type == MenuItemType.RootSubmenu ) {
                 popup = new Popup( this.Items, true, true, this.ActualWidth );
                 WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
                 Point point = TranslatePoint( this, new Point( 0, 0 ), windowsHost );
@@ -115,20 +116,34 @@ namespace ConsoleFramework.Controls
 
         public string Title { get; set; }
 
+        private string titleRight;
+        public string TitleRight {
+            get {
+                if ( titleRight == null && Type == MenuItemType.Submenu )
+                    return "\u25ba"; // ► todo : extract constant
+                return titleRight;
+            }
+            set { titleRight = value; }
+        }
+
         public string Description { get; set; }
 
         public MenuItemType Type { get; set; }
 
         private List< MenuItemBase > items = new List< MenuItemBase >();
+        
+
         public List<MenuItemBase> Items {
             get { return items; }
         }
 
         protected override Size MeasureOverride(Size availableSize) {
-            if (!string.IsNullOrEmpty(Title)) {
-                Size minButtonSize = new Size(Title.Length + 2, 1);
-                return minButtonSize;
-            } else return new Size(8, 1);
+            int length = 2;
+            if ( !string.IsNullOrEmpty( Title ) ) length += Title.Length;
+            if ( !string.IsNullOrEmpty( TitleRight ) ) length += TitleRight.Length;
+            if ( !string.IsNullOrEmpty( Title ) && !string.IsNullOrEmpty( TitleRight ) )
+                length++;
+            return new Size(length, 1);
         }
 
         public override void Render(RenderingBuffer buffer) {
@@ -142,7 +157,10 @@ namespace ConsoleFramework.Controls
 
             buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', captionAttrs );
             if (null != Title)
-                RenderString( " " + Title + " ", buffer, 0, 0, ActualWidth, captionAttrs );
+                RenderString( Title , buffer, 1, 0, ActualWidth, captionAttrs );
+            if ( null != TitleRight )
+                RenderString( TitleRight, buffer, ActualWidth - TitleRight.Length - 1, 0,
+                              TitleRight.Length, captionAttrs );
         }
 
         private class Popup : Window
@@ -352,6 +370,8 @@ namespace ConsoleFramework.Controls
                             MenuItemBase item = items[ args.Index + i ];
                             if (item is Separator)
                                 throw new InvalidOperationException("Separator cannot be added to root menu.");
+                            if (((MenuItem)item).Type == MenuItemType.Submenu)
+                                ((MenuItem) item).Type = MenuItemType.RootSubmenu;
                             stackPanel.Content.Insert( args.Index + i, item );
                         }
                         break;
@@ -364,7 +384,8 @@ namespace ConsoleFramework.Controls
                         MenuItemBase item = items[ args.Index ];
                         if (item is Separator)
                             throw new InvalidOperationException("Separator cannot be added to root menu.");
-
+                        if (((MenuItem)item).Type == MenuItemType.Submenu)
+                            ((MenuItem)item).Type = MenuItemType.RootSubmenu;
                         stackPanel.Content[args.Index] = item;
                         break;
                     }
