@@ -163,11 +163,14 @@ namespace ConsoleFramework.Controls
                               TitleRight.Length, captionAttrs );
         }
 
-        private class Popup : Window
+        internal class Popup : Window
         {
             private readonly bool shadow;
             private readonly bool border;
             private readonly int width; // Размер непрозрачной области
+
+            public static readonly RoutedEvent ControlKeyPressedEvent = EventManager.RegisterRoutedEvent("ControlKeyPressed",
+                RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(MenuItem.Popup));
 
             // todo : rename width
             public Popup( List<MenuItemBase> menuItems, bool shadow, bool border,
@@ -197,7 +200,22 @@ namespace ConsoleFramework.Controls
                 AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
                     panel.ClearChilds(  );
                 }) );
+
                 EventManager.AddHandler(panel, PreviewMouseMoveEvent, new MouseEventHandler(onPanelMouseMove));
+                AddHandler( PreviewKeyDownEvent, new KeyEventHandler(( sender, args ) => {
+                    if ( args.wVirtualKeyCode == 0x27 ) { // VK_RIGHT
+                        //closeReason = CloseReason.RightButtonPressed;
+                        KeyEventArgs newArgs = new KeyEventArgs( this, ControlKeyPressedEvent );
+                        newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
+                        RaiseEvent(ControlKeyPressedEvent, newArgs);
+                    }
+                    if ( args.wVirtualKeyCode == 0x25 ) { // VK_LEFT
+                        //closeReason = CloseReason.LeftButtonPressed;
+                        KeyEventArgs newArgs = new KeyEventArgs(this, ControlKeyPressedEvent);
+                        newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
+                        RaiseEvent(ControlKeyPressedEvent, newArgs);
+                    }
+                }) );
             }
 
             private void onPanelMouseMove( object sender, MouseEventArgs e ) {
@@ -293,6 +311,10 @@ namespace ConsoleFramework.Controls
         internal void Close( ) {
             assert( expanded );
             popup.Close(  );
+        }
+
+        internal void Expand( ) {
+            openMenu(  );
         }
     }
 
@@ -425,6 +447,32 @@ namespace ConsoleFramework.Controls
                         expandedSubmenu.Close( );
                     }
                 } ), true );
+
+                EventManager.AddHandler( Parent, MenuItem.Popup.ControlKeyPressedEvent,
+                    new KeyEventHandler(( sender, args ) => {
+                        // todo : remove copy paste
+                        List<MenuItem> expandedSubmenus = new List< MenuItem >();
+                        MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(
+                            item => item is MenuItem && ((MenuItem)item).expanded);
+                        while ( null != currentItem ) {
+                            expandedSubmenus.Add( currentItem );
+                            currentItem = (MenuItem)currentItem.Items.SingleOrDefault(
+                                item => item is MenuItem && ((MenuItem)item).expanded);
+                        }
+                        expandedSubmenus.Reverse( );
+                        foreach ( MenuItem expandedSubmenu in expandedSubmenus ) {
+                            expandedSubmenu.Close( );
+                        }
+                        //
+                        ConsoleApplication.Instance.FocusManager.SetFocusScope( this );
+                        if (args.wVirtualKeyCode == 0x27)
+                            ConsoleApplication.Instance.FocusManager.MoveFocusNext(  );
+                        else if (args.wVirtualKeyCode == 0x25)
+                            ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
+                        MenuItem focusedItem = (MenuItem)this.Items.SingleOrDefault(
+                            item => item is MenuItem && ((MenuItem)item).HasFocus);
+                        focusedItem.Expand( );
+                    }));
             }
         }
 
@@ -462,7 +510,8 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render( RenderingBuffer buffer ) {
-            buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, '-', Attr.FOREGROUND_GREEN );
+            Attr attr = Colors.Blend( Color.Black, Color.Gray );
+            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', attr);
         }
     }
 }

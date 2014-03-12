@@ -1,6 +1,6 @@
 ﻿<WindowsHost>
   <WindowsHost.MainMenu>
-    <Menu>
+    <Menu HorizontalAlignment="Center">
       <Menu.Items>
         <MenuItem Title="File" Type="Submenu">
           <MenuItem Title="New"/>
