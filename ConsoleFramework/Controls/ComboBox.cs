@@ -80,7 +80,7 @@ namespace ConsoleFramework.Controls
                     }), true );
                 EventManager.AddHandler(listbox, KeyDownEvent, new KeyEventHandler(
                     (sender, args) => {
-                        if ( args.wVirtualKeyCode == 0x0D ) { // VK_RETURN
+                        if ( args.wVirtualKeyCode == VirtualKeys.Return ) {
                             IndexSelected = listbox.SelectedItemIndex;
                             Close( );
                         }
@@ -106,7 +106,7 @@ namespace ConsoleFramework.Controls
             }
 
             private new void OnKeyDown( object sender, KeyEventArgs args ) {
-                if (args.wVirtualKeyCode == 0x1B) { // VK_ESCAPE
+                if (args.wVirtualKeyCode == VirtualKeys.Escape) {
                     Close();
                 } else base.OnKeyDown( sender, args );
             }
@@ -206,7 +206,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void OnKeyDown( object sender, KeyEventArgs args ) {
-            if ( args.wVirtualKeyCode == 0x0D ) { // VK_RETURN
+            if ( args.wVirtualKeyCode == VirtualKeys.Return ) {
                 openPopup(  );
             }
         }

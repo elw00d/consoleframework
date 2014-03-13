@@ -544,53 +544,53 @@ namespace ConsoleFramework
 				inputRecord.KeyEvent.wRepeatCount = 1;
 				switch (key.code.sym) {
 				case TermKeySym.TERMKEY_SYM_TAB:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x09;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Tab;
 					break;
 				case TermKeySym.TERMKEY_SYM_ENTER:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x0D;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Return;
 					break;
 				// in gnome-terminal it is backspace by default
 				// (see default compatibility settings in Profile's settings)
 				case TermKeySym.TERMKEY_SYM_DEL:
 				case TermKeySym.TERMKEY_SYM_BACKSPACE:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x08;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Back;
 					break;
 				case TermKeySym.TERMKEY_SYM_DELETE:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x2E;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Delete;
 					break;
 				case TermKeySym.TERMKEY_SYM_HOME:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x24;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Home;
 					break;
 				case TermKeySym.TERMKEY_SYM_END:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x23;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.End;
 					break;
 				case TermKeySym.TERMKEY_SYM_PAGEUP:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x21;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Prior;
 					break;
 				case TermKeySym.TERMKEY_SYM_PAGEDOWN:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x22;
+                    inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Next;
 					break;
 				case TermKeySym.TERMKEY_SYM_SPACE:
 					inputRecord.KeyEvent.UnicodeChar = ' ';
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x20;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Space;
 					break;
 				case TermKeySym.TERMKEY_SYM_ESCAPE:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x1B;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Escape;
 					break;
 				case TermKeySym.TERMKEY_SYM_INSERT:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x2D;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Insert;
 					break;
 				case TermKeySym.TERMKEY_SYM_UP:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x26;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Up;
 					break;
 				case TermKeySym.TERMKEY_SYM_DOWN:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x28;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Down;
 					break;
 				case TermKeySym.TERMKEY_SYM_LEFT:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x25;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Left;
 					break;
 				case TermKeySym.TERMKEY_SYM_RIGHT:
-					inputRecord.KeyEvent.wVirtualKeyCode = 0x27;
+					inputRecord.KeyEvent.wVirtualKeyCode = VirtualKeys.Right;
 					break;
 				default:
 					throw new NotSupportedException ("Not supported keyboard code detected: " + key.code.sym);

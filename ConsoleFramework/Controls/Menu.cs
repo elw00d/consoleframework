@@ -74,7 +74,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void onKeyDown(object sender, KeyEventArgs args) {
-            if (args.wVirtualKeyCode == 0x0D) { // VK_RETURN
+            if (args.wVirtualKeyCode == VirtualKeys.Return) {
                 if (Type == MenuItemType.RootSubmenu || Type == MenuItemType.Submenu)
                     openMenu();
                 else if (Type == MenuItemType.Item)
@@ -216,22 +216,20 @@ namespace ConsoleFramework.Controls
 
                 EventManager.AddHandler(panel, PreviewMouseMoveEvent, new MouseEventHandler(onPanelMouseMove));
                 AddHandler( PreviewKeyDownEvent, new KeyEventHandler(( sender, args ) => {
-                    if ( args.wVirtualKeyCode == 0x27 ) { // VK_RIGHT
-                        //closeReason = CloseReason.RightButtonPressed;
+                    if ( args.wVirtualKeyCode == VirtualKeys.Right ) {
                         KeyEventArgs newArgs = new KeyEventArgs( this, ControlKeyPressedEvent );
                         newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
                         RaiseEvent(ControlKeyPressedEvent, newArgs);
                     }
-                    if ( args.wVirtualKeyCode == 0x25 ) { // VK_LEFT
-                        //closeReason = CloseReason.LeftButtonPressed;
+                    if ( args.wVirtualKeyCode == VirtualKeys.Left ) {
                         KeyEventArgs newArgs = new KeyEventArgs(this, ControlKeyPressedEvent);
                         newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
                         RaiseEvent(ControlKeyPressedEvent, newArgs);
                     }
-                    if (args.wVirtualKeyCode == 0x28) { // VK_DOWN
+                    if (args.wVirtualKeyCode == VirtualKeys.Down) {
                         ConsoleApplication.Instance.FocusManager.MoveFocusNext();
                     }
-                    if (args.wVirtualKeyCode == 0x26) { // VK_UP
+                    if (args.wVirtualKeyCode == VirtualKeys.Up) {
                         ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
                     }
                 }) );
@@ -250,8 +248,7 @@ namespace ConsoleFramework.Controls
 
             private new void OnKeyDown(object sender, KeyEventArgs args)
             {
-                if (args.wVirtualKeyCode == 0x1B)
-                { // VK_ESCAPE
+                if (args.wVirtualKeyCode == VirtualKeys.Escape) {
                     Close();
                 }
                 else base.OnKeyDown(sender, args);
@@ -484,9 +481,9 @@ namespace ConsoleFramework.Controls
                         }
                         //
                         ConsoleApplication.Instance.FocusManager.SetFocusScope( this );
-                        if (args.wVirtualKeyCode == 0x27)
+                        if (args.wVirtualKeyCode == VirtualKeys.Right)
                             ConsoleApplication.Instance.FocusManager.MoveFocusNext(  );
-                        else if (args.wVirtualKeyCode == 0x25)
+                        else if (args.wVirtualKeyCode == VirtualKeys.Left)
                             ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
                         MenuItem focusedItem = (MenuItem)this.Items.SingleOrDefault(
                             item => item is MenuItem && ((MenuItem)item).HasFocus);
@@ -506,13 +503,11 @@ namespace ConsoleFramework.Controls
         }
 
         private void onKeyDown( object sender, KeyEventArgs args ) {
-            if ( args.wVirtualKeyCode == 0x27 ) // VK_RIGHT
-            {
+            if ( args.wVirtualKeyCode == VirtualKeys.Right ) {
                 ConsoleApplication.Instance.FocusManager.MoveFocusNext();
                 args.Handled = true;
             }
-            if ( args.wVirtualKeyCode == 0x25 ) // VK_LEFT
-            {
+            if ( args.wVirtualKeyCode == VirtualKeys.Left ) {
                 ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
                 args.Handled = true;
             }

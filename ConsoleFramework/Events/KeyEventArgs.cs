@@ -10,7 +10,7 @@ namespace ConsoleFramework.Events {
 
         public bool bKeyDown;
         public ushort wRepeatCount;
-        public short wVirtualKeyCode;
+        public VirtualKeys wVirtualKeyCode;
         public ushort wVirtualScanCode;
         public char UnicodeChar;
         public ControlKeyState dwControlKeyState;

@@ -49,10 +49,8 @@ namespace ConsoleFramework.Controls
 
         protected void OnKeyDown(object sender, KeyEventArgs args)
         {
-            if (args.wVirtualKeyCode == 09)
-            {
+            if (args.wVirtualKeyCode == VirtualKeys.Tab) {
                 ConsoleApplication.Instance.FocusManager.MoveFocusNext();
-
                 args.Handled = true;
             }
         }

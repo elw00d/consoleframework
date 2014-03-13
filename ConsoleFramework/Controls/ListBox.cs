@@ -71,7 +71,7 @@ namespace ConsoleFramework.Controls
                 args.Handled = true;
                 return;
             }
-            if ( args.wVirtualKeyCode == 0x21 ) { // VK_PRIOR - PageUp
+            if ( args.wVirtualKeyCode == VirtualKeys.PageUp ) {
                 if ( PageSize == null ) {
                     if ( SelectedItemIndex != 0 ) {
                         SelectedItemIndex = 0;
@@ -84,7 +84,7 @@ namespace ConsoleFramework.Controls
                     }
                 }
             }
-            if ( args.wVirtualKeyCode == 0x22 ) { // VK_NEXT - PageDown
+            if ( args.wVirtualKeyCode == VirtualKeys.PageDown ) {
                 if ( PageSize == null ) {
                     if ( SelectedItemIndex != items.Count - 1 ) {
                         SelectedItemIndex = items.Count - 1;
@@ -97,7 +97,7 @@ namespace ConsoleFramework.Controls
                     }
                 }
             }
-            if (args.wVirtualKeyCode == 0x26) { // VK_UP
+            if (args.wVirtualKeyCode == VirtualKeys.Up) {
                 if ( SelectedItemIndex == 0 )
                     SelectedItemIndex = items.Count - 1;
                 else {
@@ -105,7 +105,7 @@ namespace ConsoleFramework.Controls
                 }
                 Invalidate(  );
             }
-            if (args.wVirtualKeyCode == 0x28) { // VK_DOWN
+            if (args.wVirtualKeyCode == VirtualKeys.Down) {
                 SelectedItemIndex = (SelectedItemIndex + 1) % items.Count;
                 Invalidate(  );
             }

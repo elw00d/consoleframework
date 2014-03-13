@@ -1,4 +1,5 @@
 ﻿using ConsoleFramework.Events;
+using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
 {
@@ -39,7 +40,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void Button_KeyDown( object sender, KeyEventArgs args ) {
-            if ( args.wVirtualKeyCode == 0x20 ) { // VK_SPACE
+            if ( args.wVirtualKeyCode == VirtualKeys.Space ) { // VK_SPACE
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
             }
         }
