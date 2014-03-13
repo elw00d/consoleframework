@@ -263,7 +263,11 @@ namespace ConsoleFramework.Events
             {
                 Control child = children[i];
                 List<Control> nested = new List< Control >(child.Children);
-                nested.Sort(( control, control1 ) => control.TabOrder.CompareTo( control1.TabOrder ));
+                
+                // Using OrderBy instead List<T>.Sort() because the last one is unstable
+                // and can reorder elements with equal keys
+                nested = nested.OrderBy(control => control.TabOrder).ToList();
+                
                 if (nested.Count > 0)
                 {
                     children.AddRange(nested);

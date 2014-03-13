@@ -55,6 +55,7 @@ namespace ConsoleFramework.Controls
             set {
                 if ( disabled != value ) {
                     disabled = value;
+                    Focusable = !disabled;
                     Invalidate(  );
                 }
             }
@@ -66,14 +67,26 @@ namespace ConsoleFramework.Controls
             AddHandler( MouseDownEvent, new MouseEventHandler(onMouseDown) );
             AddHandler( MouseMoveEvent, new MouseEventHandler( onMouseMove ) );
             AddHandler( MouseUpEvent, new MouseEventHandler(onMouseUp) );
+            AddHandler( KeyDownEvent, new KeyEventHandler(onKeyDown));
 
             // Stretch by default
             HorizontalAlignment = HorizontalAlignment.Stretch;
         }
 
-        private void onMouseUp( object sender, MouseEventArgs mouseEventArgs ) {
+        private void onKeyDown(object sender, KeyEventArgs args) {
+            if (args.wVirtualKeyCode == 0x0D) { // VK_RETURN
+                if (Type == MenuItemType.RootSubmenu || Type == MenuItemType.Submenu)
+                    openMenu();
+                else if (Type == MenuItemType.Item)
+                    RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                args.Handled = true;
+            }
+        }
+
+        private void onMouseUp( object sender, MouseEventArgs args ) {
             if ( Type == MenuItemType.Item ) {
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                args.Handled = true;
             }
         }
 
@@ -82,11 +95,13 @@ namespace ConsoleFramework.Controls
             if ( !disabled && args.LeftButton == MouseButtonState.Pressed /*&& Parent.Parent is Menu*/ ) {
                 openMenu(  );
             }
+            args.Handled = true;
         }
 
         private void onMouseDown( object sender, MouseEventArgs args ) {
             if (!disabled)
                 openMenu(  );
+            args.Handled = true;
         }
 
         private Popup popup;
@@ -103,8 +118,6 @@ namespace ConsoleFramework.Controls
                 windowsHost.ShowModal( popup, true );
                 expanded = true;
                 popup.AddHandler( Window.ClosedEvent, new EventHandler( onPopupClosed ) );
-            } else {
-                //todo
             }
         }
 
@@ -214,6 +227,12 @@ namespace ConsoleFramework.Controls
                         KeyEventArgs newArgs = new KeyEventArgs(this, ControlKeyPressedEvent);
                         newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
                         RaiseEvent(ControlKeyPressedEvent, newArgs);
+                    }
+                    if (args.wVirtualKeyCode == 0x28) { // VK_DOWN
+                        ConsoleApplication.Instance.FocusManager.MoveFocusNext();
+                    }
+                    if (args.wVirtualKeyCode == 0x26) { // VK_UP
+                        ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
                     }
                 }) );
             }

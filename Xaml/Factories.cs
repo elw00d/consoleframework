@@ -80,7 +80,11 @@ namespace Xaml
                         } );
                 }
             }
-            ctorArgs.Sort( ( a, b ) => a.index.CompareTo( b.index ) );
+
+            // Using OrderBy instead List<T>.Sort() because the last one is unstable
+            // and can reorder elements with equal keys
+            ctorArgs = ctorArgs.OrderBy(arg => arg.index).ToList();
+
             ConstructorInfo[ ] constructors = type.GetConstructors( );
             ConstructorInfo ctorInfo = constructors.Single( ctor => ctor.GetParameters( ).Length == ctorArgs.Count );
             object createdObject = ctorInfo.Invoke( ctorArgs.Select( arg => arg.obj ).ToArray( ) );
