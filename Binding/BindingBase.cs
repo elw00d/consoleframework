@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Binding.Adapters;
@@ -193,6 +194,29 @@ namespace Binding
             }
         }
 
+        /// <summary>
+        /// Synchronizes changes of srcList, applying them to destList.
+        /// Changes are described in args.
+        /// </summary>
+        public static void ApplyChanges(IList destList, IList srcList, ListChangedEventArgs args) {
+            switch (args.Type) {
+                case ListChangedEventType.ItemsInserted: {
+                    for (int i = 0; i < args.Count; i++) {
+                        destList.Insert(args.Index + i, srcList[args.Index + i]);
+                    }
+                    break;
+                }
+                case ListChangedEventType.ItemsRemoved:
+                    for (int i = 0; i < args.Count; i++)
+                        destList.RemoveAt(args.Index);
+                    break;
+                case ListChangedEventType.ItemReplaced: {
+                    destList[args.Index] = srcList[args.Index];
+                    break;
+                }
+            }
+        }
+
         private void sourceListChanged(object sender, ListChangedEventArgs args) {
             // To avoid side effects from old listeners
             // (can be reproduced if call raisePropertyChanged inside another ObservableList handler)
@@ -202,24 +226,7 @@ namespace Binding
 
             ignoreTargetListener = true;
             try {
-                switch (args.Type) {
-                    case ListChangedEventType.ItemsInserted: {
-                        for (int i = 0; i < args.Count; i++)
-                            targetList.Insert(args.Index + i, sourceList[args.Index + i]);
-                        break;
-                    }
-                    case ListChangedEventType.ItemsRemoved: {
-                        for (int i = 0; i < args.Count; i++)
-                            targetList.RemoveAt(args.Index);
-                        break;
-                    }
-                    case ListChangedEventType.ItemReplaced: {
-                        targetList[args.Index] = sourceList[args.Index];
-                        break;
-                    }
-                    default:
-                        throw new InvalidOperationException();
-                }
+                ApplyChanges(targetList, sourceList, args);
             } finally {
                 ignoreTargetListener = false;
             }
@@ -234,24 +241,7 @@ namespace Binding
 
             ignoreSourceListener = true;
             try {
-                switch (args.Type) {
-                    case ListChangedEventType.ItemsInserted: {
-                            for (int i = 0; i < args.Count; i++)
-                                sourceList.Insert(args.Index + i, targetList[args.Index + i]);
-                            break;
-                        }
-                    case ListChangedEventType.ItemsRemoved: {
-                            for (int i = 0; i < args.Count; i++)
-                                sourceList.RemoveAt(args.Index);
-                            break;
-                        }
-                    case ListChangedEventType.ItemReplaced: {
-                            sourceList[args.Index] = targetList[args.Index];
-                            break;
-                        }
-                    default:
-                        throw new InvalidOperationException();
-                }
+                ApplyChanges(sourceList, targetList, args);
             } finally {
                 ignoreSourceListener = false;
             }

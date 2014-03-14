@@ -23,6 +23,10 @@ namespace ConsoleFramework.Controls
         
     }
 
+    /// <summary>
+    /// todo : обработать случай, при котором меню открывается, потом закрывается (popup закеширован)
+    /// а после этого набор MenuItems меняется, и нужно в popup их обновить
+    /// </summary>
     [ContentProperty("Items")]
     public class MenuItem : MenuItemBase
     {
@@ -110,21 +114,23 @@ namespace ConsoleFramework.Controls
             if ( expanded ) return;
 
             if ( this.Type == MenuItemType.Submenu || Type == MenuItemType.RootSubmenu ) {
-                popup = new Popup( this.Items, true, true, this.ActualWidth );
-                WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
-                Point point = TranslatePoint( this, new Point( 0, 0 ), windowsHost );
+                if (null == popup) {
+                    popup = new Popup(this.Items, true, true, this.ActualWidth);
+                    popup.AddHandler(Window.ClosedEvent, new EventHandler(onPopupClosed));
+                }
+                WindowsHost windowsHost = VisualTreeHelper.FindClosestParent<WindowsHost>(this);
+                Point point = TranslatePoint(this, new Point(0, 0), windowsHost);
                 popup.X = point.X;
                 popup.Y = point.Y;
-                windowsHost.ShowModal( popup, true );
+                windowsHost.ShowModal(popup, true);
                 expanded = true;
-                popup.AddHandler( Window.ClosedEvent, new EventHandler( onPopupClosed ) );
             }
         }
 
         private void onPopupClosed( object sender, EventArgs eventArgs ) {
             assert( expanded );
             expanded = false;
-            popup = null;
+            //popup = null;
         }
 
         public string Title { get; set; }
@@ -145,7 +151,6 @@ namespace ConsoleFramework.Controls
 
         private List< MenuItemBase > items = new List< MenuItemBase >();
         
-
         public List<MenuItemBase> Items {
             get { return items; }
         }
@@ -211,7 +216,7 @@ namespace ConsoleFramework.Controls
 
                 // todo : cleanup event handlers after popup closing
                 AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
-                    panel.ClearChilds(  );
+                    //panel.ClearChilds(  );
                 }) );
 
                 EventManager.AddHandler(panel, PreviewMouseMoveEvent, new MouseEventHandler(onPanelMouseMove));
@@ -368,33 +373,7 @@ namespace ConsoleFramework.Controls
         public IList< MenuItemBase > Items {
             get { return items; }
         }
-
-        // todo : to BindingBase
-//        public static void ApplyChanges<T>(IList<T> destList, ObservableList<T> srcList, ListChangedEventArgs args) {
-//            switch (args.Type) {
-//                case ListChangedEventType.ItemsInserted: {
-//                        for (int i = 0; i < args.Count; i++) {
-//                            MenuItemBase item = items[args.Index + i];
-//                            if (item is Separator)
-//                                throw new InvalidOperationException("Separator cannot be added to root menu.");
-//                            stackPanel.Content.Insert(args.Index + i, item);
-//                        }
-//                        break;
-//                    }
-//                case ListChangedEventType.ItemsRemoved:
-//                    for (int i = 0; i < args.Count; i++)
-//                        stackPanel.Content.RemoveAt(args.Index);
-//                    break;
-//                case ListChangedEventType.ItemReplaced: {
-//                        MenuItemBase item = items[args.Index];
-//                        if (item is Separator)
-//                            throw new InvalidOperationException("Separator cannot be added to root menu.");
-//                        stackPanel.Content[args.Index] = item;
-//                        break;
-//                    }
-//            }
-//        }
-
+        
         public Menu( ) {
             Panel stackPanel = new Panel( );
             stackPanel.Orientation = Orientation.Horizontal;
@@ -414,11 +393,11 @@ namespace ConsoleFramework.Controls
                         }
                         break;
                     }
-                    case ListChangedEventType.ItemsRemoved: // todo : test
+                    case ListChangedEventType.ItemsRemoved:
                         for (int i = 0; i < args.Count; i++)
                             stackPanel.Content.RemoveAt(args.Index);
                         break;
-                    case ListChangedEventType.ItemReplaced: { // todo : test
+                    case ListChangedEventType.ItemReplaced: {
                         MenuItemBase item = items[ args.Index ];
                         if (item is Separator)
                             throw new InvalidOperationException("Separator cannot be added to root menu.");
@@ -434,8 +413,6 @@ namespace ConsoleFramework.Controls
             this.AddHandler( KeyDownEvent, new KeyEventHandler(onKeyDown) );
             this.AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove) );
             this.AddHandler( PreviewMouseDownEvent, new MouseEventHandler(onPreviewMouseDown) );
-
-            
         }
 
         protected override void OnParentChanged( ) {
