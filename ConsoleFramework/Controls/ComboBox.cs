@@ -105,10 +105,10 @@ namespace ConsoleFramework.Controls
                 AddHandler( KeyDownEvent, new KeyEventHandler(OnKeyDown), true );
             }
 
-            private new void OnKeyDown( object sender, KeyEventArgs args ) {
+            private void OnKeyDown( object sender, KeyEventArgs args ) {
                 if (args.wVirtualKeyCode == VirtualKeys.Escape) {
                     Close();
-                } else base.OnKeyDown( sender, args );
+                } else base.OnPreviewKeyDown( sender, args );
             }
 
             private void OnActivated( object sender, EventArgs eventArgs ) {

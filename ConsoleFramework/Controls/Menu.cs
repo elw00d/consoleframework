@@ -33,6 +33,15 @@ namespace ConsoleFramework.Controls
         public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click",
             RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(MenuItem));
 
+        /// <summary>
+        /// Call this method if you have changed menu items set
+        /// after menu popup has been shown.
+        /// </summary>
+        public void ReinitializePopup( ) {
+            if (null != popup)
+                popup.DisconnectMenuItems(  );
+        }
+
         public event RoutedEventHandler Click {
             add {
                 AddHandler(ClickEvent, value);
@@ -186,22 +195,38 @@ namespace ConsoleFramework.Controls
             private readonly bool shadow;
             private readonly bool border;
             private readonly int width; // Размер непрозрачной области
+            private Panel panel;
 
             public static readonly RoutedEvent ControlKeyPressedEvent = EventManager.RegisterRoutedEvent("ControlKeyPressed",
                 RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(MenuItem.Popup));
 
+            /// <summary>
+            /// Call this method to remove all menu items that are used as child items.
+            /// It is necessary before reuse MenuItems in another Popup instance.
+            /// </summary>
+            public void DisconnectMenuItems( ) {
+                panel.ClearChilds();
+            }
+
             // todo : rename width
+            /// <summary>
+            /// Первая строчка всплывающего окна - особенная. Она прозрачна с точки зрения
+            /// рендеринга полностью. Однако Opacity для событий мыши в ней разные.
+            /// Первые width пикселей в ней - непрозрачные для событий мыши, но при клике на них
+            /// окно закрывается вызовом Close(). Остальные ActualWidth - width пикселей - прозрачные
+            /// для событий мыши, и нажатие мыши в этой области приводит к тому, что окно
+            /// WindowsHost закрывает окно как окно с OutsideClickClosesWindow = True.
+            /// </summary>
             public Popup( List<MenuItemBase> menuItems, bool shadow, bool border,
                 int width) {
                 this.width = width;
                 this.shadow = shadow;
                 this.border = border;
-                Panel panel = new Panel();
+                panel = new Panel();
                 panel.Orientation = Orientation.Vertical;
                 foreach (MenuItemBase item in menuItems) {
                     panel.AddChild( item );
                 }
-                //panel.Margin = new Thickness(1);
                 Content = panel;
                 
                 // If click on the transparent header, close the popup
@@ -213,31 +238,39 @@ namespace ConsoleFramework.Controls
                         }
                     }
                 }));
-
-                // todo : cleanup event handlers after popup closing
-                AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
-                    //panel.ClearChilds(  );
-                }) );
-
+                
                 EventManager.AddHandler(panel, PreviewMouseMoveEvent, new MouseEventHandler(onPanelMouseMove));
-                AddHandler( PreviewKeyDownEvent, new KeyEventHandler(( sender, args ) => {
-                    if ( args.wVirtualKeyCode == VirtualKeys.Right ) {
-                        KeyEventArgs newArgs = new KeyEventArgs( this, ControlKeyPressedEvent );
-                        newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
-                        RaiseEvent(ControlKeyPressedEvent, newArgs);
-                    }
-                    if ( args.wVirtualKeyCode == VirtualKeys.Left ) {
-                        KeyEventArgs newArgs = new KeyEventArgs(this, ControlKeyPressedEvent);
-                        newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
-                        RaiseEvent(ControlKeyPressedEvent, newArgs);
-                    }
-                    if (args.wVirtualKeyCode == VirtualKeys.Down) {
+            }
+
+            protected override void OnPreviewKeyDown( object sender, KeyEventArgs args ) {
+                switch ( args.wVirtualKeyCode ) {
+                    case VirtualKeys.Right: {
+                            KeyEventArgs newArgs = new KeyEventArgs( this, ControlKeyPressedEvent );
+                            newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
+                            RaiseEvent(ControlKeyPressedEvent, newArgs);
+                            args.Handled = true;
+                            break;
+                        }
+                    case VirtualKeys.Left: {
+                            KeyEventArgs newArgs = new KeyEventArgs(this, ControlKeyPressedEvent);
+                            newArgs.wVirtualKeyCode = args.wVirtualKeyCode;
+                            RaiseEvent(ControlKeyPressedEvent, newArgs);
+                            args.Handled = true;
+                            break;
+                        }
+                    case VirtualKeys.Down:
                         ConsoleApplication.Instance.FocusManager.MoveFocusNext();
-                    }
-                    if (args.wVirtualKeyCode == VirtualKeys.Up) {
+                        args.Handled = true;
+                        break;
+                    case VirtualKeys.Up:
                         ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
-                    }
-                }) );
+                        args.Handled = true;
+                        break;
+                    case VirtualKeys.Escape:
+                        Close();
+                        args.Handled = true;
+                        break;
+                }
             }
 
             private void onPanelMouseMove( object sender, MouseEventArgs e ) {
@@ -246,17 +279,8 @@ namespace ConsoleFramework.Controls
                 }
             }
 
-            protected override void initialize()
-            {
-                AddHandler(KeyDownEvent, new KeyEventHandler(OnKeyDown), true);
-            }
-
-            private new void OnKeyDown(object sender, KeyEventArgs args)
-            {
-                if (args.wVirtualKeyCode == VirtualKeys.Escape) {
-                    Close();
-                }
-                else base.OnKeyDown(sender, args);
+            protected override void initialize() {
+                AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown), true);
             }
 
             public override void Render(RenderingBuffer buffer)

@@ -33,9 +33,8 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
-            //AddHandler(PreviewLostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Window_PreviewLostKeyboardFocus));
-            AddHandler(Button.ClickEvent, new RoutedEventHandler(Window_Click));
-            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnKeyDown));
+            AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(Window_Click));
+            AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown));
         }
 
         /// <summary>
@@ -47,17 +46,12 @@ namespace ConsoleFramework.Controls
             PassFocusToChildUnderPoint( e );
         }
 
-        protected void OnKeyDown(object sender, KeyEventArgs args)
-        {
+        protected virtual void OnPreviewKeyDown(object sender, KeyEventArgs args) {
             if (args.wVirtualKeyCode == VirtualKeys.Tab) {
                 ConsoleApplication.Instance.FocusManager.MoveFocusNext();
                 args.Handled = true;
             }
         }
-
-        //private void Window_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
-        //    args.Handled = true;
-        //}
 
         private void Window_Click(object sender, RoutedEventArgs args) {
             //Debug.WriteLine("Click");
