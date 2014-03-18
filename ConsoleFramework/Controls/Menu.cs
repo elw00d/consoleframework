@@ -74,6 +74,12 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private KeyGesture gesture;
+        public KeyGesture Gesture {
+            get { return gesture; }
+            set { gesture = value; }
+        }
+
         public MenuItem( ) {
             Focusable = true;
 

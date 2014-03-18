@@ -2,7 +2,7 @@
   <WindowsHost.MainMenu>
     <Menu HorizontalAlignment="Center">
       <Menu.Items>
-        <MenuItem Title="File" Type="Submenu">
+        <MenuItem Title="File" Type="Submenu" Gesture="Alt+F">
           <MenuItem Title="New"/>
           <MenuItem Title="New from template..."/>
           <MenuItem Title="Open" TitleRight="F3"/>
