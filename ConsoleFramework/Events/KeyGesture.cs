@@ -39,7 +39,7 @@ namespace ConsoleFramework.Events
             return true;
         }
 
-        public bool Matches( KEY_EVENT_RECORD args ) {
+        public bool Matches( KeyEventArgs args ) {
             VirtualKeys wVirtualKeyCode = args.wVirtualKeyCode;
             if ( this.Key != wVirtualKeyCode ) return false;
             ControlKeyState controlKeyState = args.dwControlKeyState;

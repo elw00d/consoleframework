@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -39,6 +40,50 @@ namespace ConsoleFramework.Controls
             AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
                 //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
             }) );
+            AddHandler( PreviewKeyDownEvent, new KeyEventHandler(onPreviewKeyDown) );
+        }
+
+        private void onPreviewKeyDown( object sender, KeyEventArgs args ) {
+            if ( mainMenu != null ) {
+                // todo : cache gestures map and provide method to refresh gestures
+                Dictionary<KeyGesture, MenuItem> map = new Dictionary<KeyGesture, MenuItem>();
+                foreach ( MenuItemBase itemBase in mainMenu.Items ) {
+                    if ( itemBase is MenuItem ) {
+                        getGestures( (MenuItem) itemBase, map );
+                    }
+                }
+
+                KeyGesture match = map.Keys.FirstOrDefault( gesture => gesture.Matches( args ) );
+                if ( match != null ) {
+                    // todo : activate matches menu item
+                    MenuItem menuItem = map[ match ];
+                    List<MenuItem> path = new List< MenuItem >();
+                    MenuItem currentItem = menuItem;
+                    while ( currentItem != null ) {
+                        path.Add( currentItem );
+                        currentItem = currentItem.ParentItem;
+                    }
+                    path.Reverse( );
+                    foreach ( MenuItem item in path ) {
+                        item.Expand(  );
+                    }
+
+                    args.Handled = true;
+                }
+            }
+        }
+
+        private void getGestures( MenuItem item, Dictionary< KeyGesture, MenuItem > map ) {
+            if (item.Gesture != null)
+                map.Add( item.Gesture, item );
+            if ( item.Type == MenuItemType.RootSubmenu ||
+                 item.Type == MenuItemType.Submenu ) {
+                foreach ( MenuItemBase itemBase in item.Items ) {
+                    if ( itemBase is MenuItem ) {
+                        getGestures( ( MenuItem ) itemBase, map );
+                    }
+                }
+            }
         }
 
         protected override Size MeasureOverride(Size availableSize) {

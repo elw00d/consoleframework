@@ -33,6 +33,8 @@ namespace ConsoleFramework.Controls
         public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click",
             RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(MenuItem));
 
+        public MenuItem ParentItem { get; internal set; }
+
         /// <summary>
         /// Call this method if you have changed menu items set
         /// after menu popup has been shown.
@@ -131,6 +133,10 @@ namespace ConsoleFramework.Controls
             if ( this.Type == MenuItemType.Submenu || Type == MenuItemType.RootSubmenu ) {
                 if (null == popup) {
                     popup = new Popup(this.Items, true, true, this.ActualWidth);
+                    foreach ( MenuItemBase itemBase in this.Items ) {
+                        if ( itemBase is MenuItem )
+                            ( ( MenuItem ) itemBase ).ParentItem = this;
+                    }
                     popup.AddHandler(Window.ClosedEvent, new EventHandler(onPopupClosed));
                 }
                 WindowsHost windowsHost = VisualTreeHelper.FindClosestParent<WindowsHost>(this);

@@ -43,7 +43,7 @@
             <MenuItem Title="Debugger..."></MenuItem>
             <MenuItem Title="Directories..."></MenuItem>
             <Separator></Separator>
-            <MenuItem Title="Environment ..." Type="Submenu">
+            <MenuItem Title="Environment ..." Type="Submenu" Gesture="Ctrl+E">
               <MenuItem Title="Preferences..."></MenuItem>
               <MenuItem Title="Editor..."></MenuItem>
               <MenuItem Title="CodeComplete..."></MenuItem>
