@@ -51,6 +51,7 @@
     <Compile Include="Binding\ExplicitConverterTest.cs" />
     <Compile Include="Binding\SimplePropertiesTest.cs" />
     <Compile Include="Binding\ValidationTest.cs" />
+    <Compile Include="KeyGesturesTests.cs" />
     <Compile Include="LayoutTests.cs" />
     <Compile Include="Xaml\EnumsTest\EnumsTest.cs" />
     <Compile Include="Xaml\MarkupExtensionsTest.cs" />

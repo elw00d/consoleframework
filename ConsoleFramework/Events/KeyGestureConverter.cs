@@ -4,6 +4,10 @@ using Xaml;
 
 namespace ConsoleFramework.Events
 {
+    /// <summary>
+    /// KeyGesture format: [MODIFIERS+]KEY[,DISPLAY_STRING]
+    /// Examples: "ALT+CTRL+PGUP", "CTRL+COMMA", "SHIFT+F"
+    /// </summary>
     public class KeyGestureConverter : ITypeConverter
     {
         internal const char DISPLAYSTRING_SEPARATOR = ',';
