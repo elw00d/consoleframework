@@ -305,7 +305,7 @@ namespace ConsoleFramework.Rendering
             control.Arrange(lastLayoutInfo.renderSlotRect);
             // if lastLayoutInfo eq layoutInfo we can use last rendered buffer
             if (layoutInfo.Equals(lastLayoutInfo) && lastLayoutInfo.validity == LayoutValidity.Render) {
-                layoutInfo.validity = LayoutValidity.Render;
+                control.LayoutValidity = LayoutValidity.Render;
                 return fullBuffer;
             }
             // replace buffers if control has grown

@@ -371,9 +371,33 @@ namespace ConsoleFramework.Controls
             }
             set {
                 // todo : mb refactor this to disallow external access
-                layoutInfo.validity = value;
+                if (layoutInfo.validity != value) {
+                    layoutInfo.validity = value;
+                    
+                    if (layoutInfo.validity == LayoutValidity.Render && LayoutRevalidated != null) {
+                        LayoutRevalidated.Invoke(this, EventArgs.Empty);
+                    }
+                }
             }
         }
+
+        /// <summary>
+        /// Когда состояние LayoutValidity контрола сбрасывается методом ResetValidity
+        /// Это происходит при вызове Renderer.InvalidateLayout(), а не сразу же после вызова
+        /// control.Invalidate() - последний лишь добавляет его в очередь.
+        /// Не рекомендуется надолго задавать обработчики этого события, т.к. может привести к
+        /// падению производительности. Лучше отписаться сразу же после того, как необходимость в
+        /// обработчике отпала.
+        /// </summary>
+        public event EventHandler LayoutInvalidated;
+
+        /// <summary>
+        /// Когда состояние LayoutValidity становится Render.
+        /// Не рекомендуется надолго задавать обработчики этого события, т.к. может привести к
+        /// падению производительности. Лучше отписаться сразу же после того, как необходимость в
+        /// обработчике отпала.
+        /// </summary>
+        public event EventHandler LayoutRevalidated;
 
         public int ActualWidth {
             get {
@@ -643,7 +667,7 @@ namespace ConsoleFramework.Controls
                 RenderSlotRect = Rect.Empty;
                 RenderSize = Size.Empty;
                 layoutInfo.layoutClip = calculateLayoutClip();
-                layoutInfo.validity = LayoutValidity.MeasureAndArrange;
+                LayoutValidity = LayoutValidity.MeasureAndArrange;
                 return;
             }
 
@@ -712,7 +736,7 @@ namespace ConsoleFramework.Controls
 
             layoutInfo.layoutClip = calculateLayoutClip();
 
-            layoutInfo.validity = LayoutValidity.MeasureAndArrange;
+            LayoutValidity = LayoutValidity.MeasureAndArrange;
         }
         
         public HorizontalAlignment HorizontalAlignment {
@@ -873,13 +897,18 @@ namespace ConsoleFramework.Controls
         }
         
         internal void ResetValidity() {
-            // copy all calculated layout info into lastLayoutInfo
+            // Copy all calculated layout info into lastLayoutInfo
             if (layoutInfo.validity == LayoutValidity.Render) {
                 lastLayoutInfo.CopyValuesFrom(layoutInfo);
             }
-            // clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
+            // Clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
             layoutInfo.ClearValues();
-            // recursively invalidate children, but without add them to queue
+
+            // Raise Invalidated event
+            if (LayoutInvalidated != null)
+                LayoutInvalidated.Invoke(this, EventArgs.Empty);
+
+            // Recursively invalidate children, but without add them to queue
             foreach (Control child in Children) {
                 child.ResetValidity();
             }

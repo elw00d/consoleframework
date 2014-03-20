@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Binding;
 using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -92,6 +93,32 @@ namespace ConsoleFramework.Controls
 
             // Stretch by default
             HorizontalAlignment = HorizontalAlignment.Stretch;
+
+            items.ListChanged += (sender, args) => {
+                switch (args.Type) {
+                    case ListChangedEventType.ItemsInserted: {
+                        for (int i = 0; i < args.Count; i++) {
+                            MenuItemBase itemBase = items[args.Index + i];
+                            if (itemBase is MenuItem) {
+                                (itemBase as MenuItem).ParentItem = this;
+                            }
+                        }
+                        break;
+                    }
+                    case ListChangedEventType.ItemsRemoved:
+                        // todo : set ParentItem of removed items to null
+                        break;
+                    case ListChangedEventType.ItemReplaced: {
+                        // todo : set ParentItem of replaced item to null
+
+                        MenuItemBase itemBase = items[args.Index];
+                        if (itemBase is MenuItem) {
+                            (itemBase as MenuItem).ParentItem = this;
+                        }
+                        break;
+                    }
+                }
+            };
         }
 
         private void onKeyDown(object sender, KeyEventArgs args) {
@@ -170,9 +197,9 @@ namespace ConsoleFramework.Controls
 
         public MenuItemType Type { get; set; }
 
-        private List< MenuItemBase > items = new List< MenuItemBase >();
+        private readonly ObservableList<MenuItemBase> items = new ObservableList<MenuItemBase>( new List<MenuItemBase>());
         
-        public List<MenuItemBase> Items {
+        public IList<MenuItemBase> Items {
             get { return items; }
         }
 
@@ -229,7 +256,7 @@ namespace ConsoleFramework.Controls
             /// для событий мыши, и нажатие мыши в этой области приводит к тому, что окно
             /// WindowsHost закрывает окно как окно с OutsideClickClosesWindow = True.
             /// </summary>
-            public Popup( List<MenuItemBase> menuItems, bool shadow, bool border,
+            public Popup( IEnumerable<MenuItemBase> menuItems, bool shadow, bool border,
                 int width) {
                 this.width = width;
                 this.shadow = shadow;
