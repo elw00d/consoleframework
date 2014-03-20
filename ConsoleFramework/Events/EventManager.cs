@@ -187,7 +187,7 @@ namespace ConsoleFramework.Events {
 
         private readonly List<Control> prevMouseOverStack = new List<Control>();
 
-        public void ProcessInput(INPUT_RECORD inputRecord, Control rootElement) {
+        public void ParseInputEvent(INPUT_RECORD inputRecord, Control rootElement) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
 //                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)
@@ -328,15 +328,22 @@ namespace ConsoleFramework.Events {
                 eventArgs.wVirtualScanCode = keyEvent.wVirtualScanCode;
                 eventsQueue.Enqueue(eventArgs);
             }
+        }
 
-            // todo : вынести следующий код в отдельный метод ProcessEvents и вызывать
-            // его отдельно от ProcessInputEvent. А в ProcessInputEvent только класть событие в очередь
+        // todo : вынести следующий код в отдельный метод ProcessEvents и вызывать
+        // его отдельно от ProcessInputEvent. А в ProcessInputEvent только класть событие в очередь
+        public void ProcessEvents( ) {
             while (eventsQueue.Count != 0) {
                 RoutedEventArgs routedEventArgs = eventsQueue.Dequeue();
                 processRoutedEvent(routedEventArgs.RoutedEvent, routedEventArgs);
             }
         }
 
+        public bool IsQueueEmpty( ) {
+            return eventsQueue.Count == 0;
+        }
+
+        // todo : think about remove it
         internal bool ProcessRoutedEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
             if (null == routedEvent)
                 throw new ArgumentNullException("routedEvent");

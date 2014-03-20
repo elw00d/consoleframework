@@ -43,8 +43,13 @@ namespace ConsoleFramework.Rendering
         // queue of controls marked for layout invalidation
         private readonly List<Control> invalidatedControls = new List<Control>();
 
+        public bool AnyControlInvalidated {
+            get { return invalidatedControls.Count != 0; }
+        }
+
         // список контролов, у которых обновилось содержимое full render buffer
-        // актуален только при вызове UpdateRender, после вызова очищается
+        // актуален только при вызовах UpdateLayout, после вызова FinallyApplyChangesToCanvas
+        // очищается
         private readonly List<Control> renderingUpdatedControls = new List<Control>();
 
         private enum AffectType {
@@ -63,27 +68,10 @@ namespace ConsoleFramework.Rendering
         }
 
         /// <summary>
-        /// Пересчитывает лайаут для всех контролов, добавленных в очередь ревалидации.
-        /// Определяет, какие контролы необходимо перерисовать, вызывает Render у них.
-        /// Определяет, какие области экрана необходимо обновить и выполняет перерисовку
-        /// экрана консоли.
+        /// Сбрасывает все изменения, накопленные в течение предыдущих вызовов
+        /// UpdateLayout, на экран.
         /// </summary>
-        public void UpdateRender(bool forceRepaintAll = false) {
-            List<ControlAffectInfo> affectedControls = new List<ControlAffectInfo>();
-
-            renderingUpdatedControls.Clear();
-            
-            // Invalidate layout and fill renderingUpdatedControls list
-            invalidateLayout(affectedControls);
-
-            // Raise all invalidated and revalidated events of affected controls with subscribers
-            foreach (ControlAffectInfo affectInfo in affectedControls) {
-                if (affectInfo.affectType == AffectType.LayoutInvalidated)
-                    affectInfo.control.RaiseInvalidatedEvent();
-                else if (affectInfo.affectType == AffectType.LayoutRevalidated)
-                    affectInfo.control.RaiseRevalidatedEvent();
-            }
-            
+        public void FinallyApplyChangesToCanvas( bool forceRepaintAll = false ) {
             // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
             //if (renderingUpdatedControls.Count > 0) {
@@ -106,6 +94,28 @@ namespace ConsoleFramework.Rendering
             // if anything changed in layout - update displaying cursor state
             if (renderingUpdatedControls.Count > 0) {
                 ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
+            }
+            renderingUpdatedControls.Clear();
+        }
+
+        /// <summary>
+        /// Пересчитывает лайаут для всех контролов, добавленных в очередь ревалидации.
+        /// Определяет, какие контролы необходимо перерисовать, вызывает Render у них.
+        /// Определяет, какие области экрана необходимо обновить и выполняет перерисовку
+        /// экрана консоли.
+        /// </summary>
+        public void UpdateLayout() {
+            List<ControlAffectInfo> affectedControls = new List<ControlAffectInfo>();
+
+            // Invalidate layout and fill renderingUpdatedControls list
+            invalidateLayout(affectedControls);
+
+            // Raise all invalidated and revalidated events of affected controls with subscribers
+            foreach (ControlAffectInfo affectInfo in affectedControls) {
+                if (affectInfo.affectType == AffectType.LayoutInvalidated)
+                    affectInfo.control.RaiseInvalidatedEvent();
+                else if (affectInfo.affectType == AffectType.LayoutRevalidated)
+                    affectInfo.control.RaiseRevalidatedEvent();
             }
         }
 

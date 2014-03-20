@@ -123,7 +123,7 @@ namespace ConsoleFramework
 
             canvas.Size = new Size(args.Width, args.Height);
             renderer.RootElementRect = new Rect(canvas.Size);
-            renderer.UpdateRender();
+            renderer.UpdateLayout();
         }
 
         private Size userCanvasSize;
@@ -423,7 +423,8 @@ namespace ConsoleFramework
 			
 			HideCursor ();
 		    try {
-		        renderer.UpdateRender( );
+		        renderer.UpdateLayout( );
+                renderer.FinallyApplyChangesToCanvas(  );
 
 		        termkeyHandle = LibTermKey.termkey_new( 0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
 		        // Setup the input mode
@@ -513,7 +514,8 @@ namespace ConsoleFramework
 		                }
 						if (needProcessInvokeActions)
 							processInvokeActions();
-						renderer.UpdateRender( );
+						renderer.UpdateLayout( );
+                        renderer.FinallyApplyChangesToCanvas(  );
 		            }
 
 		        } finally {
@@ -691,7 +693,8 @@ namespace ConsoleFramework
             focusManager.AfterAddElementToTree(mainControl);
             //
             mainControl.Invalidate();
-            renderer.UpdateRender();
+            renderer.UpdateLayout();
+            renderer.FinallyApplyChangesToCanvas(  );
 
             // Initially hide the console cursor
             HideCursor();
@@ -702,22 +705,18 @@ namespace ConsoleFramework
             while (true) {
                 // 100 ms instead of Win32.INFINITE to check console window Zoomed and Iconic
                 // state periodically (because if user presses Maximize/Restore button
-                // there are no input event generated).
-                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, 100);
+                // there are no input event generated). todo : revert 100 ms
+                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, 0xFFFFFFFF);
                 if (waitResult == 0) {
                     break;
                 }
                 if (waitResult == 1) {
                     processInput();
-                    processInvokeActions( );
-                    renderer.UpdateRender();
-                    continue;
                 }
                 if ( waitResult == 2 ) {
-                    processInvokeActions( );
-                    renderer.UpdateRender(  );
-                    continue;
+                    // Do nothing special - because invokeActions will be invoked in loop anyway
                 }
+
                 // If we received WAIT_TIMEOUT - check window Zoomed and Iconic state
                 // and correct buffer size and console window size
                 if ( waitResult == 0x00000102 ) {
@@ -735,6 +734,21 @@ namespace ConsoleFramework
                 if ( waitResult == 0xFFFFFFFF) {
                     throw new InvalidOperationException("Invalid wait result of WaitForMultipleObjects.");
                 }
+
+                while ( true ) {
+                    bool anyInvokeActions = isAnyInvokeActions( );
+                    bool anyRoutedEvent = !EventManager.IsQueueEmpty( );
+                    bool anyLayoutToRevalidate = renderer.AnyControlInvalidated;
+
+                    if (!anyInvokeActions && !anyRoutedEvent && !anyLayoutToRevalidate)
+                        break;
+
+                    EventManager.ProcessEvents();
+                    processInvokeActions(  );
+                    renderer.UpdateLayout(  );
+                }
+
+                renderer.FinallyApplyChangesToCanvas( );
             }
 
             // Restore cursor visibility before exit
@@ -744,6 +758,12 @@ namespace ConsoleFramework
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
 
             // todo : restore attributes of console output
+        }
+
+        private bool isAnyInvokeActions( ) {
+            lock ( actionsLocker ) {
+                return ( actionsToBeInvoked.Count != 0 );
+            }
         }
 
         private void processInvokeActions( ) {
@@ -803,11 +823,11 @@ namespace ConsoleFramework
                 }
 
 				// Refresh whole display
-				renderer.UpdateRender( true );
+				renderer.FinallyApplyChangesToCanvas( true );
 
                 return;
             }
-            eventManager.ProcessInput(inputRecord, mainControl);
+            eventManager.ParseInputEvent(inputRecord, mainControl);
         }
 
         /// <summary>
