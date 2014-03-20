@@ -476,7 +476,7 @@ namespace ConsoleFramework
                             }
                         }
 
-						bool needProcessInvokeActions = false;
+						//bool needProcessInvokeActions = false;
 		                if ( fds[ 1 ].revents != POLL_EVENTS.NONE ) {
 		                    UInt64 u;
 		                    Libc.readInt64( fds[ 1 ].fd, out u );
@@ -499,7 +499,7 @@ namespace ConsoleFramework
 		                        processInputEvent( inputRecord );
 		                    }
 							if (u == 3 ) {
-								needProcessInvokeActions = true;
+								//needProcessInvokeActions = true;
 							}
 		                }
 
@@ -512,10 +512,26 @@ namespace ConsoleFramework
 		                while ( ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) ) == TermKeyResult.TERMKEY_RES_KEY ) {
 		                    processLinuxInput( key );
 		                }
-						if (needProcessInvokeActions)
-							processInvokeActions();
-						renderer.UpdateLayout( );
-                        renderer.FinallyApplyChangesToCanvas(  );
+
+                        while ( true ) {
+                            bool anyInvokeActions = isAnyInvokeActions( );
+                            bool anyRoutedEvent = !EventManager.IsQueueEmpty( );
+                            bool anyLayoutToRevalidate = renderer.AnyControlInvalidated;
+
+                            if (!anyInvokeActions && !anyRoutedEvent && !anyLayoutToRevalidate)
+                                break;
+
+                            EventManager.ProcessEvents();
+                            processInvokeActions(  );
+                            renderer.UpdateLayout(  );
+                        }
+
+                        renderer.FinallyApplyChangesToCanvas( );
+
+						//if (needProcessInvokeActions)
+						//	processInvokeActions();
+						//renderer.UpdateLayout( );
+                        //renderer.FinallyApplyChangesToCanvas(  );
 		            }
 
 		        } finally {
