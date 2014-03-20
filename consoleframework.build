@@ -143,6 +143,10 @@
     <property name="entryPointClass" value="Examples.Program"/>
     <property name="exampleName" value="HelloWorld"/>
     <call target="build-examples-core"/>
+
+	<property name="entryPointClass" value="Examples.MainMenu.Program"/>
+    <property name="exampleName" value="MainMenu"/>
+    <call target="build-examples-core"/>
   </target>
 
   <target name="clean">
