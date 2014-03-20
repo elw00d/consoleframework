@@ -328,7 +328,9 @@ namespace ConsoleFramework.Events {
                 eventArgs.wVirtualScanCode = keyEvent.wVirtualScanCode;
                 eventsQueue.Enqueue(eventArgs);
             }
-            //
+
+            // todo : вынести следующий код в отдельный метод ProcessEvents и вызывать
+            // его отдельно от ProcessInputEvent. А в ProcessInputEvent только класть событие в очередь
             while (eventsQueue.Count != 0) {
                 RoutedEventArgs routedEventArgs = eventsQueue.Dequeue();
                 processRoutedEvent(routedEventArgs.RoutedEvent, routedEventArgs);

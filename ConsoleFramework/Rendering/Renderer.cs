@@ -47,6 +47,21 @@ namespace ConsoleFramework.Rendering
         // актуален только при вызове UpdateRender, после вызова очищается
         private readonly List<Control> renderingUpdatedControls = new List<Control>();
 
+        private enum AffectType {
+            LayoutInvalidated,
+            LayoutRevalidated
+        }
+
+        private struct ControlAffectInfo {
+            public readonly Control control;
+            public readonly AffectType affectType;
+
+            public ControlAffectInfo(Control control, AffectType affectType) {
+                this.control = control;
+                this.affectType = affectType;
+            }
+        }
+
         /// <summary>
         /// Пересчитывает лайаут для всех контролов, добавленных в очередь ревалидации.
         /// Определяет, какие контролы необходимо перерисовать, вызывает Render у них.
@@ -54,9 +69,21 @@ namespace ConsoleFramework.Rendering
         /// экрана консоли.
         /// </summary>
         public void UpdateRender(bool forceRepaintAll = false) {
+            List<ControlAffectInfo> affectedControls = new List<ControlAffectInfo>();
+
             renderingUpdatedControls.Clear();
-            // invalidate layout and fill renderingUpdatedControls list
-            InvalidateLayout();
+            
+            // Invalidate layout and fill renderingUpdatedControls list
+            invalidateLayout(affectedControls);
+
+            // Raise all invalidated and revalidated events of affected controls with subscribers
+            foreach (ControlAffectInfo affectInfo in affectedControls) {
+                if (affectInfo.affectType == AffectType.LayoutInvalidated)
+                    affectInfo.control.RaiseInvalidatedEvent();
+                else if (affectInfo.affectType == AffectType.LayoutRevalidated)
+                    affectInfo.control.RaiseRevalidatedEvent();
+            }
+            
             // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
             //if (renderingUpdatedControls.Count > 0) {
@@ -159,19 +186,36 @@ namespace ConsoleFramework.Rendering
         /// контрол явно помечен как изменивший свое изображение. В остальных случаях
         /// используются кешированные буферы, содержащие уже отрендеренные изображения.
         /// </summary>
-        internal void InvalidateLayout() {
+        /// <param name="affectedControls"></param>
+        private void invalidateLayout(List<ControlAffectInfo> affectedControls) {
+            List<Control> resettedControls = new List<Control>();
+            List<Control> revalidatedControls = new List<Control>();
             while (invalidatedControls.Count != 0) {
                 // Dequeue next control
                 Control control = invalidatedControls[ invalidatedControls.Count - 1 ];
                 invalidatedControls.RemoveAt( invalidatedControls.Count - 1 );
-                // set previous results of layout passes dirty
-                control.ResetValidity();
+
+                // Set previous results of layout passes dirty
+                control.ResetValidity(resettedControls);
+                if (resettedControls.Count > 0) {
+                    foreach (Control resettedControl in resettedControls) {
+                        affectedControls.Add(new ControlAffectInfo(resettedControl, AffectType.LayoutInvalidated));
+                    }
+                    resettedControls.Clear();
+                }
+
                 //
-                updateLayout(control);
+                updateLayout(control, revalidatedControls);
+                if (revalidatedControls.Count > 0) {
+                    foreach (Control revalidatedControl in revalidatedControls) {
+                        affectedControls.Add(new ControlAffectInfo(revalidatedControl, AffectType.LayoutRevalidated));
+                    }
+                    revalidatedControls.Clear();
+                }
             }
         }
 
-        private void updateLayout(Control control) {
+        private void updateLayout(Control control, List<Control> revalidatedControls) {
             LayoutInfo lastLayoutInfo = control.lastLayoutInfo;
             // работаем с родительским элементом управления
             if (control.Parent != null) {
@@ -230,17 +274,21 @@ namespace ConsoleFramework.Rendering
             List<Control> children = control.Children;
             foreach (Control child in children) {
                 if (child.Visibility == Visibility.Visible) {
-                    RenderingBuffer fullChildBuffer = processControl(child);
+                    RenderingBuffer fullChildBuffer = processControl(child, revalidatedControls);
                     fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset, 
                         child.RenderSize,
                         child.RenderSlotRect, child.LayoutClip);
                 } else {
                     // чтобы следующий Invalidate перезаписал lastLayoutInfo
-                    child.LayoutValidity = LayoutValidity.Render;
+                    if (child.SetValidityToRender()) {
+                        revalidatedControls.Add(child);
+                    }
                 }
             }
             //
-            control.LayoutValidity = LayoutValidity.Render;
+            if (control.SetValidityToRender()) {
+                revalidatedControls.Add(control);
+            }
             addControlToRenderingUpdatedList(control);
         }
 
@@ -294,7 +342,7 @@ namespace ConsoleFramework.Rendering
             renderingUpdatedControls.Add(control);
         }
 
-        private RenderingBuffer processControl(Control control) {
+        private RenderingBuffer processControl(Control control, List<Control> revalidatedControls) {
             RenderingBuffer buffer = getOrCreateBufferForControl(control);
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
             //
@@ -305,7 +353,9 @@ namespace ConsoleFramework.Rendering
             control.Arrange(lastLayoutInfo.renderSlotRect);
             // if lastLayoutInfo eq layoutInfo we can use last rendered buffer
             if (layoutInfo.Equals(lastLayoutInfo) && lastLayoutInfo.validity == LayoutValidity.Render) {
-                control.LayoutValidity = LayoutValidity.Render;
+                if (control.SetValidityToRender()) {
+                    revalidatedControls.Add(control);
+                }
                 return fullBuffer;
             }
             // replace buffers if control has grown
@@ -323,17 +373,21 @@ namespace ConsoleFramework.Rendering
             fullBuffer.CopyFrom(buffer);
             foreach (Control child in control.Children) {
                 if (child.Visibility == Visibility.Visible) {
-                    RenderingBuffer fullChildBuffer = processControl(child);
+                    RenderingBuffer fullChildBuffer = processControl(child, revalidatedControls);
                     fullBuffer.ApplyChild(fullChildBuffer, child.ActualOffset,
                         child.RenderSize, child.RenderSlotRect, child.LayoutClip);
                 } else {
                     // чтобы следующий Invalidate для этого контрола
                     // перезаписал lastLayoutInfo
-                    child.LayoutValidity = LayoutValidity.Render;
+                    if (child.SetValidityToRender()) {
+                        revalidatedControls.Add(child);
+                    }
                 }
             }
             //
-            control.LayoutValidity = LayoutValidity.Render;
+            if (control.SetValidityToRender()) {
+                revalidatedControls.Add(control);
+            }
             //
             addControlToRenderingUpdatedList(control);
             //

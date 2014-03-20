@@ -369,16 +369,33 @@ namespace ConsoleFramework.Controls
             get {
                 return layoutInfo.validity;
             }
-            set {
-                // todo : mb refactor this to disallow external access
-                if (layoutInfo.validity != value) {
-                    layoutInfo.validity = value;
-                    
-                    if (layoutInfo.validity == LayoutValidity.Render && LayoutRevalidated != null) {
-                        LayoutRevalidated.Invoke(this, EventArgs.Empty);
-                    }
-                }
+            private set {
+                layoutInfo.validity = value;
             }
+        }
+
+        /// <summary>
+        /// Changes layout validity to Render and returns true if this control
+        /// should be treated as layout revalidated. (Returns true if layout validity 
+        /// has actually changed to Render and there are some subscribers to LayoutRevalidated event).
+        /// </summary>
+        internal bool SetValidityToRender() {
+            if (layoutInfo.validity != LayoutValidity.Render) {
+                layoutInfo.validity = LayoutValidity.Render;
+
+                return (LayoutRevalidated != null);
+            }
+            return false;
+        }
+
+        internal void RaiseInvalidatedEvent() {
+            if (LayoutInvalidated != null)
+                LayoutInvalidated.Invoke(this, EventArgs.Empty);
+        }
+
+        internal void RaiseRevalidatedEvent() {
+            if (LayoutRevalidated != null)
+                LayoutRevalidated.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -896,7 +913,14 @@ namespace ConsoleFramework.Controls
             return finalSize;
         }
         
-        internal void ResetValidity() {
+        /// <summary>
+        /// Возвращает список контролов, у которых был вызван метод ResetValidity, и которые
+        /// имеют подписчиков на событие LayoutInvalidated. То есть если у контрола был вызван
+        /// метод ResetValidity, но подписчиков на это событие он не имеет, его в этом списке быть
+        /// не должно.
+        /// </summary>
+        /// <returns></returns>
+        internal void ResetValidity(List<Control> affectedControls) {
             // Copy all calculated layout info into lastLayoutInfo
             if (layoutInfo.validity == LayoutValidity.Render) {
                 lastLayoutInfo.CopyValuesFrom(layoutInfo);
@@ -904,13 +928,19 @@ namespace ConsoleFramework.Controls
             // Clear layoutInfo.validity (and whole layoutInfo structure to avoid garbage data)
             layoutInfo.ClearValues();
 
+            // Make copy of children collection to avoid troubles with
+            // changed children in LayoutInvalidated handlers
+            List<Control> childrenCopy = new List<Control>(Children);
+
             // Raise Invalidated event
-            if (LayoutInvalidated != null)
-                LayoutInvalidated.Invoke(this, EventArgs.Empty);
+            if (LayoutInvalidated != null) {
+                //LayoutInvalidated.Invoke(this, EventArgs.Empty);
+                affectedControls.Add(this);
+            }
 
             // Recursively invalidate children, but without add them to queue
-            foreach (Control child in Children) {
-                child.ResetValidity();
+            foreach (Control child in childrenCopy) {
+                child.ResetValidity(affectedControls);
             }
         }
         

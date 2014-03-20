@@ -64,10 +64,28 @@ namespace ConsoleFramework.Controls
                         currentItem = currentItem.ParentItem;
                     }
                     path.Reverse( );
-                    foreach ( MenuItem item in path ) {
-                        item.Expand(  );
-                    }
 
+                    // todo : comment this
+                    int i = 0;
+                    Action action = null;
+                    action = new Action(() => {
+                        if (i < path.Count) {
+                            MenuItem item = path[i];
+                            item.Invalidate();
+                            EventHandler handler = null;
+                            handler = (o, eventArgs) => {
+                                item.Expand();
+                                item.LayoutRevalidated -= handler;
+                                i++;
+                                if (i < path.Count) {
+                                    action();
+                                }
+                            };
+                            item.LayoutRevalidated += handler;
+                        }
+                    });
+                    action();
+                    
                     args.Handled = true;
                 }
             }
