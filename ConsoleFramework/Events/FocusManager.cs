@@ -194,7 +194,8 @@ namespace ConsoleFramework.Events
             List<Control> children = getControlsInScope(scope);
             if (children.Count == 0)
             {
-                tryChangeFocusedElementTo(null);
+                if (tryChangeFocusedElementTo(null))
+                    currentScope = scope;
                 return;
             }
 
