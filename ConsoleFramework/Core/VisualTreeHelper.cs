@@ -43,7 +43,7 @@ namespace ConsoleFramework.Core
         }
 
         private static Control findChildByNameRecoursively( Control control, string childName ) {
-            List< Control > children = control.Children;
+            IList< Control > children = control.Children;
             foreach ( Control child in children ) {
                 if ( child.Name == childName ) {
                     return child;

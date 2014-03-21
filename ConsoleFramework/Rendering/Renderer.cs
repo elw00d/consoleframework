@@ -43,6 +43,13 @@ namespace ConsoleFramework.Rendering
         // queue of controls marked for layout invalidation
         private readonly List<Control> invalidatedControls = new List<Control>();
 
+        /// <summary>
+        /// Контролы, в дочерних элементах которого были изменения в порядке Z-Order
+        /// (только Z-Order, если были добавлены или удалены дочерние - то он автоматически
+        /// будет invalidated, и в этот список добавлять уже не нужно).
+        /// </summary>
+        private readonly List<Control> zorderCheckControls = new List< Control >();
+
         public bool AnyControlInvalidated {
             get { return invalidatedControls.Count != 0; }
         }
@@ -151,8 +158,18 @@ namespace ConsoleFramework.Rendering
                     }
                 }
                 // определим соседей контрола, которые могут перекрывать его
-                List<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
-                int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
+                IList<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
+
+                //int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
+                int controlIndex = -1;
+                for ( int i = 0; i < neighbors.Count; i++ ) {
+                    Control neighbor = neighbors[ i ];
+                    if ( neighbor == control ) {
+                        controlIndex = i;
+                        break;
+                    }
+                }
+
                 if (control.Visibility == Visibility.Visible) {
                     // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
                     if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
@@ -281,7 +298,7 @@ namespace ConsoleFramework.Rendering
             // проверяем дочерние контролы - если их layoutInfo не изменился по сравнению с последним,
             // то мы можем взять их последний renderBuffer без обновления и применить к текущему контролу
             fullBuffer.CopyFrom(buffer);
-            List<Control> children = control.Children;
+            IList<Control> children = control.Children;
             foreach (Control child in children) {
                 if (child.Visibility == Visibility.Visible) {
                     RenderingBuffer fullChildBuffer = processControl(child, revalidatedControls);
@@ -295,7 +312,7 @@ namespace ConsoleFramework.Rendering
                     }
                 }
             }
-            //
+            // todo : save overlappingRect for each control child
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
@@ -304,51 +321,8 @@ namespace ConsoleFramework.Rendering
 
         /// <summary>
         /// Добавляет указанный контрол в список контролов, для которых обновлен full rendering buffer.
-        /// Причем делает это таким образом, что если в списке уже лежит контрол, являющийся родительским
-        /// для него, то родительский контрол заменяется текущим. А если в списке уже лежит контрол,
-        /// являющийся дочерним для текущего контрола, то список не изменяется. Таким образом, в списке
-        /// всегда находится лишь минимально необходимый набор контролов, буферы которых необходимо
-        /// применить ко всем родительским контролам впроть до rootElement, чтобы обновить ситуацию на
-        /// экране. Но такая оптимизация может применяться только для тех контролов, которые за прошедший
-        /// layout pass не побывали в invalidatedControlsQueue. В противном случае мы вынуждены обновить их
-        /// целиком.
         /// </summary>
         private void addControlToRenderingUpdatedList(Control control) {
-            //if (renderingUpdatedControls.Contains(control)) {
-            //    return;
-            //}
-            //Control controlToReplace = null;
-            //bool dontAddControl = false;
-            //foreach (Control c in renderingUpdatedControls) {
-            //    // check if c is parent of control
-            //    Control current = control;
-            //    do {
-            //        if (current == c) {
-            //            // c is parent of control, we should replace c with control
-            //            controlToReplace = c;
-            //            break;
-            //        }
-            //        current = current.Parent;
-            //    } while (current != null);
-            //    // check if control is parent of c
-            //    current = c;
-            //    do {
-            //        if (current == control) {
-            //            // control is parent of c, we should do nothing with list
-            //            dontAddControl = true;
-            //            break;
-            //        }
-            //        current = current.Parent;
-            //    } while (current != null);
-            //}
-            //if (null != controlToReplace) {
-            //    if (!currentLayoutPassInvalidatedControls.Contains(controlToReplace)) {
-            //        renderingUpdatedControls.Remove(controlToReplace);
-            //    }
-            //}
-            //if (!dontAddControl || currentLayoutPassInvalidatedControls.Contains(control)) {
-            //    renderingUpdatedControls.Add(control);
-            //}
             renderingUpdatedControls.Add(control);
         }
 
@@ -394,12 +368,12 @@ namespace ConsoleFramework.Rendering
                     }
                 }
             }
-            //
+            // todo : save overlappingRect for each control child
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
             //
-            addControlToRenderingUpdatedList(control);
+            //addControlToRenderingUpdatedList(control);
             //
             return fullBuffer;
         }

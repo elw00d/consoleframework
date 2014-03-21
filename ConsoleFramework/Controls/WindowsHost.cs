@@ -161,7 +161,15 @@ namespace ConsoleFramework.Controls
         /// по Z-индексу оно будет перемещено на самый верх, и получит клавиатурный фокус ввода.
         /// </summary>
         private void activateWindow(Window window) {
-            int index = Children.FindIndex(0, control => control == window);
+            //int index = Children.FindIndex(0, control => control == window);
+            int index = -1;
+            for ( int i = 0; i < Children.Count; i++ ) {
+                Control child = Children[ i ];
+                if ( child == window ) {
+                    index = i;
+                    break;
+                }
+            }
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
             //
@@ -372,7 +380,7 @@ namespace ConsoleFramework.Controls
             RemoveChild(window);
             window.RaiseEvent( Window.ClosedEvent, new RoutedEventArgs( window, Window.ClosedEvent ) );
             // после удаления окна активизировать то, которое было активным до него
-            List<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
+            IList<Control> childrenOrderedByZIndex = GetChildrenOrderedByZIndex();
 
             int windowsStartIndex = 0;
             if ( mainMenu != null ) {

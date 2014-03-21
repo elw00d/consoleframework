@@ -533,7 +533,7 @@ namespace ConsoleFramework.Events {
         /// <returns></returns>
         private Control findSource(Point rawPoint, Control control) {
             if (control.Children.Count != 0) {
-                List<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
+                IList<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control child = childrenOrderedByZIndex[i];
                     if (Control.HitTest(rawPoint, control, child)) {

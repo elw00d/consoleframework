@@ -233,7 +233,7 @@ namespace ConsoleFramework.Controls
         }
 
         // todo : make Children protected read-only collection (IEnumerable)
-        internal readonly List<Control> Children = new List<Control>();
+        internal readonly IList<Control> Children = new List<Control>();
 
         public Control Parent {
             get;
@@ -1154,7 +1154,7 @@ namespace ConsoleFramework.Controls
         public virtual void Render(RenderingBuffer buffer) {
         }
 
-        internal virtual List<Control> GetChildrenOrderedByZIndex() {
+        internal virtual IList<Control> GetChildrenOrderedByZIndex() {
             return Children;
         }
 
