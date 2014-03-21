@@ -175,9 +175,10 @@ namespace ConsoleFramework.Controls
             //
             Control oldTopWindow = Children[Children.Count - 1];
             for (int i = index; i < Children.Count - 1; i++) {
-                Children[i] = Children[i + 1];
+                SwapChildsZOrder( i, i + 1 );
+                //Children[i] = Children[i + 1];
             }
-            Children[Children.Count - 1] = window;
+            //Children[Children.Count - 1] = window;
             
             // If need to change top window
             if (oldTopWindow != window)

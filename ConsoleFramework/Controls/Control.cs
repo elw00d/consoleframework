@@ -232,8 +232,16 @@ namespace ConsoleFramework.Controls
             set;
         }
 
+        private IList<Control >readonlyChildren ;
         // todo : make Children protected read-only collection (IEnumerable)
-        internal readonly IList<Control> Children = new List<Control>();
+        protected internal IList<Control> Children {
+            get {
+                if ( readonlyChildren == null )
+                    readonlyChildren = children.AsReadOnly( );
+                return readonlyChildren;
+            }
+        }
+        internal List<Control> children = new List< Control >();
 
         public Control Parent {
             get;
@@ -252,7 +260,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentNullException("child");
             if (null != child.Parent)
                 throw new ArgumentException("Specified child already has parent.");
-            Children.Insert(index, child);
+            children.Insert(index, child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             child.OnParentChanged(  );
@@ -265,7 +273,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentNullException("child");
             if (null != child.Parent)
                 throw new ArgumentException("Specified child already has parent.");
-            Children.Add(child);
+            children.Add(child);
             child.Parent = this;
             ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             child.OnParentChanged();
@@ -280,7 +288,7 @@ namespace ConsoleFramework.Controls
                 throw new InvalidOperationException("Specified control is not a child.");
             else {
                 ConsoleApplication.Instance.FocusManager.BeforeRemoveElementFromTree(child);
-                if (!this.Children.Remove(child))
+                if (!this.children.Remove(child))
                     throw new InvalidOperationException("Assertion failed.");
                 child.Parent = null;
 
@@ -291,6 +299,22 @@ namespace ConsoleFramework.Controls
 
                 Invalidate();
             }
+        }
+
+        /// <summary>
+        /// Swaps controls z-order by specified indexes.
+        /// </summary>
+        /// <param name="a">Index of first child</param>
+        /// <param name="b">Index of second child</param>
+        protected void SwapChildsZOrder( int a, int b ) {
+            // todo : check args
+
+            Control tmp = this.children[ a ];
+            this.children[ a ] = this.children[ b ];
+            this.children[ b ] = tmp;
+
+            // Add this to zorderCheckControls list
+            ConsoleApplication.Instance.Renderer.AddControlToZOrderCheckList( this );
         }
 
         private void initialize() {

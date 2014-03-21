@@ -420,13 +420,17 @@ namespace ConsoleFramework.Rendering
             return buffers[ control ].GetOpacityAt( x, y );
         }
 
-        public void ControlRemovedFromTree( Control child ) {
+        internal void ControlRemovedFromTree( Control child ) {
             if ( invalidatedControls.Contains( child ) ) {
                 invalidatedControls.Remove( child );
             }
             foreach ( var nestedChild in child.Children ) {
                 ControlRemovedFromTree( nestedChild );
             }
+        }
+
+        internal void AddControlToZOrderCheckList( Control control ) {
+            zorderCheckControls.Add( control );
         }
     }
 }
