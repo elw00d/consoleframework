@@ -535,6 +535,7 @@ namespace Xaml
             }
 
             // Process enumerations
+            // todo : add TypeConverterAttribute support on enum, and unit tests
             if ( source == typeof ( String ) && dest.IsEnum ) {
                 string[ ] enumNames = Enum.GetNames(dest);
                 for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
