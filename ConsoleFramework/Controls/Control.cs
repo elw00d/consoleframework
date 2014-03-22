@@ -96,6 +96,15 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public partial class Control : INotifyPropertyChanged {
 
+        /// <summary>
+        /// Часть RenderSlotRect контрола, которая в текущий момент перекрывается
+        /// одним или несколькими соседями, размещёнными выше по Z-Order. Поддерживается
+        /// в актуальном состоянии системой размещения для того, чтобы обнаруживать моменты,
+        /// когда часть, скрытая до этого другим контролом, становится видимой, и нужно
+        /// обновить эту часть изображения на экране. Так как сам контрол при этом может не быть
+        /// добавлен в Invalidation Queue, то это нужно делать автоматически.
+        /// Определяется относительно буфера самого контрола (а не Parent'a, как RenderSlotRect).
+        /// </summary>
         internal Rect LastOverlappedRect;
 
         public Object DataContext { get; set; }

@@ -37,11 +37,11 @@ namespace ConsoleFramework.Rendering
             set;
         }
 
-        // buffers containing only control rendering representation itself
+        // Buffers containing only control rendering representation itself
         private readonly Dictionary<Control, RenderingBuffer> buffers = new Dictionary<Control, RenderingBuffer>();
-        // buffers containing full control render (with children render applied)
+        // Buffers containing full control render (with children render applied)
         private readonly Dictionary<Control, RenderingBuffer> fullBuffers = new Dictionary<Control, RenderingBuffer>();
-        // queue of controls marked for layout invalidation
+        // Queue of controls marked for layout invalidation
         private readonly List<Control> invalidatedControls = new List<Control>();
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace ConsoleFramework.Rendering
         /// (только Z-Order, если были добавлены или удалены дочерние - то он автоматически
         /// будет invalidated, и в этот список добавлять уже не нужно).
         /// </summary>
-        private readonly List<Control> zorderCheckControls = new List< Control >();
+        private readonly List<Control> zOrderCheckControls = new List< Control >();
 
         public bool AnyControlInvalidated {
             get { return invalidatedControls.Count != 0; }
@@ -80,29 +80,34 @@ namespace ConsoleFramework.Rendering
         /// UpdateLayout, на экран.
         /// </summary>
         public void FinallyApplyChangesToCanvas( bool forceRepaintAll = false ) {
-            // propagate updated rendered buffers to parent elements and eventually to Canvas
             Rect affectedRect = Rect.Empty;
-            //if (renderingUpdatedControls.Count > 0) {
-            //    Debug.WriteLine("Rendering updated controls : {0}.", renderingUpdatedControls.Count);
-            //}
-            foreach (Control control in renderingUpdatedControls) {
-                Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
-                affectedRect.Union(currentAffectedRect);
-            }
-			if (forceRepaintAll) affectedRect = new Rect(rootElementRect.Size);
-            if (!affectedRect.IsEmpty) {
-                // flush stored image (with this.RootElementRect offset)
+			if ( forceRepaintAll ) {
+			    affectedRect = new Rect( rootElementRect.Size );
+			} else {
+                // Propagate updated rendered buffers to parent elements and eventually to Canvas
+			    foreach (Control control in renderingUpdatedControls) {
+                    Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
+                    affectedRect.Union(currentAffectedRect);
+                }
+			}
 
-                // affected rect relative to canvas
+            // Flush stored image (with this.RootElementRect offset)
+            if (!affectedRect.IsEmpty) {
+                // Affected rect relative to canvas
                 Rect affectedRectAbsolute = new Rect(affectedRect.x + RootElementRect.x, affectedRect.y + RootElementRect.y, affectedRect.width, affectedRect.height);
-                // clip according to real canvas size
+                
+                // Clip according to real canvas size
                 affectedRectAbsolute.Intersect(new Rect(new Point(0, 0), Canvas.Size));
+
                 Canvas.Flush(affectedRectAbsolute);
             }
-            // if anything changed in layout - update displaying cursor state
+
+            // If anything changed in layout - update displaying cursor state
             if (renderingUpdatedControls.Count > 0) {
                 ConsoleApplication.Instance.FocusManager.RefreshMouseCursor();
             }
+
+            // Prepare for next layout pass
             renderingUpdatedControls.Clear();
         }
 
@@ -126,20 +131,34 @@ namespace ConsoleFramework.Rendering
                     affectInfo.control.RaiseRevalidatedEvent();
             }
 
-            foreach ( Control zorderCheckControl in zorderCheckControls ) {
-                checkIfChildrenOverlappedRectsChanged( zorderCheckControl );
+            // Перебираем zOrderCheckControls, для каждого контрола проверяя все его дочерние -
+            // не изменился ли их overlappedRect ? Если да, и изменился так, что
+            // бОльшая часть дочернего контрола стала видима - добавить этот контрол в список
+            // renderingUpdatedControls. Их содержимое после этого в методе FinallyApplyChangesToCanvas
+            // будет выведено на экран.
+            foreach ( Control zorderCheckControl in zOrderCheckControls ) {
+                refreshChildrenLastOverlappedRects( zorderCheckControl, true );
             }
-            zorderCheckControls.Clear(  );
+
+            // Clear list to prepare for next layout pass
+            zOrderCheckControls.Clear(  );
         }
 
-        private void checkIfChildrenOverlappedRectsChanged( Control parent ) {
-            // todo : remove copy paste
+        /// <summary>
+        /// Обновляет LastOverlappedRect у всех контролов, которые являются непосредственными
+        /// детьми parent'a, в соответствии с их Z-Order. Если addToInvalidatedIfChanged = true,
+        /// то те дочерние элементы, у которых OverlappedRect уменьшился по сравнению с предыдущим
+        /// значением, будут добавлены в список renderingUpdatedControls.
+        /// </summary>
+        private void refreshChildrenLastOverlappedRects( Control parent,
+                                                         bool addToInvalidatedIfChanged ) {
             for ( int i = 0; i < parent.Children.Count; i++ ) {
                 Control control = parent.Children[ i ];
                 // Относительно parent
                 Rect controlRect = control.RenderSlotRect;
                 // Относительно control
                 Rect overlappedRect = Rect.Empty;
+
                 // Проверяем только тех соседей, у которых Z-Order выше
                 for ( int j = i + 1; j < parent.Children.Count; j++ ) {
                     Control sibling = parent.Children[ j ];
@@ -154,48 +173,17 @@ namespace ConsoleFramework.Rendering
                         }
                     }
                 }
-                Rect lastOverlappedRectCopy = control.LastOverlappedRect;
-                lastOverlappedRectCopy.Union( overlappedRect );
-                // If new rect is inside old, do nothing
-                if ( lastOverlappedRectCopy == overlappedRect ) {
-                } else {
-                    renderingUpdatedControls.Add( control );
-                }
 
-                // todo : remove after test
-//                if ( control.LastOverlappedRect != overlappedRect ) {
-//                    Debugger.Log( 1, "", control.Name + ".LastOverlappedRect=" + overlappedRect.ToString() + "\n" );
-//                }
-                control.LastOverlappedRect = overlappedRect;
-            }
-        }
-
-        private void refreshChildrenLastOverlappedRects( Control parent ) {
-            for ( int i = 0; i < parent.Children.Count; i++ ) {
-                Control control = parent.Children[ i ];
-                // Относительно parent
-                Rect controlRect = control.RenderSlotRect;
-                // Относительно control
-                Rect overlappedRect = Rect.Empty;
-                // Проверяем только тех соседей, у которых Z-Order выше
-                for ( int j = i + 1; j < parent.Children.Count; j++ ) {
-                    Control sibling = parent.Children[ j ];
-                    if ( sibling != control ) {
-                        if ( controlRect.IntersectsWith( sibling.RenderSlotRect ) ) {
-                            Rect controlRectCopy = controlRect;
-                            controlRectCopy.Intersect( sibling.RenderSlotRect );
-                            if ( !controlRectCopy.IsEmpty ) {
-                                controlRectCopy.Offset( -controlRect.X, -controlRect.Y );
-                                overlappedRect.Union( controlRectCopy );
-                            }
-                        }
+                if ( addToInvalidatedIfChanged ) {
+                    Rect lastOverlappedRectCopy = control.LastOverlappedRect;
+                    lastOverlappedRectCopy.Union( overlappedRect );
+                    
+                    // Only add to invalidated if new rect is not inside old
+                    if ( lastOverlappedRectCopy != overlappedRect ) {
+                        renderingUpdatedControls.Add( control );
                     }
                 }
-                // todo : remove after test
-//                if ( control.LastOverlappedRect != overlappedRect ) {
-//                    Debugger.Log(1, "", control.Name + ".LastOverlappedRect=" + overlappedRect.ToString() + "\n");
-//                }
-
+                
                 control.LastOverlappedRect = overlappedRect;
             }
         }
@@ -386,8 +374,10 @@ namespace ConsoleFramework.Rendering
                     }
                 }
             }
-            // todo : save overlappingRect for each control child
-            refreshChildrenLastOverlappedRects( control );
+
+            // Save overlappingRect for each control child
+            refreshChildrenLastOverlappedRects( control, false );
+
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
@@ -443,23 +433,20 @@ namespace ConsoleFramework.Rendering
                     }
                 }
             }
-            // todo : save overlappingRect for each control child
-            refreshChildrenLastOverlappedRects(control);
+            
+            // Save overlappingRect for each control child
+            refreshChildrenLastOverlappedRects( control, false );
+
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
-            //
-            //addControlToRenderingUpdatedList(control);
-            //
             return fullBuffer;
         }
 
         public void AddControlToInvalidationQueue(Control control) {
-            if (null == control) {
-                throw new ArgumentNullException("control");
-            }
+            if (null == control) throw new ArgumentNullException("control");
             if (!invalidatedControls.Contains(control)) {
-                // add to queue only if it has parent or it is root element
+                // Add to queue only if it has parent or it is root element
                 if (control.Parent != null || control == RootElement) {
                     invalidatedControls.Add(control);
                 }
@@ -496,6 +483,10 @@ namespace ConsoleFramework.Rendering
             return buffers[ control ].GetOpacityAt( x, y );
         }
 
+        /// <summary>
+        /// Called when control is removed from visual tree.
+        /// It is necessary to remove it from invalidated queue if they are there.
+        /// </summary>
         internal void ControlRemovedFromTree( Control child ) {
             if ( invalidatedControls.Contains( child ) ) {
                 invalidatedControls.Remove( child );
@@ -505,8 +496,14 @@ namespace ConsoleFramework.Rendering
             }
         }
 
+        /// <summary>
+        /// Called when some of control's children changed their z-order.
+        /// (Not when added or removed - just changed between them).
+        /// This call allows layout system to detect when need to refresh
+        /// display image if no controls invalidated but z-order changed.
+        /// </summary>
         internal void AddControlToZOrderCheckList( Control control ) {
-            zorderCheckControls.Add( control );
+            zOrderCheckControls.Add( control );
         }
     }
 }
