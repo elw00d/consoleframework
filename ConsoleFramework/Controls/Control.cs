@@ -96,6 +96,8 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public partial class Control : INotifyPropertyChanged {
 
+        internal Rect LastOverlappedRect;
+
         public Object DataContext { get; set; }
 
         private Dictionary< String, Object > resources;

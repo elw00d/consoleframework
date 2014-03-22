@@ -170,14 +170,14 @@ namespace Examples
                     Y = 6,
                     //MinHeight = 10,
                     //MinWidth = 10,
-                    Name = "Window2",
+                    Name = "LongTitleWindow",
                     Title = "Очень длинное название окна",
                     Content = groupBox
                 });
                 windowsHost.Show(new Window() {
                     X = 30,
                     Y = 15,
-                    Name = "window 3",
+                    Name = "StrangeWindow",
                     Content = new StrangePanel() {
                         Content = new StrangeControl()
                     }

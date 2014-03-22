@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 
@@ -123,6 +124,79 @@ namespace ConsoleFramework.Rendering
                     affectInfo.control.RaiseInvalidatedEvent();
                 else if (affectInfo.affectType == AffectType.LayoutRevalidated)
                     affectInfo.control.RaiseRevalidatedEvent();
+            }
+
+            foreach ( Control zorderCheckControl in zorderCheckControls ) {
+                checkIfChildrenOverlappedRectsChanged( zorderCheckControl );
+            }
+            zorderCheckControls.Clear(  );
+        }
+
+        private void checkIfChildrenOverlappedRectsChanged( Control parent ) {
+            // todo : remove copy paste
+            for ( int i = 0; i < parent.Children.Count; i++ ) {
+                Control control = parent.Children[ i ];
+                // Относительно parent
+                Rect controlRect = control.RenderSlotRect;
+                // Относительно control
+                Rect overlappedRect = Rect.Empty;
+                // Проверяем только тех соседей, у которых Z-Order выше
+                for ( int j = i + 1; j < parent.Children.Count; j++ ) {
+                    Control sibling = parent.Children[ j ];
+                    if ( sibling != control ) {
+                        if ( controlRect.IntersectsWith( sibling.RenderSlotRect ) ) {
+                            Rect controlRectCopy = controlRect;
+                            controlRectCopy.Intersect( sibling.RenderSlotRect );
+                            if ( !controlRectCopy.IsEmpty ) {
+                                controlRectCopy.Offset( -controlRect.X, -controlRect.Y );
+                                overlappedRect.Union( controlRectCopy );
+                            }
+                        }
+                    }
+                }
+                Rect lastOverlappedRectCopy = control.LastOverlappedRect;
+                lastOverlappedRectCopy.Union( overlappedRect );
+                // If new rect is inside old, do nothing
+                if ( lastOverlappedRectCopy == overlappedRect ) {
+                } else {
+                    renderingUpdatedControls.Add( control );
+                }
+
+                // todo : remove after test
+//                if ( control.LastOverlappedRect != overlappedRect ) {
+//                    Debugger.Log( 1, "", control.Name + ".LastOverlappedRect=" + overlappedRect.ToString() + "\n" );
+//                }
+                control.LastOverlappedRect = overlappedRect;
+            }
+        }
+
+        private void refreshChildrenLastOverlappedRects( Control parent ) {
+            for ( int i = 0; i < parent.Children.Count; i++ ) {
+                Control control = parent.Children[ i ];
+                // Относительно parent
+                Rect controlRect = control.RenderSlotRect;
+                // Относительно control
+                Rect overlappedRect = Rect.Empty;
+                // Проверяем только тех соседей, у которых Z-Order выше
+                for ( int j = i + 1; j < parent.Children.Count; j++ ) {
+                    Control sibling = parent.Children[ j ];
+                    if ( sibling != control ) {
+                        if ( controlRect.IntersectsWith( sibling.RenderSlotRect ) ) {
+                            Rect controlRectCopy = controlRect;
+                            controlRectCopy.Intersect( sibling.RenderSlotRect );
+                            if ( !controlRectCopy.IsEmpty ) {
+                                controlRectCopy.Offset( -controlRect.X, -controlRect.Y );
+                                overlappedRect.Union( controlRectCopy );
+                            }
+                        }
+                    }
+                }
+                // todo : remove after test
+//                if ( control.LastOverlappedRect != overlappedRect ) {
+//                    Debugger.Log(1, "", control.Name + ".LastOverlappedRect=" + overlappedRect.ToString() + "\n");
+//                }
+
+                control.LastOverlappedRect = overlappedRect;
             }
         }
 
@@ -313,6 +387,7 @@ namespace ConsoleFramework.Rendering
                 }
             }
             // todo : save overlappingRect for each control child
+            refreshChildrenLastOverlappedRects( control );
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
@@ -369,6 +444,7 @@ namespace ConsoleFramework.Rendering
                 }
             }
             // todo : save overlappingRect for each control child
+            refreshChildrenLastOverlappedRects(control);
             if (control.SetValidityToRender()) {
                 revalidatedControls.Add(control);
             }
