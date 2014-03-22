@@ -33,10 +33,6 @@ namespace ConsoleFramework.Controls
             subscribe();
         }
 
-        public Panel(Control parent) : base(parent) {
-            subscribe();
-        }
-
         public Attr Background {
             get;
             set;

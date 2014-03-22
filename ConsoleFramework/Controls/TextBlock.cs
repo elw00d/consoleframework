@@ -10,10 +10,6 @@ namespace ConsoleFramework.Controls
         private void initialize() {
         }
 
-        public TextBlock(Control parent) : base(parent) {
-            initialize();
-        }
-
         public TextBlock() {
             initialize();
         }

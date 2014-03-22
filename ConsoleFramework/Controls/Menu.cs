@@ -25,8 +25,7 @@ namespace ConsoleFramework.Controls
     }
 
     /// <summary>
-    /// todo : обработать случай, при котором меню открывается, потом закрывается (popup закеширован)
-    /// а после этого набор MenuItems меняется, и нужно в popup их обновить
+    /// Item of menu.
     /// </summary>
     [ContentProperty("Items")]
     public class MenuItem : MenuItemBase

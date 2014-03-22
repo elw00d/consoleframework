@@ -243,20 +243,20 @@ namespace ConsoleFramework.Controls
             set;
         }
 
-        private IList<Control >readonlyChildren ;
-        // todo : make Children protected read-only collection (IEnumerable)
-        protected internal IList<Control> Children {
-            get {
-                if ( readonlyChildren == null )
-                    readonlyChildren = children.AsReadOnly( );
-                return readonlyChildren;
-            }
-        }
-        internal List<Control> children = new List< Control >();
+        /// <summary>
+        /// Read-only collection of children controls ordered by Z-Order.
+        /// (Last items will be on top.)
+        /// </summary>
+        protected internal IList< Control > Children;
+
+        /// <summary>
+        /// Collection of children controls.
+        /// </summary>
+        private readonly List<Control> children = new List< Control >();
 
         public Control Parent {
             get;
-            protected set;
+            private set;
         }
 
         /// <summary>
@@ -318,7 +318,9 @@ namespace ConsoleFramework.Controls
         /// <param name="a">Index of first child</param>
         /// <param name="b">Index of second child</param>
         protected void SwapChildsZOrder( int a, int b ) {
-            // todo : check args
+            if (a < 0 || a >= children.Count) throw new ArgumentException("Incorrect index", "a");
+            if (b < 0 || b >= children.Count) throw new ArgumentException("Incorrect index", "b");
+            if ( a == b ) return;
 
             Control tmp = this.children[ a ];
             this.children[ a ] = this.children[ b ];
@@ -326,25 +328,6 @@ namespace ConsoleFramework.Controls
 
             // Add this to zorderCheckControls list
             ConsoleApplication.Instance.Renderer.AddControlToZOrderCheckList( this );
-        }
-
-        private void initialize() {
-            MinWidth = 0;
-            Focusable = false;
-            IsFocusScope = false;
-            Visibility = Visibility.Visible;
-            AddHandler(MouseEnterEvent, new MouseEventHandler(Control_MouseEnter));
-            AddHandler(MouseLeaveEvent, new MouseEventHandler(Control_MouseLeave));
-            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
-            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_LostKeyboardFocus));
-        }
-
-        private void Control_MouseEnter(object sender, MouseEventArgs args) {
-            //Debug.WriteLine("MouseEnter on control : " + Name);
-        }
-
-        private void Control_MouseLeave(object sender, MouseEventArgs args) {
-            //Debug.WriteLine("MouseLeave on control : " + Name);
         }
 
         private void Control_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
@@ -357,17 +340,9 @@ namespace ConsoleFramework.Controls
         /// Если один из дочерних контролов окна теряет фокус, то будет вызван этот обработчик
         /// </summary>
         private void Control_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs args) {
-            //Debug.WriteLine(string.Format("LostKeyboardFocusEvent : OldFocus {0} NewFocus {1}",
-            //    args.OldFocus != null ? args.OldFocus.Name : "null",
-            //    args.NewFocus.Name));
-            //args.Handled = true;
-
             // Если текущий контрол является FocusScope, то мы должны сохранить элемент,
             // который имел фокус, чтобы восстановить его, когда FocusScope получит его обратно
-            if ( this.IsFocusScope )
-                this.StoredFocus = args.OldFocus;
-            else
-                this.StoredFocus = null;
+            this.StoredFocus = this.IsFocusScope ? args.OldFocus : null;
 
             // Focusable controls invalidated automatically when lose focus
             if (this.Focusable)
@@ -375,15 +350,15 @@ namespace ConsoleFramework.Controls
         }
 
         public Control() {
-            initialize();
+            Children = children.AsReadOnly();
+            MinWidth = 0;
+            Focusable = false;
+            IsFocusScope = false;
+            Visibility = Visibility.Visible;
+            AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
+            AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_LostKeyboardFocus));
         }
         
-        public Control(Control parent) {
-            initialize();
-            //
-            Parent = parent;
-        }
-
         /// <summary>
         /// Смещение виртуального холста контрола отн-но холста родительского элемента управления.
         /// Если контрол целиком размещен в родительском элементе управления и не обрезан маргином,

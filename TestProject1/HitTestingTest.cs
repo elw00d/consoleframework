@@ -1,7 +1,4 @@
-﻿using System;
-using ConsoleFramework;
-using ConsoleFramework.Controls;
-using ConsoleFramework.Core;
+﻿using ConsoleFramework.Controls;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace TestProject1
@@ -9,37 +6,28 @@ namespace TestProject1
     [TestClass]
     public class HitTestingTest
     {
+        class TestControl : Control
+        {
+            public new void AddChild( Control control ) {
+                base.AddChild( control );
+            }
+        }
+
         [TestMethod]
         public void TestControlsDoesntLinkedToCanvas() {
-            Control a = new Control();
-            Control b = new Control();
+            TestControl a = new TestControl();
+            TestControl b = new TestControl();
             Assert.IsNull(Control.FindCommonAncestor(a, b));
         }
-
-        [TestMethod]
-        public void TestControlsParentDoesntLinkedToCanvas() {
-            Control a = new Control();
-            Control b = new Control();
-            Control aa = new Control(a);
-            Control bb = new Control(b);
-            Assert.IsNull(Control.FindCommonAncestor(aa, bb));
-        }
-
-        [TestMethod]
-        public void TestControlsParentDoesntLinkedToCanvas2() {
-            Control a = new Control();
-            Control b = new Control();
-            Control aa = new Control(a);
-            Control bb = new Control(b);
-            Assert.IsNull(Control.FindCommonAncestor(bb, aa));
-        }
-
+        
         [TestMethod]
         public void TestRootCanvasIsCommonAncestor() {
-            Control a = new Control();
-            Control b = new Control();
-            Control aa = new Control(a);
-            Control bb = new Control(b);
+            TestControl a = new TestControl();
+            TestControl b = new TestControl();
+            TestControl aa = new TestControl();
+            a.AddChild(aa);
+            TestControl bb = new TestControl();
+            b.AddChild(bb);
             Control commonAncestor = Control.FindCommonAncestor(aa, bb);
             Control commonAncestor2 = Control.FindCommonAncestor(bb, aa);
             Assert.IsNull(commonAncestor);
@@ -56,15 +44,21 @@ namespace TestProject1
         [TestMethod]
         public void TestNormalSituation() {
             //
-            Control x = new Control() { Name = "x" };
-            Control ancestor = new Control(x) { Name = "ancestor"};
-            Control a = new Control(ancestor) { Name = "a" };
-            Control aa = new Control(a) { Name = "aa" };
-            Control aaa = new Control(aa) { Name = "aaa" };
-            Control b = new Control(ancestor) { Name = "b" };
+            TestControl x = new TestControl() { Name = "x" };
+            TestControl ancestor = new TestControl() { Name = "ancestor" };
+            x.AddChild( ancestor );
+            TestControl a = new TestControl() { Name = "a" };
+            ancestor.AddChild( a );
+            TestControl aa = new TestControl() { Name = "aa" };
+            a.AddChild( aa );
+            TestControl aaa = new TestControl() { Name = "aaa" };
+            aa.AddChild( aaa );
+            TestControl b = new TestControl() { Name = "b" };
+            ancestor.AddChild( b );
             Assert.AreEqual(Control.FindCommonAncestor(a, b), ancestor);
             Assert.AreEqual(Control.FindCommonAncestor(aa, b), ancestor);
-            Control bb = new Control(b) { Name = "bb" };
+            TestControl bb = new TestControl() { Name = "bb" };
+            b.AddChild( bb );
             Assert.AreEqual(Control.FindCommonAncestor(aa, bb), ancestor);
             //
             Assert.AreEqual(Control.FindCommonAncestor(a, aa), a);
@@ -73,26 +67,6 @@ namespace TestProject1
             Assert.AreEqual(Control.FindCommonAncestor(bb, ancestor), ancestor);
             //
             Assert.AreEqual(Control.FindCommonAncestor(aaa, ancestor), ancestor);
-        }
-
-        /// <summary>
-        /// todo : repair this test after finish rendering
-        /// </summary>
-        [TestMethod]
-        [Ignore]
-        public void TestPointTranslation() {
-            Panel panel = new Panel() { Name = "panel" };
-            Control textblock1 = new TextBlock() { Name = "textblock1", Text = "ff"};
-            Control textblock2 = new TextBlock() {Name = "textblock2", Text = "fff"};
-            panel.AddChild(textblock1);
-            panel.AddChild(textblock2);
-            panel.Arrange(new Rect(0, 0, 80, 25));
-            //
-            Assert.AreEqual(new Point(0, 0), Control.TranslatePoint(panel, new Point(0, 0), null));
-            Assert.AreEqual(new Point(0, 0), Control.TranslatePoint(null, new Point(0, 0), textblock1));
-            Assert.AreEqual(new Point(0, -12), Control.TranslatePoint(null, new Point(0, 0), textblock2));
-            Assert.AreEqual(new Point(0, -12), Control.TranslatePoint(textblock1, new Point(0, 0), textblock2));
-            Assert.AreEqual(new Point(10, 12 + 5), Control.TranslatePoint(textblock2, new Point(10, 5), panel));
         }
     }
 }
