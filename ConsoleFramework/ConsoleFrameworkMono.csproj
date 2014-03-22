@@ -11,23 +11,23 @@
     <AssemblyName>ConsoleFramework</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>True</DebugSymbols>
+    <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
+    <ConsolePause>false</ConsolePause>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
+    <ConsolePause>false</ConsolePause>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -81,29 +81,31 @@
     <Compile Include="Rendering\Renderer.cs" />
     <Compile Include="Rendering\RenderingBuffer.cs" />
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
-    <Compile Include="Xaml\ContentPropertyAttribute.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
-    <Compile Include="Xaml\Factories.cs" />
-    <Compile Include="Xaml\ITypeConverter.cs" />
-    <Compile Include="Xaml\MarkupExtensionAttribute.cs" />
-    <Compile Include="Xaml\MarkupExtensionsParser.cs" />
-    <Compile Include="Xaml\RefMarkupExtension.cs" />
-    <Compile Include="Xaml\TypeConverterAttribute.cs" />
-    <Compile Include="Xaml\TypeMarkupExtension.cs" />
-    <Compile Include="Xaml\XamlParser.cs" />
     <Compile Include="ConsoleApplication.cs" />
+    <Compile Include="Controls\ButtonBase.cs" />
+    <Compile Include="Controls\CheckBox.cs" />
+    <Compile Include="Controls\Menu.cs" />
+    <Compile Include="Controls\UIElementCollection.cs" />
+    <Compile Include="Core\ThicknessConverter.cs" />
+    <Compile Include="Events\KeyConverter.cs" />
+    <Compile Include="Events\KeyGesture.cs" />
+    <Compile Include="Events\KeyGestureConverter.cs" />
+    <Compile Include="Events\ModifierKeysConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Controls\LayoutSystem.txt" />
     <None Include="Events\Focus.txt" />
-    <None Include="Xaml\xaml.txt" />
-    <None Include="Xaml\xaml.xsd" />
     <None Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Binding\Binding.csproj">
       <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
       <Name>Binding</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xaml\Xaml.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>Xaml</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

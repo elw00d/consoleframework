@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleFrameworkMono", "Con
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesMono", "Examples\ExamplesMono.csproj", "{2BBC9906-5CEB-40DD-84E0-6D037EF159CA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xaml", "Xaml\Xaml.csproj", "{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -21,6 +23,10 @@ Global
 		{2BBC9906-5CEB-40DD-84E0-6D037EF159CA}.Debug|x86.Build.0 = Debug|x86
 		{2BBC9906-5CEB-40DD-84E0-6D037EF159CA}.Release|x86.ActiveCfg = Release|x86
 		{2BBC9906-5CEB-40DD-84E0-6D037EF159CA}.Release|x86.Build.0 = Release|x86
+		{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}.Debug|x86.Build.0 = Debug|Any CPU
+		{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}.Release|x86.ActiveCfg = Release|Any CPU
+		{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}.Release|x86.Build.0 = Release|Any CPU
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.ActiveCfg = Debug|x86
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Debug|x86.Build.0 = Debug|x86
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.ActiveCfg = Release|x86

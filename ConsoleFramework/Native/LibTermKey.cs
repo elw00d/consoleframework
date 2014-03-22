@@ -50,6 +50,44 @@ namespace ConsoleFramework.Native
         [DllImport( "libtermkey.so", EntryPoint="termkey_getkey" )]
         private static extern TermKeyResult termkey_getkey64( IntPtr termKey, ref TermKeyKey64 key );
 
+		public static TermKeyResult termkey_getkey_force(IntPtr termKey, ref TermKeyKey key) {
+			if (IntPtr.Size == 4) {
+				TermKeyKey32 temp = new TermKeyKey32();
+				TermKeyResult result = termkey_getkey_force32(termKey, ref temp);
+				key.type = temp.type;
+				key.code = temp.code;
+				key.modifiers = temp.modifiers;
+				key.utf8_0 = temp.utf8_0;
+				key.utf8_1 = temp.utf8_1;
+				key.utf8_2 = temp.utf8_2;
+				key.utf8_3 = temp.utf8_3;
+				key.utf8_4 = temp.utf8_4;
+				key.utf8_5 = temp.utf8_5;
+				key.utf8_6 = temp.utf8_6;
+				return result;
+			} else {
+				TermKeyKey64 temp = new TermKeyKey64();
+				TermKeyResult result = termkey_getkey_force64(termKey, ref temp);
+				key.type = temp.type;
+				key.code = temp.code;
+				key.modifiers = temp.modifiers;
+				key.utf8_0 = temp.utf8_0;
+				key.utf8_1 = temp.utf8_1;
+				key.utf8_2 = temp.utf8_2;
+				key.utf8_3 = temp.utf8_3;
+				key.utf8_4 = temp.utf8_4;
+				key.utf8_5 = temp.utf8_5;
+				key.utf8_6 = temp.utf8_6;
+				return result;
+			}
+		}
+
+		[DllImport( "libtermkey.so", EntryPoint="termkey_getkey_force" )]
+        private static extern TermKeyResult termkey_getkey_force32( IntPtr termKey, ref TermKeyKey32 key );
+		
+        [DllImport( "libtermkey.so", EntryPoint="termkey_getkey_force" )]
+        private static extern TermKeyResult termkey_getkey_force64( IntPtr termKey, ref TermKeyKey64 key );
+
         [DllImport( "libtermkey.so" )]
         public static extern TermKeyResult termkey_advisereadable( IntPtr termKey );
 

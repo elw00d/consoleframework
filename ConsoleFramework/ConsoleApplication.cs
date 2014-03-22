@@ -427,6 +427,7 @@ namespace ConsoleFramework
                 renderer.FinallyApplyChangesToCanvas(  );
 
 		        termkeyHandle = LibTermKey.termkey_new( 0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
+
 		        // Setup the input mode
 		        Console.Write( "\x1B[?1002h" );
 		        pollfd fd = new pollfd( );
@@ -445,7 +446,7 @@ namespace ConsoleFramework
 
 		        try {
 #if !WIN32
-                    // catch SIGWINCH to handle terminal resizing
+                    // Catch SIGWINCH to handle terminal resizing
 			        UnixSignal[] signals = new UnixSignal [] {
 			            new UnixSignal (Signum.SIGWINCH)
 			        };
@@ -466,9 +467,16 @@ namespace ConsoleFramework
 					this.running = true;
 					this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
 					//
+					int nextwait = -1;
 		            while ( true ) {
-		                int pollRes = Libc.poll( fds, 2, -1 );
-		                if ( pollRes == 0 ) throw new InvalidOperationException( "Assertion failed." );
+		                int pollRes = Libc.poll( fds, 2, nextwait );
+		                if ( pollRes == 0 ) {
+							if (nextwait == -1)
+								throw new InvalidOperationException( "Assertion failed." );
+							if (TermKeyResult.TERMKEY_RES_KEY == LibTermKey.termkey_getkey_force(termkeyHandle, ref key) ) {
+								processLinuxInput( key );
+							}
+						}
                         if ( pollRes == -1 ) {
                             int errorCode = Marshal.GetLastWin32Error();
                             if ( errorCode != Libc.EINTR ) {
@@ -476,7 +484,6 @@ namespace ConsoleFramework
                             }
                         }
 
-						//bool needProcessInvokeActions = false;
 		                if ( fds[ 1 ].revents != POLL_EVENTS.NONE ) {
 		                    UInt64 u;
 		                    Libc.readInt64( fds[ 1 ].fd, out u );
@@ -488,7 +495,7 @@ namespace ConsoleFramework
 		                        break;
 		                    }
 		                    if ( u == 2 ) {
-		                        // get new term size and process appropriate INPUT_RECORD event
+		                        // Get new term size and process appropriate INPUT_RECORD event
 		                        INPUT_RECORD inputRecord = new INPUT_RECORD( );
 		                        inputRecord.EventType = EventType.WINDOW_BUFFER_SIZE_EVENT;
 
@@ -499,7 +506,7 @@ namespace ConsoleFramework
 		                        processInputEvent( inputRecord );
 		                    }
 							if (u == 3 ) {
-								//needProcessInvokeActions = true;
+								// It is signal from async actions invocation stuff
 							}
 		                }
 
@@ -509,9 +516,17 @@ namespace ConsoleFramework
 		                    LibTermKey.termkey_advisereadable( termkeyHandle );
 		                }
 
-		                while ( ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) ) == TermKeyResult.TERMKEY_RES_KEY ) {
+						TermKeyResult result = ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) );
+		                while (result == TermKeyResult.TERMKEY_RES_KEY ) {
 		                    processLinuxInput( key );
+							result = ( LibTermKey.termkey_getkey( termkeyHandle, ref key ) );
 		                }
+
+						if (result == TermKeyResult.TERMKEY_RES_AGAIN) {
+							nextwait = LibTermKey.termkey_get_waittime(termkeyHandle);
+						} else {
+							nextwait = -1;
+						}
 
                         while ( true ) {
                             bool anyInvokeActions = isAnyInvokeActions( );
@@ -527,11 +542,6 @@ namespace ConsoleFramework
                         }
 
                         renderer.FinallyApplyChangesToCanvas( );
-
-						//if (needProcessInvokeActions)
-						//	processInvokeActions();
-						//renderer.UpdateLayout( );
-                        //renderer.FinallyApplyChangesToCanvas(  );
 		            }
 
 		        } finally {
@@ -549,7 +559,7 @@ namespace ConsoleFramework
 		
 		private void processLinuxInput (TermKeyKey key)
 		{
-			// if any special button has been pressed (Tab, Enter, etc)
+			// If any special button has been pressed (Tab, Enter, etc)
 			// we should convert its code to INPUT_RECORD.KeyEvent
 			// Because INPUT_RECORD.KeyEvent depends on Windows' scan codes,
 			// we convert codes retrieved from LibTermKey to Windows virtual scan codes
@@ -638,6 +648,20 @@ namespace ConsoleFramework
 				inputRecord.KeyEvent.wRepeatCount = 1;
 				inputRecord.KeyEvent.UnicodeChar = unicodeCharacter;
 				inputRecord.KeyEvent.dwControlKeyState = 0;
+				if (char.IsLetterOrDigit( unicodeCharacter )) {
+					if (char.IsDigit( unicodeCharacter)) {
+						inputRecord.KeyEvent.wVirtualKeyCode =
+							(VirtualKeys) (unicodeCharacter - '0' + (int) VirtualKeys.N0);
+					} else {
+						char lowercased = char.ToLowerInvariant( unicodeCharacter );
+
+						// Only english characters can be converted to VirtualKeys
+						if (lowercased >= 'a' && lowercased <= 'z') {
+							inputRecord.KeyEvent.wVirtualKeyCode =
+								(VirtualKeys) (lowercased - 'a' + (int) VirtualKeys.A );
+						}
+					}
+				}
 				if ((key.modifiers & 4) == 4) {
 					inputRecord.KeyEvent.dwControlKeyState |= ControlKeyState.LEFT_CTRL_PRESSED;
 				}
@@ -721,8 +745,8 @@ namespace ConsoleFramework
             while (true) {
                 // 100 ms instead of Win32.INFINITE to check console window Zoomed and Iconic
                 // state periodically (because if user presses Maximize/Restore button
-                // there are no input event generated). todo : revert 100 ms
-                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, 0xFFFFFFFF);
+                // there are no input event generated).
+                uint waitResult = Win32.WaitForMultipleObjects(3, handles, false, 100);
                 if (waitResult == 0) {
                     break;
                 }

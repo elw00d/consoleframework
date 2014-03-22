@@ -14,25 +14,26 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>True</DebugSymbols>
+    <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>False</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
-    <Optimize>True</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Examples.AsyncUiUpdate.Program</StartupObject>
+    <StartupObject>Examples.MainMenu.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -42,12 +43,17 @@
     <Compile Include="AsyncUiUpdate\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CheckBoxes\Program.cs" />
+    <Compile Include="MainMenu\Program.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="CheckBoxes\main.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GridTest.xml" />
+    <EmbeddedResource Include="MainMenu\main.xml" />
+    <EmbeddedResource Include="MainMenu\windows-host.xml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MainWindow.xml">
@@ -73,5 +79,13 @@
       <Project>{03300A54-DEC4-41A8-9C9A-591805400C76}</Project>
       <Name>ConsoleFrameworkMono</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Xaml\Xaml.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>Xaml</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="CheckBoxes\" />
+    <Folder Include="MainMenu\" />
   </ItemGroup>
 </Project>
