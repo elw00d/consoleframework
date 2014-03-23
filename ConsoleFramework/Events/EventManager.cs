@@ -190,8 +190,7 @@ namespace ConsoleFramework.Events {
         public void ParseInputEvent(INPUT_RECORD inputRecord, Control rootElement) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
-//                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED)
-//                    return;
+
                 if (mouseEvent.dwEventFlags != MouseEventFlags.PRESSED_OR_RELEASED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.MOUSE_MOVED &&
                     mouseEvent.dwEventFlags != MouseEventFlags.DOUBLE_CLICK &&
@@ -242,7 +241,6 @@ namespace ConsoleFramework.Events {
                             break;
                     }
 
-                    //bool anyEnterOrLeaveEventQueued = false;
                     for (int i = prevMouseOverStack.Count - 1; i >= index; i-- ) {
                         Control control = prevMouseOverStack[i];
                         MouseEventArgs args = new MouseEventArgs(control, Control.MouseLeaveEvent,
@@ -330,8 +328,9 @@ namespace ConsoleFramework.Events {
             }
         }
 
-        // todo : вынести следующий код в отдельный метод ProcessEvents и вызывать
-        // его отдельно от ProcessInputEvent. А в ProcessInputEvent только класть событие в очередь
+        /// <summary>
+        /// Processes all routed events in queue.
+        /// </summary>
         public void ProcessEvents( ) {
             while (eventsQueue.Count != 0) {
                 RoutedEventArgs routedEventArgs = eventsQueue.Dequeue();
@@ -436,37 +435,31 @@ namespace ConsoleFramework.Events {
                 // сохраняя при этом Handled (если Preview событие помечено как Handled=true,
                 // то и настоящее событие будет маршрутизировано с Handled=true)
                 if (routedEvent == Control.PreviewMouseDownEvent) {
+                    MouseButtonEventArgs mouseArgs = ( ( MouseButtonEventArgs ) args );
                     MouseButtonEventArgs argsNew = new MouseButtonEventArgs(
-                        args.Source, Control.MouseDownEvent,
-                        ((MouseButtonEventArgs) args).RawPosition,
-                        ((MouseButtonEventArgs)args).LeftButton,
-                        ((MouseButtonEventArgs)args).MiddleButton,
-                        ((MouseButtonEventArgs)args).RightButton,
-                        ((MouseButtonEventArgs)args).ChangedButton
-                        );
+                        args.Source, Control.MouseDownEvent, mouseArgs.RawPosition,
+                        mouseArgs.LeftButton, mouseArgs.MiddleButton, mouseArgs.RightButton,
+                        mouseArgs.ChangedButton
+                    );
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
                 if (routedEvent == Control.PreviewMouseUpEvent) {
+                    MouseButtonEventArgs mouseArgs = ( ( MouseButtonEventArgs ) args );
                     MouseButtonEventArgs argsNew = new MouseButtonEventArgs(
-                        args.Source, Control.MouseUpEvent,
-                        ((MouseButtonEventArgs)args).RawPosition,
-                        ((MouseButtonEventArgs)args).LeftButton,
-                        ((MouseButtonEventArgs)args).MiddleButton,
-                        ((MouseButtonEventArgs)args).RightButton,
-                        ((MouseButtonEventArgs)args).ChangedButton
-                        );
+                        args.Source, Control.MouseUpEvent, mouseArgs.RawPosition,
+                        mouseArgs.LeftButton, mouseArgs.MiddleButton, mouseArgs.RightButton,
+                        mouseArgs.ChangedButton
+                    );
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
                 if (routedEvent == Control.PreviewMouseMoveEvent) {
+                    MouseEventArgs mouseArgs = ( ( MouseEventArgs ) args );
                     MouseEventArgs argsNew = new MouseEventArgs(
-                        args.Source, Control.MouseMoveEvent,
-                        ((MouseEventArgs)args).RawPosition,
-                        ((MouseEventArgs)args).LeftButton,
-                        ((MouseEventArgs)args).MiddleButton,
-                        ((MouseEventArgs)args).RightButton
-                        );
+                        args.Source, Control.MouseMoveEvent, mouseArgs.RawPosition,
+                        mouseArgs.LeftButton, mouseArgs.MiddleButton, mouseArgs.RightButton
+                    );
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
@@ -474,23 +467,25 @@ namespace ConsoleFramework.Events {
 
                 if (routedEvent == Control.PreviewKeyDownEvent) {
                     KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyDownEvent);
-                    argsNew.UnicodeChar = ((KeyEventArgs) args).UnicodeChar;
-                    argsNew.bKeyDown = ((KeyEventArgs)args).bKeyDown;
-                    argsNew.dwControlKeyState = ((KeyEventArgs)args).dwControlKeyState;
-                    argsNew.wRepeatCount = ((KeyEventArgs)args).wRepeatCount;
-                    argsNew.wVirtualKeyCode = ((KeyEventArgs)args).wVirtualKeyCode;
-                    argsNew.wVirtualScanCode = ((KeyEventArgs)args).wVirtualScanCode;
+                    KeyEventArgs keyEventArgs = ( ( KeyEventArgs ) args );
+                    argsNew.UnicodeChar = keyEventArgs.UnicodeChar;
+                    argsNew.bKeyDown = keyEventArgs.bKeyDown;
+                    argsNew.dwControlKeyState = keyEventArgs.dwControlKeyState;
+                    argsNew.wRepeatCount = keyEventArgs.wRepeatCount;
+                    argsNew.wVirtualKeyCode = keyEventArgs.wVirtualKeyCode;
+                    argsNew.wVirtualScanCode = keyEventArgs.wVirtualScanCode;
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
                 if (routedEvent == Control.PreviewKeyUpEvent) {
                     KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyUpEvent);
-                    argsNew.UnicodeChar = ((KeyEventArgs)args).UnicodeChar;
-                    argsNew.bKeyDown = ((KeyEventArgs)args).bKeyDown;
-                    argsNew.dwControlKeyState = ((KeyEventArgs)args).dwControlKeyState;
-                    argsNew.wRepeatCount = ((KeyEventArgs)args).wRepeatCount;
-                    argsNew.wVirtualKeyCode = ((KeyEventArgs)args).wVirtualKeyCode;
-                    argsNew.wVirtualScanCode = ((KeyEventArgs)args).wVirtualScanCode;
+                    KeyEventArgs keyEventArgs = ( ( KeyEventArgs ) args );
+                    argsNew.UnicodeChar = keyEventArgs.UnicodeChar;
+                    argsNew.bKeyDown = keyEventArgs.bKeyDown;
+                    argsNew.dwControlKeyState = keyEventArgs.dwControlKeyState;
+                    argsNew.wRepeatCount = keyEventArgs.wRepeatCount;
+                    argsNew.wVirtualKeyCode = keyEventArgs.wVirtualKeyCode;
+                    argsNew.wVirtualScanCode = keyEventArgs.wVirtualScanCode;
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
@@ -549,7 +544,12 @@ namespace ConsoleFramework.Events {
             return control;
         }
 
+        /// <summary>
+        /// Adds specified routed event to event queue. This event will be processed in next pass.
+        /// </summary>
         internal void QueueEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            if (routedEvent != args.RoutedEvent)
+                throw new ArgumentException("Routed event doesn't match to routedEvent passed.", "args");
             this.eventsQueue.Enqueue(args);
         }
     }

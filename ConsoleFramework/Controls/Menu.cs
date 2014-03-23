@@ -324,12 +324,9 @@ namespace ConsoleFramework.Controls
             public override void Render(RenderingBuffer buffer)
             {
                 Attr borderAttrs = Colors.Blend(Color.Black, Color.Gray);
-                // устанавливаем прозрачными первую строку и первый столбец
-                // для столбца дополнительно включена прозрачность для событий мыши
 
-                // background
-                buffer.FillRectangle(0, 1, this.ActualWidth, this.ActualHeight - 1, ' ',
-                    borderAttrs);
+                // Background
+                buffer.FillRectangle(0, 1, ActualWidth, ActualHeight - 1, ' ', borderAttrs);
 
                 // Первые width пикселей первой строки - прозрачные, но события мыши не пропускают
                 // По нажатию на них мы закрываем всплывающее окно вручную
@@ -339,9 +336,7 @@ namespace ConsoleFramework.Controls
                 // перемещении нажатого курсора над этим местом
                 buffer.SetOpacityRect( width, 0, ActualWidth - width, 1, 6 );
 
-                //buffer.SetOpacityRect(0, 1, 1, ActualHeight - 1, 6);
-                if (shadow)
-                {
+                if (shadow) {
                     buffer.SetOpacity(0, ActualHeight - 1, 2 + 4);
                     buffer.SetOpacity(ActualWidth - 1, 1, 2 + 4);
                     buffer.SetOpacityRect(ActualWidth - 1, 2, 1, ActualHeight - 2, 1 + 4);
@@ -349,7 +344,6 @@ namespace ConsoleFramework.Controls
                     buffer.SetOpacityRect(1, ActualHeight - 1, ActualWidth - 1, 1, 3 + 4);
                     buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 1, 1, '\u2580',
                                           Attr.NO_ATTRIBUTES);
-                    //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );
                 }
 
                 RenderBorders( buffer, new Point(1, 1), new Point(ActualWidth - 3, ActualHeight - 2),

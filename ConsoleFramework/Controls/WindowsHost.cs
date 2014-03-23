@@ -53,9 +53,9 @@ namespace ConsoleFramework.Controls
                     }
                 }
 
+                // Activate matches menu item
                 KeyGesture match = map.Keys.FirstOrDefault( gesture => gesture.Matches( args ) );
                 if ( match != null ) {
-                    // todo : activate matches menu item
                     MenuItem menuItem = map[ match ];
                     List<MenuItem> path = new List< MenuItem >();
                     MenuItem currentItem = menuItem;
@@ -65,7 +65,7 @@ namespace ConsoleFramework.Controls
                     }
                     path.Reverse( );
 
-                    // todo : comment this
+                    // Open all menu items in path successively
                     int i = 0;
                     Action action = null;
                     action = new Action(() => {
@@ -162,14 +162,15 @@ namespace ConsoleFramework.Controls
         /// </summary>
         private void activateWindow(Window window) {
             //int index = Children.FindIndex(0, control => control == window);
-            int index = -1;
-            for ( int i = 0; i < Children.Count; i++ ) {
-                Control child = Children[ i ];
-                if ( child == window ) {
-                    index = i;
-                    break;
-                }
-            }
+            int index = Children.IndexOf( window );
+//            int index = -1;
+//            for ( int i = 0; i < Children.Count; i++ ) {
+//                Control child = Children[ i ];
+//                if ( child == window ) {
+//                    index = i;
+//                    break;
+//                }
+//            }
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
             //
@@ -383,18 +384,6 @@ namespace ConsoleFramework.Controls
                 initializeFocusOnActivatedWindow(topWindow);
                 Invalidate();
             }
-        }
-
-        /// <summary>
-        /// Утилитный метод, позволяющий для любого контрола определить ближайший WindowsHost,
-        /// в котором он размещается.
-        /// </summary>
-        public static WindowsHost FindWindowsHostParent( Control control ) {
-            Control tmp = control;
-            while ( tmp != null && !( tmp is WindowsHost ) ) {
-                tmp = tmp.Parent;
-            }
-            return ( WindowsHost ) ( tmp );
         }
     }
 }

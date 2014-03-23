@@ -191,7 +191,7 @@ namespace ConsoleFramework.Controls
             Window popup = new PopupWindow(Items, SelectedItemIndex, shadow,
                 ShownItemsCount != null ? ShownItemsCount.Value - 1 : ( int? ) null);
             Point popupCoord = TranslatePoint(this, new Point(0, 0),
-                WindowsHost.FindWindowsHostParent(this));
+                VisualTreeHelper.FindClosestParent<WindowsHost>( this ));
             popup.X = popupCoord.X;
             popup.Y = popupCoord.Y;
             popup.Width = shadow ? ActualWidth+1 : ActualWidth;

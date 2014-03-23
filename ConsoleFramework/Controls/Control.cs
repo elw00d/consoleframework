@@ -201,7 +201,13 @@ namespace ConsoleFramework.Controls
             EventManager.AddHandler(this, routedEvent, @delegate, handledEventsToo);
         }
 
+        /// <summary>
+        /// Addes specified routed event to event queue. This event will be processed in next pass.
+        /// </summary>
         public void RaiseEvent(RoutedEvent routedEvent, RoutedEventArgs args) {
+            if ( routedEvent == null ) throw new ArgumentNullException( "routedEvent" );
+            if ( args == null ) throw new ArgumentNullException( "args" );
+
             ConsoleApplication.Instance.EventManager.QueueEvent(routedEvent, args);
         }
 
@@ -238,6 +244,10 @@ namespace ConsoleFramework.Controls
             }
         }
         
+        /// <summary>
+        /// Name of control. If set, it should be unique for siblings to avoid
+        /// ambiguities when searching by name.
+        /// </summary>
         public string Name {
             get;
             set;
@@ -254,6 +264,9 @@ namespace ConsoleFramework.Controls
         /// </summary>
         private readonly List<Control> children = new List< Control >();
 
+        /// <summary>
+        /// Parent of current control in visual tree.
+        /// </summary>
         public Control Parent {
             get;
             private set;
@@ -372,15 +385,6 @@ namespace ConsoleFramework.Controls
             }
             private set {
                 layoutInfo.actualOffset = value;
-            }
-        }
-
-        internal LayoutValidity LayoutValidity {
-            get {
-                return layoutInfo.validity;
-            }
-            private set {
-                layoutInfo.validity = value;
             }
         }
 
@@ -555,9 +559,7 @@ namespace ConsoleFramework.Controls
         }
 
         public void Measure(Size availableSize) {
-            if (layoutInfo.validity != LayoutValidity.Nothing)
-                // nothing to do
-                return;
+            if (layoutInfo.validity != LayoutValidity.Nothing) return;
 
             layoutInfo.measureArgument = availableSize;
 
@@ -637,13 +639,14 @@ namespace ConsoleFramework.Controls
         
         /// <summary>
         /// Возвращает размеры, необходимые для размещения контрола вместе с его дочерними элементами.
-        /// <br/>
+        /// <para>
         /// Если возвращаемый размер меньше availableSize, то это может быть учтено родительским контролом,
         /// и он может выделить под контрол слот, меньший, чем планировалось изначально. А может быть
         /// проигнорировано, в этом случае контрол будет размещён в слоте, большем, чем собственно
         /// контролу необходимо. Контрол должен учитывать такой вариант развития событий (если его
         /// реальное размещение превышает ожидания).
-        /// <br/>
+        /// </para>
+        /// <para>
         /// Если возвращаемый размер больше availableSize, то опять же тут 2 варианта развития событий.
         /// В первом случае родительский контрол согласно логике размещения может попробовать найти
         /// дополнительное место для контрола и вызвать Measure повторно с бОльшим availableSize.
@@ -651,16 +654,17 @@ namespace ConsoleFramework.Controls
         /// или же места нет, - возвращённый desired size будет записан в unclipped desired size и на этапе
         /// arrange контрол будет размещен в желаемых размерах, однако реально столько места он занимать не
         /// будет, и в контексте родительского контрола его рендеринг будет обрезан.
-        /// <br/>
+        /// </para>
+        /// <para>
         /// Нельзя возвращать int.MaxValue в качестве width или height возвращаемого размера.
-        /// <br/>
+        /// </para>
+        /// <para>
         /// При реализации панелей необходимо в обязательном порядке вызвать Measure для всех дочерних
         /// элементов, причём количество вызовов может быть любым, но последний для каждого контрола
         /// вызов должен быть выполнен именно с теми размерами, которые реально будут использоваться
         /// при размещении элемента.
+        /// </para>
         /// </summary>
-        /// <param name="availableSize"></param>
-        /// <returns></returns>
         protected virtual Size MeasureOverride(Size availableSize) {
             return new Size(0, 0);
         }
@@ -670,31 +674,30 @@ namespace ConsoleFramework.Controls
         /// После выполнения метода будут установлены все свойства, необходимые для рендеринга контрола.
         /// Если Arrange вызывался с размерами, меньшими чем те, которые были возвращены контролом в 
         /// MeasureOverride, то рендеринг контрола будет обрезанным.
-        /// <br/>
+        /// <para>
         /// Если Arrange вызывался с размерами, превышающими запрошенные в MeasureOverride, то
         /// слот, выделенный контролу, будет больше ожидаемого, и то, как будет использовано дополнительное
         /// место - зависит от логики ArrangeOverride контрола. Если ArrangeOverride вернет старое значение
         /// (меньшее чем нынешний finalSize), то RenderSize будет меньше RenderSlotRect, и часть пространства,
         /// выделенного для размещения элемента управления, просто не будет им использоваться.
-        /// <br/>
+        /// </para>
+        /// <para>
         /// Внимание ! Если вы реализуете логику панели в коде метода ArrangeOverride, то очень важно то, что нужно следить за тем,
         /// с какими аргументами вы вызываете метод Arrange для дочерних элементов. Если вы передаёте туда размеры, превышающие те,
         /// которые будут возвращены из ArrangeOverride родительского элемента управления, то это будет означать следующее: родительский
         /// контрол дочернему выделит места больше чем имеется (или ровно всё место), и дочерний контрол при рендеринге будет
         /// полностью затирать родительский элемент управления. За рамки слота родительского контрола он, конечно, не залезет
         /// (обрежется системой отрисовки), но и родительскому контролу не даст ничего нарисовать.
+        /// </para>
         /// </summary>
-        /// <param name="finalRect"></param>
         public void Arrange(Rect finalRect) {
-            if (layoutInfo.validity != LayoutValidity.Nothing) {
-                return;
-            }
+            if (layoutInfo.validity != LayoutValidity.Nothing) return;
 
             if (Visibility == Visibility.Collapsed) {
                 RenderSlotRect = Rect.Empty;
                 RenderSize = Size.Empty;
                 layoutInfo.layoutClip = calculateLayoutClip();
-                LayoutValidity = LayoutValidity.MeasureAndArrange;
+                layoutInfo.validity = LayoutValidity.MeasureAndArrange;
                 return;
             }
 
@@ -763,7 +766,7 @@ namespace ConsoleFramework.Controls
 
             layoutInfo.layoutClip = calculateLayoutClip();
 
-            LayoutValidity = LayoutValidity.MeasureAndArrange;
+            layoutInfo.validity = LayoutValidity.MeasureAndArrange;
         }
         
         public HorizontalAlignment HorizontalAlignment {
@@ -944,7 +947,6 @@ namespace ConsoleFramework.Controls
 
             // Raise Invalidated event
             if (LayoutInvalidated != null) {
-                //LayoutInvalidated.Invoke(this, EventArgs.Empty);
                 affectedControls.Add(this);
             }
 

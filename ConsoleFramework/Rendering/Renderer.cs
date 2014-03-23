@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
 
@@ -219,21 +218,8 @@ namespace ConsoleFramework.Rendering
                         }
                     }
                 }
-                // определим соседей контрола, которые могут перекрывать его
-                IList<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
-
-                //int controlIndex = neighbors.FindIndex(0, control1 => control1 == control);
-                int controlIndex = -1;
-                for ( int i = 0; i < neighbors.Count; i++ ) {
-                    Control neighbor = neighbors[ i ];
-                    if ( neighbor == control ) {
-                        controlIndex = i;
-                        break;
-                    }
-                }
-
+                
                 if (control.Visibility == Visibility.Visible) {
-                    // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
                     if (affectedRect == new Rect(new Point(0, 0), control.RenderSize)) {
                         fullParentBuffer.ApplyChild(fullBuffer, control.ActualOffset,
                             control.RenderSize, control.RenderSlotRect, control.LayoutClip);
@@ -243,8 +229,14 @@ namespace ConsoleFramework.Rendering
                             affectedRect);
                     }
                 }
+
+                // определим соседей контрола, которые могут перекрывать его
+                IList<Control> neighbors = control.Parent.GetChildrenOrderedByZIndex();
+
                 // восстанавливаем изображение поверх обновленного контрола, если
                 // имеются контролы, лежащие выше по z-order
+                int controlIndex = neighbors.IndexOf(control);
+                // начиная с controlIndex + 1 в списке лежат контролы с z-index больше чем z-index текущего контрола
                 for (int i = controlIndex + 1; i < neighbors.Count; i++) {
                     Control neighbor = neighbors[i];
                     fullParentBuffer.ApplyChild(getOrCreateFullBufferForControl(neighbor),
