@@ -402,8 +402,6 @@ namespace ConsoleFramework
 		    renderer.RootElementRect = userRootElementRect.IsEmpty 
                 ? new Rect( canvas.Size ) : userRootElementRect;
 			renderer.RootElement = mainControl;
-			// Initialize default focus
-			focusManager.AfterAddElementToTree (mainControl);
 			//
 			mainControl.Invalidate ();
 			
@@ -729,8 +727,6 @@ namespace ConsoleFramework
             renderer.RootElementRect = userRootElementRect.IsEmpty 
                 ? new Rect( new Point(0, 0), canvas.Size ) : userRootElementRect;
 			renderer.RootElement = mainControl;
-            // Initialize default focus
-            focusManager.AfterAddElementToTree(mainControl);
             //
             mainControl.Invalidate();
             renderer.UpdateLayout();

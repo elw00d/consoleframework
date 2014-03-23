@@ -8,6 +8,7 @@ using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {
@@ -24,12 +25,13 @@ namespace ConsoleFramework.Controls
     /// Может быть самым первым контролом программы (окно не может, к примеру, оно может существовать
     /// только в рамках хоста окон).
     /// </summary>
+    [ContentProperty("Children")]
     public class Panel : Control {
         private void subscribe() {
         }
 
         public Panel() {
-            collection = new UIElementCollection(this);
+            children = new UIElementCollection(this);
             subscribe();
         }
 
@@ -52,12 +54,9 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private readonly UIElementCollection collection;
-        /// <summary>
-        /// todo : rename to Children
-        /// </summary>
-        public UIElementCollection Content {
-            get { return collection; }
+        private readonly UIElementCollection children;
+        public new UIElementCollection Children {
+            get { return children; }
         }
 
         public new void AddChild(Control control) {
@@ -65,8 +64,7 @@ namespace ConsoleFramework.Controls
         }
 
         public void ClearChilds( ) {
-            List< Control > children = new List< Control >(this.Children);
-            foreach ( var child in children ) {
+            foreach ( var child in new List< Control >(base.Children) ) {
                 RemoveChild(child);
             }
         }
@@ -80,7 +78,7 @@ namespace ConsoleFramework.Controls
             if (orientation == Orientation.Vertical) {
                 int totalHeight = 0;
                 int maxWidth = 0;
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     child.Measure(availableSize);
                     // todo : fix if child returns big size > availableSize
                     totalHeight += child.DesiredSize.Height;
@@ -88,20 +86,20 @@ namespace ConsoleFramework.Controls
                         maxWidth = child.DesiredSize.Width;
                     }
                 }
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     child.Measure(new Size(maxWidth, child.DesiredSize.Height));
                 }
                 return new Size(maxWidth, totalHeight);
             } else {
                 int totalWidth = 0;
                 int maxHeight = 0;
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     child.Measure(availableSize);
                     totalWidth += child.DesiredSize.Width;
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;
                 }
-                foreach (Control child in Children)
+                foreach (Control child in base.Children)
                     child.Measure(new Size(child.DesiredSize.Width, maxHeight));
                 return new Size(totalWidth, maxHeight);
             }
@@ -111,11 +109,11 @@ namespace ConsoleFramework.Controls
             if (orientation == Orientation.Vertical) {
                 int totalHeight = 0;
                 int maxWidth = 0;
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     if (child.DesiredSize.Width > maxWidth)
                         maxWidth = child.DesiredSize.Width;
                 }
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     int y = totalHeight;
                     int height = child.DesiredSize.Height;
                     child.Arrange(new Rect(0, y, maxWidth, height));
@@ -125,11 +123,11 @@ namespace ConsoleFramework.Controls
             } else {
                 int totalWidth = 0;
                 int maxHeight = 0;
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;
                 }
-                foreach (Control child in Children) {
+                foreach (Control child in base.Children) {
                     int x = totalWidth;
                     int width = child.DesiredSize.Width;
                     child.Arrange(new Rect(x, 0, width, maxHeight));

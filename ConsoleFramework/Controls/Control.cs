@@ -286,7 +286,6 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Insert(index, child);
             child.Parent = this;
-            ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             child.OnParentChanged(  );
             child.Invalidate(  );
             Invalidate();
@@ -299,7 +298,6 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Add(child);
             child.Parent = this;
-            ConsoleApplication.Instance.FocusManager.AfterAddElementToTree(child);
             child.OnParentChanged();
             child.Invalidate();
             Invalidate();

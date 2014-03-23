@@ -112,10 +112,6 @@ namespace ConsoleFramework.Events
             return true;
         }
 
-        internal void AfterAddElementToTree(Control control) {
-            // todo : решить, нужно ли что-либо выполнять в этом месте
-        }
-
         private Control currentScope;
         /// <summary>
         /// Текущая область фокуса
@@ -214,13 +210,10 @@ namespace ConsoleFramework.Events
                 if ( scope.StoredFocus != null ) {
                     // проверяем, не удалён ли StoredFocus и является ли он Visible & Focusable
                     if ( !VisualTreeHelper.IsConnectedToRoot( scope.StoredFocus ) ) {
-                        // todo : log warn about disconnected control
                         reinitFocus = true;
                     } else if ( scope.StoredFocus.Visibility != Visibility.Visible ) {
-                        // todo : log warn about invizible control to be focused
                         reinitFocus = true;
                     } else if ( !scope.StoredFocus.Focusable ) {
-                        // todo : log warn
                         reinitFocus = true;
                     }
                 } else {

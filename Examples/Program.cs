@@ -57,7 +57,6 @@ namespace Examples
             using (StreamReader reader = new StreamReader(stream))
             {
                 string result = reader.ReadToEnd();
-                // todo : try to specify dataContext
                 MyDataContext dataContext = new MyDataContext( );
                 dataContext.Str = "Введите заголовок";
                 createdFromXaml = XamlParser.CreateFromXaml<Window>(result, dataContext, new List<string>()

@@ -324,7 +324,6 @@ namespace ConsoleFramework.Events {
                     );
                     eventsQueue.Enqueue( args );
                 }
-                // todo : add double click handling
             }
             if (inputRecord.EventType == EventType.KEY_EVENT) {
                 KEY_EVENT_RECORD keyEvent = inputRecord.KeyEvent;
@@ -486,7 +485,6 @@ namespace ConsoleFramework.Events {
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
-                // todo : add double click support
 
                 if (routedEvent == Control.PreviewKeyDownEvent) {
                     KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyDownEvent);

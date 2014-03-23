@@ -41,6 +41,7 @@ namespace ConsoleFramework.Events {
     public class MouseButtonEventArgs : MouseEventArgs
     {
         private readonly MouseButton button;
+        private readonly int clickCount;
 
         public MouseButtonEventArgs(object source, RoutedEvent routedEvent)
             : base(source, routedEvent) {
@@ -49,9 +50,10 @@ namespace ConsoleFramework.Events {
         public MouseButtonEventArgs(object source, RoutedEvent routedEvent, Point rawPosition,
                                     MouseButtonState leftButton, MouseButtonState middleButton,
                                     MouseButtonState rightButton,
-                                    MouseButton button)
+                                    MouseButton button, int clickCount = 1)
             : base(source, routedEvent, rawPosition, leftButton, middleButton, rightButton) {
             this.button = button;
+            this.clickCount = clickCount;
         }
 
         public MouseButtonState ButtonState {
@@ -69,9 +71,11 @@ namespace ConsoleFramework.Events {
         }
 
         public MouseButton ChangedButton {
-            get {
-                return button;
-            }
+            get { return button; }
+        }
+
+        public int ClickCount {
+            get { return clickCount; }
         }
     }
 
