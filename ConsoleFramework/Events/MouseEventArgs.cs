@@ -18,9 +18,11 @@ namespace ConsoleFramework.Events {
 
     public class MouseWheelEventArgs : MouseEventArgs
     {
-        // Properties
-        public MouseWheelEventArgs(object source, RoutedEvent routedEvent)
-            : base(source, routedEvent) {
+        public MouseWheelEventArgs(object source, RoutedEvent routedEvent, Point rawPosition,
+                                    MouseButtonState leftButton, MouseButtonState middleButton,
+                                    MouseButtonState rightButton, int delta)
+            : base(source, routedEvent, rawPosition, leftButton, middleButton, rightButton) {
+            Delta = delta;
         }
 
         public int Delta {

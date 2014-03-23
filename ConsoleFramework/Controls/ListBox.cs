@@ -44,6 +44,16 @@ namespace ConsoleFramework.Controls
             AddHandler( KeyDownEvent, new KeyEventHandler(OnKeyDown) );
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
             AddHandler( MouseMoveEvent, new MouseEventHandler(OnMouseMove));
+            AddHandler( MouseWheelEvent, new MouseWheelEventHandler(onMouseWheel) );
+        }
+
+        private void onMouseWheel( object sender, MouseWheelEventArgs args ) {
+            if ( args.Delta > 0) {
+                pageUpCore( 2 );
+            } else {
+                pageDownCore( 2 );
+            }
+            args.Handled = true;
         }
 
         private void OnMouseMove( object sender, MouseEventArgs args ) {
@@ -66,36 +76,44 @@ namespace ConsoleFramework.Controls
             args.Handled = true;
         }
 
+        private void pageUpCore( int? pageSize ) {
+            if ( pageSize == null ) {
+                if ( SelectedItemIndex != 0 ) {
+                    SelectedItemIndex = 0;
+                    Invalidate( );
+                }
+            } else {
+                if ( SelectedItemIndex != 0 ) {
+                    SelectedItemIndex = Math.Max(0, SelectedItemIndex - pageSize.Value);
+                    Invalidate(  );
+                }
+            }
+        }
+
+        private void pageDownCore( int? pageSize ) {
+            if ( pageSize == null ) {
+                if ( SelectedItemIndex != items.Count - 1 ) {
+                    SelectedItemIndex = items.Count - 1;
+                    Invalidate( );
+                }
+            } else {
+                if ( SelectedItemIndex != items.Count - 1 ) {
+                    SelectedItemIndex = Math.Min(items.Count - 1, SelectedItemIndex + pageSize.Value);
+                    Invalidate(  );
+                }
+            }
+        }
+
         private void OnKeyDown( object sender, KeyEventArgs args ) {
             if ( items.Count == 0 ) {
                 args.Handled = true;
                 return;
             }
             if ( args.wVirtualKeyCode == VirtualKeys.PageUp ) {
-                if ( PageSize == null ) {
-                    if ( SelectedItemIndex != 0 ) {
-                        SelectedItemIndex = 0;
-                        Invalidate( );
-                    }
-                } else {
-                    if ( SelectedItemIndex != 0 ) {
-                        SelectedItemIndex = Math.Max( 0, SelectedItemIndex - PageSize.Value );
-                        Invalidate(  );
-                    }
-                }
+                pageUpCore( PageSize );
             }
             if ( args.wVirtualKeyCode == VirtualKeys.PageDown ) {
-                if ( PageSize == null ) {
-                    if ( SelectedItemIndex != items.Count - 1 ) {
-                        SelectedItemIndex = items.Count - 1;
-                        Invalidate( );
-                    }
-                } else {
-                    if ( SelectedItemIndex != items.Count - 1 ) {
-                        SelectedItemIndex = Math.Min( items.Count - 1, SelectedItemIndex + PageSize.Value );
-                        Invalidate(  );
-                    }
-                }
+                pageDownCore( PageSize );
             }
             if (args.wVirtualKeyCode == VirtualKeys.Up) {
                 if ( SelectedItemIndex == 0 )

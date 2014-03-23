@@ -311,12 +311,25 @@ namespace ConsoleFramework.Events {
                     lastMiddleMouseButtonState = middleMouseButtonState;
                     lastRightMouseButtonState = rightMouseButtonState;
                 }
-                // todo : add whelled and double click handling
-                //Debug.WriteLine(mouseEvent.dwEventFlags);
+
+                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_WHEELED) {
+                    MouseWheelEventArgs args = new MouseWheelEventArgs(
+                        ConsoleApplication.Instance.FocusManager.FocusedElement,
+                        Control.PreviewMouseWheelEvent,
+                        // Because rawPosition in this event is incorrectly set by Windows
+                        new Point(0, 0),
+                        lastLeftMouseButtonState, lastMiddleMouseButtonState, 
+                        lastRightMouseButtonState,
+                        mouseEvent.dwButtonState > 0 ? 1 : -1
+                    );
+                    eventsQueue.Enqueue( args );
+                }
+                // todo : add double click handling
             }
             if (inputRecord.EventType == EventType.KEY_EVENT) {
                 KEY_EVENT_RECORD keyEvent = inputRecord.KeyEvent;
-                KeyEventArgs eventArgs = new KeyEventArgs(ConsoleApplication.Instance.FocusManager.FocusedElement,
+                KeyEventArgs eventArgs = new KeyEventArgs(
+                    ConsoleApplication.Instance.FocusManager.FocusedElement,
                     keyEvent.bKeyDown ? Control.PreviewKeyDownEvent : Control.PreviewKeyUpEvent);
                 eventArgs.UnicodeChar = keyEvent.UnicodeChar;
                 eventArgs.bKeyDown = keyEvent.bKeyDown;
@@ -463,7 +476,17 @@ namespace ConsoleFramework.Events {
                     argsNew.Handled = args.Handled;
                     eventsQueue.Enqueue(argsNew);
                 }
-                // todo : add mouse wheel support
+                if ( routedEvent == Control.PreviewMouseWheelEvent ) {
+                    MouseWheelEventArgs oldArgs = ((MouseWheelEventArgs)args);
+                    MouseEventArgs argsNew = new MouseWheelEventArgs(
+                        args.Source, Control.MouseWheelEvent, oldArgs.RawPosition,
+                        oldArgs.LeftButton, oldArgs.MiddleButton, oldArgs.RightButton,
+                        oldArgs.Delta
+                    );
+                    argsNew.Handled = args.Handled;
+                    eventsQueue.Enqueue(argsNew);
+                }
+                // todo : add double click support
 
                 if (routedEvent == Control.PreviewKeyDownEvent) {
                     KeyEventArgs argsNew = new KeyEventArgs(args.Source, Control.KeyDownEvent);
