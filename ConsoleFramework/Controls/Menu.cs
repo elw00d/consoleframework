@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Binding;
 using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -177,7 +176,6 @@ namespace ConsoleFramework.Controls
         private void onPopupClosed( object sender, EventArgs eventArgs ) {
             assert( expanded );
             expanded = false;
-            //popup = null;
         }
 
         public string Title { get; set; }
@@ -204,28 +202,93 @@ namespace ConsoleFramework.Controls
 
         protected override Size MeasureOverride(Size availableSize) {
             int length = 2;
-            if ( !string.IsNullOrEmpty( Title ) ) length += Title.Length;
+            if ( !string.IsNullOrEmpty( Title ) ) length += getTitleLength( Title );
             if ( !string.IsNullOrEmpty( TitleRight ) ) length += TitleRight.Length;
             if ( !string.IsNullOrEmpty( Title ) && !string.IsNullOrEmpty( TitleRight ) )
                 length++;
             return new Size(length, 1);
         }
 
+        /// <summary>
+        /// Counts length of string to be rendered with underscore prefixes on.
+        /// </summary>
+        private static int getTitleLength( String title ) {
+            bool underscore = false;
+            int len = 0;
+            foreach ( char c in title ) {
+                if ( underscore ) {
+                    len++;
+                    underscore = false;
+                } else {
+                    if ( c == '_' ) {
+                        underscore = true;
+                    } else {
+                        len++;
+                    }
+                }
+            }
+            return len;
+        }
+
         public override void Render(RenderingBuffer buffer) {
             Attr captionAttrs;
-            if (HasFocus || this.expanded)
-                captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
-            else
-                captionAttrs = Colors.Blend(Color.Black, Color.Gray);
+            Attr specialAttrs;
+            if ( HasFocus || this.expanded ) {
+                captionAttrs = Colors.Blend( Color.Black, Color.DarkGreen );
+                specialAttrs = Colors.Blend( Color.DarkRed, Color.DarkGreen );
+            } else {
+                captionAttrs = Colors.Blend( Color.Black, Color.Gray );
+                specialAttrs = Colors.Blend( Color.DarkRed, Color.Gray );
+            }
             if ( disabled )
                 captionAttrs = Colors.Blend( Color.DarkGray, Color.Gray );
 
             buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', captionAttrs );
-            if (null != Title)
-                RenderString( Title , buffer, 1, 0, ActualWidth, captionAttrs );
+            if ( null != Title ) {
+                renderString( Title, buffer, 1, 0, ActualWidth, captionAttrs, 
+                    Disabled ? captionAttrs : specialAttrs );
+            }
             if ( null != TitleRight )
                 RenderString( TitleRight, buffer, ActualWidth - TitleRight.Length - 1, 0,
                               TitleRight.Length, captionAttrs );
+        }
+
+        /// <summary>
+        /// Renders string using attr, but if character is prefixed with underscore,
+        /// symbol will use specialAttrs instead. To render underscore pass two underscores.
+        /// Example: "_File" renders File when 'F' is rendered using specialAttrs.
+        /// </summary>
+        private static int renderString( string s, RenderingBuffer buffer,
+                                         int x, int y, int maxWidth, Attr attr,
+                                         Attr specialAttr) {
+            bool underscore = false;
+            int j = 0;
+            for ( int i = 0; i < s.Length && j < maxWidth; i++ ) {
+                char c;
+                if ( underscore ) {
+                    c = s[ i ];
+                } else {
+                    if ( s[ i ] == '_' ) {
+                        underscore = true;
+                        continue;
+                    } else {
+                        c = s[ i ];
+                    }
+                }
+
+                Attr a;
+                if ( j + 2 >= maxWidth && j >= 2 && s.Length > maxWidth ) {
+                    c = '.';
+                    a = attr;
+                } else {
+                    a = underscore ? specialAttr : attr;
+                }
+                buffer.SetPixel( x + j, y, c, a );
+
+                j++;
+                underscore = false;
+            }
+            return j;
         }
 
         internal class Popup : Window

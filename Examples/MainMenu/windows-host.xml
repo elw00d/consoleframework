@@ -2,59 +2,61 @@
   <WindowsHost.MainMenu>
     <Menu HorizontalAlignment="Center">
       <Menu.Items>
-        <MenuItem Title="File" Type="Submenu" Gesture="Alt+F">
-          <MenuItem Title="New"/>
-          <MenuItem Title="New from template..."/>
-          <MenuItem Title="Open" TitleRight="F3"/>
-          <MenuItem Title="Reload"/>
-          <MenuItem Title="Save"/>
-          <MenuItem Title="Save as..."/>
-          <MenuItem Title="Save all" Disabled="True"/>
+        <MenuItem Title="_File" Type="Submenu" Gesture="Alt+F">
+          <MenuItem Title="_New"/>
+          <MenuItem Title="New from _template..."/>
+          <MenuItem Title="_Open" TitleRight="F3"/>
+          <MenuItem Title="_Reload"/>
+          <MenuItem Title="_Save"/>
+          <MenuItem Title="Save _as..."/>
+          <MenuItem Title="Save a_ll" Disabled="True"/>
           <Separator/>
-          <MenuItem Title="Print"/>
-          <MenuItem Title="Print setup"/>
+          <MenuItem Title="_Print"/>
+          <MenuItem Title="Print s_etup"/>
           <Separator/>
-          <MenuItem Title="Change dir..."/>
-          <MenuItem Title="Command shell"/>
-          <MenuItem Title="Exit"/>
+          <MenuItem Title="_Change dir..."/>
+          <MenuItem Title="Comman_d shell"/>
+          <MenuItem Title="E_xit" TitleRight="Alt+X"/>
         </MenuItem>
-        <MenuItem Title="Edit" Type="Submenu">
-          <MenuItem Title="Undo" Disabled="True"/>
-          <MenuItem Title="Redo" Disabled="True"/>
+        <MenuItem Title="_Edit" Type="Submenu">
+          <MenuItem Title="_Undo"/>
+          <MenuItem Title="_Redo"/>
           <Separator/>
-          <MenuItem Title="Cut" Disabled="True"/>
-          <MenuItem Title="Copy" Disabled="True"/>
+          <MenuItem Title="Cu_t"/>
+          <MenuItem Title="_Copy"/>
           <MenuItem Title="Paste" Disabled="True"/>
-          <MenuItem Title="Clear" Disabled="True"/>
-          <MenuItem Title="Select All" Disabled="True"/>
-          <MenuItem Title="Unselect" Disabled="True"/>
+          <MenuItem Title="C_lear"/>
+          <MenuItem Title="Select _All" />
+          <MenuItem Title="U_nselect"/>
           <Separator/>
-          <MenuItem Title="Show clipboard"/>
+          <MenuItem Title="_Show clipboard"/>
           <Separator/>
-          <MenuItem Title="Copy to Windows"/>
-          <MenuItem Title="Copy from Windows"/>
+          <MenuItem Title="Cop_y to Windows"/>
+          <MenuItem Title="Copy from _Windows"/>
         </MenuItem>
-        <MenuItem Type="Submenu" Title="About">
+        <MenuItem Type="Submenu" Title="_Options">
           <MenuItem.Items>
-            <MenuItem Title="Mode"></MenuItem>
-            <MenuItem Title="Compiler..."></MenuItem>
-            <MenuItem Title="Memory sizes..."></MenuItem>
-            <MenuItem Title="Linker..."></MenuItem>
-            <MenuItem Title="Debugger..."></MenuItem>
-            <MenuItem Title="Directories..."></MenuItem>
+            <MenuItem Title="Mode..." TitleRight="Debug"></MenuItem>
+            <MenuItem Title="_Compiler..."></MenuItem>
+            <MenuItem Title="_Memory sizes..."></MenuItem>
+            <MenuItem Title="_Linker..."></MenuItem>
+            <MenuItem Title="De_bugger..."></MenuItem>
+            <MenuItem Title="_Directories..."></MenuItem>
+            <MenuItem Title="Bro_wser..."></MenuItem>
+            <MenuItem Title="_Tools..."></MenuItem>
             <Separator></Separator>
-            <MenuItem Title="Environment ..." Type="Submenu" Gesture="Ctrl+E">
-              <MenuItem Title="Preferences..."></MenuItem>
-              <MenuItem Title="Editor..."></MenuItem>
-              <MenuItem Title="CodeComplete..."></MenuItem>
-              <MenuItem Title="CodeTemplates..."></MenuItem>
-              <MenuItem Title="Desktop..."></MenuItem>
-              <MenuItem Title="Keyboard &amp; mouse"></MenuItem>
+            <MenuItem Title="_Environment ..." Type="Submenu" Gesture="Ctrl+E">
+              <MenuItem Title="_Preferences..."></MenuItem>
+              <MenuItem Title="_Editor..."></MenuItem>
+              <MenuItem Title="Code_Complete..."></MenuItem>
+              <MenuItem Title="Code_Templates..."></MenuItem>
+              <MenuItem Title="_Desktop..."></MenuItem>
+              <MenuItem Title="Keyboard &amp; _mouse..."></MenuItem>
             </MenuItem>
             <Separator></Separator>
-            <MenuItem Title="Open..."></MenuItem>
-            <MenuItem Title="Save"></MenuItem>
-            <MenuItem Title="Save as..."></MenuItem>
+            <MenuItem Title="_Open..."></MenuItem>
+            <MenuItem Title="_Save"></MenuItem>
+            <MenuItem Title="Save _as..."></MenuItem>
           </MenuItem.Items>
         </MenuItem>
         <MenuItem Title="Go"/>
