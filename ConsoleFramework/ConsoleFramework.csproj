@@ -57,6 +57,8 @@
     <Compile Include="Controls\UIElementCollection.cs" />
     <Compile Include="Core\ThicknessConverter.cs" />
     <Compile Include="Core\VisualTreeHelper.cs" />
+    <Compile Include="Events\ICommand.cs" />
+    <Compile Include="Events\ICommandSource.cs" />
     <Compile Include="Events\KeyboardFocusChangedEventArgs.cs" />
     <Compile Include="Events\KeyConverter.cs" />
     <Compile Include="Events\KeyEventArgs.cs" />
