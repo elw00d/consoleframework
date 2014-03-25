@@ -1,0 +1,12 @@
+﻿<WindowsHost>
+  <WindowsHost.MainMenu>
+    <Menu HorizontalAlignment="Center">
+      <Menu.Items>
+        <MenuItem Title="_Commands" Type="Submenu" Gesture="Alt+C">
+          <MenuItem Title="_Run command" TitleRight="Ctrl+R" Gesture="Ctrl+R"
+                    Command="{Binding MyCommand, Mode=OneTime}"/>
+        </MenuItem>
+      </Menu.Items>
+    </Menu>
+  </WindowsHost.MainMenu>
+</WindowsHost>

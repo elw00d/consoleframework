@@ -42,9 +42,11 @@ namespace Examples.Commands
         }
 
         public static void Main(string[] args) {
-            WindowsHost windowsHost = new WindowsHost();
+            DataContext dataContext = new DataContext();
+            WindowsHost windowsHost = (WindowsHost)ConsoleApplication.LoadFromXaml(
+                "Examples.Commands.windows-host.xml", dataContext);
             Window mainWindow = (Window)ConsoleApplication.LoadFromXaml(
-                "Examples.Commands.main.xml", new DataContext());
+                "Examples.Commands.main.xml", dataContext);
             windowsHost.Show(mainWindow);
             ConsoleApplication.Instance.Run(windowsHost);
         }
