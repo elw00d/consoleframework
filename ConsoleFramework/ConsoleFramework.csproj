@@ -95,6 +95,7 @@
     <Compile Include="Events\RoutedEvent.cs" />
     <Compile Include="Xaml\BindingMarkupExtension.cs" />
     <Compile Include="Xaml\ConvertMarkupExtension.cs" />
+    <Compile Include="Xaml\NotBooleanConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Controls\LayoutSystem.txt" />

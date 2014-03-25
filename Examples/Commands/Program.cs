@@ -9,21 +9,10 @@ namespace Examples.Commands
     class Program
     {
         private class MyCommand : ICommand {
-            private readonly DataContext dataContext;
-            public MyCommand(DataContext dataContext) {
-                this.dataContext = dataContext;
-                dataContext.PropertyChanged += (sender, args) => {
-                    if (args.PropertyName == "ButtonEnabled") {
-                        if (CanExecuteChanged != null)
-                            CanExecuteChanged.Invoke(this, EventArgs.Empty);
-                    }
-                };
-            }
-
             public event EventHandler CanExecuteChanged;
             
             public bool CanExecute(object parameter) {
-                return dataContext.ButtonEnabled;
+                return true;
             }
 
             public void Execute(object parameter) {
@@ -34,21 +23,8 @@ namespace Examples.Commands
         }
 
         private class DataContext : INotifyPropertyChanged {
-            private bool buttonEnabled;
-            public bool ButtonEnabled {
-                get {
-                    return buttonEnabled;
-                }
-                set {
-                    if (buttonEnabled != value) {
-                        buttonEnabled = value;
-                        raisePropertyChanged("ButtonEnabled");
-                    }
-                }
-            }
-
             public DataContext() {
-                myCommand = new MyCommand(this);
+                myCommand = new MyCommand();
             }
 
             private readonly ICommand myCommand;

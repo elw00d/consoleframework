@@ -98,8 +98,7 @@ namespace Binding
         }
 
         /// <summary>
-        /// Converter used for values conversion between Source and Target if
-        /// declared properties types are different.
+        /// Converter used for values conversion between Source and Target.
         /// </summary>
         public IBindingConverter Converter {
             get {return converter;}

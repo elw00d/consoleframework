@@ -1,6 +1,9 @@
-﻿<Window>
+﻿<Window xmlns:x="http://consoleframework.org/xaml.xsd">
+  <Window.Resources>
+    <NotBooleanConverter x:Key="1" x:Id="notConverter"/>
+  </Window.Resources>
   <Panel>
-    <CheckBox Name="checkbox" Caption="Enable button" Checked="{Binding Path=ButtonEnabled}"></CheckBox>
-    <Button Disabled="True" Command="{Binding Path=MyCommand, Mode=OneTime}">BlaBlaBla</Button>
+    <CheckBox x:Id="ch" Name="checkbox" Caption="Enable button" Checked="False"></CheckBox>
+    <Button Disabled="{Binding Checked, Source={Ref ch}, Converter={Ref notConverter}}" Command="{Binding MyCommand, Mode=OneTime}">BlaBlaBla</Button>
   </Panel>
 </Window>

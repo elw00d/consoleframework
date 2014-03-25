@@ -9,9 +9,18 @@ namespace ConsoleFramework.Xaml
     [MarkupExtension("Binding")]
     class BindingMarkupExtension : IMarkupExtension
     {
+        public BindingMarkupExtension() {
+        }
+
+        public BindingMarkupExtension(string path) {
+            Path = path;
+        }
+
         public String Path { get; set; }
 
         public String Mode { get; set; }
+
+        public Object Source { get; set; }
 
         /// <summary>
         /// Converter to be used.
@@ -19,7 +28,8 @@ namespace ConsoleFramework.Xaml
         public IBindingConverter Converter { get; set; }
 
         public object ProvideValue(IMarkupExtensionContext context) {
-            if ( null != context.DataContext && context.DataContext is INotifyPropertyChanged) {
+            Object realSource = Source ?? context.DataContext;
+            if (null != realSource && realSource is INotifyPropertyChanged) {
                 BindingMode mode = BindingMode.Default;
                 if ( Path != null ) {
                     Type enumType = typeof ( BindingMode );
@@ -32,7 +42,7 @@ namespace ConsoleFramework.Xaml
                     }
                 }
                 BindingBase binding = new BindingBase( context.Object, context.PropertyName,
-                    (INotifyPropertyChanged) context.DataContext, Path, mode);
+                    (INotifyPropertyChanged) realSource, Path, mode);
                 if ( Converter != null )
                     binding.Converter = Converter;
                 binding.Bind(  );
