@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Events;
+﻿using System;
+using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 
 namespace ConsoleFramework.Controls
@@ -6,7 +7,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Base class for buttons and toggle buttons (checkboxes and radio buttons).
     /// </summary>
-    public abstract class ButtonBase : Control
+    public abstract class ButtonBase : Control, ICommandSource
     {
         /// <summary>
         /// Is button in clicking mode (when mouse pressed but not released yet).
@@ -18,6 +19,20 @@ namespace ConsoleFramework.Controls
         /// </summary>
         protected bool pressed;
 
+        private bool disabled;
+        public bool Disabled {
+            get {
+                return disabled;
+            }
+            set {
+                if (disabled != value) {
+                    disabled = value;
+                    Focusable = !disabled;
+                    Invalidate();
+                }
+            }
+        }
+        
         public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click", 
             RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Button));
 
@@ -40,8 +55,11 @@ namespace ConsoleFramework.Controls
         }
 
         private void Button_KeyDown( object sender, KeyEventArgs args ) {
+            if (Disabled) return;
+
             if ( args.wVirtualKeyCode == VirtualKeys.Space ) { // VK_SPACE
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                args.Handled = true;
             }
         }
 
@@ -64,7 +82,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void Button_OnMouseDown(object sender, MouseButtonEventArgs args) {
-            if (!clicking) {
+            if (!clicking && !Disabled) {
                 clicking = true;
                 pressed = true;
                 ConsoleApplication.Instance.BeginCaptureInput(this);
@@ -74,7 +92,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void Button_OnMouseUp(object sender, MouseButtonEventArgs args) {
-            if (clicking) {
+            if (clicking && !Disabled) {
                 clicking = false;
                 if (pressed) {
                     pressed = false;
@@ -82,10 +100,49 @@ namespace ConsoleFramework.Controls
                 }
                 if (HitTest(args.RawPosition)) {
                     RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                    if (command != null && command.CanExecute(CommandParameter)) {
+                        command.Execute(CommandParameter);
+                    }
                 }
                 ConsoleApplication.Instance.EndCaptureInput(this);
                 args.Handled = true;
             }
+        }
+
+        private ICommand command;
+        public ICommand Command {
+            get {
+                return command;
+            }
+            set {
+                if (command != value) {
+                    if (command != null) {
+                        command.CanExecuteChanged -= onCommandCanExecuteChanged;
+                    }
+                    command = value;
+                    command.CanExecuteChanged += onCommandCanExecuteChanged;
+
+                    refreshCanExecute();
+                }
+            }
+        }
+
+        private void onCommandCanExecuteChanged(object sender, EventArgs args) {
+            refreshCanExecute();
+        }
+
+        private void refreshCanExecute() {
+            if (command == null) {
+                this.Disabled = false;
+                return;
+            }
+
+            this.Disabled = !command.CanExecute(CommandParameter);
+        }
+
+        public object CommandParameter {
+            get;
+            set;
         }
     }
 }

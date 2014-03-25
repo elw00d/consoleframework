@@ -1,6 +1,4 @@
-﻿using ConsoleFramework.Controls;
-
-namespace ConsoleFramework.Events
+﻿namespace ConsoleFramework.Events
 {
     ///<summary>
     /// An interface for classes that know how to invoke a Command.
@@ -10,26 +8,18 @@ namespace ConsoleFramework.Events
         /// <summary>
         /// The command that will be executed when the class is "invoked."
         /// Classes that implement this interface should enable or disable based on the command's CanExecute return value.
-        /// The property may be implemented as read-write if desired.
         /// </summary>
         ICommand Command {
             get;
+            set;
         }
 
         /// <summary>
         /// The parameter that will be passed to the command when executing the command.
-        /// The property may be implemented as read-write if desired.
         /// </summary>
         object CommandParameter {
             get;
-        }
-
-        /// <summary>
-        /// An element that an implementor may wish to target as the destination for the command.
-        /// The property may be implemented as read-write if desired.
-        /// </summary>
-        Control CommandTarget {
-            get;
+            set;
         }
     }
 }

@@ -35,7 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Examples.Program</StartupObject>
+    <StartupObject>Examples.Commands.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AsyncUiUpdate\Program.cs" />
     <Compile Include="CheckBoxes\Program.cs" />
+    <Compile Include="Commands\Program.cs" />
     <Compile Include="MainMenu\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -87,6 +88,9 @@
     <EmbeddedResource Include="MainMenu\windows-host.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Commands\main.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

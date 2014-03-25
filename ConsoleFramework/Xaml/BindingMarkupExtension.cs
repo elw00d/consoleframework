@@ -27,6 +27,7 @@ namespace ConsoleFramework.Xaml
                     for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
                         if ( enumNames[ i ] == Mode ) {
                             mode = ( BindingMode ) Enum.ToObject( enumType, enumType.GetEnumValues( ).GetValue( i ) );
+                            break;
                         }
                     }
                 }

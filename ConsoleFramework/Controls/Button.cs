@@ -2,9 +2,11 @@
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {
+    [ContentProperty("Caption")]
     public class Button : ButtonBase {
         public Button() {
         }
@@ -29,11 +31,15 @@ namespace ConsoleFramework.Controls
         
         public override void Render(RenderingBuffer buffer) {
             Attr captionAttrs;
-            if (HasFocus)
-                captionAttrs = Colors.Blend(Color.White, Color.DarkGreen);
-            else
-                captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
-            
+            if (Disabled) {
+                captionAttrs = Colors.Blend(Color.Gray, Color.DarkGray);
+            } else {
+                if (HasFocus)
+                    captionAttrs = Colors.Blend(Color.White, Color.DarkGreen);
+                else
+                    captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
+            }
+
             if (pressed) {
                 buffer.FillRectangle(1, 0, ActualWidth - 1, ActualHeight - 1, ' ', captionAttrs);
                 buffer.SetOpacityRect(0, 0, 1, ActualHeight, 3);

@@ -1,0 +1,6 @@
+﻿<Window>
+  <Panel>
+    <CheckBox Name="checkbox" Caption="Enable button" Checked="{Binding Path=ButtonEnabled}"></CheckBox>
+    <Button Disabled="True" Command="{Binding Path=MyCommand, Mode=OneTime}">BlaBlaBla</Button>
+  </Panel>
+</Window>

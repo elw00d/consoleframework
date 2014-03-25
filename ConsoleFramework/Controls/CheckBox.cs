@@ -39,6 +39,7 @@ namespace ConsoleFramework.Controls
             set {
                 if ( isChecked != value ) {
                     isChecked = value;
+                    RaisePropertyChanged("Checked");
                     Invalidate(  );
                 }
             }
