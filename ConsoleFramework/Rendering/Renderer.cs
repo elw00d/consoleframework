@@ -254,6 +254,9 @@ namespace ConsoleFramework.Rendering
                 }
                 return applyChangesToCanvas(control.Parent, parentAffectedRect);
             } else {
+                if (control != RootElement)
+                    throw new InvalidOperationException("Assertion failed.");
+
                 // мы добрались до экрана консоли
                 fullBuffer.CopyToPhysicalCanvas(Canvas, affectedRect, RootElementRect.TopLeft);
                 return affectedRect;
@@ -435,7 +438,7 @@ namespace ConsoleFramework.Rendering
             return fullBuffer;
         }
 
-        public void AddControlToInvalidationQueue(Control control) {
+        internal void AddControlToInvalidationQueue(Control control) {
             if (null == control) throw new ArgumentNullException("control");
             if (!invalidatedControls.Contains(control)) {
                 // Add to queue only if it has parent or it is root element

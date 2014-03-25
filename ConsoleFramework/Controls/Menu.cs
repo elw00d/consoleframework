@@ -27,7 +27,7 @@ namespace ConsoleFramework.Controls
     /// Item of menu.
     /// </summary>
     [ContentProperty("Items")]
-    public class MenuItem : MenuItemBase
+    public class MenuItem : MenuItemBase, ICommandSource
     {
         public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click",
             RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(MenuItem));
@@ -123,8 +123,12 @@ namespace ConsoleFramework.Controls
             if (args.wVirtualKeyCode == VirtualKeys.Return) {
                 if (Type == MenuItemType.RootSubmenu || Type == MenuItemType.Submenu)
                     openMenu();
-                else if (Type == MenuItemType.Item)
-                    RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                else if ( Type == MenuItemType.Item ) {
+                    RaiseEvent( ClickEvent, new RoutedEventArgs( this, ClickEvent ) );
+                    if (command != null && command.CanExecute(CommandParameter)) {
+                        command.Execute(CommandParameter);
+                    }
+                }
                 args.Handled = true;
             }
         }
@@ -132,6 +136,10 @@ namespace ConsoleFramework.Controls
         private void onMouseUp( object sender, MouseEventArgs args ) {
             if ( Type == MenuItemType.Item ) {
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                if (command != null && command.CanExecute(CommandParameter)) {
+                    command.Execute(CommandParameter);
+                }
+
                 args.Handled = true;
             }
         }
@@ -455,6 +463,42 @@ namespace ConsoleFramework.Controls
 
         internal void Expand( ) {
             openMenu(  );
+        }
+
+        private ICommand command;
+        public ICommand Command {
+            get {
+                return command;
+            }
+            set {
+                if (command != value) {
+                    if (command != null) {
+                        command.CanExecuteChanged -= onCommandCanExecuteChanged;
+                    }
+                    command = value;
+                    command.CanExecuteChanged += onCommandCanExecuteChanged;
+
+                    refreshCanExecute();
+                }
+            }
+        }
+
+        private void onCommandCanExecuteChanged(object sender, EventArgs args) {
+            refreshCanExecute();
+        }
+
+        private void refreshCanExecute() {
+            if (command == null) {
+                this.Disabled = false;
+                return;
+            }
+
+            this.Disabled = !command.CanExecute(CommandParameter);
+        }
+
+        public object CommandParameter {
+            get;
+            set;
         }
     }
 
