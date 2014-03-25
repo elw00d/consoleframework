@@ -68,6 +68,7 @@
     <Compile Include="Events\MouseEventArgs.cs" />
     <Compile Include="Controls\Window.cs" />
     <Compile Include="Events\EventManager.cs" />
+    <Compile Include="Events\RelayCommand.cs" />
     <Compile Include="Events\RoutedEventArgs.cs" />
     <Compile Include="Events\FocusManager.cs" />
     <Compile Include="Native\Libc.cs" />
