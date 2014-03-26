@@ -56,6 +56,8 @@ namespace ConsoleFramework.Controls
                 // Activate matches menu item
                 KeyGesture match = map.Keys.FirstOrDefault( gesture => gesture.Matches( args ) );
                 if ( match != null ) {
+                    mainMenu.CloseAllSubmenus( );
+
                     MenuItem menuItem = map[ match ];
                     List<MenuItem> path = new List< MenuItem >();
                     MenuItem currentItem = menuItem;
@@ -71,6 +73,10 @@ namespace ConsoleFramework.Controls
                     action = new Action(() => {
                         if (i < path.Count) {
                             MenuItem item = path[i];
+                            if ( item.Type == MenuItemType.Item ) {
+                                item.RaiseClick( );
+                                return;
+                            }
                             item.Invalidate();
                             EventHandler handler = null;
                             handler = (o, eventArgs) => {

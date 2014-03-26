@@ -124,10 +124,7 @@ namespace ConsoleFramework.Controls
                 if (Type == MenuItemType.RootSubmenu || Type == MenuItemType.Submenu)
                     openMenu();
                 else if ( Type == MenuItemType.Item ) {
-                    RaiseEvent( ClickEvent, new RoutedEventArgs( this, ClickEvent ) );
-                    if (command != null && command.CanExecute(CommandParameter)) {
-                        command.Execute(CommandParameter);
-                    }
+                    RaiseClick(  );
                 }
                 args.Handled = true;
             }
@@ -135,11 +132,7 @@ namespace ConsoleFramework.Controls
 
         private void onMouseUp( object sender, MouseEventArgs args ) {
             if ( Type == MenuItemType.Item ) {
-                RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
-                if (command != null && command.CanExecute(CommandParameter)) {
-                    command.Execute(CommandParameter);
-                }
-
+                RaiseClick(  );
                 args.Handled = true;
             }
         }
@@ -500,6 +493,13 @@ namespace ConsoleFramework.Controls
             get;
             set;
         }
+
+        internal void RaiseClick( ) {
+            RaiseEvent( ClickEvent, new RoutedEventArgs( this, ClickEvent ) );
+            if (command != null && command.CanExecute(CommandParameter)) {
+                command.Execute(CommandParameter);
+            }
+        }
     }
 
     /// <summary>
@@ -537,6 +537,21 @@ namespace ConsoleFramework.Controls
             get { return items; }
         }
         
+        public void CloseAllSubmenus( ) {
+            List<MenuItem> expandedSubmenus = new List< MenuItem >();
+            MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(
+                item => item is MenuItem && ((MenuItem)item).expanded);
+            while ( null != currentItem ) {
+                expandedSubmenus.Add( currentItem );
+                currentItem = (MenuItem)currentItem.Items.SingleOrDefault(
+                    item => item is MenuItem && ((MenuItem)item).expanded);
+            }
+            expandedSubmenus.Reverse( );
+            foreach ( MenuItem expandedSubmenu in expandedSubmenus ) {
+                expandedSubmenu.Close( );
+            }
+        }
+
         public Menu( ) {
             Panel stackPanel = new Panel( );
             stackPanel.Orientation = Orientation.Horizontal;
@@ -589,36 +604,12 @@ namespace ConsoleFramework.Controls
                 // окна). И событие выбора пункта меню из всплывающего окошка может быть поймано 
                 // в WindowsHost, но не в Menu. А нам нужно повесить обработчик, который закроет
                 // все показанные попапы.
-                EventManager.AddHandler( Parent, MenuItem.ClickEvent, new RoutedEventHandler( ( sender, args ) => {
-                    List<MenuItem> expandedSubmenus = new List< MenuItem >();
-                    MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(
-                        item => item is MenuItem && ((MenuItem)item).expanded);
-                    while ( null != currentItem ) {
-                        expandedSubmenus.Add( currentItem );
-                        currentItem = (MenuItem)currentItem.Items.SingleOrDefault(
-                            item => item is MenuItem && ((MenuItem)item).expanded);
-                    }
-                    expandedSubmenus.Reverse( );
-                    foreach ( MenuItem expandedSubmenu in expandedSubmenus ) {
-                        expandedSubmenu.Close( );
-                    }
-                } ), true );
+                EventManager.AddHandler( Parent, MenuItem.ClickEvent, 
+                    new RoutedEventHandler( ( sender, args ) => CloseAllSubmenus( ) ), true );
 
                 EventManager.AddHandler( Parent, MenuItem.Popup.ControlKeyPressedEvent,
                     new KeyEventHandler(( sender, args ) => {
-                        // todo : remove copy paste
-                        List<MenuItem> expandedSubmenus = new List< MenuItem >();
-                        MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(
-                            item => item is MenuItem && ((MenuItem)item).expanded);
-                        while ( null != currentItem ) {
-                            expandedSubmenus.Add( currentItem );
-                            currentItem = (MenuItem)currentItem.Items.SingleOrDefault(
-                                item => item is MenuItem && ((MenuItem)item).expanded);
-                        }
-                        expandedSubmenus.Reverse( );
-                        foreach ( MenuItem expandedSubmenu in expandedSubmenus ) {
-                            expandedSubmenu.Close( );
-                        }
+                        CloseAllSubmenus( );
                         //
                         ConsoleApplication.Instance.FocusManager.SetFocusScope( this );
                         if (args.wVirtualKeyCode == VirtualKeys.Right)
@@ -626,7 +617,7 @@ namespace ConsoleFramework.Controls
                         else if (args.wVirtualKeyCode == VirtualKeys.Left)
                             ConsoleApplication.Instance.FocusManager.MoveFocusPrev();
                         MenuItem focusedItem = (MenuItem)this.Items.SingleOrDefault(
-                            item => item is MenuItem && ((MenuItem)item).HasFocus);
+                            item => item is MenuItem && item.HasFocus);
                         focusedItem.Expand( );
                     }));
             }
