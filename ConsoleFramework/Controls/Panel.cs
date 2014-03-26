@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using Binding.Observables;
+﻿using System.Collections.Generic;
 using ConsoleFramework.Core;
-using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 using Xaml;
@@ -136,23 +130,6 @@ namespace ConsoleFramework.Controls
                 return finalSize;
             }
         }
-
-//        public void Panel_PreviewKeyDown(object sender, KeyEventArgs args) {
-//            if (args.wVirtualKeyCode == 09) {
-//                Debug.WriteLine("Tab");
-//                List<Control> childs = GetChildrenOrderedByZIndex();
-//                if (childs.Count > 0) {
-//                    int findIndex = childs.FindIndex(c => c.HasLogicalFocus);
-//                    if (findIndex == -1)
-//                        childs[0].SetFocus();
-//                    else {
-//                        Control child = childs[(findIndex + 1)%childs.Count];
-//                        child.SetFocus();
-//                    }
-//                }
-//                args.Handled = true;
-//            }
-//        }
 
         /// <summary>
         /// Рисует исключительно себя - просто фон.

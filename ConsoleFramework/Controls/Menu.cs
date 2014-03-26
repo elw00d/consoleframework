@@ -537,6 +537,93 @@ namespace ConsoleFramework.Controls
             get { return items; }
         }
         
+        private void getGestures( MenuItem item, Dictionary< KeyGesture, MenuItem > map ) {
+            if (item.Gesture != null)
+                map.Add( item.Gesture, item );
+            if ( item.Type == MenuItemType.RootSubmenu ||
+                 item.Type == MenuItemType.Submenu ) {
+                foreach ( MenuItemBase itemBase in item.Items ) {
+                    if ( itemBase is MenuItem ) {
+                        getGestures( ( MenuItem ) itemBase, map );
+                    }
+                }
+            }
+        }
+
+        public void RefreshKeyGestures( ) {
+            gestures = null;
+        }
+
+        private Dictionary< KeyGesture, MenuItem > gestures;
+
+        private Dictionary< KeyGesture, MenuItem > getGesturesMap( ) {
+            if ( gestures == null ) {
+                gestures = new Dictionary<KeyGesture, MenuItem>();
+                foreach ( MenuItemBase itemBase in this.Items ) {
+                    if ( itemBase is MenuItem ) {
+                        getGestures( (MenuItem) itemBase, gestures );
+                    }
+                }
+            }
+            return gestures;
+        }
+
+        public bool TryMatchGesture( KeyEventArgs args ) {
+            Dictionary< KeyGesture, MenuItem > map = getGesturesMap( );
+            KeyGesture match = map.Keys.FirstOrDefault( gesture => gesture.Matches( args ) );
+            if ( match == null ) return false;
+
+            this.CloseAllSubmenus( );
+
+            // Activate matches menu item
+            MenuItem menuItem = map[ match ];
+            List<MenuItem> path = new List< MenuItem >();
+            MenuItem currentItem = menuItem;
+            while ( currentItem != null ) {
+                path.Add( currentItem );
+                currentItem = currentItem.ParentItem;
+            }
+            path.Reverse( );
+
+            // Open all menu items in path successively
+            int i = 0;
+            Action action = null;
+            action = new Action(() => {
+                if (i < path.Count) {
+                    MenuItem item = path[i];
+                    if ( item.Type == MenuItemType.Item ) {
+                        item.RaiseClick( );
+                        return;
+                    }
+
+                    // Activate focus on item
+                    if ( item.ParentItem == null ) {
+                        ConsoleApplication.Instance.FocusManager.SetFocus( this, item );
+                    } else {
+                        // Set focus to PopupWindow -> item
+                        ConsoleApplication.Instance.FocusManager.SetFocus( 
+                            item.Parent.Parent, item );
+                    }
+                    item.Invalidate();
+                    EventHandler handler = null;
+
+                    // Wait for layout to be revalidated and expand it
+                    handler = (o, eventArgs) => {
+                        item.Expand();
+                        item.LayoutRevalidated -= handler;
+                        i++;
+                        if (i < path.Count) {
+                            action();
+                        }
+                    };
+                    item.LayoutRevalidated += handler;
+                }
+            });
+            action();
+
+            return true;
+        }
+
         public void CloseAllSubmenus( ) {
             List<MenuItem> expandedSubmenus = new List< MenuItem >();
             MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(

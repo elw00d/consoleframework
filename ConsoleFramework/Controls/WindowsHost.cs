@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -37,75 +35,13 @@ namespace ConsoleFramework.Controls
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(onPreviewMouseDown), true);
             AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove), true );
             AddHandler(PreviewMouseUpEvent, new MouseEventHandler(onPreviewMouseUp), true);
-            AddHandler( MouseMoveEvent, new MouseEventHandler(( sender, args ) => {
-                //Debugger.Log( 1, "", "WindowHost.MouseMove\n" );
-            }) );
             AddHandler( PreviewKeyDownEvent, new KeyEventHandler(onPreviewKeyDown) );
         }
 
         private void onPreviewKeyDown( object sender, KeyEventArgs args ) {
             if ( mainMenu != null ) {
-                // todo : cache gestures map and provide method to refresh gestures
-                Dictionary<KeyGesture, MenuItem> map = new Dictionary<KeyGesture, MenuItem>();
-                foreach ( MenuItemBase itemBase in mainMenu.Items ) {
-                    if ( itemBase is MenuItem ) {
-                        getGestures( (MenuItem) itemBase, map );
-                    }
-                }
-
-                // Activate matches menu item
-                KeyGesture match = map.Keys.FirstOrDefault( gesture => gesture.Matches( args ) );
-                if ( match != null ) {
-                    mainMenu.CloseAllSubmenus( );
-
-                    MenuItem menuItem = map[ match ];
-                    List<MenuItem> path = new List< MenuItem >();
-                    MenuItem currentItem = menuItem;
-                    while ( currentItem != null ) {
-                        path.Add( currentItem );
-                        currentItem = currentItem.ParentItem;
-                    }
-                    path.Reverse( );
-
-                    // Open all menu items in path successively
-                    int i = 0;
-                    Action action = null;
-                    action = new Action(() => {
-                        if (i < path.Count) {
-                            MenuItem item = path[i];
-                            if ( item.Type == MenuItemType.Item ) {
-                                item.RaiseClick( );
-                                return;
-                            }
-                            item.Invalidate();
-                            EventHandler handler = null;
-                            handler = (o, eventArgs) => {
-                                item.Expand();
-                                item.LayoutRevalidated -= handler;
-                                i++;
-                                if (i < path.Count) {
-                                    action();
-                                }
-                            };
-                            item.LayoutRevalidated += handler;
-                        }
-                    });
-                    action();
-                    
+                if ( mainMenu.TryMatchGesture( args ) ) {
                     args.Handled = true;
-                }
-            }
-        }
-
-        private void getGestures( MenuItem item, Dictionary< KeyGesture, MenuItem > map ) {
-            if (item.Gesture != null)
-                map.Add( item.Gesture, item );
-            if ( item.Type == MenuItemType.RootSubmenu ||
-                 item.Type == MenuItemType.Submenu ) {
-                foreach ( MenuItemBase itemBase in item.Items ) {
-                    if ( itemBase is MenuItem ) {
-                        getGestures( ( MenuItem ) itemBase, map );
-                    }
                 }
             }
         }
@@ -167,25 +103,14 @@ namespace ConsoleFramework.Controls
         /// по Z-индексу оно будет перемещено на самый верх, и получит клавиатурный фокус ввода.
         /// </summary>
         private void activateWindow(Window window) {
-            //int index = Children.FindIndex(0, control => control == window);
             int index = Children.IndexOf( window );
-//            int index = -1;
-//            for ( int i = 0; i < Children.Count; i++ ) {
-//                Control child = Children[ i ];
-//                if ( child == window ) {
-//                    index = i;
-//                    break;
-//                }
-//            }
             if (-1 == index)
                 throw new InvalidOperationException("Assertion failed.");
             //
             Control oldTopWindow = Children[Children.Count - 1];
             for (int i = index; i < Children.Count - 1; i++) {
                 SwapChildsZOrder( i, i + 1 );
-                //Children[i] = Children[i + 1];
             }
-            //Children[Children.Count - 1] = window;
             
             // If need to change top window
             if (oldTopWindow != window)

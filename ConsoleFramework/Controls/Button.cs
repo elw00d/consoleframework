@@ -1,5 +1,4 @@
 ﻿using ConsoleFramework.Core;
-using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 using Xaml;
@@ -8,9 +7,6 @@ namespace ConsoleFramework.Controls
 {
     [ContentProperty("Caption")]
     public class Button : ButtonBase {
-        public Button() {
-        }
-
         private string caption;
         public string Caption {
             get {

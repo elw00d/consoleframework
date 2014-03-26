@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -33,7 +32,6 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseDownEvent, new MouseButtonEventHandler(Window_OnMouseDown));
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
-            AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(Window_Click));
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown));
         }
 
@@ -51,10 +49,6 @@ namespace ConsoleFramework.Controls
                 ConsoleApplication.Instance.FocusManager.MoveFocusNext();
                 args.Handled = true;
             }
-        }
-
-        private void Window_Click(object sender, RoutedEventArgs args) {
-            //Debug.WriteLine("Click");
         }
 
         /// <summary>
@@ -240,14 +234,6 @@ namespace ConsoleFramework.Controls
                     Invalidate();
                     args.Handled = true;
                 }
-                else
-                {
-//                    Control topChildAtPoint = this.GetTopChildAtPoint(point);
-//                    if (null != topChildAtPoint && topChildAtPoint.Visibility == Visibility.Visible && topChildAtPoint.Focusable)
-//                    {
-//                        ConsoleApplication.Instance.FocusManager.SetFocus(this, topChildAtPoint);
-//                    }
-                }
             }
         }
 
@@ -305,7 +291,6 @@ namespace ConsoleFramework.Controls
                 Vector vector = new Vector(parentPoint.X - movingStartPoint.x, parentPoint.Y - movingStartPoint.y);
                 X = movingStartX + vector.X;
                 Y = movingStartY + vector.Y;
-                //Debug.WriteLine("X:Y {0}:{1} -> {2}:{3}", movingStartX, movingStartY, X, Y);
                 getWindowsHost().Invalidate();
                 args.Handled = true;
             }

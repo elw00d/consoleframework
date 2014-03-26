@@ -21,7 +21,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        protected override Core.Size MeasureOverride(Core.Size availableSize) {
+        protected override Size MeasureOverride(Size availableSize) {
             Content.Measure(availableSize);
             return new Size(10, 10);
         }
