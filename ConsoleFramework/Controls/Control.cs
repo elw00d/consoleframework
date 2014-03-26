@@ -279,6 +279,45 @@ namespace ConsoleFramework.Controls
         protected virtual void OnParentChanged( ) {
         }
 
+        private void attachedToRootElement() {
+            this.attachedToVisualTree = true;
+            foreach (Control child in Children) {
+                child.attachedToRootElement();
+            }
+        }
+
+        private void detachedFromRootElement() {
+            this.attachedToVisualTree = false;
+            foreach (Control child in Children) {
+                child.detachedFromRootElement();
+            }
+        }
+
+        /// <summary>
+        /// Called by ConsoleApplication when Run() initializes the root element
+        /// to init attached-detached system to be consistent.
+        /// </summary>
+        internal void ControlSetAsRootElement() {
+            attachedToRootElement();
+        }
+
+        internal void ControlUnsetAsRootElement() {
+            detachedFromRootElement();
+        }
+
+        private void parentChanged() {
+            if (Parent == null) {
+                detachedFromRootElement();
+            } else {
+                if (Parent.attachedToVisualTree) attachedToRootElement();
+                else detachedFromRootElement();
+            }
+
+            OnParentChanged();
+        }
+
+        private bool attachedToVisualTree;
+
         protected void InsertChildAt( int index, Control child ) {
             if (null == child)
                 throw new ArgumentNullException("child");
@@ -286,7 +325,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Insert(index, child);
             child.Parent = this;
-            child.OnParentChanged(  );
+            child.parentChanged();
             child.Invalidate(  );
             Invalidate();
         }
@@ -298,7 +337,7 @@ namespace ConsoleFramework.Controls
                 throw new ArgumentException("Specified child already has parent.");
             children.Add(child);
             child.Parent = this;
-            child.OnParentChanged();
+            child.parentChanged();
             child.Invalidate();
             Invalidate();
         }
@@ -317,7 +356,7 @@ namespace ConsoleFramework.Controls
                 // Remove it from invalidation queue if already added
                 ConsoleApplication.Instance.Renderer.ControlRemovedFromTree( child);
 
-                child.OnParentChanged();
+                child.parentChanged();
 
                 Invalidate();
             }
@@ -962,7 +1001,9 @@ namespace ConsoleFramework.Controls
         /// на экране обязательно, вместе со всеми дочерними, даже если у него ничего не изменилось.
         /// </summary>
         public void Invalidate() {
-            ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
+            if (this.attachedToVisualTree) {
+                ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
+            }
         }
 
         public virtual Control GetTopChildAtPoint(Point point) {

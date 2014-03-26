@@ -553,7 +553,9 @@ namespace ConsoleFramework
 		        ShowCursor( );
 		        NCurses.endwin( );
 		    }
-		}
+
+            renderer.RootElement = null;
+        }
 		
 		private void processLinuxInput (TermKeyKey key)
 		{
@@ -792,6 +794,8 @@ namespace ConsoleFramework
 
             // Restore console mode before exit
             Win32.SetConsoleMode( stdInputHandle, consoleMode );
+
+            renderer.RootElement = null;
 
             // todo : restore attributes of console output
         }

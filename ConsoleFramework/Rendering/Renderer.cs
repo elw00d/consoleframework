@@ -26,9 +26,20 @@ namespace ConsoleFramework.Rendering
             }
         }
 
+        private Control rootElement;
         public Control RootElement {
-            get;
-            set;
+            get {
+                return rootElement;
+            }
+            set {
+                if (rootElement != value) {
+                    if (rootElement != null)
+                        rootElement.ControlUnsetAsRootElement();
+                    rootElement = value;
+                    if (rootElement != null)
+                        rootElement.ControlSetAsRootElement();
+                }
+            }
         }
 
         public PhysicalCanvas Canvas {
@@ -58,7 +69,7 @@ namespace ConsoleFramework.Rendering
         // актуален только при вызовах UpdateLayout, после вызова FinallyApplyChangesToCanvas
         // очищается
         private readonly List<Control> renderingUpdatedControls = new List<Control>();
-
+        
         private enum AffectType {
             LayoutInvalidated,
             LayoutRevalidated
