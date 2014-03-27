@@ -158,7 +158,7 @@ namespace ConsoleFramework.Controls
 
             if ( this.Type == MenuItemType.Submenu || Type == MenuItemType.RootSubmenu ) {
                 if (null == popup) {
-                    popup = new Popup(this.Items, true, true, this.ActualWidth);
+                    popup = new Popup(this.Items, true, this.ActualWidth);
                     foreach ( MenuItemBase itemBase in this.Items ) {
                         if ( itemBase is MenuItem )
                             ( ( MenuItem ) itemBase ).ParentItem = this;
@@ -295,9 +295,8 @@ namespace ConsoleFramework.Controls
         internal class Popup : Window
         {
             private readonly bool shadow;
-            private readonly bool border;
-            private readonly int width; // Размер непрозрачной области
-            private Panel panel;
+            private readonly int parentItemWidth; // Размер непрозрачной для нажатий мыши области в 1ой строке окна
+            private readonly Panel panel;
 
             public static readonly RoutedEvent ControlKeyPressedEvent = EventManager.RegisterRoutedEvent("ControlKeyPressed",
                 RoutingStrategy.Bubble, typeof(KeyEventHandler), typeof(MenuItem.Popup));
@@ -310,7 +309,6 @@ namespace ConsoleFramework.Controls
                 panel.ClearChilds();
             }
 
-            // todo : rename width
             /// <summary>
             /// Первая строчка всплывающего окна - особенная. Она прозрачна с точки зрения
             /// рендеринга полностью. Однако Opacity для событий мыши в ней разные.
@@ -319,11 +317,9 @@ namespace ConsoleFramework.Controls
             /// для событий мыши, и нажатие мыши в этой области приводит к тому, что окно
             /// WindowsHost закрывает окно как окно с OutsideClickClosesWindow = True.
             /// </summary>
-            public Popup( IEnumerable<MenuItemBase> menuItems, bool shadow, bool border,
-                int width) {
-                this.width = width;
+            public Popup( IEnumerable<MenuItemBase> menuItems, bool shadow, int parentItemWidth) {
+                this.parentItemWidth = parentItemWidth;
                 this.shadow = shadow;
-                this.border = border;
                 panel = new Panel();
                 panel.Orientation = Orientation.Vertical;
                 foreach (MenuItemBase item in menuItems) {
@@ -335,7 +331,7 @@ namespace ConsoleFramework.Controls
                 AddHandler( PreviewMouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
                     if ( Content != null && !Content.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
                         Close();
-                        if ( new Rect( new Size( width, 1 ) ).Contains( args.GetPosition( this ) ) ) {
+                        if ( new Rect( new Size( parentItemWidth, 1 ) ).Contains( args.GetPosition( this ) ) ) {
                             args.Handled = true;
                         }
                     }
@@ -394,11 +390,11 @@ namespace ConsoleFramework.Controls
 
                 // Первые width пикселей первой строки - прозрачные, но события мыши не пропускают
                 // По нажатию на них мы закрываем всплывающее окно вручную
-                buffer.SetOpacityRect(0, 0, width, 1, 2);
+                buffer.SetOpacityRect(0, 0, parentItemWidth, 1, 2);
                 // Оставшиеся пиксели первой строки - пропускают события мыши
                 // И WindowsHost закроет всплывающее окно автоматически при нажатии или
                 // перемещении нажатого курсора над этим местом
-                buffer.SetOpacityRect( width, 0, ActualWidth - width, 1, 6 );
+                buffer.SetOpacityRect( parentItemWidth, 0, ActualWidth - parentItemWidth, 1, 6 );
 
                 if (shadow) {
                     buffer.SetOpacity(0, ActualHeight - 1, 2 + 4);
@@ -624,6 +620,9 @@ namespace ConsoleFramework.Controls
             return true;
         }
 
+        /// <summary>
+        /// Forces all open submenus to be closed.
+        /// </summary>
         public void CloseAllSubmenus( ) {
             List<MenuItem> expandedSubmenus = new List< MenuItem >();
             MenuItem currentItem = ( MenuItem ) this.Items.SingleOrDefault(

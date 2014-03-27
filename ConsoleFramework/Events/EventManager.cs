@@ -187,6 +187,8 @@ namespace ConsoleFramework.Events {
 
         private readonly List<Control> prevMouseOverStack = new List<Control>();
 
+        private Point lastMousePosition;
+
         public void ParseInputEvent(INPUT_RECORD inputRecord, Control rootElement) {
             if (inputRecord.EventType == EventType.MOUSE_EVENT) {
                 MOUSE_EVENT_RECORD mouseEvent = inputRecord.MouseEvent;
@@ -199,7 +201,17 @@ namespace ConsoleFramework.Events {
                     //
                     throw new InvalidOperationException("Flags combination in mouse event was not expected.");
                 }
-                Point rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
+                Point rawPosition;
+                if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED ||
+                    mouseEvent.dwEventFlags == MouseEventFlags.PRESSED_OR_RELEASED) {
+                    rawPosition = new Point(mouseEvent.dwMousePosition.X, mouseEvent.dwMousePosition.Y);
+                    lastMousePosition = rawPosition;
+                } else {
+                    // При событии MOUSE_WHEELED в Windows некорректно устанавливается mouseEvent.dwMousePosition
+                    // Поэтому для определения элемента, над которым производится прокручивание колёсика, мы
+                    // вынуждены сохранять координаты, полученные при предыдущем событии мыши
+                    rawPosition = lastMousePosition;
+                }
                 Control topMost = findSource(rawPosition, rootElement);
 
                 // если мышь захвачена контролом, то события перемещения мыши доставляются только ему,
@@ -314,10 +326,9 @@ namespace ConsoleFramework.Events {
 
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_WHEELED) {
                     MouseWheelEventArgs args = new MouseWheelEventArgs(
-                        ConsoleApplication.Instance.FocusManager.FocusedElement,
+                        topMost,
                         Control.PreviewMouseWheelEvent,
-                        // Because rawPosition in this event is incorrectly set by Windows
-                        new Point(0, 0),
+                        rawPosition,
                         lastLeftMouseButtonState, lastMiddleMouseButtonState, 
                         lastRightMouseButtonState,
                         mouseEvent.dwButtonState > 0 ? 1 : -1
