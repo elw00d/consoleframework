@@ -173,14 +173,6 @@ namespace Examples
                     Title = "Очень длинное название окна",
                     Content = groupBox
                 });
-                windowsHost.Show(new Window() {
-                    X = 30,
-                    Y = 15,
-                    Name = "StrangeWindow",
-                    Content = new StrangePanel() {
-                        Content = new StrangeControl()
-                    }
-                });
                 windowsHost.Show(window1);
                 windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево

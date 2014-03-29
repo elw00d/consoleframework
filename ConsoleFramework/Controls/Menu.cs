@@ -81,6 +81,12 @@ namespace ConsoleFramework.Controls
             set { gesture = value; }
         }
 
+        private bool popupShadow = true;
+        public bool PopupShadow {
+            get { return popupShadow; }
+            set { popupShadow = value; }
+        }
+
         public MenuItem( ) {
             Focusable = true;
 
@@ -158,7 +164,7 @@ namespace ConsoleFramework.Controls
 
             if ( this.Type == MenuItemType.Submenu || Type == MenuItemType.RootSubmenu ) {
                 if (null == popup) {
-                    popup = new Popup(this.Items, true, this.ActualWidth);
+                    popup = new Popup(this.Items, this.popupShadow, this.ActualWidth);
                     foreach ( MenuItemBase itemBase in this.Items ) {
                         if ( itemBase is MenuItem )
                             ( ( MenuItem ) itemBase ).ParentItem = this;
@@ -406,8 +412,11 @@ namespace ConsoleFramework.Controls
                                           Attr.NO_ATTRIBUTES);
                 }
 
-                RenderBorders( buffer, new Point(1, 1), new Point(ActualWidth - 3, ActualHeight - 2),
-                    true, borderAttrs);
+                RenderBorders( buffer, new Point( 1, 1 ),
+                               shadow
+                                   ? new Point( ActualWidth - 3, ActualHeight - 2 )
+                                   : new Point( ActualWidth - 2, ActualHeight - 1 ),
+                               true, borderAttrs );
             }
 
             protected override Size MeasureOverride(Size availableSize)

@@ -52,7 +52,6 @@
     <Compile Include="Controls\MessageBox.cs" />
     <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
-    <Compile Include="Controls\StrangeControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Controls\UIElementCollection.cs" />
     <Compile Include="Core\ThicknessConverter.cs" />
@@ -77,7 +76,6 @@
     <Compile Include="Core\Colors.cs" />
     <Compile Include="Core\UnicodeTable.cs" />
     <Compile Include="Rendering\RenderingBuffer.cs" />
-    <Compile Include="Controls\StrangePanel.cs" />
     <Compile Include="Controls\Button.cs" />
     <Compile Include="Controls\Control.cs" />
     <Compile Include="Controls\Panel.cs" />
