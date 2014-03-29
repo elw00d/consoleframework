@@ -89,7 +89,7 @@ namespace Examples
                     MaxWidth = 10,
                     Margin = new Thickness(1),
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    //Size = 10
+                    Size = 15
                 };
                 Button button = new Button() {
                     Name = "button1",

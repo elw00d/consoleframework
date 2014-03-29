@@ -53,7 +53,7 @@ namespace ConsoleFramework.Controls {
                 } else {
                     Text = keyInfo.KeyChar.ToString();
                 }
-                if (cursorPosition + 1 < getSize(  )) {
+                if (cursorPosition + 1 < ActualWidth - 2) {
                     cursorPosition++;
                     CursorPosition = new Point(cursorPosition + 1, 0);
                 } else {
@@ -172,7 +172,11 @@ namespace ConsoleFramework.Controls {
         }
 
         protected override Size MeasureOverride(Size availableSize) {
-            return new Size(getSize() + 2, 1);
+            Size desired = new Size( getSize( ) + 2, 1 );
+            return new Size(
+                Math.Min( desired.Width, availableSize.Width ),
+                Math.Min( desired.Height, availableSize.Height )
+            );
         }
 
         // this fields describe the whole state of textbox
@@ -183,10 +187,10 @@ namespace ConsoleFramework.Controls {
 
         public override void Render(RenderingBuffer buffer) {
             Attr attr = Colors.Blend(Color.White, Color.DarkBlue);
-            buffer.FillRectangle(0, 0, getSize() + 2, ActualHeight, ' ', attr);
+            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', attr);
             if (null != text) {
                 for (int i = displayOffset; i < text.Length; i++) {
-                    if (i - displayOffset < getSize(  )) {
+                    if (i - displayOffset < ActualWidth - 2) {
                         buffer.SetPixel(1 + i - displayOffset, 0, text[i]);
                     }
                 }
@@ -195,7 +199,7 @@ namespace ConsoleFramework.Controls {
             if (displayOffset > 0)
                 buffer.SetPixel(0, 0, '<', arrowsAttr);
             if (!String.IsNullOrEmpty(text) && getSize(  ) + displayOffset < text.Length)
-                buffer.SetPixel(getSize() + 1, 0, '>', arrowsAttr);
+                buffer.SetPixel(ActualWidth - 1, 0, '>', arrowsAttr);
         }
     }
 }
