@@ -73,6 +73,7 @@ namespace ConsoleFramework.Core
 
         /// <summary>
         /// Ищет ближайший родительский элемент контрола типа T.
+        /// Возвращает его либо null, если такой не найден.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="control"></param>
@@ -81,7 +82,8 @@ namespace ConsoleFramework.Core
             Control tmp = control;
             while ( tmp != null && !( tmp is T ) )
                 tmp = tmp.Parent;
-            return (T) tmp;
+            if (tmp is T) return (T) tmp;
+            return null;
         }
     }
 }

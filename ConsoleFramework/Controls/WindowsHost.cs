@@ -36,6 +36,27 @@ namespace ConsoleFramework.Controls
             AddHandler( PreviewMouseMoveEvent, new MouseEventHandler(onPreviewMouseMove), true );
             AddHandler(PreviewMouseUpEvent, new MouseEventHandler(onPreviewMouseUp), true);
             AddHandler( PreviewKeyDownEvent, new KeyEventHandler(onPreviewKeyDown) );
+            AddHandler( PreviewMouseWheelEvent, new MouseWheelEventHandler(onPreviewMouseWheel) );
+        }
+
+        /// <summary>
+        /// Interrupts wheel event propagation if its source window is not on top now.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void onPreviewMouseWheel( object sender, MouseWheelEventArgs args ) {
+            int windowsStartIndex = 0;
+            if ( mainMenu != null ) {
+                assert( Children[ 0 ] == mainMenu );
+                windowsStartIndex++;
+            }
+            if ( windowsStartIndex < Children.Count ) {
+                Window topWindow = ( Window ) Children[ Children.Count - 1 ];
+                Window sourceWindow = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
+                if ( topWindow != sourceWindow ) {
+                    args.Handled = true;
+                }
+            }
         }
 
         private void onPreviewKeyDown( object sender, KeyEventArgs args ) {
@@ -137,15 +158,15 @@ namespace ConsoleFramework.Controls
         }
 
         private void onPreviewMouseMove(object sender, MouseEventArgs args) {
-            onPreviewMouseEvents(sender, args, 2);
+            onPreviewMouseEvents(args, 2);
         }
 
         private void onPreviewMouseDown(object sender, MouseEventArgs args) {
-            onPreviewMouseEvents(sender, args, 0);
+            onPreviewMouseEvents(args, 0);
         }
 
         private void onPreviewMouseUp(object sender, MouseEventArgs args) {
-            onPreviewMouseEvents(sender, args, 1);
+            onPreviewMouseEvents(args, 1);
         }
 
         /// <summary>
@@ -158,7 +179,7 @@ namespace ConsoleFramework.Controls
         /// eventType = 1 - PreviewMouseUp
         /// eventType = 2 - PreviewMouseMove
         /// </summary>
-        private void onPreviewMouseEvents(object sender, MouseEventArgs args, int eventType) {
+        private void onPreviewMouseEvents(MouseEventArgs args, int eventType) {
             bool handle = false;
             check:
             if ( isTopWindowModal( ) ) {
