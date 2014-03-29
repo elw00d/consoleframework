@@ -86,8 +86,10 @@ namespace Examples
                     HorizontalAlignment = HorizontalAlignment.Right
                 });
                 TextBox textBox = new TextBox() {
-                    Width = 15,
-                    Size = 10
+                    MaxWidth = 10,
+                    Margin = new Thickness(1),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    //Size = 10
                 };
                 Button button = new Button() {
                     Name = "button1",

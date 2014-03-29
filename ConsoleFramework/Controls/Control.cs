@@ -846,7 +846,25 @@ namespace ConsoleFramework.Controls
         private Rect calculateLayoutClip() {
             Vector offset = computeAlignmentOffset();
             Size clientSize = getClientSize();
-            return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+
+            // Обрезаем clientSize, если он не удовлетворяет Min/Max ограничениям
+            // Если этого не сделать, то при выделении слотов с запасом элементы с установленными
+            // Min/Max-ограничениями будут размещаться некорректно (например, если для TextBox
+            // в вертикальной панели задать MaxWidth=5 и HorizontalAlignment=Center):
+            // |........hsdlkldkfljsd| - то есть левый край будет выровнен для центрирования
+            // корректно, но с правой стороны рендеринг не обрезан.
+
+            int width = clientSize.Width;
+            if ( this.Width.HasValue )
+                width = this.Width.Value;
+            width = Math.Min(Math.Max(width, MinWidth), MaxWidth);
+
+            int height = clientSize.Height;
+            if (this.Height.HasValue)
+                height = this.Height.Value;
+            height = Math.Min(Math.Max(height, MinHeight), MaxHeight);
+
+            return new Rect(-offset.X, -offset.Y, width + offset.X, height + offset.Y);
         }
 
         /// <summary>

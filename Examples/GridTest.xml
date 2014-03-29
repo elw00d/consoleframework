@@ -3,17 +3,17 @@
         xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
         xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding"
         xmlns:xaml="clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework"
-           >
+        MinWidth="10" MinHeight="10"   >
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="10"></ColumnDefinition>
+      <ColumnDefinition Width="15"></ColumnDefinition>
       <ColumnDefinition Width="*"></ColumnDefinition>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
-    <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
+    <TextBox HorizontalAlignment="Center" MaxWidth="10" Text="Text"></TextBox>
     <TextBox HorizontalAlignment="Stretch" Text="Text"></TextBox>
     <CheckBox></CheckBox>
     <Button Margin="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Caption="Long Button"></Button>

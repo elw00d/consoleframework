@@ -168,7 +168,7 @@ namespace ConsoleFramework.Controls {
 
         private int getSize( ) {
             if ( Size.HasValue ) return Size.Value;
-            return text != null ? text.Length : 0;
+            return text != null ? text.Length + 1 : 1;
         }
 
         protected override Size MeasureOverride(Size availableSize) {
