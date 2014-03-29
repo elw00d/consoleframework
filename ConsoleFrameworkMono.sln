@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Binding", "Binding\Binding.csproj", "{E1CD529B-E3F1-4660-AA4F-1670E0992553}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleFrameworkMono", "ConsoleFramework\ConsoleFrameworkMono.csproj", "{03300A54-DEC4-41A8-9C9A-591805400C76}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesMono", "Examples\ExamplesMono.csproj", "{2BBC9906-5CEB-40DD-84E0-6D037EF159CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xaml", "Xaml\Xaml.csproj", "{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BindingMono", "Binding\BindingMono.csproj", "{E1CD529B-E3F1-4660-AA4F-1670E0992553}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XamlMono", "Xaml\XamlMono.csproj", "{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -51,8 +51,6 @@
     <Compile Include="Controls\Panel.cs" />
     <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
-    <Compile Include="Controls\StrangeControl.cs" />
-    <Compile Include="Controls\StrangePanel.cs" />
     <Compile Include="Controls\TextBlock.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Controls\Window.cs" />
@@ -92,6 +90,9 @@
     <Compile Include="Events\KeyGesture.cs" />
     <Compile Include="Events\KeyGestureConverter.cs" />
     <Compile Include="Events\ModifierKeysConverter.cs" />
+    <Compile Include="Events\ICommand.cs" />
+    <Compile Include="Events\ICommandSource.cs" />
+    <Compile Include="Events\RelayCommand.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Controls\LayoutSystem.txt" />
@@ -99,19 +100,19 @@
     <None Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Binding\Binding.csproj">
-      <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
-      <Name>Binding</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Xaml\Xaml.csproj">
-      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
-      <Name>Xaml</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Posix" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Binding\BindingMono.csproj">
+      <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
+      <Name>BindingMono</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xaml\XamlMono.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>XamlMono</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
