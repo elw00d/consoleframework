@@ -21,12 +21,8 @@ namespace ConsoleFramework.Controls
     /// </summary>
     [ContentProperty("Children")]
     public class Panel : Control {
-        private void subscribe() {
-        }
-
         public Panel() {
             children = new UIElementCollection(this);
-            subscribe();
         }
 
         public Attr Background {
@@ -74,7 +70,6 @@ namespace ConsoleFramework.Controls
                 int maxWidth = 0;
                 foreach (Control child in base.Children) {
                     child.Measure(availableSize);
-                    // todo : fix if child returns big size > availableSize
                     totalHeight += child.DesiredSize.Height;
                     if (child.DesiredSize.Width > maxWidth) {
                         maxWidth = child.DesiredSize.Width;
@@ -143,10 +138,6 @@ namespace ConsoleFramework.Controls
                         Attr.FOREGROUND_GREEN | Attr.FOREGROUND_RED | Attr.FOREGROUND_INTENSITY);
                 }
             }
-        }
-
-        public override string ToString() {
-            return "Panel";
         }
     }
 }
