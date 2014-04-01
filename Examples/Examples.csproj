@@ -35,7 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Examples.Program</StartupObject>
+    <StartupObject>Examples.TreeView.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,6 +48,7 @@
     <Compile Include="MainMenu\Program.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TreeView\Program.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -98,6 +99,10 @@
     <EmbeddedResource Include="Commands\windows-host.xml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="TreeView\main.xml" />
+    <EmbeddedResource Include="TreeView\windows-host.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

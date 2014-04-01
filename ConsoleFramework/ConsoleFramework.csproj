@@ -53,6 +53,7 @@
     <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\TextBox.cs" />
+    <Compile Include="Controls\TreeView.cs" />
     <Compile Include="Controls\UIElementCollection.cs" />
     <Compile Include="Core\ThicknessConverter.cs" />
     <Compile Include="Core\VisualTreeHelper.cs" />
