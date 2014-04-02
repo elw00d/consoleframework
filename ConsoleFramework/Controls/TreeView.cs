@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -26,7 +25,7 @@ namespace ConsoleFramework.Controls
 
         internal String GetDisplayTitle( ) {
             if ( Items.Count != 0 ) {
-                return new string( ' ', Level * 2 ) + ">" + " " + Title;
+                return new string(' ', Level * 2) + (Expanded ? "\u25bc" : "\u25ba") + " " + Title; // ► todo : extract constants
             } else {
                 return new string(' ', Level * 2) + "  " + Title;
             }
@@ -60,10 +59,17 @@ namespace ConsoleFramework.Controls
 
         public IItemsSource ItemsSource { get; set; }
 
-        private ListBox listBox;
+        private readonly ListBox listBox;
 
         public TreeView( ) {
             listBox = new ListBox( );
+            listBox.HorizontalAlignment = HorizontalAlignment.Stretch;
+            listBox.VerticalAlignment = VerticalAlignment.Stretch;
+            
+            // Stretch by default too
+            this.HorizontalAlignment = HorizontalAlignment.Stretch;
+            this.VerticalAlignment = VerticalAlignment.Stretch;
+
             this.AddChild( listBox );
             this.items.ListChanged += ( sender, args ) => {
                 switch ( args.Type ) {
@@ -83,6 +89,7 @@ namespace ConsoleFramework.Controls
                             break;
                         }
                     default:
+                        // todo : handle other event types
                         throw new NotSupportedException();
                 }
             };
@@ -95,34 +102,57 @@ namespace ConsoleFramework.Controls
 
         private readonly List<TreeItem> treeItemsFlat = new List< TreeItem >();
 
-        private void expandCollapse( TreeItem item ) {
-            int index = treeItemsFlat.IndexOf( item );
-            if ( item.Expanded ) {
-                for ( int i = 0; i < item.Items.Count; i++ ) {
-                    TreeItem child = item.Items[ i ];
-                    treeItemsFlat.RemoveAt( index + 1 );
-                    // Учесть уровень вложенности в title
-                    listBox.Items.RemoveAt( index + 1 );
-                    child.Position = -1;
-                }
-                for ( int k = index + 1; k < treeItemsFlat.Count; k++ ) {
-                    treeItemsFlat[ k ].Position -= item.Items.Count;
-                }
-                item.Expanded = false;
-            } else {
-                for ( int i = 0; i < item.Items.Count; i++ ) {
-                    TreeItem child = item.Items[ i ];
-                    treeItemsFlat.Insert( i + index + 1, child);
-                    child.Position = i + index + 1;
-                    child.Level = item.Level + 1;
+        private void expand(TreeItem item) {
+            int index = treeItemsFlat.IndexOf(item);
+            for (int i = 0; i < item.Items.Count; i++) {
+                TreeItem child = item.Items[i];
+                treeItemsFlat.Insert(i + index + 1, child);
+                child.Position = i + index + 1;
+                child.Level = item.Level + 1;
 
-                    // Учесть уровень вложенности в title
-                    listBox.Items.Insert(i + index + 1, child.GetDisplayTitle());
+                // Учесть уровень вложенности в title
+                listBox.Items.Insert(i + index + 1, child.GetDisplayTitle());
+            }
+            for (int k = index + 1 + item.Items.Count; k < treeItemsFlat.Count; k++) {
+                treeItemsFlat[k].Position += item.Items.Count;
+            }
+        }
+
+        private void collapse(TreeItem item) {
+            int index = treeItemsFlat.IndexOf(item);
+            for (int i = 0; i < item.Items.Count; i++) {
+                TreeItem child = item.Items[i];
+                treeItemsFlat.RemoveAt(index + 1);
+                listBox.Items.RemoveAt(index + 1);
+                child.Position = -1;
+            }
+            for (int k = index + 1; k < treeItemsFlat.Count; k++) {
+                treeItemsFlat[k].Position -= item.Items.Count;
+            }
+        }
+
+        private void expandCollapse( TreeItem item ) {
+            int index = treeItemsFlat.IndexOf(item);
+            if ( item.Expanded ) {
+                // Children are collapsed but with Expanded state saved
+                foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
+                    collapse(child);
                 }
-                for ( int k = index + 1 + item.Items.Count; k < treeItemsFlat.Count; k++ ) {
-                    treeItemsFlat[ k ].Position += item.Items.Count;
-                }
+
+                collapse(item);
+                item.Expanded = false;
+                // Need to update item string (because Expanded status has been changed)
+                listBox.Items[index] = item.GetDisplayTitle();
+            } else {
+                expand(item);
                 item.Expanded = true;
+                // Need to update item string (because Expanded status has been changed)
+                listBox.Items[index] = item.GetDisplayTitle();
+
+                // Children are expanded too according to their Expanded stored state
+                foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
+                    expand(child);
+                }
             }
             // todo : make this not necessary
             listBox.Invalidate(  );
