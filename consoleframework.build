@@ -136,16 +136,28 @@
     <property name="assembly-name" value="Examples" overwrite="true"  />
     <property name="assembly-description" value="Examples executable" overwrite="true"  />
 
+    <property name="entryPointClass" value="Examples.Program"/>
+    <property name="exampleName" value="ManyControls"/>
+    <call target="build-examples-core"/>
+
     <property name="entryPointClass" value="Examples.AsyncUiUpdate.Program"/>
     <property name="exampleName" value="AsyncUiUpdate"/>
     <call target="build-examples-core"/>
 
-    <property name="entryPointClass" value="Examples.Program"/>
-    <property name="exampleName" value="HelloWorld"/>
+	<property name="entryPointClass" value="Examples.CheckBoxes.Program"/>
+    <property name="exampleName" value="CheckBoxes"/>
+    <call target="build-examples-core"/>
+
+	<property name="entryPointClass" value="Examples.Commands.Program"/>
+    <property name="exampleName" value="Commands"/>
     <call target="build-examples-core"/>
 
 	<property name="entryPointClass" value="Examples.MainMenu.Program"/>
     <property name="exampleName" value="MainMenu"/>
+    <call target="build-examples-core"/>
+
+	<property name="entryPointClass" value="Examples.TreeView.Program"/>
+    <property name="exampleName" value="TreeView"/>
     <call target="build-examples-core"/>
   </target>
 
