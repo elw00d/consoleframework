@@ -35,3 +35,6 @@ ConsoleFrameworkMono.userprefs
 build/
 Xaml/bin/
 Xaml/obj/
+Web/TestApp/TestApp/bin/
+Web/TestApp/TestApp/obj/
+Web/TestApp/TestApp.suo

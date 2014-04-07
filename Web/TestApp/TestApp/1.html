@@ -1,0 +1,62 @@
+<!DOCTYPE html> 
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  </head>
+  <body onload="onLoad()">    
+  <style>
+	#div1 {
+		font-family: 'Courier New', 'Consolas',monospaced;
+	}
+  </style>
+    <script type="text/javascript">
+      var jsilConfig = {
+        printStackTrace: false,
+        xna: 4,
+ 
+        manifests: [
+          "TestApp.exe"
+        ],
+      };
+
+	  function getRelativePos(mouseEvent, element) {
+		var rect = element.getBoundingClientRect();
+		var scrollTop = document.documentElement.scrollTop?
+						document.documentElement.scrollTop:document.body.scrollTop;
+		var scrollLeft = document.documentElement.scrollLeft?                   
+						document.documentElement.scrollLeft:document.body.scrollLeft;
+		var elementLeft = rect.left+scrollLeft;  
+		var elementTop = rect.top+scrollTop;
+
+			if (document.all){ //detects using IE   
+				//event not evt because of IE
+				x = event.clientX+scrollLeft-elementLeft; 
+				y = event.clientY+scrollTop-elementTop;
+				return {x: x, y: y};
+			}
+			else{
+				x = mouseEvent.pageX-elementLeft;
+				y = mouseEvent.pageY-elementTop;
+				return {x: x, y: y};
+		}
+	}
+    </script>
+    <script src="../Libraries/JSIL.js" type="text/javascript"></script>
+    
+    <!--<canvas id="canvas" width="1280" height="720">
+    </canvas><br>-->
+	<div id="div1" style="background: green; display: inline-block;"></div>
+ 
+    <div id="log"></div>
+ 
+    <script type="text/javascript">
+      function runMain () {
+        // We can't invoke Main() since it disposes the Game immediately, breaking everything.
+        var asm = JSIL.GetAssembly("TestApp", true);
+		asm.TestApp.Program.Main([]);
+        //var game = new asm.TestApp.Program();
+        //game.Run();
+      };
+    </script>
+  </body>
+</html>
