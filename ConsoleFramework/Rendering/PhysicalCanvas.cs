@@ -9,7 +9,7 @@ namespace ConsoleFramework.Rendering
     /// Represents the buffer prepared to output into terminal.
     /// Provides indexer-like access to buffer and method <see cref="Flush(ConsoleFramework.Core.Rect)"/>.
     /// </summary>
-    public sealed class PhysicalCanvas {
+    public class PhysicalCanvas {
         private readonly IntPtr stdOutputHandle = IntPtr.Zero;
 		
 		public PhysicalCanvas(int width, int height) {
@@ -26,7 +26,7 @@ namespace ConsoleFramework.Rendering
         /// <summary>
         /// Buffer to marshal between application and Win32 API layer.
         /// </summary>
-        private CHAR_INFO[,] buffer;
+        protected CHAR_INFO[,] buffer;
 
         /// <summary>
         /// Indexers cache to avoid objects creation on every [][] call.
@@ -159,7 +159,7 @@ namespace ConsoleFramework.Rendering
         /// <summary>
         /// Writes collected data to console screen buffer, but paints specified rect only.
         /// </summary>
-        public void Flush(Rect affectedRect) {
+        public virtual void Flush(Rect affectedRect) {
 			if (stdOutputHandle != IntPtr.Zero) {
 				// we are in windows environment
 	            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,

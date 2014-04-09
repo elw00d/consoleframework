@@ -49,8 +49,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleAdapter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="1.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ConsoleAdapter.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="go.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Binding\Binding.csproj">
+      <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
+      <Name>Binding</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ConsoleFramework\ConsoleFramework.csproj">
+      <Project>{2A59C284-2995-4F37-8D65-411C25C85493}</Project>
+      <Name>ConsoleFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Xaml\Xaml.csproj">
+      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
+      <Name>Xaml</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
