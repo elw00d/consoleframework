@@ -401,12 +401,15 @@ namespace ConsoleFramework.Controls
 
         public Control() {
             Children = children.AsReadOnly();
-            MinWidth = 0;
+            //MinWidth = 0;
             Focusable = false;
             IsFocusScope = false;
             Visibility = Visibility.Visible;
             AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_LostKeyboardFocus));
+            // todo : remove after issue https://github.com/sq/JSIL/issues/388 will be fixed
+            this.Width = null;
+            this.Height = null;
         }
         
         /// <summary>

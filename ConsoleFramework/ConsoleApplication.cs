@@ -189,8 +189,13 @@ namespace ConsoleFramework
 
 		private static readonly bool usingLinux;
 		private static readonly bool isDarwin;
+        private static readonly bool usingJsil;
 
         static ConsoleApplication() {
+#if JSIL
+            usingJsil = true;
+            return;
+#endif
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -218,6 +223,10 @@ namespace ConsoleFramework
         private ConsoleApplication() {
             eventManager = new EventManager();
             focusManager = new FocusManager(eventManager);
+#if !JSIL
+            exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            invokeWaitHandle = new EventWaitHandle( false, EventResetMode.AutoReset );
+#endif
         }
 
         private static volatile ConsoleApplication instance;
@@ -241,8 +250,8 @@ namespace ConsoleFramework
 
         private IntPtr stdInputHandle;
         private IntPtr stdOutputHandle;
-        private readonly EventWaitHandle exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-        private readonly EventWaitHandle invokeWaitHandle = new EventWaitHandle( false, EventResetMode.AutoReset );
+        private readonly EventWaitHandle exitWaitHandle;
+        private readonly EventWaitHandle invokeWaitHandle;
         private int? mainThreadId;
         
         private struct ActionInfo

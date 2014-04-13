@@ -662,13 +662,13 @@ namespace ConsoleFramework.Controls
                                 throw new InvalidOperationException("Separator cannot be added to root menu.");
                             if (((MenuItem)item).Type == MenuItemType.Submenu)
                                 ((MenuItem) item).Type = MenuItemType.RootSubmenu;
-                            stackPanel.Children.Insert( args.Index + i, item );
+                            stackPanel.XChildren.Insert( args.Index + i, item );
                         }
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved:
                         for (int i = 0; i < args.Count; i++)
-                            stackPanel.Children.RemoveAt(args.Index);
+                            stackPanel.XChildren.RemoveAt(args.Index);
                         break;
                     case ListChangedEventType.ItemReplaced: {
                         MenuItemBase item = items[ args.Index ];
@@ -676,7 +676,7 @@ namespace ConsoleFramework.Controls
                             throw new InvalidOperationException("Separator cannot be added to root menu.");
                         if (((MenuItem)item).Type == MenuItemType.Submenu)
                             ((MenuItem)item).Type = MenuItemType.RootSubmenu;
-                        stackPanel.Children[args.Index] = item;
+                        stackPanel.XChildren[args.Index] = item;
                         break;
                     }
                 }

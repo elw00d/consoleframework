@@ -19,7 +19,7 @@ namespace ConsoleFramework.Controls
     /// Может быть самым первым контролом программы (окно не может, к примеру, оно может существовать
     /// только в рамках хоста окон).
     /// </summary>
-    [ContentProperty("Children")]
+    [ContentProperty("XChildren")]
     public class Panel : Control {
         public Panel() {
             children = new UIElementCollection(this);
@@ -45,7 +45,9 @@ namespace ConsoleFramework.Controls
         }
 
         private readonly UIElementCollection children;
-        public new UIElementCollection Children {
+        // todo : rename to Children back after fixing
+        // https://github.com/sq/JSIL/issues/391
+        public new UIElementCollection XChildren {
             get { return children; }
         }
 

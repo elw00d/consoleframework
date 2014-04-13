@@ -26,6 +26,10 @@ namespace ConsoleFramework.Controls
             this.IsFocusScope = true;
             AddHandler(PreviewMouseDownEvent, new MouseButtonEventHandler(Window_OnPreviewMouseDown));
             initialize(  );
+
+            // todo : remove after issue https://github.com/sq/JSIL/issues/388 will be fixed
+            this.X = null;
+            this.Y = null;
         }
 
         protected virtual void initialize( ) {

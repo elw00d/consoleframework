@@ -11,7 +11,8 @@
     <RootNamespace>TestApp</RootNamespace>
     <AssemblyName>TestApp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
@@ -33,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>TestApp.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="JSIL">
       <HintPath>..\..\JSIL\JSIL\bin\JSIL.dll</HintPath>
@@ -50,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleAdapter.cs" />
+    <Compile Include="EventManager2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -79,6 +84,9 @@
       <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
       <Name>Xaml</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

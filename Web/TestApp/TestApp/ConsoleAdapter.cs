@@ -84,7 +84,7 @@ namespace TestApp
         private void initBuffer() {
             for ( int y = 0; y < height; y++ ) {
                 for ( int x = 0; x < width; x++ ) {
-                    buffer[ x, y ] =  new CHAR_INFO(  ) {UnicodeChar = ' '};
+                    buffer[ y, x ] =  new CHAR_INFO(  ) {UnicodeChar = ' '};
                 }
             }
         }
@@ -93,10 +93,10 @@ namespace TestApp
             StringBuilder sb = new StringBuilder( );
             for ( int y = 0; y < height; y++ ) {
                 for ( int x = 0; x < width; x++ ) {
-                    if ( buffer[ x, y ].UnicodeChar == '\0' || buffer[ x, y ].UnicodeChar == ' ' )
+                    if ( buffer[ y, x ].UnicodeChar == '\0' || buffer[ y, x ].UnicodeChar == ' ' )
                         sb.Append( "&nbsp;" );
                     else
-                        sb.Append( buffer[ x, y ] );
+                        sb.Append( buffer[ y, x ].UnicodeChar );
                 }
                 sb.Append( "<br/>" );
             }
@@ -105,6 +105,7 @@ namespace TestApp
 
         public override void Flush( Rect affectedRect ) {
             flushScreen( );
+            Console.WriteLine("Flush called");
         }
     }
 }
