@@ -55,7 +55,8 @@ namespace TestApp
                 if (((int)pos.x) < divWidth && ((int)pos.y) < divHeight) {
                     int coordX = pos.x/( divWidth*1.0/width );
                     int coordY = pos.y/( divHeight*1.0/height );
-                    //Builtins.Global["console"].log(pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
+                    Builtins.Global["console"].log("mousedown " +
+                        pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
                     UserInputReceived.Invoke( this, new UserInputEventArgs( 
                         new INPUT_RECORD(  )
                             {
@@ -109,7 +110,7 @@ namespace TestApp
                 {
                     int coordX = pos.x / (divWidth * 1.0 / width);
                     int coordY = pos.y / (divHeight * 1.0 / height);
-                    //Builtins.Global["console"].log(pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
+//                    Builtins.Global["console"].log("mousemove " + pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
                     UserInputReceived.Invoke(this, new UserInputEventArgs(
                         new INPUT_RECORD()
                         {

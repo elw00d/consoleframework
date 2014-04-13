@@ -22,7 +22,7 @@ namespace ConsoleFramework.Controls
     [ContentProperty("XChildren")]
     public class Panel : Control {
         public Panel() {
-            children = new UIElementCollection(this);
+            xchildren = new UIElementCollection(this);
         }
 
         public Attr Background {
@@ -44,11 +44,11 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private readonly UIElementCollection children;
+        private readonly UIElementCollection xchildren;
         // todo : rename to Children back after fixing
         // https://github.com/sq/JSIL/issues/391
         public new UIElementCollection XChildren {
-            get { return children; }
+            get { return xchildren; }
         }
 
         public new void AddChild(Control control) {

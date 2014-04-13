@@ -293,6 +293,8 @@ namespace ConsoleFramework
         /// </summary>
         public Control RootControl {
             get { return mainControl; }
+            // todo : remove after integrating JSIL code into ConsoleApplication class
+            set { mainControl = value; }
         }
 
         private Control mainControl;

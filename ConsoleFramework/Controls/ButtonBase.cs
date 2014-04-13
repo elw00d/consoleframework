@@ -34,7 +34,7 @@ namespace ConsoleFramework.Controls
         }
         
         public static readonly RoutedEvent ClickEvent = EventManager.RegisterRoutedEvent("Click", 
-            RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(Button));
+            RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ButtonBase));
 
         public event RoutedEventHandler OnClick {
             add {

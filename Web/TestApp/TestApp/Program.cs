@@ -22,11 +22,25 @@ namespace TestApp
 
             WindowsHost windowsHost = new WindowsHost(  );
             Window window = new Window(  );
-            window.Content = new Panel(  )
+            Panel panel = new Panel( )
                 {
-                    Width = 30,
-                    Height = 10
+                    //Width = 30, Height = 10
+                    HorizontalAlignment = HorizontalAlignment.Stretch
                 };
+            panel.XChildren.Add( new TextBlock(  )
+                {
+                    Text = "Text !"
+                });
+            Button button = new Button( )
+                {
+                    Caption = "Button", HorizontalAlignment = HorizontalAlignment.Center
+                };
+            panel.XChildren.Add(button );
+            button.OnClick += ( sender, eventArgs ) => {
+                MessageBox.Show( "Info", "Button pressed !", result => {
+                } );
+            };
+            window.Content = panel;
             window.Title = "Hello, Web !";
             windowsHost.Show( window );
 
@@ -43,6 +57,7 @@ namespace TestApp
             // Fill the canvas by default
             renderer.RootElementRect = new Rect( new Point( 0, 0 ), canvas.Size );
             renderer.RootElement = mainControl;
+            ConsoleApplication.Instance.RootControl = mainControl;
             //
             mainControl.Invalidate();
             renderer.UpdateLayout();
