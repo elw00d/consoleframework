@@ -6,6 +6,7 @@ using System.Threading;
 using ConsoleFramework;
 using ConsoleFramework.Controls;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 using ConsoleFramework.Rendering;
 using JSIL;
 
@@ -33,7 +34,7 @@ namespace TestApp
             //ConsoleApplication.Instance.Run( windowsHost );
         }
 
-        private static void runWindows(Control control) {
+        private static void runWindows(Control mainControl) {
             ConsoleAdapter canvas = new ConsoleAdapter( 80, 25 );
             canvas.Initialize(  );
             
@@ -41,17 +42,33 @@ namespace TestApp
             renderer.Canvas = canvas;
             // Fill the canvas by default
             renderer.RootElementRect = new Rect( new Point( 0, 0 ), canvas.Size );
-            renderer.RootElement = control;
+            renderer.RootElement = mainControl;
             //
-            control.Invalidate();
+            mainControl.Invalidate();
             renderer.UpdateLayout();
             renderer.FinallyApplyChangesToCanvas();
 
             Console.WriteLine("Applied to canvas");
+            EventManager eventManager = ConsoleApplication.Instance.EventManager;
 
             canvas.UserInputReceived += ( sender, args ) => {
-                control.Invalidate();
-                renderer.UpdateLayout();
+//                mainControl.Invalidate();
+//                renderer.UpdateLayout();
+//                renderer.FinallyApplyChangesToCanvas();
+                eventManager.ParseInputEvent( args.InputRecord, mainControl );
+
+                while (true) {
+                    //bool anyInvokeActions = isAnyInvokeActions();
+                    bool anyRoutedEvent = !eventManager.IsQueueEmpty();
+                    bool anyLayoutToRevalidate = renderer.AnyControlInvalidated;
+
+                    if (/*!anyInvokeActions &&*/ !anyRoutedEvent && !anyLayoutToRevalidate)
+                        break;
+
+                    eventManager.ProcessEvents();
+                    //processInvokeActions();
+                    renderer.UpdateLayout();
+                }
                 renderer.FinallyApplyChangesToCanvas();
             };
         }

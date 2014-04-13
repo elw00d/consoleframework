@@ -47,18 +47,15 @@ namespace TestApp
                 e.preventDefault( );
             } ) );
 
+            bool mousePressed = false;
             body.addEventListener("mousedown", new Action<dynamic>(e => {
                 dynamic pos = Builtins.Global["getRelativePos"](e, div);
-                //                Builtins.Global[ "console" ].log(  );
-
                 int divWidth = div.offsetWidth;
                 int divHeight = div.offsetHeight;
                 if (((int)pos.x) < divWidth && ((int)pos.y) < divHeight) {
                     int coordX = pos.x/( divWidth*1.0/width );
                     int coordY = pos.y/( divHeight*1.0/height );
-                    Builtins.Global["console"].log(pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
-                    //buffer[coordX, coordY] = 'X';
-                    //flushScreen();
+                    //Builtins.Global["console"].log(pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
                     UserInputReceived.Invoke( this, new UserInputEventArgs( 
                         new INPUT_RECORD(  )
                             {
@@ -71,6 +68,60 @@ namespace TestApp
                                         dwMousePosition = new COORD((short)coordX, (short)coordY)
                                     }
                             }) );
+                }
+                mousePressed = true;
+                //e.preventDefault( );
+            }));
+
+            body.addEventListener("mouseup", new Action<dynamic>(e =>
+            {
+                dynamic pos = Builtins.Global["getRelativePos"](e, div);
+                int divWidth = div.offsetWidth;
+                int divHeight = div.offsetHeight;
+                if (((int)pos.x) < divWidth && ((int)pos.y) < divHeight)
+                {
+                    int coordX = pos.x / (divWidth * 1.0 / width);
+                    int coordY = pos.y / (divHeight * 1.0 / height);
+                    Builtins.Global["console"].log("mouseup: " + pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
+                    UserInputReceived.Invoke(this, new UserInputEventArgs(
+                        new INPUT_RECORD()
+                        {
+                            EventType = EventType.MOUSE_EVENT,
+                            MouseEvent = new MOUSE_EVENT_RECORD()
+                            {
+                                dwButtonState = 0,
+                                dwControlKeyState = 0,
+                                dwEventFlags = MouseEventFlags.PRESSED_OR_RELEASED,
+                                dwMousePosition = new COORD((short)coordX, (short)coordY)
+                            }
+                        }));
+                }
+                mousePressed = false;
+                //e.preventDefault( );
+            }));
+
+            body.addEventListener("mousemove", new Action<dynamic>(e =>
+            {
+                dynamic pos = Builtins.Global["getRelativePos"](e, div);
+                int divWidth = div.offsetWidth;
+                int divHeight = div.offsetHeight;
+                if (((int)pos.x) < divWidth && ((int)pos.y) < divHeight)
+                {
+                    int coordX = pos.x / (divWidth * 1.0 / width);
+                    int coordY = pos.y / (divHeight * 1.0 / height);
+                    //Builtins.Global["console"].log(pos.x + " " + pos.y + " -> " + coordX + " " + coordY);
+                    UserInputReceived.Invoke(this, new UserInputEventArgs(
+                        new INPUT_RECORD()
+                        {
+                            EventType = EventType.MOUSE_EVENT,
+                            MouseEvent = new MOUSE_EVENT_RECORD()
+                            {
+                                dwButtonState = mousePressed ? MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED : 0,
+                                dwControlKeyState = 0,
+                                dwEventFlags = MouseEventFlags.MOUSE_MOVED,
+                                dwMousePosition = new COORD((short)coordX, (short)coordY)
+                            }
+                        }));
                 }
                 //e.preventDefault( );
             }));
@@ -105,7 +156,7 @@ namespace TestApp
 
         public override void Flush( Rect affectedRect ) {
             flushScreen( );
-            Console.WriteLine("Flush called");
+            //Console.WriteLine("Flush called");
         }
     }
 }
