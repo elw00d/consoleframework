@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
@@ -104,6 +105,7 @@ namespace ConsoleFramework.Controls
                     if (child.DesiredSize.Width > maxWidth)
                         maxWidth = child.DesiredSize.Width;
                 }
+                maxWidth = Math.Max( maxWidth, finalSize.Width );
                 foreach (Control child in base.Children) {
                     int y = totalHeight;
                     int height = child.DesiredSize.Height;
@@ -118,6 +120,7 @@ namespace ConsoleFramework.Controls
                     if (child.DesiredSize.Height > maxHeight)
                         maxHeight = child.DesiredSize.Height;
                 }
+                maxHeight = Math.Max(maxHeight, finalSize.Height);
                 foreach (Control child in base.Children) {
                     int x = totalWidth;
                     int width = child.DesiredSize.Width;

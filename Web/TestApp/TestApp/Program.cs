@@ -24,12 +24,14 @@ namespace TestApp
             Window window = new Window(  );
             Panel panel = new Panel( )
                 {
-                    //Width = 30, Height = 10
+                    Margin = new Thickness(1),
                     HorizontalAlignment = HorizontalAlignment.Stretch
                 };
             panel.XChildren.Add( new TextBlock(  )
                 {
-                    Text = "Text !"
+                    Text = "Press the button",
+                    Margin = new Thickness(0, 0, 0, 1),
+                    HorizontalAlignment = HorizontalAlignment.Center
                 });
             Button button = new Button( )
                 {
@@ -45,7 +47,7 @@ namespace TestApp
             windowsHost.Show( window );
 
             runWindows( windowsHost );
-            //ConsoleApplication.Instance.Run( windowsHost );
+//            ConsoleApplication.Instance.Run( windowsHost );
         }
 
         private static void runWindows(Control mainControl) {
