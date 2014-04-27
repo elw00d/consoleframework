@@ -26,7 +26,7 @@ namespace Binding.Converters
         }
 
         public ConversionResult ConvertBack(Object integer) {
-            return new ConversionResult(((int)integer).ToString(CultureInfo.InvariantCulture) );
+            return new ConversionResult(((int)integer).ToString(/*CultureInfo.InvariantCulture*/) );
         }
     }
 

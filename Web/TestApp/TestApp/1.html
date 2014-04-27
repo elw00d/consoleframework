@@ -30,7 +30,9 @@
       function runMain () {
         // We can't invoke Main() since it disposes the Game immediately, breaking everything.
         var asm = JSIL.GetAssembly("TestApp", true);
-		asm.TestApp.Program.Main([]);
+//        asm.TestApp.Tests.ListFailProgram.Main([]);
+        asm.TestApp.Tests.Program.Main([]);
+
 //          var asm = JSIL.GetAssembly("TestApp", true);
 //          asm.TestApp.Program2.Main([]);
       };
