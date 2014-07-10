@@ -20,7 +20,9 @@ namespace Binding.Converters
                 if (s == null) return new ConversionResult( false, "String is null");
                 int value = int.Parse(( string ) s);
                 return new ConversionResult(value);
-            } catch (FormatException e) {
+            // todo : revert FormatException after fixing issue
+            //} catch (FormatException e) {
+            } catch (Exception e) {
                 return new ConversionResult(false, "Incorrect number");
             }
         }

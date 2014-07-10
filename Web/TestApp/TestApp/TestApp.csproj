@@ -50,7 +50,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>TestApp.Tests.ListFailProgram</StartupObject>
+    <StartupObject>TestApp.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JSIL">
@@ -80,7 +80,6 @@
     <Compile Include="Tests\Binding\ExplicitConverterTest.cs" />
     <Compile Include="Tests\Binding\SimplePropertiesTest.cs" />
     <Compile Include="Tests\Binding\ValidationTest.cs" />
-    <Compile Include="Tests\ListFailProgram.cs" />
     <Compile Include="Tests\Program.cs" />
     <Compile Include="Tests\Xaml\EnumsTest\EnumsTest.cs" />
     <Compile Include="Tests\Xaml\XamlTest.cs" />
@@ -118,6 +117,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="go2.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

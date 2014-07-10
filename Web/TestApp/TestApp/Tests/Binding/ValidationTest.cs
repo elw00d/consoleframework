@@ -73,9 +73,7 @@ namespace TestProject1.Binding
             target.TargetStr = "5";
             Assert.IsTrue( source.SourceInt == 5 );
             target.TargetStr = "invalid int";
-            // todo : uncomment after issue https://github.com/sq/JSIL/issues/449
-            // will have been fixed
-            //Assert.IsTrue(source.SourceInt == 0);
+            Assert.IsTrue(source.SourceInt == 0);
             Assert.IsTrue( lastResult.hasConversionError );
         }
     }
