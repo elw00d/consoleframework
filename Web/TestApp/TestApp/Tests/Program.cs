@@ -19,8 +19,8 @@ namespace TestApp.Tests
             collectionsTest.TestListBinding(  );
             collectionsTest.TestListBinding2(  );
 
-            ExplicitConverterTest explicitConverterTest = new ExplicitConverterTest(  );
-            explicitConverterTest.TestMethod1(  );
+//            ExplicitConverterTest explicitConverterTest = new ExplicitConverterTest(  );
+//            explicitConverterTest.TestMethod1(  );
 
             SimplePropertiesTest simplePropertiesTest = new SimplePropertiesTest(  );
             simplePropertiesTest.TestConversion(  );

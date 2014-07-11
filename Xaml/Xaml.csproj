@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JSIL">
+      <HintPath>..\..\JSIL-master\JSIL\bin\JSIL.dll</HintPath>
+    </Reference>
+    <Reference Include="JSIL.Meta">
+      <HintPath>..\..\JSIL-master\JSIL\bin\JSIL.Meta.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
