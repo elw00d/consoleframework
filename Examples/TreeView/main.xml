@@ -1,5 +1,5 @@
-﻿<Window>
-  <TreeView>
+﻿<Window Title="{Binding SelectedItemTitle, Mode=OneWay}">
+  <TreeView Name="tree">
     <TreeView.Items>
       <TreeItem Title="General" Disabled="True">
         <TreeItem Title="My" Disabled="True"></TreeItem>

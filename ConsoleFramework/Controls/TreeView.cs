@@ -14,7 +14,7 @@ namespace ConsoleFramework.Controls
     }
 
     [ContentProperty("Items")]
-    public class TreeItem : ICommandSource
+    public class TreeItem
     {
         /// <summary>
         /// Pos in TreeView listbox.
@@ -31,6 +31,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        // todo : call listBox.Invalidate() if item is visible now
         public String Title { get; set; }
 
         private bool disabled;
@@ -49,6 +50,7 @@ namespace ConsoleFramework.Controls
         private readonly ObservableList<TreeItem> items = new ObservableList<TreeItem>(
             new List< TreeItem >());
 
+        // todo : handle modifications of this list
         public IList<TreeItem> Items { get { return items; } }
 
         public bool HasChildren {
@@ -58,42 +60,6 @@ namespace ConsoleFramework.Controls
         public IItemsSource ItemsSource { get; set; }
 
         public bool Expanded { get; set; }
-
-        private ICommand command;
-        public ICommand Command {
-            get {
-                return command;
-            }
-            set {
-                if (command != value) {
-                    if (command != null) {
-                        command.CanExecuteChanged -= onCommandCanExecuteChanged;
-                    }
-                    command = value;
-                    command.CanExecuteChanged += onCommandCanExecuteChanged;
-
-                    refreshCanExecute();
-                }
-            }
-        }
-
-        private void onCommandCanExecuteChanged(object sender, EventArgs args) {
-            refreshCanExecute();
-        }
-
-        private void refreshCanExecute() {
-            if (command == null) {
-                this.Disabled = false;
-                return;
-            }
-
-            this.Disabled = !command.CanExecute(CommandParameter);
-        }
-
-        public object CommandParameter {
-            get;
-            set;
-        }
     }
 
     [ContentProperty("Items")]
@@ -109,6 +75,12 @@ namespace ConsoleFramework.Controls
         public IItemsSource ItemsSource { get; set; }
 
         private readonly ListBox listBox;
+
+        public TreeItem SelectedItem {
+            get {
+                return treeItemsFlat[listBox.SelectedItemIndex];
+            }
+        }
 
         public TreeView( ) {
             listBox = new ListBox( );
@@ -147,6 +119,10 @@ namespace ConsoleFramework.Controls
                     expandCollapse(treeItemsFlat[ listBox.SelectedItemIndex ]);
                 }
             }), true );
+
+            listBox.SelectedItemIndexChanged += (sender, args) => {
+                this.RaisePropertyChanged("SelectedItem");
+            };
         }
 
         private readonly List<TreeItem> treeItemsFlat = new List< TreeItem >();
@@ -170,8 +146,7 @@ namespace ConsoleFramework.Controls
 
         private void collapse(TreeItem item) {
             int index = treeItemsFlat.IndexOf(item);
-            for (int i = 0; i < item.Items.Count; i++) {
-                TreeItem child = item.Items[i];
+            foreach (TreeItem child in item.Items) {
                 treeItemsFlat.RemoveAt(index + 1);
                 if (child.Disabled) listBox.DisabledItemsIndexes.Remove(index + 1);
                 listBox.Items.RemoveAt(index + 1);

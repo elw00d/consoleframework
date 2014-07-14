@@ -74,9 +74,18 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private string title;
         public string Title {
-            get;
-            set;
+            get {
+                return title;
+            }
+            set {
+                if (title != value) {
+                    title = value;
+                    Invalidate();
+                    RaisePropertyChanged("Title");
+                }
+            }
         }
 
         protected WindowsHost getWindowsHost()
@@ -205,7 +214,7 @@ namespace ConsoleFramework.Controls
         private int resizingStartWidth;
         private int resizingStartHeight;
         private Point resizingStartPoint;
-
+        
         public void Window_OnMouseDown(object sender, MouseButtonEventArgs args) {
             // перемещение можно начинать только когда окно не ресайзится и наоборот
             if (!moving && !resizing && !closing) {
