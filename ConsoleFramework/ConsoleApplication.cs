@@ -191,11 +191,16 @@ namespace ConsoleFramework
 		private static readonly bool isDarwin;
         private static readonly bool usingJsil;
 
+        public static bool IsRunningOnJsil() {
+            return Type.GetType("JSIL.Pointer") != null;
+        }
+
         static ConsoleApplication() {
-#if JSIL
-            usingJsil = true;
-            return;
-#endif
+            if (IsRunningOnJsil()) {
+                usingJsil = true;
+                return;
+            }
+
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -223,10 +228,11 @@ namespace ConsoleFramework
         private ConsoleApplication() {
             eventManager = new EventManager();
             focusManager = new FocusManager(eventManager);
-#if !JSIL
-            exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-            invokeWaitHandle = new EventWaitHandle( false, EventResetMode.AutoReset );
-#endif
+
+            if (!usingJsil) {
+                exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+                invokeWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            }
         }
 
         private static volatile ConsoleApplication instance;
