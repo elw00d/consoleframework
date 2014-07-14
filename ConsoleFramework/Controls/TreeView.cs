@@ -14,7 +14,7 @@ namespace ConsoleFramework.Controls
     }
 
     [ContentProperty("Items")]
-    public class TreeItem
+    public class TreeItem : ICommandSource
     {
         /// <summary>
         /// Pos in TreeView listbox.
@@ -33,6 +33,19 @@ namespace ConsoleFramework.Controls
 
         public String Title { get; set; }
 
+        private bool disabled;
+        public bool Disabled {
+            get { return disabled; }
+            set {
+                if (disabled != value) {
+                    disabled = value;
+                    // todo : как-то прокинуть своё новое состояние в отображающий его ListBox
+                    //Focusable = !disabled;
+                    //Invalidate();
+                }
+            }
+        }
+
         private readonly ObservableList<TreeItem> items = new ObservableList<TreeItem>(
             new List< TreeItem >());
 
@@ -45,6 +58,42 @@ namespace ConsoleFramework.Controls
         public IItemsSource ItemsSource { get; set; }
 
         public bool Expanded { get; set; }
+
+        private ICommand command;
+        public ICommand Command {
+            get {
+                return command;
+            }
+            set {
+                if (command != value) {
+                    if (command != null) {
+                        command.CanExecuteChanged -= onCommandCanExecuteChanged;
+                    }
+                    command = value;
+                    command.CanExecuteChanged += onCommandCanExecuteChanged;
+
+                    refreshCanExecute();
+                }
+            }
+        }
+
+        private void onCommandCanExecuteChanged(object sender, EventArgs args) {
+            refreshCanExecute();
+        }
+
+        private void refreshCanExecute() {
+            if (command == null) {
+                this.Disabled = false;
+                return;
+            }
+
+            this.Disabled = !command.CanExecute(CommandParameter);
+        }
+
+        public object CommandParameter {
+            get;
+            set;
+        }
     }
 
     [ContentProperty("Items")]
@@ -82,8 +131,8 @@ namespace ConsoleFramework.Controls
                                     prevItem = this.items[ i + args.Index - 1 ];
                                 treeItem.Position = prevItem != null ? prevItem.Position : 0;
                                 listBox.Items.Insert(treeItem.Position, treeItem.GetDisplayTitle() );
-                                // todo : make this not necessary
-                                listBox.Invalidate(  );
+                                if (treeItem.Disabled)
+                                    listBox.DisabledItemsIndexes.Add(treeItem.Position);
                                 treeItemsFlat.Insert( treeItem.Position, treeItem );
                             }
                             break;
@@ -112,6 +161,7 @@ namespace ConsoleFramework.Controls
 
                 // Учесть уровень вложенности в title
                 listBox.Items.Insert(i + index + 1, child.GetDisplayTitle());
+                if (child.Disabled) listBox.DisabledItemsIndexes.Add(i + index + 1);
             }
             for (int k = index + 1 + item.Items.Count; k < treeItemsFlat.Count; k++) {
                 treeItemsFlat[k].Position += item.Items.Count;
@@ -123,6 +173,7 @@ namespace ConsoleFramework.Controls
             for (int i = 0; i < item.Items.Count; i++) {
                 TreeItem child = item.Items[i];
                 treeItemsFlat.RemoveAt(index + 1);
+                if (child.Disabled) listBox.DisabledItemsIndexes.Remove(index + 1);
                 listBox.Items.RemoveAt(index + 1);
                 child.Position = -1;
             }
@@ -154,8 +205,6 @@ namespace ConsoleFramework.Controls
                     expand(child);
                 }
             }
-            // todo : make this not necessary
-            listBox.Invalidate(  );
         }
 
         protected override Size MeasureOverride( Size availableSize ) {

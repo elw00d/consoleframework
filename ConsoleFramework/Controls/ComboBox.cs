@@ -49,7 +49,8 @@ namespace ConsoleFramework.Controls
                 this.shadow = shadow;
                 scrollViewer = new ScrollViewer(  );
                 listbox = new ListBox(  );
-                listbox.Items.AddRange( items );
+                foreach (string item in items) listbox.Items.Add(item);
+//                listbox.Items.AddRange( items );
                 listbox.SelectedItemIndex = selectedItemIndex;
                 if ( shownItemsCount != null )
                     listbox.PageSize = shownItemsCount.Value;

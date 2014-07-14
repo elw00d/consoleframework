@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Binding.Observables;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -10,6 +11,8 @@ namespace ConsoleFramework.Controls
 {
     /// <summary>
     /// Список элементов с возможностью выбрать один из них.
+    /// todo : дополнить поддержку disabledItemsIndexes: при изменении их должно выполняться
+    /// todo : Invalidate(), и они должны быть ненажимаемыми и невыбираемыми
     /// </summary>
     public class ListBox : Control
     {
@@ -19,14 +22,21 @@ namespace ConsoleFramework.Controls
         /// </summary>
         public int? PageSize { get; set; }
 
-        private readonly List<string> items = new List<string>();
-        public List<String>  Items {
+        private readonly ObservableList<string> items = new ObservableList<string>(new List<string>());
+        public IList<String>  Items {
             get { return items; }
         }
         
         private int selectedItemIndex;
 
         public event EventHandler SelectedItemIndexChanged;
+
+        private readonly List<int> disabledItemsIndexes = new List<int>(); 
+        public List<int> DisabledItemsIndexes {
+            get {
+                return disabledItemsIndexes;
+            }
+        } 
 
         public int SelectedItemIndex {
             get { return selectedItemIndex; }
@@ -45,6 +55,38 @@ namespace ConsoleFramework.Controls
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
             AddHandler( MouseMoveEvent, new MouseEventHandler(OnMouseMove));
             AddHandler( MouseWheelEvent, new MouseWheelEventHandler(onMouseWheel) );
+            this.items.ListChanged += (sender, args) => {
+                // Shift indexes of disabled items
+                switch (args.Type) {
+                    case ListChangedEventType.ItemsInserted: {
+                        List<int> disabledIndexesCopy = new List<int>(DisabledItemsIndexes);
+                        foreach (int index in disabledIndexesCopy) {
+                            if (index >= args.Index) {
+                                this.DisabledItemsIndexes.Remove(index);
+                                this.DisabledItemsIndexes.Add(index + args.Count);
+                            }
+                        }
+                        break;
+                    }
+                    case ListChangedEventType.ItemsRemoved: {
+                        List<int> disabledIndexesCopy = new List<int>(DisabledItemsIndexes);
+                        foreach (int index in disabledIndexesCopy) {
+                            if (index >= args.Index) {
+                                this.DisabledItemsIndexes.Remove(index);
+                                this.DisabledItemsIndexes.Add(index - args.Count);
+                            }
+                        }
+                        break;
+                    }
+                    case ListChangedEventType.ItemReplaced: {
+                        // Nothing to do
+                        break;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+                Invalidate();
+            };
         }
 
         private void onMouseWheel( object sender, MouseWheelEventArgs args ) {
@@ -145,11 +187,13 @@ namespace ConsoleFramework.Controls
         {
             Attr selectedAttr = Colors.Blend(Color.White, Color.DarkGreen);
             Attr attr = Colors.Blend(Color.Black, Color.DarkCyan);
+            Attr disabledAttr = Colors.Blend(Color.Gray, Color.DarkCyan);
             for ( int y = 0; y < ActualHeight; y++ ) {
                 string item = y < items.Count ? items[ y ] : null;
 
                 if ( item != null ) {
-                    Attr currentAttr = SelectedItemIndex == y ? selectedAttr : attr;
+                    Attr currentAttr = disabledItemsIndexes.Contains(y) ? disabledAttr :
+                        (SelectedItemIndex == y ? selectedAttr : attr);
 
                     buffer.SetPixel( 0, y, ' ', currentAttr );
                     if ( ActualWidth > 1 ) {

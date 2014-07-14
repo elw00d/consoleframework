@@ -1,8 +1,8 @@
 ﻿<Window>
   <TreeView>
     <TreeView.Items>
-      <TreeItem Title="General">
-        <TreeItem Title="My"></TreeItem>
+      <TreeItem Title="General" Disabled="True">
+        <TreeItem Title="My" Disabled="True"></TreeItem>
         <TreeItem Title="Personal"></TreeItem>
         <TreeItem Title="Stuff"></TreeItem>
         <TreeItem Title="Panel"></TreeItem>
@@ -11,7 +11,7 @@
         <TreeItem Title="More symbols"></TreeItem>
         <TreeItem Title="No options"></TreeItem>
         <TreeItem Title="End of all">
-          <TreeItem Title="More symbols"></TreeItem>
+          <TreeItem Title="More symbols" Disabled="True"></TreeItem>
           <TreeItem Title="No options"></TreeItem>
           <TreeItem Title="More symbols"></TreeItem>
           <TreeItem Title="No options"></TreeItem>
