@@ -310,6 +310,17 @@ namespace ConsoleFramework.Rendering
             }
         }
 
+        private bool checkDesiredSizeNotChangedRecursively( Control control ) {
+            if ( control.lastLayoutInfo.unclippedDesiredSize != control.layoutInfo.unclippedDesiredSize ) {
+                return false;
+            }
+            foreach ( Control child in control.Children ) {
+                if ( !checkDesiredSizeNotChangedRecursively( child ) )
+                    return false;
+            }
+            return true;
+        }
+
         private void updateLayout(Control control, List<Control> revalidatedControls) {
             LayoutInfo lastLayoutInfo = control.lastLayoutInfo;
             // работаем с родительским элементом управления
@@ -321,7 +332,8 @@ namespace ConsoleFramework.Rendering
                 // возвращаем управление
                 if (lastLayoutInfo.validity != LayoutValidity.Nothing) {
                     control.Measure(lastLayoutInfo.measureArgument);
-                    if (lastLayoutInfo.unclippedDesiredSize == control.layoutInfo.unclippedDesiredSize) {
+//                    if (lastLayoutInfo.unclippedDesiredSize == control.layoutInfo.unclippedDesiredSize) {
+                    if (checkDesiredSizeNotChangedRecursively(control)) {
                         needUpdateParentLayout = false;
                     }
                 }
@@ -397,6 +409,15 @@ namespace ConsoleFramework.Rendering
             renderingUpdatedControls.Add(control);
         }
 
+        private bool checkRenderingWasNotChangedRecursively( Control control ) {
+            if ( !control.lastLayoutInfo.Equals( control.layoutInfo ) 
+                || control.lastLayoutInfo.validity != LayoutValidity.Render ) return false;
+            foreach ( Control child in control.Children ) {
+                if ( !checkRenderingWasNotChangedRecursively( child ) ) return false;
+            }
+            return true;
+        }
+
         private RenderingBuffer processControl(Control control, List<Control> revalidatedControls) {
             RenderingBuffer buffer = getOrCreateBufferForControl(control);
             RenderingBuffer fullBuffer = getOrCreateFullBufferForControl(control);
@@ -407,7 +428,8 @@ namespace ConsoleFramework.Rendering
             control.Measure(lastLayoutInfo.measureArgument);
             control.Arrange(lastLayoutInfo.renderSlotRect);
             // if lastLayoutInfo eq layoutInfo we can use last rendered buffer
-            if (layoutInfo.Equals(lastLayoutInfo) && lastLayoutInfo.validity == LayoutValidity.Render) {
+//            if (layoutInfo.Equals(lastLayoutInfo) && lastLayoutInfo.validity == LayoutValidity.Render) {
+            if (checkRenderingWasNotChangedRecursively(control)) {
                 if (control.SetValidityToRender()) {
                     revalidatedControls.Add(control);
                 }

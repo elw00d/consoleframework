@@ -33,10 +33,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="JSIL">
-      <HintPath>..\..\JSIL-master\JSIL\bin\JSIL.dll</HintPath>
+      <HintPath>..\Web\JSIL\JSIL.dll</HintPath>
     </Reference>
     <Reference Include="JSIL.Meta">
-      <HintPath>..\..\JSIL-master\JSIL\bin\JSIL.Meta.dll</HintPath>
+      <HintPath>..\Web\JSIL\JSIL.Meta.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

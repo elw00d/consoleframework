@@ -1,22 +1,28 @@
 ﻿<Window Title="{Binding SelectedItemTitle, Mode=OneWay}">
-  <TreeView Name="tree">
-    <TreeView.Items>
-      <TreeItem Title="General" Disabled="True">
-        <TreeItem Title="My" Disabled="True"></TreeItem>
-        <TreeItem Title="Personal"></TreeItem>
-        <TreeItem Title="Stuff"></TreeItem>
-        <TreeItem Title="Panel"></TreeItem>
-      </TreeItem>
-      <TreeItem Title="Specific">
-        <TreeItem Title="More symbols"></TreeItem>
-        <TreeItem Title="No options"></TreeItem>
-        <TreeItem Title="End of all">
-          <TreeItem Title="More symbols" Disabled="True"></TreeItem>
-          <TreeItem Title="No options"></TreeItem>
+  <Panel Orientation="Horizontal">
+<!--  <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}">-->
+    <TreeView Name="tree">
+      <TreeView.Items>
+        <TreeItem Title="General" Disabled="True">
+          <TreeItem Title="My" Disabled="True"></TreeItem>
+          <TreeItem Title="Personal"></TreeItem>
+          <TreeItem Title="Stuff"></TreeItem>
+          <TreeItem Title="Panel"></TreeItem>
+        </TreeItem>
+        <TreeItem Title="Specific">
           <TreeItem Title="More symbols"></TreeItem>
           <TreeItem Title="No options"></TreeItem>
+          <TreeItem Title="End of all">
+            <TreeItem Title="More symbols" Disabled="True"></TreeItem>
+            <TreeItem Title="No options"></TreeItem>
+            <TreeItem Title="More symbols"></TreeItem>
+            <TreeItem Title="No options"></TreeItem>
+          </TreeItem>
         </TreeItem>
-      </TreeItem>
-    </TreeView.Items>
-  </TreeView>
+      </TreeView.Items>
+    </TreeView>
+<!--  </GroupBox>-->
+<!--    <Button>sdfsf</Button>-->
+<!--    <Button>sdfsf</Button>-->
+  </Panel>
 </Window>

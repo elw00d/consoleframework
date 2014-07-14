@@ -453,6 +453,11 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
+        /// Вызывается когда у контрола вызван метод Invalidate().
+        /// </summary>
+        public event EventHandler Invalidated;
+
+        /// <summary>
         /// Когда состояние LayoutValidity контрола сбрасывается методом ResetValidity
         /// Это происходит при вызове Renderer.InvalidateLayout(), а не сразу же после вызова
         /// control.Invalidate() - последний лишь добавляет его в очередь.
@@ -1006,6 +1011,7 @@ namespace ConsoleFramework.Controls
         public void Invalidate() {
             if (this.attachedToVisualTree) {
                 ConsoleApplication.Instance.Renderer.AddControlToInvalidationQueue(this);
+                if (Invalidated != null) Invalidated.Invoke( this, EventArgs.Empty );
             }
         }
 
