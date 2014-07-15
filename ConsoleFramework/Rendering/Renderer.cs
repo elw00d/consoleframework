@@ -91,14 +91,14 @@ namespace ConsoleFramework.Rendering
         /// </summary>
         public void FinallyApplyChangesToCanvas( bool forceRepaintAll = false ) {
             Rect affectedRect = Rect.Empty;
+
+            // Propagate updated rendered buffers to parent elements and eventually to Canvas
+            foreach (Control control in renderingUpdatedControls) {
+                Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
+                affectedRect.Union(currentAffectedRect);
+            }
 			if ( forceRepaintAll ) {
 			    affectedRect = new Rect( rootElementRect.Size );
-			} else {
-                // Propagate updated rendered buffers to parent elements and eventually to Canvas
-			    foreach (Control control in renderingUpdatedControls) {
-                    Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
-                    affectedRect.Union(currentAffectedRect);
-                }
 			}
 
             // Flush stored image (with this.RootElementRect offset)
