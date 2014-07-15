@@ -130,11 +130,10 @@ namespace ConsoleFramework.Controls
                     buffer.SetOpacity( 1, ActualHeight - 1, 2+4 );
                     buffer.SetOpacity( ActualWidth - 1, 0, 2+4 );
                     buffer.SetOpacityRect( ActualWidth - 1, 1, 1, ActualHeight - 1, 1+4 );
-                    buffer.FillRectangle( ActualWidth - 1, 1, 1, ActualHeight - 1, '\u2588', borderAttrs );
+                    buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 1, UnicodeTable.FullBlock, borderAttrs);
                     buffer.SetOpacityRect( 2, ActualHeight - 1, ActualWidth - 2, 1, 3+4 );
-                    buffer.FillRectangle( 2, ActualHeight - 1, ActualWidth - 2, 1, '\u2580',
+                    buffer.FillRectangle(2, ActualHeight - 1, ActualWidth - 2, 1, UnicodeTable.UpperHalfBlock,
                                           Attr.NO_ATTRIBUTES );
-                    //buffer.SetPixel( ActualWidth-1,ActualHeight-1, '\u2598' );
                 }
             }
 

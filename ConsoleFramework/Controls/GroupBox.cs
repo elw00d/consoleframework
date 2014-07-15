@@ -89,31 +89,31 @@ namespace ConsoleFramework.Controls
             for ( int x = 0; x < ActualWidth; x++ ) {
                 char? c = null;
                 if ( x == 0 )
-                    c = '\u250C';
+                    c = UnicodeTable.SingleFrameTopLeftCorner;
                 else if (x == ActualWidth - 1)
-                    c = '\u2510';
+                    c = UnicodeTable.SingleFrameTopRightCorner;
                 else if (x == 1 || x == 2 + titleRenderedWidth)
                     c = ' ';
                 else if ( x > 2 + titleRenderedWidth && x < ActualWidth - 1 )
-                    c = '\u2500';
+                    c = UnicodeTable.SingleFrameHorizontal;
                 if (c != null)
                     buffer.SetPixel( x, 0, c.Value, attr );
             }
             // left border
             if (ActualHeight > 2)
-                buffer.FillRectangle( 0, 1, 1, ActualHeight - 2, '\u2502', attr );
+                buffer.FillRectangle(0, 1, 1, ActualHeight - 2, UnicodeTable.SingleFrameVertical, attr);
             if (ActualHeight > 1)
-                buffer.SetPixel( 0, ActualHeight-1, '\u2514', attr );
+                buffer.SetPixel(0, ActualHeight - 1, UnicodeTable.SingleFrameBottomLeftCorner, attr);
             // right border
             if ( ActualWidth > 1 ) {
                 if (ActualHeight > 2)
-                    buffer.FillRectangle( ActualWidth - 1, 1, 1, ActualHeight - 2, '\u2502', attr );
+                    buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - 2, UnicodeTable.SingleFrameVertical, attr);
                 if (ActualHeight > 1)
-                    buffer.SetPixel( ActualWidth-1, ActualHeight-1, '\u2518', attr );
+                    buffer.SetPixel(ActualWidth - 1, ActualHeight - 1, UnicodeTable.SingleFrameBottomRightCorner, attr);
             }
             // bottom border
             if ( ActualHeight > 1 && ActualWidth > 2 ) {
-                buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 2, 1, '\u2500', attr);
+                buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 2, 1, UnicodeTable.SingleFrameHorizontal, attr);
             }
         }
     }

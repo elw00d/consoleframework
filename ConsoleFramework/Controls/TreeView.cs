@@ -25,7 +25,7 @@ namespace ConsoleFramework.Controls
 
         internal String GetDisplayTitle( ) {
             if ( Items.Count != 0 ) {
-                return new string(' ', Level * 2) + (Expanded ? "\u25bc" : "\u25ba") + " " + Title; // ► todo : extract constants
+                return new string(' ', Level * 2) + (Expanded ? UnicodeTable.ArrowDown : UnicodeTable.ArrowRight) + " " + Title;
             } else {
                 return new string(' ', Level * 2) + "  " + Title;
             }

@@ -191,7 +191,7 @@ namespace ConsoleFramework.Controls
         public string TitleRight {
             get {
                 if ( titleRight == null && Type == MenuItemType.Submenu )
-                    return "\u25ba"; // ► todo : extract constant
+                    return new string(UnicodeTable.ArrowRight, 1);
                 return titleRight;
             }
             set { titleRight = value; }
@@ -406,9 +406,9 @@ namespace ConsoleFramework.Controls
                     buffer.SetOpacity(0, ActualHeight - 1, 2 + 4);
                     buffer.SetOpacity(ActualWidth - 1, 1, 2 + 4);
                     buffer.SetOpacityRect(ActualWidth - 1, 2, 1, ActualHeight - 2, 1 + 4);
-                    buffer.FillRectangle(ActualWidth - 1, 2, 1, ActualHeight - 2, '\u2588', borderAttrs);
+                    buffer.FillRectangle(ActualWidth - 1, 2, 1, ActualHeight - 2, UnicodeTable.FullBlock, borderAttrs);
                     buffer.SetOpacityRect(1, ActualHeight - 1, ActualWidth - 1, 1, 3 + 4);
-                    buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 1, 1, '\u2580',
+                    buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - 1, 1, UnicodeTable.UpperHalfBlock,
                                           Attr.NO_ATTRIBUTES);
                 }
 

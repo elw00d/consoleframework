@@ -251,14 +251,16 @@ namespace ConsoleFramework.Controls
 
             if ( horizontalScrollVisible ) {
                 buffer.SetOpacityRect( 0, ActualHeight-1, ActualWidth, 1, 0 );
-                buffer.SetPixel(0, ActualHeight - 1, '\u25C4', attr); // ◄
+                buffer.SetPixel(0, ActualHeight - 1, UnicodeTable.ArrowLeft, attr); // ◄
                 // оставляем дополнительный пиксель справа, если одновременно видны оба скроллбара
                 int rightOffset = verticalScrollVisible ? 1 : 0;
                 if ( ActualWidth > 2 + rightOffset ) {
-                    buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - (2 + rightOffset), 1, '\u2592', attr); // ▒
+                    buffer.FillRectangle(1, ActualHeight - 1, ActualWidth - (2 + rightOffset), 1, 
+                        UnicodeTable.MediumShade, attr); // ▒
                 }
                 if ( ActualWidth > 1 + rightOffset ) {
-                    buffer.SetPixel(ActualWidth - (1 + rightOffset), ActualHeight - 1, '\u25BA', attr); // ►
+                    buffer.SetPixel(ActualWidth - (1 + rightOffset), ActualHeight - 1,
+                        UnicodeTable.ArrowRight, attr); // ►
                 }
 
                 // определим, в каком месте находится ползунок
@@ -280,22 +282,22 @@ namespace ConsoleFramework.Controls
                         scrollerPos = ( int ) Math.Round( deltaX/( deltaInPos ) );
                     }
 
-                    buffer.SetPixel( 1 + scrollerPos, ActualHeight - 1, '\u25A0', attr ); // ■
+                    buffer.SetPixel(1 + scrollerPos, ActualHeight - 1, UnicodeTable.BlackSquare, attr); // ■
                 } else if ( ActualWidth == 3 + ( verticalScrollVisible ? 1 : 0 ) ) {
-                    buffer.SetPixel(1, ActualHeight - 1, '\u25A0', attr); // ■
+                    buffer.SetPixel(1, ActualHeight - 1, UnicodeTable.BlackSquare, attr); // ■
                 }
             }
             if ( verticalScrollVisible ) {
                 buffer.SetOpacityRect(ActualWidth-1, 0, 1, ActualHeight, 0);
 
-                buffer.SetPixel(ActualWidth - 1, 0, '\u25B2', attr); // ▲
+                buffer.SetPixel(ActualWidth - 1, 0, UnicodeTable.ArrowUp, attr); // ▲
                 // оставляем дополнительный пиксель снизу, если одновременно видны оба скроллбара
                 int downOffset = horizontalScrollVisible ? 1 : 0;
                 if ( ActualHeight > 2 + downOffset ) {
-                    buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - (2 + downOffset), '\u2592', attr); // ▒
+                    buffer.FillRectangle(ActualWidth - 1, 1, 1, ActualHeight - (2 + downOffset), UnicodeTable.MediumShade, attr); // ▒
                 }
                 if ( ActualHeight > 1 + downOffset ) {
-                    buffer.SetPixel(ActualWidth - 1, ActualHeight - (1 + downOffset), '\u25BC', attr); // ▼
+                    buffer.SetPixel(ActualWidth - 1, ActualHeight - (1 + downOffset), UnicodeTable.ArrowDown, attr); // ▼
                 }
 
                 // определим, в каком месте находится ползунок
@@ -317,13 +319,13 @@ namespace ConsoleFramework.Controls
                         scrollerPos = ( int ) Math.Round( deltaY/( deltaInPos ) );
                     }
 
-                    buffer.SetPixel( ActualWidth - 1, 1 + scrollerPos, '\u25A0', attr ); // ■
+                    buffer.SetPixel(ActualWidth - 1, 1 + scrollerPos, UnicodeTable.BlackSquare, attr); // ■
                 } else if ( ActualHeight == 3 + ( horizontalScrollVisible ? 1 : 0 ) ) {
-                    buffer.SetPixel(ActualWidth - 1, 1, '\u25A0', attr); // ■
+                    buffer.SetPixel(ActualWidth - 1, 1, UnicodeTable.BlackSquare, attr); // ■
                 }
             }
             if ( horizontalScrollVisible && verticalScrollVisible ) {
-                buffer.SetPixel(ActualWidth - 1, ActualHeight - 1, '\u2518', attr); // ┘
+                buffer.SetPixel(ActualWidth - 1, ActualHeight - 1, UnicodeTable.SingleFrameBottomRightCorner, attr); // ┘
             }
         }
     }

@@ -162,18 +162,6 @@ namespace ConsoleFramework.Controls
 
         public Grid( ) {
             children = new UIElementCollection(this);
-//            children.CollectionChanged += ( sender, args ) => {
-//                if ( null != args.OldItems ) {
-//                    foreach ( var oldItem in args.OldItems ) {
-//                        RemoveChild( ( Control ) oldItem );
-//                    }
-//                }
-//                if ( null != args.NewItems ) {
-//                    foreach ( var newItem in args.NewItems ) {
-//                        AddChild( ( Control ) newItem );
-//                    }
-//                }
-//            };
         }
 
         protected override Size MeasureOverride( Size availableSize ) {

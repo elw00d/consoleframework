@@ -23,9 +23,9 @@ namespace ConsoleFramework.Controls
 
         public override void Render( RenderingBuffer buffer ) {
             Attr attr = Colors.Blend( Color.DarkCyan, Color.DarkBlue );
-            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, '\u2592', attr); // ▒
+            buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, UnicodeTable.MediumShade, attr);
             int filled = ( int ) ( ActualWidth*( Percent*0.01 ) );
-            buffer.FillRectangle(0, 0, filled, ActualHeight, '\u2593', attr); // ▓
+            buffer.FillRectangle(0, 0, filled, ActualHeight, UnicodeTable.DarkShade, attr);
         }
     }
 }
