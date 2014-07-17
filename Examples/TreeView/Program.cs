@@ -80,11 +80,6 @@ namespace Examples.TreeView
             ConsoleFramework.Controls.TreeView tree = mainWindow.FindChildByName<ConsoleFramework.Controls.TreeView>("tree");
             // todo : придумать способ для того, чтобы обходиться без такого костыля
             context.Items = tree.Items;
-            tree.PropertyChanged += (sender, eventArgs) => {
-                if (eventArgs.PropertyName == "SelectedItem") {
-                    context.SelectedItem = tree.SelectedItem;
-                }
-            };
             ConsoleApplication.Instance.Run(windowsHost);
         }
     }

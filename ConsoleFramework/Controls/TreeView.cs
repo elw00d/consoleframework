@@ -78,6 +78,7 @@ namespace ConsoleFramework.Controls
 
         public TreeItem SelectedItem {
             get {
+                if (treeItemsFlat.Count == 0) return null;
                 return treeItemsFlat[listBox.SelectedItemIndex];
             }
         }
@@ -131,13 +132,15 @@ namespace ConsoleFramework.Controls
                             for (int j = treeItem.Position; j < treeItemsFlat.Count; j++) {
                                 treeItemsFlat[j].Position++;
                             }
+                            treeItemsFlat.Insert(treeItem.Position, treeItem);
                             listBox.Items.Insert(treeItem.Position, treeItem.GetDisplayTitle());
                             if (treeItem.Disabled)
                                 listBox.DisabledItemsIndexes.Add(treeItem.Position);
-                            treeItemsFlat.Insert(treeItem.Position, treeItem);
-
+                            
                             // Handle modification of inner list recursively
                             subscribeToListChanged(treeItem.items, ItemsOnListChanged);
+                            if (treeItem.Position <= listBox.SelectedItemIndex)
+                                RaisePropertyChanged("SelectedItem");
                         }
                         break;
                     }
@@ -153,6 +156,10 @@ namespace ConsoleFramework.Controls
 
                             // Cleanup event handler recursively
                             unsubscribeFromListChanged(treeItem.items, ItemsOnListChanged);
+
+                            if (listBox.SelectedItemIndex >= treeItem.Position) {
+                                RaisePropertyChanged("SelectedItem");
+                            }
                         }
                         break;
                     }

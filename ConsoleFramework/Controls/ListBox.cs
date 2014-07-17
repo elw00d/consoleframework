@@ -66,6 +66,9 @@ namespace ConsoleFramework.Controls
                                 this.DisabledItemsIndexes.Add(index + args.Count);
                             }
                         }
+                        if (selectedItemIndex >= args.Index) {
+                            SelectedItemIndex = Math.Min(items.Count - 1, selectedItemIndex + args.Count);
+                        }
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved: {
@@ -75,6 +78,9 @@ namespace ConsoleFramework.Controls
                                 this.DisabledItemsIndexes.Remove(index);
                                 this.DisabledItemsIndexes.Add(index - args.Count);
                             }
+                        }
+                        if (selectedItemIndex >= args.Index) {
+                            SelectedItemIndex = Math.Max(0, selectedItemIndex - args.Count);
                         }
                         break;
                     }

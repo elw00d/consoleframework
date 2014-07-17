@@ -1,7 +1,7 @@
 ﻿<Window Title="{Binding SelectedItemTitle, Mode=OneWay}">
   <Panel Orientation="Horizontal">
   <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}">
-    <TreeView Name="tree">
+    <TreeView Name="tree" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
       <TreeView.Items>
         <TreeItem Title="General" Disabled="True">
           <TreeItem Title="My" Disabled="True"></TreeItem>
