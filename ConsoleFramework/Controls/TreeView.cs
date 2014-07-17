@@ -47,7 +47,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private readonly ObservableList<TreeItem> items = new ObservableList<TreeItem>(
+        internal readonly ObservableList<TreeItem> items = new ObservableList<TreeItem>(
             new List< TreeItem >());
 
         // todo : handle modifications of this list
@@ -92,28 +92,8 @@ namespace ConsoleFramework.Controls
             this.VerticalAlignment = VerticalAlignment.Stretch;
 
             this.AddChild( listBox );
-            this.items.ListChanged += ( sender, args ) => {
-                switch ( args.Type ) {
-                    case ListChangedEventType.ItemsInserted:
-                        {
-                            for ( int i = 0; i < args.Count; i++ ) {
-                                TreeItem treeItem = this.items[ i + args.Index ];
-                                TreeItem prevItem = null;
-                                if (i + args.Index - 1 >= 0)
-                                    prevItem = this.items[ i + args.Index - 1 ];
-                                treeItem.Position = prevItem != null ? prevItem.Position : 0;
-                                listBox.Items.Insert(treeItem.Position, treeItem.GetDisplayTitle() );
-                                if (treeItem.Disabled)
-                                    listBox.DisabledItemsIndexes.Add(treeItem.Position);
-                                treeItemsFlat.Insert( treeItem.Position, treeItem );
-                            }
-                            break;
-                        }
-                    default:
-                        // todo : handle other event types
-                        throw new NotSupportedException();
-                }
-            };
+            this.items.ListChanged += ItemsOnListChanged;
+
             this.AddHandler( MouseDownEvent, new MouseEventHandler(( sender, args ) => {
                 if ( args.Handled ) {
                     expandCollapse(treeItemsFlat[ listBox.SelectedItemIndex ]);
@@ -123,6 +103,63 @@ namespace ConsoleFramework.Controls
             listBox.SelectedItemIndexChanged += (sender, args) => {
                 this.RaisePropertyChanged("SelectedItem");
             };
+        }
+
+        private static void subscribeToListChanged(ObservableList<TreeItem> items, ListChangedHandler handler) {
+            items.ListChanged += handler;
+            foreach (TreeItem item in items) {
+                subscribeToListChanged(item.items, handler);
+            }
+        }
+
+        private static void unsubscribeFromListChanged(ObservableList<TreeItem> items, ListChangedHandler handler) {
+            items.ListChanged -= handler;
+            foreach (TreeItem item in items) {
+                unsubscribeFromListChanged(item.items, handler);
+            }
+        }
+
+        private void ItemsOnListChanged(object sender, ListChangedEventArgs args) {
+            switch (args.Type) {
+                case ListChangedEventType.ItemsInserted: {
+                        for (int i = 0; i < args.Count; i++) {
+                            TreeItem treeItem = this.items[i + args.Index];
+                            TreeItem prevItem = null;
+                            if (i + args.Index - 1 >= 0)
+                                prevItem = this.items[i + args.Index - 1];
+                            treeItem.Position = prevItem != null ? prevItem.Position : 0;
+                            for (int j = treeItem.Position; j < treeItemsFlat.Count; j++) {
+                                treeItemsFlat[j].Position++;
+                            }
+                            listBox.Items.Insert(treeItem.Position, treeItem.GetDisplayTitle());
+                            if (treeItem.Disabled)
+                                listBox.DisabledItemsIndexes.Add(treeItem.Position);
+                            treeItemsFlat.Insert(treeItem.Position, treeItem);
+
+                            // Handle modification of inner list recursively
+                            subscribeToListChanged(treeItem.items, ItemsOnListChanged);
+                        }
+                        break;
+                    }
+                case ListChangedEventType.ItemsRemoved: {
+                        foreach (TreeItem treeItem in args.RemovedItems.Cast<TreeItem>()) {
+                            if (treeItem.Expanded)
+                                collapse(treeItem);
+                            treeItemsFlat.RemoveAt(treeItem.Position);
+                            listBox.Items.RemoveAt(treeItem.Position);
+                            for (int j = treeItem.Position; j < treeItemsFlat.Count; j++) {
+                                treeItemsFlat[j].Position--;
+                            }
+
+                            // Cleanup event handler recursively
+                            unsubscribeFromListChanged(treeItem.items, ItemsOnListChanged);
+                        }
+                        break;
+                    }
+                default:
+                    // todo : handle other event types
+                    throw new NotSupportedException();
+            }
         }
 
         private readonly List<TreeItem> treeItemsFlat = new List< TreeItem >();

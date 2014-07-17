@@ -1,6 +1,6 @@
 ﻿<Window Title="{Binding SelectedItemTitle, Mode=OneWay}">
   <Panel Orientation="Horizontal">
-<!--  <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}">-->
+  <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}">
     <TreeView Name="tree">
       <TreeView.Items>
         <TreeItem Title="General" Disabled="True">
@@ -21,8 +21,8 @@
         </TreeItem>
       </TreeView.Items>
     </TreeView>
-<!--  </GroupBox>-->
-<!--    <Button>sdfsf</Button>-->
+  </GroupBox>
+    <Button Command="{Binding RemoveCommand, Mode=OneTime}">Remove item</Button>
 <!--    <Button>sdfsf</Button>-->
   </Panel>
 </Window>
