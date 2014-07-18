@@ -22,7 +22,10 @@
       </TreeView.Items>
     </TreeView>
   </GroupBox>
+    <Panel Orientation="Vertical">
     <Button Command="{Binding RemoveCommand, Mode=OneTime}">Remove item</Button>
+    <Button Command="{Binding ExpandCollapseCommand, Mode=OneTime}">Expand / Collapse</Button>
+    </Panel>
 <!--    <Button>sdfsf</Button>-->
   </Panel>
 </Window>
