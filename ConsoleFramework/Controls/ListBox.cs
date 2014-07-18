@@ -45,6 +45,7 @@ namespace ConsoleFramework.Controls
                     selectedItemIndex = value;
                     if (null != SelectedItemIndexChanged)
                         SelectedItemIndexChanged( this, EventArgs.Empty);
+                    Invalidate();
                 }
             }
         }
@@ -117,7 +118,7 @@ namespace ConsoleFramework.Controls
 
         private void OnMouseDown( object sender, MouseButtonEventArgs args ) {
             int index = args.GetPosition( this ).Y;
-            if ( SelectedItemIndex != index ) {
+            if ( !disabledItemsIndexes.Contains(index) && SelectedItemIndex != index) {
                 SelectedItemIndex = index;
                 Invalidate(  );
             }
@@ -126,14 +127,24 @@ namespace ConsoleFramework.Controls
 
         private void pageUpCore( int? pageSize ) {
             if ( pageSize == null ) {
-                if ( SelectedItemIndex != 0 ) {
-                    SelectedItemIndex = 0;
-                    Invalidate( );
+                int firstEnabledIndex = 0;
+                bool found = false;
+                for (int i = 0; i < items.Count && !found; i++) {
+                    if (!disabledItemsIndexes.Contains(firstEnabledIndex)) found = true;
+                    else firstEnabledIndex = (firstEnabledIndex + 1) % items.Count;
                 }
+                if (found && selectedItemIndex != firstEnabledIndex) {
+                    SelectedItemIndex = firstEnabledIndex;
+                }
+//                if ( SelectedItemIndex != 0 ) {
+//                    SelectedItemIndex = 0;
+//                    Invalidate( );
+//                }
             } else {
                 if ( SelectedItemIndex != 0 ) {
+                    // todo : fix here too
                     SelectedItemIndex = Math.Max(0, SelectedItemIndex - pageSize.Value);
-                    Invalidate(  );
+//                    Invalidate(  );
                 }
             }
         }

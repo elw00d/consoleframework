@@ -110,10 +110,15 @@ namespace ConsoleFramework.Controls
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved:
-                        // todo : set ParentItem of removed items to null
+                        foreach (object removedItem in args.RemovedItems) {
+                            if (removedItem is MenuItem)
+                                (removedItem as MenuItem).ParentItem = null;
+                        }
                         break;
                     case ListChangedEventType.ItemReplaced: {
-                        // todo : set ParentItem of replaced item to null
+                        object removedItem = args.RemovedItems[0];
+                        if (removedItem is MenuItem)
+                            (removedItem as MenuItem).ParentItem = null;
 
                         MenuItemBase itemBase = items[args.Index];
                         if (itemBase is MenuItem) {
