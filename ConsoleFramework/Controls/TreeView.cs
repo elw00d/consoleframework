@@ -125,8 +125,8 @@ namespace ConsoleFramework.Controls
             this.AddChild( listBox );
             this.items.ListChanged += ItemsOnListChanged;
 
-            this.AddHandler( MouseDownEvent, new MouseEventHandler(( sender, args ) => {
-                if ( args.Handled ) {
+            listBox.AddHandler( MouseDownEvent, new MouseEventHandler(( sender, args ) => {
+                if ( !args.Handled ) {
                     expandCollapse(treeItemsFlat[ listBox.SelectedItemIndex ]);
                 }
             }), true );
@@ -251,9 +251,19 @@ namespace ConsoleFramework.Controls
             for (int k = index + 1 + item.Items.Count; k < treeItemsFlat.Count; k++) {
                 treeItemsFlat[k].Position += item.Items.Count;
             }
+
+            // Children are expanded too according to their Expanded stored state
+            foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
+                expand(child);
+            }
         }
 
         private void collapse(TreeItem item) {
+            // Children are collapsed but with Expanded state saved
+            foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
+                collapse(child);
+            }
+
             int index = treeItemsFlat.IndexOf(item);
             foreach (TreeItem child in item.Items) {
                 treeItemsFlat.RemoveAt(index + 1);
@@ -269,11 +279,6 @@ namespace ConsoleFramework.Controls
         private void expandCollapse( TreeItem item ) {
             int index = treeItemsFlat.IndexOf(item);
             if ( item.Expanded ) {
-                // Children are collapsed but with Expanded state saved
-                foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
-                    collapse(child);
-                }
-
                 collapse(item);
                 item.expanded = false;
                 // Need to update item string (because Expanded status has been changed)
@@ -283,11 +288,6 @@ namespace ConsoleFramework.Controls
                 item.expanded = true;
                 // Need to update item string (because Expanded status has been changed)
                 listBox.Items[index] = item.DisplayTitle;
-
-                // Children are expanded too according to their Expanded stored state
-                foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
-                    expand(child);
-                }
             }
         }
 

@@ -35,6 +35,22 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private bool fitSizeToContent = false;
+        /// <summary>
+        /// If true, child will always win in layout battle.
+        /// If false (default), parent will always win (and groupbox size
+        /// will be constrained according to passed availableSize).
+        /// </summary>
+        public bool FitSizeToContent { 
+            get { return fitSizeToContent; }
+            set {
+                if ( fitSizeToContent != value ) {
+                    fitSizeToContent = value;
+                    Invalidate(  );
+                }
+            } 
+        }
+
         protected override Size MeasureOverride(Size availableSize)
         {
             Size contentSize = Size.Empty;
@@ -46,6 +62,8 @@ namespace ConsoleFramework.Controls
                 Math.Max( contentSize.Width + 2, (title??string.Empty).Length + 4 ),
                 contentSize.Height + 2
                 );
+            if ( fitSizeToContent ) return needSize;
+
             Size constrainedSize = new Size(
                 Math.Min( needSize.Width, availableSize.Width ),
                 Math.Min( needSize.Height, availableSize.Height )

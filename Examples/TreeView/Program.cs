@@ -36,6 +36,12 @@ namespace Examples.TreeView
                         SelectedItem.Expanded = !SelectedItem.Expanded;
                     }
                 }, o => SelectedItem != null);
+
+                changeTitleCommand = new RelayCommand( o => {
+                    if ( SelectedItem != null ) {
+                        SelectedItem.Title = "Changed title";
+                    }
+                }, o => SelectedItem != null );
             }
 
             public IList<TreeItem> Items;
@@ -80,6 +86,11 @@ namespace Examples.TreeView
                 get {
                     return expandCollapseCommand;
                 }
+            }
+
+            private readonly RelayCommand changeTitleCommand;
+            public ICommand ChangeTitleCommand {
+                get { return changeTitleCommand; }
             }
         }
 

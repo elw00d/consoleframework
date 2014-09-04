@@ -108,7 +108,7 @@ namespace ConsoleFramework.Controls
         private void OnMouseMove( object sender, MouseEventArgs args ) {
             if ( args.LeftButton == MouseButtonState.Pressed ) {
                 int index = args.GetPosition( this ).Y;
-                if ( SelectedItemIndex != index ) {
+                if ( !disabledItemsIndexes.Contains(index) && SelectedItemIndex != index ) {
                     SelectedItemIndex = index;
                     Invalidate(  );
                 }
@@ -122,7 +122,8 @@ namespace ConsoleFramework.Controls
                 SelectedItemIndex = index;
                 Invalidate(  );
             }
-            args.Handled = true;
+            if (disabledItemsIndexes.Contains( index ))
+                args.Handled = true;
         }
 
         private void pageUpCore( int? pageSize ) {

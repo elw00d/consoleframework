@@ -1,6 +1,6 @@
 ﻿<Window Title="{Binding SelectedItemTitle, Mode=OneWay}">
   <Panel Orientation="Horizontal">
-  <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}">
+  <GroupBox Title="{Binding SelectedItemTitle, Mode=OneWay}" FitSizeToContent="true">
     <TreeView Name="tree" SelectedItem="{Binding SelectedItem, Mode=OneWayToSource}">
       <TreeView.Items>
         <TreeItem Title="General" Disabled="True">
@@ -22,10 +22,11 @@
       </TreeView.Items>
     </TreeView>
   </GroupBox>
-    <Panel Orientation="Vertical">
+  <Panel Orientation="Vertical">
     <Button Command="{Binding RemoveCommand, Mode=OneTime}">Remove item</Button>
     <Button Command="{Binding ExpandCollapseCommand, Mode=OneTime}">Expand / Collapse</Button>
-    </Panel>
+    <Button Command="{Binding ChangeTitleCommand, Mode=OneTime}">Change title</Button>
+  </Panel>
 <!--    <Button>sdfsf</Button>-->
   </Panel>
 </Window>
