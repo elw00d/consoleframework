@@ -223,7 +223,7 @@ namespace Xaml
 
         [JSReplacement("JSIL.XML.ReaderFromString($xml)")]
     public static XmlReader ReaderFromString (string xml) {
-        var ms = new MemoryStream(Encoding.ASCII.GetBytes(xml));
+        var ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
         return XmlReader.Create(ms);
     }
 

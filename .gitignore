@@ -8,3 +8,5 @@ TestProject1/bin/
 TestProject1/obj/
 Xaml/bin/
 Xaml/obj/
+build/
+ConsoleFramework.suo

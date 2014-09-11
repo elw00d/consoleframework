@@ -67,6 +67,9 @@
         <include name="System.dll"/>
 		<include name="System.Core.dll"/>
 		<include name="System.Xml.dll"/>
+		<!-- Using JSIL for JSReplacement attribute - if you don't need JSIL, you can remove this -->
+		<include name="Web/JSIL/JSIL.dll"/>
+		<include name="Web/JSIL/JSIL.Meta.dll"/>
       </references>
 
       <arg value="/filealign:${project.file-alignment}" unless="${project.build.is-mono}"/>
@@ -158,6 +161,10 @@
 
 	<property name="entryPointClass" value="Examples.TreeView.Program"/>
     <property name="exampleName" value="TreeView"/>
+    <call target="build-examples-core"/>
+
+	<property name="entryPointClass" value="Examples.RadioButtons.Program"/>
+    <property name="exampleName" value="RadioButtons"/>
     <call target="build-examples-core"/>
   </target>
 
