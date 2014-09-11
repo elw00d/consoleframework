@@ -1,0 +1,13 @@
+﻿<Window xmlns:x="http://consoleframework.org/xaml.xsd">
+  <Panel>
+    <RadioGroup Name="radio">
+      <!-- Uncomment to test initially selected item -->
+      <!--<RadioGroup.SelectedItemIndex>2</RadioGroup.SelectedItemIndex>-->
+      
+      <RadioButton Caption="Listen music" Checked="True"></RadioButton>
+      <RadioButton Caption="Eat"></RadioButton>
+      <RadioButton Caption="Have sex" Checked="True"></RadioButton>
+    </RadioGroup>
+    <Button Name="btn" Caption="What am I want now?"></Button>
+  </Panel>
+</Window>

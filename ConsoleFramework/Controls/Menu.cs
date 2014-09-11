@@ -317,7 +317,7 @@ namespace ConsoleFramework.Controls
             /// It is necessary before reuse MenuItems in another Popup instance.
             /// </summary>
             public void DisconnectMenuItems( ) {
-                panel.ClearChilds();
+                panel.XChildren.Clear();
             }
 
             /// <summary>
@@ -334,7 +334,7 @@ namespace ConsoleFramework.Controls
                 panel = new Panel();
                 panel.Orientation = Orientation.Vertical;
                 foreach (MenuItemBase item in menuItems) {
-                    panel.AddChild( item );
+                    panel.XChildren.Add( item );
                 }
                 Content = panel;
                 

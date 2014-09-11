@@ -22,8 +22,8 @@ namespace ConsoleFramework.Controls
             button.Margin = new Thickness(4, 0, 4, 0);
             button.HorizontalAlignment = HorizontalAlignment.Center;
             button.Caption = "OK";
-            panel.AddChild( textBlock );
-            panel.AddChild( button );
+            panel.XChildren.Add( textBlock );
+            panel.XChildren.Add( button );
             panel.HorizontalAlignment = HorizontalAlignment.Center;
             panel.VerticalAlignment = VerticalAlignment.Bottom;
             this.Content = panel;

@@ -6,9 +6,15 @@ using Binding.Observables;
 namespace ConsoleFramework.Controls
 {
     public partial class Control {
+        public delegate void ControlAddedEventHandler(Control control);
+        public delegate void ControlRemovedEventHandler(Control control);
+
         public class UIElementCollection : IList {
             private readonly IList list = new ObservableList<Control>(new List<Control>());
             private readonly Control parent;
+
+            public event ControlAddedEventHandler ControlAdded;
+            public event ControlAddedEventHandler ControlRemoved;
 
             public UIElementCollection(Control parent) {
                 this.parent = parent;
@@ -21,18 +27,27 @@ namespace ConsoleFramework.Controls
                 switch (args.Type) {
                     case ListChangedEventType.ItemsInserted: {
                         for (int i = 0; i < args.Count; i++) {
-                            parent.InsertChildAt(args.Index + i, (Control) list[args.Index + i]);
+                            var control = (Control) list[args.Index + i];
+                            parent.InsertChildAt(args.Index + i, control);
+                            if (ControlAdded != null) ControlAdded.Invoke(control);
                         }
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved:
                         for (int i = 0; i < args.Count; i++) {
-                            parent.RemoveChild(parent.Children[args.Index]);
+                            Control control = parent.Children[args.Index];
+                            parent.RemoveChild(control);
+                            if (ControlRemoved != null) ControlRemoved.Invoke(control);
                         }
                         break;
                     case ListChangedEventType.ItemReplaced: {
-                        parent.RemoveChild(parent.Children[args.Index]);
-                        parent.InsertChildAt(args.Index, (Control) list[args.Index]);
+                        var removedControl = parent.Children[args.Index];
+                        parent.RemoveChild(removedControl);
+                        if (ControlRemoved != null) ControlRemoved.Invoke(removedControl);
+
+                        var addedControl = (Control) list[args.Index];
+                        parent.InsertChildAt(args.Index, addedControl);
+                        if (ControlAdded != null) ControlAdded.Invoke(addedControl);
                         break;
                     }
                 }

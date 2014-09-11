@@ -74,13 +74,13 @@ namespace Examples
                 panel.Name = "panel1";
                 panel.HorizontalAlignment =  HorizontalAlignment.Center;
                 panel.VerticalAlignment = VerticalAlignment.Stretch;
-                panel.AddChild(new TextBlock() {
+                panel.XChildren.Add(new TextBlock() {
                     Name = "label1",
                     Text = "Label1",
                     Margin = new Thickness(1,2,1,0)
                     //,Visibility = Visibility.Collapsed
                 });
-                panel.AddChild(new TextBlock() {
+                panel.XChildren.Add(new TextBlock() {
                     Name = "label2",
                     Text = "Label2_____",
                     HorizontalAlignment = HorizontalAlignment.Right
@@ -124,10 +124,10 @@ namespace Examples
                 listbox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 //listbox.Width = 10;
 
-                panel.AddChild(comboBox);
-                panel.AddChild(button);
-                panel.AddChild(textBox);
-                panel.AddChild( listbox );
+                panel.XChildren.Add(comboBox);
+                panel.XChildren.Add(button);
+                panel.XChildren.Add(textBox);
+                panel.XChildren.Add(listbox);
                 
                 //application.Run(panel);
                 WindowsHost windowsHost = new WindowsHost()
