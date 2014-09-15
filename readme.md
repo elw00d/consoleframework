@@ -16,6 +16,12 @@ Features
 
 ![](http://gyazo.com/81e1ae92cfba8c7a1c2a98da7da75ad7.png)
 
+License
+-------
+
+Copyright 2011-2014 I. Kostromin
+License: MIT/X11
+
 Build from source
 --
 To build a library with examples you can use [NAnt]:
