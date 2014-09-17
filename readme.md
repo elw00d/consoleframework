@@ -18,8 +18,8 @@ Features
 
 License
 -------
-
 Copyright 2011-2014 I. Kostromin
+
 License: MIT/X11
 
 Build from source
