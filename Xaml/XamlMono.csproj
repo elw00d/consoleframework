@@ -33,6 +33,12 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
+    <Reference Include="JSIL">
+      <HintPath>..\Web\JSIL\JSIL.dll</HintPath>
+    </Reference>
+    <Reference Include="JSIL.Meta">
+      <HintPath>..\Web\JSIL\JSIL.Meta.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContentPropertyAttribute.cs" />
