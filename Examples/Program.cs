@@ -149,13 +149,16 @@ namespace Examples
                 groupBox.Title = "Группа";
                 ScrollViewer scrollViewer = new ScrollViewer(  );
                 ListBox listBox = new ListBox(  );
-                listBox.Items.Add( "Длинный элемент" );
-                listBox.Items.Add("Длинный элемент 2");
-                listBox.Items.Add("Длинный элемент 3");
-                listBox.Items.Add("Длинный элемент 4");
-                listBox.Items.Add("Длинный элемент 5");
-                listBox.Items.Add("Длинный элемент 6");
-                listBox.Items.Add("Длинный элемент 700");
+                for ( int i = 0; i < 30; i++ ) {
+                    listBox.Items.Add(string.Format("Длинный элемент {0}", i));
+                }
+//                listBox.Items.Add( "Длинный элемент" );
+//                listBox.Items.Add("Длинный элемент 2");
+//                listBox.Items.Add("Длинный элемент 3");
+//                listBox.Items.Add("Длинный элемент 4");
+//                listBox.Items.Add("Длинный элемент 5");
+//                listBox.Items.Add("Длинный элемент 6");
+//                listBox.Items.Add("Длинный элемент 700");
                 listBox.HorizontalAlignment = HorizontalAlignment.Stretch;
                 listBox.VerticalAlignment = VerticalAlignment.Stretch;
                 scrollViewer.Content = listBox;
@@ -171,12 +174,13 @@ namespace Examples
                     Y = 6,
                     //MinHeight = 10,
                     //MinWidth = 10,
+                    MaxHeight = 14,
                     Name = "LongTitleWindow",
                     Title = "Очень длинное название окна",
                     Content = groupBox
                 });
-                windowsHost.Show(window1);
-                windowsHost.Show(createdFromXaml);
+//                windowsHost.Show(window1);
+//                windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 //application.TerminalSizeChanged += ( sender, eventArgs ) => {
                 //    application.CanvasSize = new Size(eventArgs.Width, eventArgs.Height);

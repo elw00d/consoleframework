@@ -7,6 +7,51 @@ using ConsoleFramework.Rendering;
 namespace ConsoleFramework.Controls
 {
     /// <summary>
+    /// Event args containing info for ScrollViewer - how to display inner content.
+    /// </summary>
+    public class ContentShouldBeScrolledEventArgs : RoutedEventArgs
+    {
+        private readonly int? mostLeftVisibleX;
+        private readonly int? mostRightVisibleX;
+        private readonly int? mostTopVisibleY;
+        private readonly int? mostBottomVisibleY;
+
+        public ContentShouldBeScrolledEventArgs( object source, RoutedEvent routedEvent,
+            int? mostLeftVisibleX, int? mostRightVisibleX,
+            int? mostTopVisibleY, int? mostBottomVisibleY)
+            : base(source, routedEvent) {
+            if (mostLeftVisibleX.HasValue && mostRightVisibleX.HasValue)
+                throw new ArgumentException("Only one of X values can be specified");
+            if (mostTopVisibleY.HasValue && mostBottomVisibleY.HasValue)
+                throw new ArgumentException("Only one of Y values can be specified");
+            this.mostLeftVisibleX = mostLeftVisibleX;
+            this.mostRightVisibleX = mostRightVisibleX;
+            this.mostTopVisibleY = mostTopVisibleY;
+            this.mostBottomVisibleY = mostBottomVisibleY;
+        }
+
+        public int? MostLeftVisibleX {
+            get { return mostLeftVisibleX; }
+        }
+
+        public int? MostRightVisibleX {
+            get { return mostRightVisibleX; }
+        }
+
+        public int? MostTopVisibleY {
+            get { return mostTopVisibleY; }
+        }
+
+        public int? MostBottomVisibleY {
+            get { return mostBottomVisibleY; }
+        }
+    }
+
+    public delegate void ContentShouldBeScrolledEventHandler(object sender,
+                                                                  ContentShouldBeScrolledEventArgs args);
+
+
+    /// <summary>
     /// Контрол, виртуализирующий содержимое так, что можно прокручивать его, если
     /// оно не вмещается в отведённое пространство.
     /// todo : добавить обработку нажатий мыши по ползункам и между ползунками и стрелками
@@ -14,10 +59,60 @@ namespace ConsoleFramework.Controls
     /// </summary>
     public class ScrollViewer : Control
     {
+        /// <summary>
+        /// Event can be fired by children when needs to explicitly set current
+        /// visible region (for example, ListBox after mouse wheel scrolling).
+        /// </summary>
+        public static RoutedEvent ContentShouldBeScrolledEvent =
+            EventManager.RegisterRoutedEvent("ContentShouldBeScrolled", RoutingStrategy.Bubble, 
+            typeof(ContentShouldBeScrolledEventHandler), typeof(ScrollViewer));
+        
         public ScrollViewer( ) {
             AddHandler( MouseDownEvent, new MouseButtonEventHandler(OnMouseDown) );
             HorizontalScrollEnabled = true;
             VerticalScrollEnabled = true;
+            AddHandler( ContentShouldBeScrolledEvent, new ContentShouldBeScrolledEventHandler(onContentShouldBeScrolled) );
+        }
+
+        private void onContentShouldBeScrolled( object sender, ContentShouldBeScrolledEventArgs args ) {
+            if ( args.MostLeftVisibleX.HasValue ) {
+                if ( this.deltaX <= args.MostLeftVisibleX.Value &&
+                     this.deltaX + this.RenderSize.Width > args.MostLeftVisibleX.Value ) {
+                    // This X coord is already visible - do nothing
+                } else {
+                    this.deltaX = Math.Min( args.MostLeftVisibleX.Value,
+                                            Content.RenderSize.Width - this.RenderSize.Width );
+                }
+            } else if ( args.MostRightVisibleX.HasValue ) {
+                if (this.deltaX <= args.MostRightVisibleX.Value &&
+                     this.deltaX + this.RenderSize.Width > args.MostRightVisibleX.Value ) {
+                    // This X coord is already visible - do nothing
+                } else {
+                    this.deltaX = Math.Max(args.MostRightVisibleX.Value - this.ActualWidth + 1,
+                                            0 );
+                }
+            }
+
+            if ( args.MostTopVisibleY.HasValue ) {
+                if (this.deltaY <= args.MostTopVisibleY.Value &&
+                     this.deltaY + this.RenderSize.Height > args.MostTopVisibleY.Value ) {
+                    // This Y coord is already visible - do nothing
+                } else {
+                    this.deltaY = Math.Min(args.MostTopVisibleY.Value,
+                                            Content.RenderSize.Height - this.RenderSize.Height );
+                }
+            } else if ( args.MostBottomVisibleY.HasValue ) {
+                if (this.deltaY <= args.MostBottomVisibleY.Value &&
+                     this.deltaY + this.RenderSize.Height > args.MostBottomVisibleY.Value ) {
+                    // This Y coord is already visible - do nothing
+                } else {
+                    this.deltaY = Math.Max(args.MostBottomVisibleY.Value - this.ActualHeight + 1,
+                                            0 );
+                }
+            }
+
+            this.Invalidate(  );
+            
         }
 
         public enum Direction

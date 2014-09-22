@@ -141,11 +141,18 @@ namespace ConsoleFramework.Controls
 //                    SelectedItemIndex = 0;
 //                    Invalidate( );
 //                }
+
+                
             } else {
                 if ( SelectedItemIndex != 0 ) {
                     // todo : fix here too
                     SelectedItemIndex = Math.Max(0, SelectedItemIndex - pageSize.Value);
 //                    Invalidate(  );
+
+                    // Notify any ScrollViewer that wraps this control to scroll visible part
+                    this.RaiseEvent(ScrollViewer.ContentShouldBeScrolledEvent,
+                    new ContentShouldBeScrolledEventArgs(this, ScrollViewer.ContentShouldBeScrolledEvent,
+                        null, null, SelectedItemIndex, null));
                 }
             }
         }
@@ -159,6 +166,12 @@ namespace ConsoleFramework.Controls
             } else {
                 if ( SelectedItemIndex != items.Count - 1 ) {
                     SelectedItemIndex = Math.Min(items.Count - 1, SelectedItemIndex + pageSize.Value);
+
+                    // Notify any ScrollViewer that wraps this control to scroll visible part
+                    this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent, 
+                        new ContentShouldBeScrolledEventArgs( this, ScrollViewer.ContentShouldBeScrolledEvent,
+                            null, null, null, Math.Max(0, SelectedItemIndex)));
+
                     Invalidate(  );
                 }
             }
