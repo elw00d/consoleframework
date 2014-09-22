@@ -25,9 +25,9 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// Создаёт экземпляр комбобокса
+        /// Creates combobox instance.
         /// </summary>
-        /// <param name="shadow">Отображать ли тень</param>
+        /// <param name="shadow">Display shadow or not</param>
         public ComboBox( bool shadow ) {
             this.shadow = shadow;
             Focusable = true;
@@ -38,9 +38,9 @@ namespace ConsoleFramework.Controls
         private class PopupWindow : Window
         {
             public int IndexSelected;
-            private bool shadow;
-            private ListBox listbox;
-            private ScrollViewer scrollViewer;
+            private readonly bool shadow;
+            private readonly ListBox listbox;
+            private readonly ScrollViewer scrollViewer;
 
             public PopupWindow( IEnumerable< string > items, 
                 int selectedItemIndex, bool shadow,
@@ -61,11 +61,7 @@ namespace ConsoleFramework.Controls
                 scrollViewer.Content = listbox;
                 Content = scrollViewer;
 
-                // todo : продумать более удобное API для взаимодействия с ScrollViewer
-                // todo : вынести этот код в ScrollableListBox
-                listbox.SelectedItemIndexChanged += ListboxOnSelectedItemIndexChanged;
-
-                // if click on the transparent header, close the popup
+                // If click on the transparent header, close the popup
                 AddHandler( MouseDownEvent, new MouseButtonEventHandler(( sender, args ) => {
                     if ( !scrollViewer.RenderSlotRect.Contains( args.GetPosition( this ) ) ) {
                         Close();
@@ -73,7 +69,7 @@ namespace ConsoleFramework.Controls
                     }
                 }));
 
-                // if listbox item has been selected
+                // If listbox item has been selected
                 EventManager.AddHandler( listbox, MouseUpEvent, new MouseButtonEventHandler(
                     ( sender, args ) => {
                         IndexSelected = listbox.SelectedItemIndex;
@@ -89,7 +85,7 @@ namespace ConsoleFramework.Controls
                 // todo : cleanup event handlers after popup closing
             }
 
-            private void ListboxOnSelectedItemIndexChanged( object sender, EventArgs e ) {
+            private void initListBoxScrollingPos( ) {
                 int itemIndex = listbox.SelectedItemIndex;
                 int firstVisibleItemIndex = scrollViewer.DeltaY;
                 int lastVisibleItemIndex = firstVisibleItemIndex + scrollViewer.ActualHeight -
@@ -118,12 +114,12 @@ namespace ConsoleFramework.Controls
             public override void Render(RenderingBuffer buffer)
             {
                 Attr borderAttrs = Colors.Blend(Color.Black, Color.DarkCyan);
-                // устанавливаем прозрачными первую строку и первый столбец
-                // для столбца дополнительно включена прозрачность для событий мыши
 
-                // background
+                // Background
                 buffer.FillRectangle(1, 1, this.ActualWidth - 1, this.ActualHeight - 1, ' ', borderAttrs);
 
+                // First row and first column are transparent
+                // Column is also transparent for mouse events
                 buffer.SetOpacityRect( 0,0,ActualWidth, 1, 2 );
                 buffer.SetOpacityRect( 0, 1, 1, ActualHeight-1, 6 );
                 if ( shadow ) {
@@ -141,11 +137,11 @@ namespace ConsoleFramework.Controls
             {
                 if (Content == null) return new Size(0, 0);
                 if ( shadow ) {
-                    // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
+                    // 1 row and 1 column - reserved for transparent space, remaining - for ListBox
                     Content.Measure( new Size( availableSize.Width - 2, availableSize.Height - 2 ) );
                     return new Size( Content.DesiredSize.Width + 2, Content.DesiredSize.Height + 2 );
                 } else {
-                    // 1 строку и 1 столбец оставляем для прозрачного пространства, остальное занимает ListBox
+                    // 1 row and 1 column - reserved for transparent space, remaining - for ListBox
                     Content.Measure(new Size(availableSize.Width - 1, availableSize.Height - 1));
                     return new Size(Content.DesiredSize.Width + 1, Content.DesiredSize.Height + 1);
                 }
@@ -160,11 +156,11 @@ namespace ConsoleFramework.Controls
                         Content.Arrange(new Rect(new Point(1, 1),
                                                    new Size(finalSize.Width - 1, finalSize.Height - 1)));
                     }
-                    // При инициализации нужно установить корректные смещения scroll viewer для текущего
-                    // выбранного элемента. Но так как работа scroll viewer зависит от установленных
-                    // значений ActualWidth / ActualHeight, то это нужно выполнить после выполнения
-                    // этапа размещения (arrangement)
-                    ListboxOnSelectedItemIndexChanged(this, EventArgs.Empty);
+
+                    // When initializing we need to correctly assign offsets to ScrollViewer for
+                    // currently selected item. Because ScrollViewer depends of ActualWidth / ActualHeight
+                    // of Content, we need to do this after arrangement has finished.
+                    initListBoxScrollingPos( );
                 }
                 return finalSize;
             }
@@ -197,7 +193,7 @@ namespace ConsoleFramework.Controls
             popup.Width = shadow ? ActualWidth+1 : ActualWidth;
             if (Items.Count != 0)
                 popup.Height = (ShownItemsCount != null ? ShownItemsCount.Value : Items.Count)
-                    + (shadow ? 2 : 1); // 1 строка для прозначного "заголовка"
+                    + (shadow ? 2 : 1); // 1 row for transparent "header"
             else popup.Height = shadow ? 3 : 2;
             WindowsHost windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
             windowsHost.ShowModal(popup, true);
@@ -247,7 +243,7 @@ namespace ConsoleFramework.Controls
         protected override Size MeasureOverride(Size availableSize) {
             if (Items.Count == 0) return EMPTY_SIZE;
             int maxLen = Items.Max(s => s.Length);
-            // 1 пиксель слева от надписи, 1 справа, потом стрелка и ещё 1 пустой пиксель
+            // 1 pixel from left, 1 from right, then arrow and 1 more empty pixel
             Size size = new Size(Math.Min(maxLen + 4, availableSize.Width), 1);
             return size;
         }

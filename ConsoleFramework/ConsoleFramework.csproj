@@ -99,11 +99,6 @@
     <Compile Include="Xaml\NotBooleanConverter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Controls\LayoutSystem.txt" />
-    <Content Include="Events\Focus.txt" />
-    <Content Include="readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Binding\Binding.csproj">
       <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
       <Name>Binding</Name>

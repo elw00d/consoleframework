@@ -166,7 +166,15 @@ namespace Examples
                 scrollViewer.VerticalAlignment = VerticalAlignment.Stretch;
                 scrollViewer.HorizontalScrollEnabled = false;
 
-                groupBox.Content = scrollViewer;
+                //groupBox.Content = scrollViewer;
+
+                ComboBox combo = new ComboBox();
+                combo.ShownItemsCount = 10;
+                for ( int i = 0; i < 30; i++ ) {
+                    combo.Items.Add(string.Format("Длинный элемент {0}", i));
+                }
+                groupBox.Content = combo;
+
                 groupBox.HorizontalAlignment = HorizontalAlignment.Stretch;
 
                 windowsHost.Show(new Window() {
