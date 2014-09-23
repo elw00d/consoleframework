@@ -77,42 +77,49 @@ namespace ConsoleFramework.Controls
         private void onContentShouldBeScrolled( object sender, ContentShouldBeScrolledEventArgs args ) {
             if ( args.MostLeftVisibleX.HasValue ) {
                 if ( this.deltaX <= args.MostLeftVisibleX.Value &&
-                     this.deltaX + this.RenderSize.Width > args.MostLeftVisibleX.Value ) {
+                     this.deltaX + getEffectiveWidth() > args.MostLeftVisibleX.Value ) {
                     // This X coord is already visible - do nothing
                 } else {
                     this.deltaX = Math.Min( args.MostLeftVisibleX.Value,
-                                            Content.RenderSize.Width - this.RenderSize.Width );
+                                            Content.RenderSize.Width - getEffectiveWidth());
                 }
             } else if ( args.MostRightVisibleX.HasValue ) {
                 if (this.deltaX <= args.MostRightVisibleX.Value &&
-                     this.deltaX + this.RenderSize.Width > args.MostRightVisibleX.Value ) {
+                     this.deltaX + getEffectiveWidth() > args.MostRightVisibleX.Value ) {
                     // This X coord is already visible - do nothing
                 } else {
-                    this.deltaX = Math.Max(args.MostRightVisibleX.Value - this.ActualWidth + 1,
+                    this.deltaX = Math.Max(args.MostRightVisibleX.Value - getEffectiveWidth() + 1,
                                             0 );
                 }
             }
 
             if ( args.MostTopVisibleY.HasValue ) {
                 if (this.deltaY <= args.MostTopVisibleY.Value &&
-                     this.deltaY + this.RenderSize.Height > args.MostTopVisibleY.Value ) {
+                     this.deltaY + getEffectiveHeight() > args.MostTopVisibleY.Value ) {
                     // This Y coord is already visible - do nothing
                 } else {
                     this.deltaY = Math.Min(args.MostTopVisibleY.Value,
-                                            Content.RenderSize.Height - this.RenderSize.Height );
+                                            Content.RenderSize.Height - getEffectiveHeight());
                 }
             } else if ( args.MostBottomVisibleY.HasValue ) {
                 if (this.deltaY <= args.MostBottomVisibleY.Value &&
-                     this.deltaY + this.RenderSize.Height > args.MostBottomVisibleY.Value ) {
+                     this.deltaY + getEffectiveHeight() > args.MostBottomVisibleY.Value ) {
                     // This Y coord is already visible - do nothing
                 } else {
-                    this.deltaY = Math.Max(args.MostBottomVisibleY.Value - this.ActualHeight + 1,
+                    this.deltaY = Math.Max(args.MostBottomVisibleY.Value - getEffectiveHeight() + 1,
                                             0 );
                 }
             }
 
             this.Invalidate(  );
-            
+        }
+
+        private int getEffectiveWidth( ) {
+            return VerticalScrollVisible ? RenderSize.Width - 1 : RenderSize.Width;
+        }
+
+        private int getEffectiveHeight( ) {
+            return HorizontalScrollVisible ? RenderSize.Height - 1 : RenderSize.Height;
         }
 
         public enum Direction

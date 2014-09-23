@@ -164,16 +164,16 @@ namespace Examples
                 scrollViewer.Content = listBox;
 //                scrollViewer.HorizontalAlignment = HorizontalAlignment.Stretch;
                 scrollViewer.VerticalAlignment = VerticalAlignment.Stretch;
-                scrollViewer.HorizontalScrollEnabled = false;
+                scrollViewer.HorizontalScrollEnabled = true;
 
-                //groupBox.Content = scrollViewer;
+                groupBox.Content = scrollViewer;
 
                 ComboBox combo = new ComboBox();
                 combo.ShownItemsCount = 10;
                 for ( int i = 0; i < 30; i++ ) {
                     combo.Items.Add(string.Format("Длинный элемент {0}", i));
                 }
-                groupBox.Content = combo;
+//                groupBox.Content = combo;
 
                 groupBox.HorizontalAlignment = HorizontalAlignment.Stretch;
 
@@ -182,7 +182,7 @@ namespace Examples
                     Y = 6,
                     //MinHeight = 10,
                     //MinWidth = 10,
-                    MaxHeight = 14,
+                    Height = 14,
                     Name = "LongTitleWindow",
                     Title = "Очень длинное название окна",
                     Content = groupBox
