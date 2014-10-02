@@ -401,11 +401,12 @@ namespace ConsoleFramework.Controls
 
                 // Первые width пикселей первой строки - прозрачные, но события мыши не пропускают
                 // По нажатию на них мы закрываем всплывающее окно вручную
-                buffer.SetOpacityRect(0, 0, parentItemWidth, 1, 2);
+                buffer.SetOpacityRect(0, 0, Math.Min( ActualWidth, parentItemWidth ), 1, 2);
                 // Оставшиеся пиксели первой строки - пропускают события мыши
                 // И WindowsHost закроет всплывающее окно автоматически при нажатии или
                 // перемещении нажатого курсора над этим местом
-                buffer.SetOpacityRect( parentItemWidth, 0, ActualWidth - parentItemWidth, 1, 6 );
+                if (ActualWidth > parentItemWidth)
+                    buffer.SetOpacityRect( parentItemWidth, 0, ActualWidth - parentItemWidth, 1, 6 );
 
                 if (shadow) {
                     buffer.SetOpacity(0, ActualHeight - 1, 2 + 4);
