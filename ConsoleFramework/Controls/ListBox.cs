@@ -127,6 +127,7 @@ namespace ConsoleFramework.Controls
         }
 
         private void pageUpCore( int? pageSize ) {
+            if ( allItemsAreDisabled ) return;
             if ( pageSize == null ) {
                 int firstEnabledIndex = 0;
                 bool found = false;
@@ -137,42 +138,61 @@ namespace ConsoleFramework.Controls
                 if (found && selectedItemIndex != firstEnabledIndex) {
                     SelectedItemIndex = firstEnabledIndex;
                 }
-//                if ( SelectedItemIndex != 0 ) {
-//                    SelectedItemIndex = 0;
-//                    Invalidate( );
-//                }
-
-                
             } else {
                 if ( SelectedItemIndex != 0 ) {
-                    // todo : fix here too
-                    SelectedItemIndex = Math.Max(0, SelectedItemIndex - pageSize.Value);
-//                    Invalidate(  );
+                    int newIndex = Math.Max( 0, SelectedItemIndex - pageSize.Value );
 
-                    // Notify any ScrollViewer that wraps this control to scroll visible part
-                    this.RaiseEvent(ScrollViewer.ContentShouldBeScrolledEvent,
-                    new ContentShouldBeScrolledEventArgs(this, ScrollViewer.ContentShouldBeScrolledEvent,
-                        null, null, SelectedItemIndex, null));
+                    // If it is disabled, take the first non-disabled item before
+                    while ( disabledItemsIndexes.Contains( newIndex )
+                            && newIndex > 0 ) {
+                        newIndex--;
+                    }
+
+                    if ( !disabledItemsIndexes.Contains( newIndex ) ) {
+                        SelectedItemIndex = newIndex;
+
+                        // Notify any ScrollViewer that wraps this control to scroll visible part
+                        this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
+                                         new ContentShouldBeScrolledEventArgs( this,
+                                                                               ScrollViewer.ContentShouldBeScrolledEvent,
+                                                                               null, null, SelectedItemIndex, null ) );
+                    }
                 }
             }
         }
 
         private void pageDownCore( int? pageSize ) {
+            if ( allItemsAreDisabled ) return;
             if ( pageSize == null ) {
                 if ( SelectedItemIndex != items.Count - 1 ) {
+                    // Take the last non-disabled item
                     SelectedItemIndex = items.Count - 1;
+                    while ( disabledItemsIndexes.Contains( SelectedItemIndex ) ) {
+                        SelectedItemIndex--;
+                    }
                     Invalidate( );
                 }
             } else {
                 if ( SelectedItemIndex != items.Count - 1 ) {
-                    SelectedItemIndex = Math.Min(items.Count - 1, SelectedItemIndex + pageSize.Value);
+                    int newIndex = Math.Min( items.Count - 1, SelectedItemIndex + pageSize.Value );
 
-                    // Notify any ScrollViewer that wraps this control to scroll visible part
-                    this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent, 
-                        new ContentShouldBeScrolledEventArgs( this, ScrollViewer.ContentShouldBeScrolledEvent,
-                            null, null, null, Math.Max(0, SelectedItemIndex)));
+                    // If it is disabled, take the first non-disabled item after
+                    while ( disabledItemsIndexes.Contains( newIndex )
+                            && newIndex < items.Count - 1 ) {
+                        newIndex++;
+                    }
 
-                    Invalidate(  );
+                    if ( !disabledItemsIndexes.Contains( newIndex ) ) {
+                        SelectedItemIndex = newIndex;
+
+                        // Notify any ScrollViewer that wraps this control to scroll visible part
+                        this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
+                                         new ContentShouldBeScrolledEventArgs( this,
+                                                                               ScrollViewer.ContentShouldBeScrolledEvent,
+                                                                               null, null, null,
+                                                                               Math.Max( 0, SelectedItemIndex ) ) );
+
+                    }
                 }
             }
         }
@@ -189,18 +209,28 @@ namespace ConsoleFramework.Controls
                 pageDownCore( PageSize );
             }
             if (args.wVirtualKeyCode == VirtualKeys.Up) {
-                if ( SelectedItemIndex == 0 )
-                    SelectedItemIndex = items.Count - 1;
-                else {
-                    SelectedItemIndex--;
-                }
+                if ( allItemsAreDisabled ) return;
+                do {
+                    if ( SelectedItemIndex == 0 )
+                        SelectedItemIndex = items.Count - 1;
+                    else {
+                        SelectedItemIndex--;
+                    }
+                } while ( disabledItemsIndexes.Contains( SelectedItemIndex ) );
                 Invalidate(  );
             }
             if (args.wVirtualKeyCode == VirtualKeys.Down) {
-                SelectedItemIndex = (SelectedItemIndex + 1) % items.Count;
+                if ( allItemsAreDisabled ) return;
+                do {
+                    SelectedItemIndex = ( SelectedItemIndex + 1 )%items.Count;
+                } while ( disabledItemsIndexes.Contains( SelectedItemIndex ) );
                 Invalidate(  );
             }
             args.Handled = true;
+        }
+
+        private bool allItemsAreDisabled {
+            get { return disabledItemsIndexes.Count == items.Count; }
         }
 
         protected override Size MeasureOverride(Size availableSize) {
