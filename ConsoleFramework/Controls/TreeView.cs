@@ -177,12 +177,21 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        private void ensureFlatListIsCorrect( ) {
+            for ( int i = 0; i < treeItemsFlat.Count; i++ ) {
+                assert( treeItemsFlat[ i ].Position == i );
+            }
+        }
+
+        /// <summary>
+        /// Maintains the correct order of items in flat list.
+        /// </summary>
         private void onItemInserted(int pos) {
             TreeItem treeItem = items[pos];
             TreeItem prevItem = null;
-            if (pos - 1 >= 0)
-                prevItem = this.items[pos - 1];
-            treeItem.Position = prevItem != null ? prevItem.Position : 0;
+            if (pos > 0)
+                prevItem = this.items[pos];
+            treeItem.Position = prevItem != null ? prevItem.Position + 1 : items.Count - 1;
             for (int j = treeItem.Position; j < treeItemsFlat.Count; j++) {
                 treeItemsFlat[j].Position++;
             }
@@ -195,6 +204,8 @@ namespace ConsoleFramework.Controls
             subscribeToItem(treeItem, ItemsOnListChanged);
             if (treeItem.Position <= listBox.SelectedItemIndex)
                 RaisePropertyChanged("SelectedItem");
+
+            ensureFlatListIsCorrect( );
         }
 
         private void onItemRemoved(TreeItem treeItem) {
@@ -209,6 +220,8 @@ namespace ConsoleFramework.Controls
 
             if (listBox.SelectedItemIndex >= treeItem.Position)
                 RaisePropertyChanged("SelectedItem");
+
+            ensureFlatListIsCorrect( );
         }
 
         private void ItemsOnListChanged(object sender, ListChangedEventArgs args) {
@@ -256,6 +269,8 @@ namespace ConsoleFramework.Controls
             foreach (TreeItem child in item.Items.Where(child => child.Expanded)) {
                 expand(child);
             }
+
+            ensureFlatListIsCorrect( );
         }
 
         private void collapse(TreeItem item) {
@@ -274,6 +289,8 @@ namespace ConsoleFramework.Controls
             for (int k = index + 1; k < treeItemsFlat.Count; k++) {
                 treeItemsFlat[k].Position -= item.Items.Count;
             }
+
+            ensureFlatListIsCorrect( );
         }
 
         private void expandCollapse( TreeItem item ) {
