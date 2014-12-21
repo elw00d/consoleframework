@@ -35,7 +35,7 @@ namespace Examples.TreeView
                     if (SelectedItem != null) {
                         SelectedItem.Expanded = !SelectedItem.Expanded;
                     }
-                }, o => SelectedItem != null);
+                }, o => SelectedItem != null && SelectedItem.HasChildren);
 
                 changeTitleCommand = new RelayCommand( o => {
                     if ( SelectedItem != null ) {
@@ -57,6 +57,8 @@ namespace Examples.TreeView
                         raisePropertyChanged("SelectedItem");
                         raisePropertyChanged("SelectedItemTitle");
                         removeCommand.RaiseCanExecuteChanged();
+                        expandCollapseCommand.RaiseCanExecuteChanged(  );
+                        changeTitleCommand.RaiseCanExecuteChanged(  );
                     }
                 }
             }

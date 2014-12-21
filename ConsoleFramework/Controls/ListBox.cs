@@ -27,7 +27,7 @@ namespace ConsoleFramework.Controls
             get { return items; }
         }
         
-        private int selectedItemIndex;
+        private int? selectedItemIndex = null;
 
         public event EventHandler SelectedItemIndexChanged;
 
@@ -38,7 +38,7 @@ namespace ConsoleFramework.Controls
             }
         } 
 
-        public int SelectedItemIndex {
+        public int? SelectedItemIndex {
             get { return selectedItemIndex; }
             set {
                 if ( selectedItemIndex != value ) {
@@ -67,8 +67,9 @@ namespace ConsoleFramework.Controls
                                 this.DisabledItemsIndexes.Add(index + args.Count);
                             }
                         }
-                        if (selectedItemIndex >= args.Index) {
-                            SelectedItemIndex = Math.Min(items.Count - 1, selectedItemIndex + args.Count);
+                        // Selected item should stay the same after insertion
+                        if (selectedItemIndex.HasValue && selectedItemIndex.Value >= args.Index) {
+                            SelectedItemIndex = Math.Min(items.Count - 1, selectedItemIndex.Value + args.Count);
                         }
                         break;
                     }
@@ -80,8 +81,13 @@ namespace ConsoleFramework.Controls
                                 this.DisabledItemsIndexes.Add(index - args.Count);
                             }
                         }
-                        if (selectedItemIndex >= args.Index) {
-                            SelectedItemIndex = Math.Max(0, selectedItemIndex - args.Count);
+                        // When removing, selectedItemIndex should be unchanged. If it is impossible
+                        // (for example, if selectedItemIndex points to disabled item now) we should reset it to null
+                        if ( selectedItemIndex.HasValue ) {
+                            if ( selectedItemIndex >= items.Count
+                                || disabledItemsIndexes.Contains( selectedItemIndex.Value ) ) {
+                                SelectedItemIndex = null;
+                            }
                         }
                         break;
                     }
@@ -139,8 +145,8 @@ namespace ConsoleFramework.Controls
                     SelectedItemIndex = firstEnabledIndex;
                 }
             } else {
-                if ( SelectedItemIndex != 0 ) {
-                    int newIndex = Math.Max( 0, SelectedItemIndex - pageSize.Value );
+                if ( SelectedItemIndex.HasValue && SelectedItemIndex != 0 ) {
+                    int newIndex = Math.Max( 0, SelectedItemIndex.Value - pageSize.Value );
 
                     // If it is disabled, take the first non-disabled item before
                     while ( disabledItemsIndexes.Contains( newIndex )
@@ -164,17 +170,17 @@ namespace ConsoleFramework.Controls
         private void pageDownCore( int? pageSize ) {
             if ( allItemsAreDisabled ) return;
             if ( pageSize == null ) {
-                if ( SelectedItemIndex != items.Count - 1 ) {
+                if ( SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
                     // Take the last non-disabled item
                     SelectedItemIndex = items.Count - 1;
-                    while ( disabledItemsIndexes.Contains( SelectedItemIndex ) ) {
+                    while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) ) {
                         SelectedItemIndex--;
                     }
                     Invalidate( );
                 }
             } else {
-                if ( SelectedItemIndex != items.Count - 1 ) {
-                    int newIndex = Math.Min( items.Count - 1, SelectedItemIndex + pageSize.Value );
+                if ( SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
+                    int newIndex = Math.Min( items.Count - 1, SelectedItemIndex.Value + pageSize.Value );
 
                     // If it is disabled, take the first non-disabled item after
                     while ( disabledItemsIndexes.Contains( newIndex )
@@ -190,7 +196,7 @@ namespace ConsoleFramework.Controls
                                          new ContentShouldBeScrolledEventArgs( this,
                                                                                ScrollViewer.ContentShouldBeScrolledEvent,
                                                                                null, null, null,
-                                                                               Math.Max( 0, SelectedItemIndex ) ) );
+                                                                               Math.Max( 0, SelectedItemIndex.Value ) ) );
 
                     }
                 }
@@ -211,19 +217,20 @@ namespace ConsoleFramework.Controls
             if (args.wVirtualKeyCode == VirtualKeys.Up) {
                 if ( allItemsAreDisabled ) return;
                 do {
-                    if ( SelectedItemIndex == 0 )
+                    if ( SelectedItemIndex == 0 || SelectedItemIndex == null )
                         SelectedItemIndex = items.Count - 1;
                     else {
                         SelectedItemIndex--;
                     }
-                } while ( disabledItemsIndexes.Contains( SelectedItemIndex ) );
+                } while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) );
                 Invalidate(  );
             }
             if (args.wVirtualKeyCode == VirtualKeys.Down) {
                 if ( allItemsAreDisabled ) return;
                 do {
+                    if ( SelectedItemIndex == null ) SelectedItemIndex = 0;
                     SelectedItemIndex = ( SelectedItemIndex + 1 )%items.Count;
-                } while ( disabledItemsIndexes.Contains( SelectedItemIndex ) );
+                } while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) );
                 Invalidate(  );
             }
             args.Handled = true;

@@ -105,11 +105,12 @@ namespace ConsoleFramework.Controls
         public IItemsSource ItemsSource { get; set; }
 
         private readonly ListBox listBox;
-
+        
         public TreeItem SelectedItem {
             get {
-                if (treeItemsFlat.Count == 0) return null;
-                return treeItemsFlat[listBox.SelectedItemIndex];
+                if ( treeItemsFlat.Count == 0 ) return null;
+                if ( listBox.SelectedItemIndex == null ) return null;
+                return treeItemsFlat[listBox.SelectedItemIndex.Value];
             }
         }
 
@@ -127,7 +128,8 @@ namespace ConsoleFramework.Controls
 
             listBox.AddHandler( MouseDownEvent, new MouseEventHandler(( sender, args ) => {
                 if ( !args.Handled ) {
-                    expandCollapse(treeItemsFlat[ listBox.SelectedItemIndex ]);
+                    if ( listBox.SelectedItemIndex.HasValue )
+                        expandCollapse( treeItemsFlat[ listBox.SelectedItemIndex.Value ] );
                 }
             }), true );
 

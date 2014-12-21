@@ -37,7 +37,7 @@ namespace ConsoleFramework.Controls
 
         private class PopupWindow : Window
         {
-            public int IndexSelected;
+            public int? IndexSelected;
             private readonly bool shadow;
             private readonly ListBox listbox;
             private readonly ScrollViewer scrollViewer;
@@ -86,7 +86,7 @@ namespace ConsoleFramework.Controls
             }
 
             private void initListBoxScrollingPos( ) {
-                int itemIndex = listbox.SelectedItemIndex;
+                int itemIndex = listbox.SelectedItemIndex ?? 0;
                 int firstVisibleItemIndex = scrollViewer.DeltaY;
                 int lastVisibleItemIndex = firstVisibleItemIndex + scrollViewer.ActualHeight -
                                             ( scrollViewer.HorizontalScrollVisible ? 1 : 0 ) - 1;
@@ -184,7 +184,7 @@ namespace ConsoleFramework.Controls
 
         private void openPopup( ) {
             if (opened) throw new InvalidOperationException("Assertion failed.");
-            Window popup = new PopupWindow(Items, SelectedItemIndex, shadow,
+            Window popup = new PopupWindow(Items, SelectedItemIndex ?? 0, shadow,
                 ShownItemsCount != null ? ShownItemsCount.Value - 1 : ( int? ) null);
             Point popupCoord = TranslatePoint(this, new Point(0, 0),
                 VisualTreeHelper.FindClosestParent<WindowsHost>( this ));
@@ -224,7 +224,7 @@ namespace ConsoleFramework.Controls
         }
 
 
-        public int SelectedItemIndex {
+        public int? SelectedItemIndex {
             get { return selectedItemIndex; }
             set {
                 if ( selectedItemIndex != value ) {
@@ -236,7 +236,7 @@ namespace ConsoleFramework.Controls
         }
 
         private bool m_opened;
-        private int selectedItemIndex;
+        private int? selectedItemIndex;
 
         public static Size EMPTY_SIZE = new Size(3, 1);
 
@@ -257,7 +257,7 @@ namespace ConsoleFramework.Controls
             buffer.SetPixel( 0, 0, ' ', attrs );
             int usedForCurrentItem = 0;
             if ( Items.Count != 0 && ActualWidth > 4 ) {
-                usedForCurrentItem = RenderString(Items[SelectedItemIndex], buffer, 1, 0, ActualWidth - 4, attrs);
+                usedForCurrentItem = RenderString(Items[SelectedItemIndex ?? 0], buffer, 1, 0, ActualWidth - 4, attrs);
             }
             buffer.FillRectangle( 1 + usedForCurrentItem, 0, ActualWidth - (usedForCurrentItem + 1), 1, ' ', attrs );
             if (ActualWidth > 2)

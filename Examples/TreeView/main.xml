@@ -10,13 +10,13 @@
           <TreeItem Title="Panel"></TreeItem>
         </TreeItem>
         <TreeItem Title="Specific">
-          <TreeItem Title="More symbols"></TreeItem>
-          <TreeItem Title="No options"></TreeItem>
+          <TreeItem Title="More symbols 0"></TreeItem>
+          <TreeItem Title="No options 0"></TreeItem>
           <TreeItem Title="End of all">
-            <TreeItem Title="More symbols" Disabled="True"></TreeItem>
-            <TreeItem Title="No options"></TreeItem>
-            <TreeItem Title="More symbols"></TreeItem>
-            <TreeItem Title="No options"></TreeItem>
+            <TreeItem Title="More symbols 1" Disabled="True"></TreeItem>
+            <TreeItem Title="No options 1"></TreeItem>
+            <TreeItem Title="More symbols 2"></TreeItem>
+            <TreeItem Title="No options 2"></TreeItem>
           </TreeItem>
         </TreeItem>
       </TreeView.Items>
