@@ -11,8 +11,6 @@ namespace ConsoleFramework.Controls
 {
     /// <summary>
     /// Список элементов с возможностью выбрать один из них.
-    /// todo : дополнить поддержку disabledItemsIndexes: при изменении их должно выполняться
-    /// todo : Invalidate(), и они должны быть ненажимаемыми и невыбираемыми
     /// </summary>
     public class ListBox : Control
     {
@@ -156,27 +154,51 @@ namespace ConsoleFramework.Controls
 
                     if ( !disabledItemsIndexes.Contains( newIndex ) ) {
                         SelectedItemIndex = newIndex;
-
-                        // Notify any ScrollViewer that wraps this control to scroll visible part
-                        this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
-                                         new ContentShouldBeScrolledEventArgs( this,
-                                                                               ScrollViewer.ContentShouldBeScrolledEvent,
-                                                                               null, null, SelectedItemIndex, null ) );
                     }
                 }
             }
+            currentItemShouldBeVisibleAtTop( );
+        }
+
+        /// <summary>
+        /// Makes the current selected item to be visible at bottom of scroll viewer
+        /// (if any wrapping scroll viewer presents).
+        /// Call this method after any PgDown or keyboard down arrow handling.
+        /// </summary>
+        private void currentItemShouldBeVisibleAtBottom( ) {
+            // Notify any ScrollViewer that wraps this control to scroll visible part
+            this.RaiseEvent(ScrollViewer.ContentShouldBeScrolledEvent,
+                            new ContentShouldBeScrolledEventArgs( this,
+                                                                  ScrollViewer.ContentShouldBeScrolledEvent,
+                                                                  null, null, null,
+                                                                   Math.Max(0, SelectedItemIndex.Value)));
+        }
+
+        /// <summary>
+        /// Makes the current selected item to be visible at top of scroll viewer
+        /// (if any wrapping scroll viewer presents).
+        /// Call this method after any PgUp or keyboard up arrow handling.
+        /// </summary>
+        private void currentItemShouldBeVisibleAtTop() {
+            // Notify any ScrollViewer that wraps this control to scroll visible part
+            this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
+                             new ContentShouldBeScrolledEventArgs( this,
+                                                                   ScrollViewer.ContentShouldBeScrolledEvent,
+                                                                   null, null, null,
+                                                                   Math.Max( 0, SelectedItemIndex.Value ) ) );
         }
 
         private void pageDownCore( int? pageSize ) {
             if ( allItemsAreDisabled ) return;
             if ( pageSize == null ) {
-                if ( SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
+                if ( !allItemsAreDisabled && SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
                     // Take the last non-disabled item
-                    SelectedItemIndex = items.Count - 1;
-                    while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) ) {
-                        SelectedItemIndex--;
+                    int firstEnabledItemIndex = items.Count - 1;
+                    while (disabledItemsIndexes.Contains(firstEnabledItemIndex)){
+                        firstEnabledItemIndex--;
                     }
-                    Invalidate( );
+
+                    SelectedItemIndex = firstEnabledItemIndex;
                 }
             } else {
                 if ( SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
@@ -190,17 +212,10 @@ namespace ConsoleFramework.Controls
 
                     if ( !disabledItemsIndexes.Contains( newIndex ) ) {
                         SelectedItemIndex = newIndex;
-
-                        // Notify any ScrollViewer that wraps this control to scroll visible part
-                        this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
-                                         new ContentShouldBeScrolledEventArgs( this,
-                                                                               ScrollViewer.ContentShouldBeScrolledEvent,
-                                                                               null, null, null,
-                                                                               Math.Max( 0, SelectedItemIndex.Value ) ) );
-
                     }
                 }
             }
+            currentItemShouldBeVisibleAtBottom();
         }
 
         private void OnKeyDown( object sender, KeyEventArgs args ) {
@@ -223,7 +238,8 @@ namespace ConsoleFramework.Controls
                         SelectedItemIndex--;
                     }
                 } while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) );
-                Invalidate(  );
+
+                currentItemShouldBeVisibleAtTop();
             }
             if (args.wVirtualKeyCode == VirtualKeys.Down) {
                 if ( allItemsAreDisabled ) return;
@@ -231,7 +247,8 @@ namespace ConsoleFramework.Controls
                     if ( SelectedItemIndex == null ) SelectedItemIndex = 0;
                     SelectedItemIndex = ( SelectedItemIndex + 1 )%items.Count;
                 } while ( disabledItemsIndexes.Contains( SelectedItemIndex.Value ) );
-                Invalidate(  );
+
+                currentItemShouldBeVisibleAtBottom(  );
             }
             args.Handled = true;
         }
