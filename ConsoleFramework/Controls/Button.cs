@@ -36,7 +36,7 @@ namespace ConsoleFramework.Controls
                     captionAttrs = Colors.Blend(Color.Black, Color.DarkGreen);
             }
 
-            if (pressed) {
+            if (pressed || pressedUsingKeyboard) {
                 buffer.FillRectangle(1, 0, ActualWidth - 1, ActualHeight - 1, ' ', captionAttrs);
                 buffer.SetOpacityRect(0, 0, 1, ActualHeight, 3);
                 buffer.FillRectangle(0, 0, 1, ActualHeight, ' ', captionAttrs);

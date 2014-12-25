@@ -929,7 +929,6 @@ namespace ConsoleFramework
         /// Invokes action in main loop thread asynchronously.
         /// If run loop was not started yet, nothing will be done.
         /// </summary>
-        /// <param name="action"></param>
         public void Post( Action action ) {
             // If run loop is not started, nothing to do
             if ( !this.running ) {
@@ -945,6 +944,32 @@ namespace ConsoleFramework
                 	invokeWaitHandle.Set();
 				}
 			}
+        }
+
+        private readonly object timersLock = new object(  );
+
+        /// <summary>
+        /// This structure is required to avoid active timer to be collected by GC
+        /// before action execution.
+        /// </summary>
+        private readonly List<Timer> activeTimers = new List< Timer >();
+
+        /// <summary>
+        /// Invokes action in main loop thread (UI thread) asynchronously and after delay.
+        /// If run loop will not start to delayed time, nothing will be done.
+        /// </summary>
+        public void Post( Action action, TimeSpan delay ) {
+            lock ( timersLock ) {
+                Timer[] array = new Timer[1];
+                Timer timer = new Timer( state => {
+                    this.Post( action );
+                    lock ( timersLock ) {
+                        activeTimers.Remove( array[ 0 ] );
+                    }
+                }, null, delay, TimeSpan.FromMilliseconds( -1 ) );
+                array[ 0 ] = timer;
+                activeTimers.Add( timer );
+            }
         }
 
         /// <summary>

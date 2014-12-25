@@ -19,6 +19,12 @@ namespace ConsoleFramework.Controls
         /// </summary>
         protected bool pressed;
 
+        /// <summary>
+        /// True in some time after user has pressed button using keyboard
+        /// (~ 0.5 second) - just for animate pressing
+        /// </summary>
+        protected bool pressedUsingKeyboard;
+
         private bool disabled;
         public bool Disabled {
             get {
@@ -57,8 +63,15 @@ namespace ConsoleFramework.Controls
         private void Button_KeyDown( object sender, KeyEventArgs args ) {
             if (Disabled) return;
 
-            if ( args.wVirtualKeyCode == VirtualKeys.Space ) { // VK_SPACE
+            if ( args.wVirtualKeyCode == VirtualKeys.Space
+                || args.wVirtualKeyCode == VirtualKeys.Return) {
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                pressedUsingKeyboard = true;
+                Invalidate(  );
+                ConsoleApplication.Instance.Post( ( ) => {
+                    pressedUsingKeyboard = false;
+                    Invalidate(  );
+                }, TimeSpan.FromMilliseconds( 300 ) );
                 args.Handled = true;
             }
         }
