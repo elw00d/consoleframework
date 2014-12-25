@@ -199,17 +199,19 @@ namespace ConsoleFramework.Events {
             lastMousePressEventArgs = eventArgs;
             timer = new Timer( state => {
                 ConsoleApplication.Instance.RunOnUiThread( ( ) => {
-                    eventsQueue.Enqueue( new MouseButtonEventArgs(
-                        lastMousePressEventArgs.Source,
-                        Control.MouseDownEvent,
-                        lastMousePosition,
-                        lastMousePressEventArgs.LeftButton,
-                        lastMousePressEventArgs.MiddleButton,
-                        lastMousePressEventArgs.RightButton,
-                        MouseButton.Left,
-                        1,
-                        true
-                    ) );
+                    if (autoRepeatTimerRunning) {
+                        eventsQueue.Enqueue( new MouseButtonEventArgs(
+                            lastMousePressEventArgs.Source,
+                            Control.MouseDownEvent,
+                            lastMousePosition,
+                            lastMousePressEventArgs.LeftButton,
+                            lastMousePressEventArgs.MiddleButton,
+                            lastMousePressEventArgs.RightButton,
+                            MouseButton.Left,
+                            1,
+                            true
+                        ) );
+                    }
                 } );
                 // todo : make this constants configurable
             }, null, TimeSpan.FromMilliseconds( 300 ), TimeSpan.FromMilliseconds(100) );
