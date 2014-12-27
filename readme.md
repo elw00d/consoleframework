@@ -46,15 +46,13 @@ make
 
 After that you can copy binaries from ./libs into directory with examples. Or you can use binaries of libtermkey from zip in **/native** directory.
 
-Libc and ncursesw are distributed in binaries in vast majority of Linux distros (in Mac OS X you may need to install them manually using [MacPorts]), so all you need is locate actual binaries and create a symlinks in local directory, for example, if you are Mac OS X user, you can create next symlinks
+Libc and ncursesw are distributed in binaries in vast majority of Linux distros and OS X, so all you need is locate actual binaries and copy them in the output directory if the target machine does not have them, for example, if you are Mac OS X user, you will need to install libtermkey.
 
 ```sh
-ln -s /usr/lib/libc.dylib libc.so.6
-ln -s ./libncurses.5.4.dylib libncursesw.so.5
-ln -s ./libtermkey.1.dylib libtermkey.so
+brew install --universal libtermkey
 ```
 
-Console Framework expects that libraries will be available strictly by this names. If your system already has symlinks *libc.so.6* and *libncursesw.so.5*, you can skip this step.
+Console Framework expects that libraries will be available strictly by these names on Linux. If your system already has symlinks *libc.so.6* and *libncursesw.so.5*, you can skip this step.
 
 Running examples
 --
