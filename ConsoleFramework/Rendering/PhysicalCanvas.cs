@@ -185,7 +185,7 @@ namespace ConsoleFramework.Rendering
 							NCurses.attrset(
 								(int) NCurses.COLOR_PAIR(index));
 						}
-						char outChar = buffer[y, x].UnicodeChar != '\0' ? buffer[y, x].UnicodeChar : ' ';
+						char outChar = buffer[y, x].UnicodeChar != '\0' ? (buffer[y, x].UnicodeChar) : ' ';
 						NCurses.mvaddstr(y, x, new string(outChar,1));
 					}
 				}
