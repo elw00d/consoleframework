@@ -104,6 +104,9 @@
 
       <arg value="/filealign:${project.file-alignment}" unless="${project.build.is-mono}"/>
     </csc>
+
+    <!--- Dll mappings for OS X -->
+    <copy file="ConsoleFramework/ConsoleFramework.dll.config" todir="${project.output.dir}"/>
   </target>
 
   <!-- Builds examples for specified use case -->
