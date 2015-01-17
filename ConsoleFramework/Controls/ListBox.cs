@@ -184,14 +184,16 @@ namespace ConsoleFramework.Controls
             this.RaiseEvent( ScrollViewer.ContentShouldBeScrolledEvent,
                              new ContentShouldBeScrolledEventArgs( this,
                                                                    ScrollViewer.ContentShouldBeScrolledEvent,
-                                                                   null, null, null,
-                                                                   Math.Max( 0, SelectedItemIndex.Value ) ) );
+                                                                   null, null,
+                                                                   Math.Max( 0, SelectedItemIndex.Value ),
+                                                                   null ) );
         }
 
         private void pageDownCore( int? pageSize ) {
             if ( allItemsAreDisabled ) return;
+            int itemIndex = SelectedItemIndex.HasValue ? SelectedItemIndex.Value : 0;
             if ( pageSize == null ) {
-                if ( !allItemsAreDisabled && SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
+                if ( !allItemsAreDisabled && itemIndex != items.Count - 1 ) {
                     // Take the last non-disabled item
                     int firstEnabledItemIndex = items.Count - 1;
                     while (disabledItemsIndexes.Contains(firstEnabledItemIndex)){
@@ -201,8 +203,8 @@ namespace ConsoleFramework.Controls
                     SelectedItemIndex = firstEnabledItemIndex;
                 }
             } else {
-                if ( SelectedItemIndex.HasValue && SelectedItemIndex != items.Count - 1 ) {
-                    int newIndex = Math.Min( items.Count - 1, SelectedItemIndex.Value + pageSize.Value );
+                if ( itemIndex != items.Count - 1 ) {
+                    int newIndex = Math.Min( items.Count - 1, itemIndex + pageSize.Value );
 
                     // If it is disabled, take the first non-disabled item after
                     while ( disabledItemsIndexes.Contains( newIndex )

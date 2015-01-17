@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -54,8 +55,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Контрол, виртуализирующий содержимое так, что можно прокручивать его, если
     /// оно не вмещается в отведённое пространство.
-    /// todo : добавить обработку нажатий мыши по ползункам и между ползунками и стрелками
-    /// todo : добавить повторение нажатий мыши по таймеру
+    /// todo : add scroller dragging support
     /// </summary>
     public class ScrollViewer : Control
     {
@@ -209,48 +209,73 @@ namespace ConsoleFramework.Controls
         private void OnMouseDown( object sender, MouseButtonEventArgs args ) {
             Point pos = args.GetPosition( this );
             if ( horizontalScrollVisible ) {
-                if ( pos == new Point( 0, ActualHeight - 1 ) ) {
-                    // left arrow clicked
-                    if (deltaX > 0)
-                    {
+                Point leftArrowPos = new Point( 0, ActualHeight - 1 );
+                Point rightArrowPos = new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ),
+                                                 ActualHeight - 1 );
+                if (leftArrowPos == pos) {
+                    if (deltaX > 0) {
                         deltaX--;
                         Invalidate();
                     }
-                    
+                } else if (rightArrowPos == pos) {
+                    // сколько места сейчас оставлено дочернему контролу
+                    int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
+                    if ( deltaX < Content.RenderSize.Width - remainingWidth ) {
+                        deltaX++;
+                        Invalidate( );
+                    }
                 } else {
-                    if ( pos ==
-                         new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ), ActualHeight - 1 ) ) {
-                        // right arrow clicked
-                        
-                        // сколько места сейчас оставлено дочернему контролу
-                        int remainingWidth = ActualWidth - (verticalScrollVisible ? 1 : 0);
-                        if (deltaX < Content.RenderSize.Width - remainingWidth)
-                        {
-                            deltaX++;
+                    // Clicked somewhere in scrollbar
+                    Point? horizontalScrollerPos = HorizontalScrollerPos;
+                    if ( horizontalScrollerPos.HasValue ) {
+                        int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
+                        int itemsPerScrollerPos = Content.RenderSize.Width/remainingWidth;
+                        if ( pos.X < horizontalScrollerPos.Value.X ) {
+                            deltaX = Math.Max( 0, deltaX - itemsPerScrollerPos );
+                            Invalidate(  );
+                        } else if ( pos.X > horizontalScrollerPos.Value.X ) {
+                            deltaX = Math.Min(Content.RenderSize.Width - remainingWidth,
+                                deltaX + itemsPerScrollerPos);
                             Invalidate();
+                        } else {
+                            // Click on scroller
+                            // todo : make scroller draggable
                         }
                     }
                 }
             }
             if ( verticalScrollVisible ) {
-                if ( pos == new Point( ActualWidth - 1, 0 ) ) {
-                    // up arrow clicked
-                    if (deltaY > 0)
-                    {
+                Point upArrowPos = new Point( ActualWidth - 1, 0 );
+                Point downArrowPos = new Point( ActualWidth - 1,
+                                                ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) );
+                if ( pos == upArrowPos ) {
+                    if (deltaY > 0) {
                         deltaY--;
                         Invalidate();
                     }
+                } else if ( pos == downArrowPos ) {
+                    // сколько места сейчас оставлено дочернему контролу
+                    int remainingHeight = ActualHeight - ( horizontalScrollVisible ? 1 : 0 );
+                    if ( deltaY < Content.RenderSize.Height - remainingHeight ) {
+                        deltaY++;
+                        Invalidate( );
+                    }
                 } else {
-                    if ( pos ==
-                         new Point( ActualWidth - 1, ActualHeight - ( 1 + ( horizontalScrollVisible ? 1 : 0 ) ) ) ) {
-                        // down arrow clicked
-                        
-                        // сколько места сейчас оставлено дочернему контролу
-                        int remainingHeight = ActualHeight - (horizontalScrollVisible ? 1 : 0);
-                        if (deltaY < Content.RenderSize.Height - remainingHeight)
-                        {
-                            deltaY++;
+                    // Clicked somewhere in scrollbar
+                    Point? verticalScrollerPos = VerticalScrollerPos;
+                    if ( verticalScrollerPos.HasValue ) {
+                        int remainingHeight = ActualHeight - ( horizontalScrollVisible ? 1 : 0 );
+                        int itemsPerScrollerPos = Content.RenderSize.Height/remainingHeight;
+                        if ( pos.Y < verticalScrollerPos.Value.Y ) {
+                            deltaY = Math.Max( 0, deltaY - itemsPerScrollerPos );
+                            Invalidate(  );
+                        } else if ( pos.Y > verticalScrollerPos.Value.Y ) {
+                            deltaY = Math.Min(Content.RenderSize.Height - remainingHeight,
+                                                deltaY + itemsPerScrollerPos);
                             Invalidate();
+                        } else {
+                            // Click on scroller
+                            // todo : make scroller draggable
                         }
                     }
                 }
@@ -344,6 +369,65 @@ namespace ConsoleFramework.Controls
 
             Size result = new Size(resultWidth, resultHeight);
             return result;
+        }
+
+        /// <summary>
+        /// Returns position of horizontal scroller if it is visible now, null otherwise.
+        /// </summary>
+        public Point? HorizontalScrollerPos {
+            get {
+                if ( !horizontalScrollVisible ) return null;
+
+                if ( ActualWidth > 3 + ( verticalScrollVisible ? 1 : 0 ) ) {
+                    int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
+                    int extraWidth = Content.RenderSize.Width - remainingWidth;
+                    int pages = extraWidth/( remainingWidth - 2 - 1 );
+
+                    // Relative to scrollbar (without arrows)
+                    int scrollerPos;
+                    if ( pages == 0 ) {
+                        double posInDelta = ( remainingWidth*1.0 - 2 - 1 )/extraWidth;
+                        scrollerPos = ( int ) Math.Round( posInDelta*deltaX );
+                    } else {
+                        double deltaInPos = ( extraWidth*1.0 )/( remainingWidth - 2 - 1 );
+                        scrollerPos = ( int ) Math.Round( deltaX/( deltaInPos ) );
+                    }
+
+                    // Relative to whole control
+                    return new Point(scrollerPos + 1, ActualHeight - 1);
+                } else {
+                    return null;
+                }
+            }
+        }
+        /// <summary>
+        /// Returns position of scroller if it is visible now, null otherwise.
+        /// </summary>
+        public Point? VerticalScrollerPos {
+            get {
+                if ( !verticalScrollVisible ) return null;
+
+                if ( ActualHeight > 3 + ( horizontalScrollVisible ? 1 : 0 ) ) {
+                    int remainingHeight = ActualHeight - ( horizontalScrollVisible ? 1 : 0 );
+                    int extraHeight = Content.RenderSize.Height - remainingHeight;
+                    int pages = extraHeight/( remainingHeight - 2 - 1 );
+
+                    // Relative to scrollbar (without arrows)
+                    int scrollerPos;
+                    if ( pages == 0 ) {
+                        double posInDelta = ( remainingHeight*1.0 - 2 - 1 )/extraHeight;
+                        scrollerPos = ( int ) Math.Round( posInDelta*deltaY );
+                    } else {
+                        double deltaInPos = ( extraHeight*1.0 )/( remainingHeight - 2 - 1 );
+                        scrollerPos = ( int ) Math.Round( deltaY/( deltaInPos ) );
+                    }
+
+                    // Relative to whole control
+                    return new Point(ActualWidth - 1, scrollerPos + 1);
+                } else {
+                    return null;
+                }
+            }
         }
 
         public override void Render(RenderingBuffer buffer) {
