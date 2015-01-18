@@ -62,8 +62,6 @@ namespace ConsoleFramework
             
             if ( maximized ) return;
             //
-            savedWindowRect = new Rect( new Point( Console.WindowLeft, Console.WindowTop ),
-                                        new Size( Console.WindowWidth, Console.WindowHeight ) );
             savedBufferSize = new Size(Console.BufferWidth, Console.BufferHeight);
             Win32.SendMessage(getConsoleWindowHwnd(), Win32.WM_SYSCOMMAND,
                 Win32.SC_MAXIMIZE, IntPtr.Zero);
@@ -72,7 +70,12 @@ namespace ConsoleFramework
             Console.SetWindowPosition( 0, 0 );
             Console.SetBufferSize(maxWidth, maxHeight);
             Console.SetWindowSize(maxWidth, maxHeight);
-            //
+
+            // Apply new sizes to Canvas
+            CanvasSize = new Size(maxWidth, maxHeight);
+            renderer.RootElementRect = new Rect(canvas.Size);
+            renderer.UpdateLayout();
+
             maximized = true;
         }
 
@@ -102,7 +105,12 @@ namespace ConsoleFramework
                 Math.Min( savedWindowRect.Width, maxWidth),
                 Math.Min(savedWindowRect.Height, maxHeight));
             Console.SetWindowPosition(savedWindowRect.Left, savedWindowRect.Top);
-            //
+
+            // Apply new sizes to Canvas
+            CanvasSize = new Size(savedWindowRect.Width, savedWindowRect.Height);
+            renderer.RootElementRect = new Rect(canvas.Size);
+            renderer.UpdateLayout();
+
             maximized = false;
         }
 
@@ -738,10 +746,16 @@ namespace ConsoleFramework
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
             Win32.GetConsoleScreenBufferInfo( stdOutputHandle, out screenBufferInfo );
 
+            // Set Canvas size to current console window size (not to whole buffer size)
+            savedWindowRect = new Rect( new Point( Console.WindowLeft, Console.WindowTop ),
+                                        new Size( Console.WindowWidth, Console.WindowHeight ) );
+            CanvasSize = new Size(savedWindowRect.Width, savedWindowRect.Height);
+
             canvas = userCanvasSize.IsEmpty 
                 ? new PhysicalCanvas( screenBufferInfo.dwSize.X, screenBufferInfo.dwSize.Y, stdOutputHandle ) 
                 : new PhysicalCanvas( userCanvasSize.Width, userCanvasSize.Height, stdOutputHandle);
             renderer.Canvas = canvas;
+
             // Fill the canvas by default
             renderer.RootElementRect = userRootElementRect.IsEmpty 
                 ? new Rect( new Point(0, 0), canvas.Size ) : userRootElementRect;
@@ -753,6 +767,7 @@ namespace ConsoleFramework
 
             // Initially hide the console cursor
             HideCursor();
+            
             
 			this.running = true;
 			this.mainThreadId = Thread.CurrentThread.ManagedThreadId;
@@ -783,6 +798,10 @@ namespace ConsoleFramework
                             Maximize();
                         else
                             Restore();
+                    }
+                    if ( !maximized ) {
+                        savedWindowRect = new Rect( new Point( Console.WindowLeft, Console.WindowTop ),
+                                                    new Size( Console.WindowWidth, Console.WindowHeight ) );
                     }
                 }
                 // WAIT_FAILED
