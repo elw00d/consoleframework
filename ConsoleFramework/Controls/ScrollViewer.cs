@@ -212,19 +212,19 @@ namespace ConsoleFramework.Controls
                 Point leftArrowPos = new Point( 0, ActualHeight - 1 );
                 Point rightArrowPos = new Point( ActualWidth - ( 1 + ( verticalScrollVisible ? 1 : 0 ) ),
                                                  ActualHeight - 1 );
-                if (leftArrowPos == pos) {
+                if ( leftArrowPos == pos ) {
                     if (deltaX > 0) {
                         deltaX--;
                         Invalidate();
                     }
-                } else if (rightArrowPos == pos) {
+                } else if ( rightArrowPos == pos ) {
                     // сколько места сейчас оставлено дочернему контролу
                     int remainingWidth = ActualWidth - ( verticalScrollVisible ? 1 : 0 );
                     if ( deltaX < Content.RenderSize.Width - remainingWidth ) {
                         deltaX++;
                         Invalidate( );
                     }
-                } else {
+                } else if ( pos.Y == ActualHeight - 1 ) {
                     // Clicked somewhere in scrollbar
                     Point? horizontalScrollerPos = HorizontalScrollerPos;
                     if ( horizontalScrollerPos.HasValue ) {
@@ -260,7 +260,7 @@ namespace ConsoleFramework.Controls
                         deltaY++;
                         Invalidate( );
                     }
-                } else {
+                } else if ( pos.X == ActualWidth - 1 ) {
                     // Clicked somewhere in scrollbar
                     Point? verticalScrollerPos = VerticalScrollerPos;
                     if ( verticalScrollerPos.HasValue ) {
@@ -309,11 +309,7 @@ namespace ConsoleFramework.Controls
             Size desiredSize = Content.DesiredSize;
 
             horizontalScrollVisible = HorizontalScrollEnabled && (desiredSize.Width > availableSize.Width);
-            verticalScrollVisible = VerticalScrollEnabled && (desiredSize.Height + (horizontalScrollVisible ? 1 : 0) > availableSize.Height);
-            if ( verticalScrollVisible ) {
-                // Нужно проверить ещё раз, нужен ли горизонтальный сколлбар
-                horizontalScrollVisible = HorizontalScrollEnabled && (desiredSize.Width + 1 > availableSize.Width);
-            }
+            verticalScrollVisible = VerticalScrollEnabled && (desiredSize.Height > availableSize.Height);
 
             int width = Math.Min( verticalScrollVisible ? desiredSize.Width + 1 : desiredSize.Width, availableSize.Width );
             int height = Math.Min( horizontalScrollVisible ? desiredSize.Height + 1 : desiredSize.Height, availableSize.Height );
