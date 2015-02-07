@@ -94,7 +94,6 @@ namespace ConsoleFramework
             Win32.SendMessage(getConsoleWindowHwnd(), Win32.WM_SYSCOMMAND, 
                 Win32.SC_RESTORE, IntPtr.Zero);
             Console.SetWindowPosition( 0, 0 );
-            Console.SetBufferSize( savedBufferSize.Width, savedBufferSize.Height );
 
             // Get largest size again - because resolution of screen can change
             // between maximize and restore calls
@@ -105,6 +104,13 @@ namespace ConsoleFramework
                 Math.Min( savedWindowRect.Width, maxWidth),
                 Math.Min(savedWindowRect.Height, maxHeight));
             Console.SetWindowPosition(savedWindowRect.Left, savedWindowRect.Top);
+
+            // Duo issue with console in Windows 10 Technical Preview (unexpected decreasing Console.BufferSize)
+            // we should take Max of window width. See https://github.com/elw00d/consoleframework/issues/21
+            Console.SetBufferSize(
+                Math.Max( savedBufferSize.Width, Console.WindowWidth ),
+                Math.Max( savedBufferSize.Height, Console.WindowHeight )
+            );
 
             // Apply new sizes to Canvas
             CanvasSize = new Size(savedWindowRect.Width, savedWindowRect.Height);
