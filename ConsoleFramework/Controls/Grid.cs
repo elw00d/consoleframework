@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Rendering;
-using ConsoleFramework.Xaml;
 using Xaml;
 
 namespace ConsoleFramework.Controls
@@ -170,7 +168,11 @@ namespace ConsoleFramework.Controls
             Control[ , ] matrix = new Control[ ColumnDefinitions.Count,RowDefinitions.Count ];
             for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
                 for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                    matrix[ x, y ] = Children[ y*ColumnDefinitions.Count + x ];
+                    if ( Children.Count > y*ColumnDefinitions.Count + x ) {
+                        matrix[ x, y ] = Children[ y*ColumnDefinitions.Count + x ];
+                    } else {
+                        matrix[ x, y ] = null;
+                    }
                 }
             }
             // Если в качестве availableSize передано PositiveInfinity, мы просто игнорируем Star-элементы,
@@ -203,7 +205,8 @@ namespace ConsoleFramework.Controls
                     if ( rowDefinition.MaxHeight != null && height > rowDefinition.MaxHeight.Value )
                         height = rowDefinition.MaxHeight.Value;
 
-                    matrix[ x, y ].Measure( new Size( width, height ) );
+                    if ( matrix[ x, y ] != null )
+                        matrix[ x, y ].Measure( new Size( width, height ) );
                 }
             }
 
@@ -223,8 +226,9 @@ namespace ConsoleFramework.Controls
                     if ( ColumnDefinitions[ x ].MinWidth != null && maxWidth < ColumnDefinitions[ x ].MinWidth.Value )
                         maxWidth = ColumnDefinitions[ x ].MinWidth.Value;
                     for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                        if ( matrix[ x, y ].DesiredSize.Width > maxWidth )
-                            maxWidth = matrix[ x, y ].DesiredSize.Width;
+                        if ( matrix[ x, y ] != null )
+                            if ( matrix[ x, y ].DesiredSize.Width > maxWidth )
+                                maxWidth = matrix[ x, y ].DesiredSize.Width;
                     }
                     columnsWidths[ x ] = maxWidth;
                 }
@@ -240,8 +244,9 @@ namespace ConsoleFramework.Controls
                     if ( RowDefinitions[ y ].MinHeight != null && maxHeight < RowDefinitions[ y ].MinHeight.Value )
                         maxHeight = RowDefinitions[ y ].MinHeight.Value;
                     for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                        if ( matrix[ x, y ].DesiredSize.Height > maxHeight )
-                            maxHeight = matrix[ x, y ].DesiredSize.Height;
+                        if ( matrix[ x, y ] != null )
+                            if ( matrix[ x, y ].DesiredSize.Height > maxHeight )
+                                maxHeight = matrix[ x, y ].DesiredSize.Height;
                     }
                     rowsHeights[ y ] = maxHeight;
                 }
@@ -284,7 +289,8 @@ namespace ConsoleFramework.Controls
                 int width = columnsWidths[ x ];
                 for ( int y = 0; y < RowDefinitions.Count; y++ ) {
                     int height = rowsHeights[ y ];
-                    matrix[ x, y ].Measure( new Size( width, height ) );
+                    if ( matrix[ x, y ] != null )
+                        matrix[ x, y ].Measure( new Size( width, height ) );
                 }
             }
 
@@ -296,10 +302,12 @@ namespace ConsoleFramework.Controls
             for ( int x = 0; x < columnsWidths.Length; x++ ) {
                 int currentY = 0;
                 for ( int y = 0; y < rowsHeights.Length; y++ ) {
-                    Children[y * columnsWidths.Length + x].Arrange( new Rect(
-                        new Point(currentX, currentY),
-                        new Size(columnsWidths[x], rowsHeights[y])
-                        ) );
+                    if ( Children.Count > y*columnsWidths.Length + x ) {
+                        Children[y * columnsWidths.Length + x].Arrange( new Rect(
+                            new Point(currentX, currentY),
+                            new Size(columnsWidths[x], rowsHeights[y])
+                            ) );
+                    }
                     currentY += rowsHeights[ y ];
                 }
                 currentX += columnsWidths[ x ];
