@@ -230,9 +230,16 @@ namespace ConsoleFramework.Controls
         internal LayoutInfo layoutInfo = new LayoutInfo();
         internal LayoutInfo lastLayoutInfo = new LayoutInfo();
 
+        private Visibility visibility;
+
         public Visibility Visibility {
-            get;
-            set;
+            get { return visibility; }
+            set {
+                if ( visibility != value ) {
+                    visibility = value;
+                    Invalidate();
+                }
+            }
         }
 
         /// <summary>
