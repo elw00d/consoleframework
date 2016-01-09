@@ -1,9 +1,11 @@
 ﻿using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {
+    [ContentProperty("Text")]
     public class TextBlock : Control {
         private string text;
 
@@ -12,6 +14,20 @@ namespace ConsoleFramework.Controls
 
         public TextBlock() {
             initialize();
+        }
+
+        private Color color = Color.Black;
+
+        public Color Color
+        {
+            get { return color; }
+            set
+            {
+                if ( color != value ) {
+                    color = value;
+                    Invalidate(  );
+                }
+            }
         }
 
         public string Text {
@@ -33,7 +49,7 @@ namespace ConsoleFramework.Controls
         }
 
         public override void Render(RenderingBuffer buffer) {
-            Attr attr = Colors.Blend(Color.Black, Color.DarkYellow);
+            Attr attr = Colors.Blend(color, Color.DarkYellow);
             buffer.FillRectangle( 0, 0, ActualWidth, ActualHeight, ' ', attr);
             for (int x = 0; x < ActualWidth; ++x) {
                 for (int y = 0; y < ActualHeight; ++y) {
