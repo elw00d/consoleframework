@@ -1352,5 +1352,24 @@ namespace ConsoleFramework.Controls
                 ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
             }
         }
+
+        /// <summary>
+        /// This method is called after control has been created and filled with children.
+        /// todo : think about avoiding reentrant Created() calls
+        /// </summary>
+        public void Created( ) {
+            foreach ( var child in Children ) {
+                child.Created(  );
+            }
+            OnCreated(  );
+        }
+
+        /// <summary>
+        /// This method is invoked after control has been created and all children
+        /// controls are created too (and children' OnCreated called). So, you can
+        /// find any child control in this method and subscribe for events.
+        /// </summary>
+        protected virtual void OnCreated( ) {
+        }
     }
 }

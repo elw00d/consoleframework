@@ -191,12 +191,15 @@ namespace ConsoleFramework
                 }
                 using ( StreamReader reader = new StreamReader( stream ) ) {
                     string result = reader.ReadToEnd( );
-                    return XamlParser.CreateFromXaml<Control>(result, dataContext, new List<string>()
+                    Control control = XamlParser.CreateFromXaml<Control>(result, dataContext, new List<string>()
                     {
                         "clr-namespace:Xaml;assembly=Xaml",
                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                     });
+                    control.DataContext = dataContext;
+                    control.Created( );
+                    return control;
                 }
             }
         }
