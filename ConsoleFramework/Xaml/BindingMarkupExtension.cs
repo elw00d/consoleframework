@@ -29,7 +29,10 @@ namespace ConsoleFramework.Xaml
 
         public object ProvideValue(IMarkupExtensionContext context) {
             Object realSource = Source ?? context.DataContext;
-            if (null != realSource && realSource is INotifyPropertyChanged) {
+            if ( null != realSource && !( realSource is INotifyPropertyChanged ) ) {
+                throw new ArgumentException("Source must be INotifyPropertyChanged to use bindings");
+            }
+            if (null != realSource) {
                 BindingMode mode = BindingMode.Default;
                 if ( Path != null ) {
                     Type enumType = typeof ( BindingMode );
