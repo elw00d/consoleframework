@@ -74,6 +74,10 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Binding\Binding.csproj">
+      <Project>{e1cd529b-e3f1-4660-aa4f-1670e0992553}</Project>
+      <Name>Binding</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ConsoleFramework\ConsoleFramework.csproj">
       <Project>{2A59C284-2995-4F37-8D65-411C25C85493}</Project>
       <Name>ConsoleFramework</Name>
