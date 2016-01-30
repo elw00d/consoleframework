@@ -131,6 +131,7 @@ namespace ConsoleFramework.Controls
                     buffer.SetPixel(x, y, ' ', Attr.BACKGROUND_BLUE |
                         Attr.BACKGROUND_GREEN | Attr.BACKGROUND_RED | Attr.FOREGROUND_BLUE |
                         Attr.FOREGROUND_GREEN | Attr.FOREGROUND_RED | Attr.FOREGROUND_INTENSITY);
+                    buffer.SetOpacity( x, y, 4 );
                 }
             }
         }

@@ -255,6 +255,9 @@ namespace ConsoleFramework.Events {
                 // контрола, над которым событие было зарегистрировано. Такой механизм необходим,
                 // например, для корректной обработки перемещений окон (вверх или в стороны)
                 Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
+
+                // No sense to further process event with no source control
+                if ( source == null ) return;
                 
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
                     MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
@@ -602,20 +605,28 @@ namespace ConsoleFramework.Events {
         /// </summary>
         /// <param name="rawPoint"></param>
         /// <param name="control">RootElement для проверки всего визуального дерева.</param>
-        /// <returns></returns>
+        /// <returns>Элемент управления или null, если событие мыши было за границами всех контролов, или
+        /// если все контролы были прозрачны для событий мыши</returns>
         private Control findSource(Point rawPoint, Control control) {
             if (control.Children.Count != 0) {
                 IList<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
                 for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
                     Control child = childrenOrderedByZIndex[i];
                     if (Control.HitTest(rawPoint, control, child)) {
-                        Point childPoint = Control.TranslatePoint( null, rawPoint, child );
-                        int opacity = ConsoleApplication.Instance.Renderer.getControlOpacityAt( child, childPoint.X, childPoint.Y );
-                        if ( opacity >= 4 && opacity <= 7 ) {
-                            continue;
-                        }
-                        return findSource(rawPoint, child);
+                        Control foundSource = findSource(rawPoint, child);
+                        if ( null != foundSource ) return foundSource;
                     }
+                }
+            }
+            Point localPoint = Control.TranslatePoint(null, rawPoint, control);
+            Rect controlRect = new Rect(new Point(0, 0), control.RenderSize);
+            if ( !controlRect.Contains( localPoint ) ) {
+                return null;
+            } else {
+                int _opacity = ConsoleApplication.Instance.Renderer
+                    .getControlOpacityAt( control, localPoint.X, localPoint.Y );
+                if ( _opacity >= 4 && _opacity <= 7 ) {
+                    return null;
                 }
             }
             return control;

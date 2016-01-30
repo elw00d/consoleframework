@@ -43,8 +43,7 @@ namespace ConsoleFramework.Controls
         /// По клику мышки ищет конечный Focusable контрол, который размещён 
         /// на месте нажатия и устанавливает на нём фокус.
         /// </summary>
-        private void Window_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
+        private void Window_OnPreviewMouseDown(object sender, MouseButtonEventArgs e) {
             PassFocusToChildUnderPoint( e );
         }
 

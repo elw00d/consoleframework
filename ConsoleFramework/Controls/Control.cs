@@ -1331,6 +1331,7 @@ namespace ConsoleFramework.Controls
         /// и передаёт на него фокус, если он - Focusable и Visible.
         /// </summary>
         protected void PassFocusToChildUnderPoint( MouseEventArgs args ) {
+            Control topControl = null;
             Control tofocus = null;
             Control parent = this;
             Control hitTested = null;
@@ -1341,15 +1342,23 @@ namespace ConsoleFramework.Controls
                 if (null != hitTested)
                 {
                     parent = hitTested;
-                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
-                    {
-                        tofocus = hitTested;
+                    if (hitTested.Visibility == Visibility.Visible) {
+                        topControl = hitTested;
+                        if ( hitTested.Focusable ) {
+                            tofocus = hitTested;
+                        }
                     }
                 }
             } while (hitTested != null);
             if (tofocus != null)
             {
                 ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
+            }
+            if ( topControl != null && args.RightButton == MouseButtonState.Pressed ) {
+                if ( topControl.ContextMenu != null ) {
+                    var windowsHost = VisualTreeHelper.FindClosestParent<WindowsHost>(this);
+                    topControl.ContextMenu.OpenMenu(windowsHost, args.GetPosition(windowsHost));
+                }
             }
         }
 
@@ -1370,6 +1379,12 @@ namespace ConsoleFramework.Controls
         /// find any child control in this method and subscribe for events.
         /// </summary>
         protected virtual void OnCreated( ) {
+        }
+
+        private ContextMenu contextMenu;
+        public ContextMenu ContextMenu {
+            get { return contextMenu; }
+            set { contextMenu = value; }
         }
     }
 }
