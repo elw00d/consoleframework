@@ -1328,36 +1328,20 @@ namespace ConsoleFramework.Controls
 
         /// <summary>
         /// Определяет дочерний элемент, находящийся под курсором мыши,
-        /// и передаёт на него фокус, если он - Focusable и Visible.
+        /// и передаёт на него фокус, если он - Focusable. А если нажата правая кнопка мыши и у
+        /// контрола есть контекстное меню, активизирует его.
         /// </summary>
         protected void PassFocusToChildUnderPoint( MouseEventArgs args ) {
-            Control topControl = null;
-            Control tofocus = null;
-            Control parent = this;
-            Control hitTested = null;
-            do
-            {
-                Point position = args.GetPosition(parent);
-                hitTested = parent.GetTopChildAtPoint(position);
-                if (null != hitTested)
-                {
-                    parent = hitTested;
-                    if (hitTested.Visibility == Visibility.Visible) {
-                        topControl = hitTested;
-                        if ( hitTested.Focusable ) {
-                            tofocus = hitTested;
-                        }
-                    }
+            Control topControl = VisualTreeHelper.FindTopControlUnderMouse( this, args.GetPosition( this ) );
+            if ( topControl != null ) {
+                if ( topControl.Focusable ) {
+                    ConsoleApplication.Instance.FocusManager.SetFocus(this, topControl);
                 }
-            } while (hitTested != null);
-            if (tofocus != null)
-            {
-                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
-            }
-            if ( topControl != null && args.RightButton == MouseButtonState.Pressed ) {
-                if ( topControl.ContextMenu != null ) {
-                    var windowsHost = VisualTreeHelper.FindClosestParent<WindowsHost>(this);
-                    topControl.ContextMenu.OpenMenu(windowsHost, args.GetPosition(windowsHost));
+                if ( args.RightButton == MouseButtonState.Pressed ) {
+                    if ( topControl.ContextMenu != null ) {
+                        var windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
+                        topControl.ContextMenu.OpenMenu( windowsHost, args.GetPosition( windowsHost ) );
+                    }
                 }
             }
         }

@@ -187,8 +187,8 @@ namespace Examples
                     Title = "Очень длинное название окна",
                     Content = groupBox
                 });
-//                windowsHost.Show(window1);
-//                windowsHost.Show(createdFromXaml);
+                windowsHost.Show(window1);
+                windowsHost.Show(createdFromXaml);
                 //textBox.SetFocus(); todo : научиться задавать фокусный элемент до добавления в визуальное дерево
                 //application.TerminalSizeChanged += ( sender, eventArgs ) => {
                 //    application.CanvasSize = new Size(eventArgs.Width, eventArgs.Height);

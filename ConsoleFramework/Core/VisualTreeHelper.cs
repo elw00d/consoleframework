@@ -85,5 +85,48 @@ namespace ConsoleFramework.Core
             if (tmp is T) return (T) tmp;
             return null;
         }
+
+        /// <summary>
+        /// Находит самый верхний элемент под указателем мыши с координатами rawPoint.
+        /// Учитывается прозрачность элементов - если пиксель, куда указывает мышь, отмечен как
+        /// прозрачный для событий мыши (opacity от 4 до 7), то они будут проходить насквозь,
+        /// к следующему контролу. Также учитывается видимость элементов - Hidden и Collapsed элементы
+        /// будут проигнорированы.
+        /// Так обрабатываются, например, тени окошек и прозрачные места контролов (первый столбец Combobox).
+        /// </summary>
+        /// <param name="localPoint">Координаты относительно control</param>
+        /// <param name="control">RootElement для проверки всего визуального дерева.</param>
+        /// <returns>Элемент управления или null, если событие мыши было за границами всех контролов, или
+        /// если все контролы были прозрачны для событий мыши</returns>
+        public static Control FindTopControlUnderMouse(Control control, Point localPoint) {
+            if (null == control) throw new ArgumentNullException("control");
+
+            Point rawPoint = Control.TranslatePoint( control, localPoint, null );
+
+            if (control.Children.Count != 0) {
+                IList<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
+                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
+                    Control child = childrenOrderedByZIndex[i];
+                    if (Control.HitTest(rawPoint, control, child)) {
+                        Control foundSource = FindTopControlUnderMouse(child, 
+                            Control.TranslatePoint( control, localPoint, child ));
+                        if ( null != foundSource ) return foundSource;
+                    }
+                }
+            }
+            Rect controlRect = new Rect(new Point(0, 0), control.RenderSize);
+            if ( !controlRect.Contains( localPoint ) ) {
+                return null;
+            } else {
+                if ( control.Visibility != Visibility.Visible )
+                    return null;
+                int _opacity = ConsoleApplication.Instance.Renderer
+                    .getControlOpacityAt( control, localPoint.X, localPoint.Y );
+                if ( _opacity >= 4 && _opacity <= 7 ) {
+                    return null;
+                }
+            }
+            return control;
+        }
     }
 }
