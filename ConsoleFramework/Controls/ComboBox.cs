@@ -208,7 +208,8 @@ namespace ConsoleFramework.Controls
         }
 
         private void OnMouseDown( object sender, MouseButtonEventArgs mouseButtonEventArgs ) {
-            openPopup(  );
+            if ( !opened ) 
+                openPopup(  );
         }
 
         private void OnPopupClosed( object o, EventArgs args ) {
