@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;

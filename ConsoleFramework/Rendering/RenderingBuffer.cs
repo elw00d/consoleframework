@@ -175,6 +175,21 @@ namespace ConsoleFramework.Rendering
             }
         }
 
+        public void SetPixelSafe( int x, int y, char c ) {
+            if (buffer.GetLength( 0 ) > x && buffer.GetLength( 1 ) > y)
+                SetPixel( x, y, c );
+        }
+
+        public void SetPixelSafe(int x, int y, Attr attr) {
+            if (buffer.GetLength(0) > x && buffer.GetLength(1) > y)
+                SetPixel(x, y, attr);
+        }
+
+        public void SetPixelSafe(int x, int y, char c, Attr attr) {
+            if (buffer.GetLength(0) > x && buffer.GetLength(1) > y)
+                SetPixel(x, y, c, attr);
+        }
+
         public void SetPixel(int x, int y, char c) {
             buffer[x, y].UnicodeChar = c;
         }
@@ -284,6 +299,12 @@ namespace ConsoleFramework.Rendering
         /// </summary>
         public int GetOpacityAt( int x, int y ) {
             return opacityMatrix[ x, y ];
+        }
+
+        public void RenderStringSafe( string s, int x, int y, Attr attr ) {
+            for ( int i = 0; i < s.Length; i++ ) {
+                SetPixelSafe( x + i, y, s[i], attr );
+            }
         }
     }
 }
