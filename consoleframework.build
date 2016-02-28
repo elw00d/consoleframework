@@ -128,6 +128,7 @@
         <include name="System.Core.dll"/>
 		<include name="${project.output.dir}/Xaml.dll"/>
         <include name="${project.output.dir}/ConsoleFramework.dll"/>
+        <include name="${project.output.dir}/Binding.dll"/>
       </references>
       <resources dynamicprefix="true" prefix="">
         <include name="Examples/**/*.xml" />
@@ -150,24 +151,28 @@
     <property name="exampleName" value="AsyncUiUpdate"/>
     <call target="build-examples-core"/>
 
-	<property name="entryPointClass" value="Examples.CheckBoxes.Program"/>
+    <property name="entryPointClass" value="Examples.CheckBoxes.Program"/>
     <property name="exampleName" value="CheckBoxes"/>
     <call target="build-examples-core"/>
 
-	<property name="entryPointClass" value="Examples.Commands.Program"/>
+    <property name="entryPointClass" value="Examples.Commands.Program"/>
     <property name="exampleName" value="Commands"/>
     <call target="build-examples-core"/>
 
-	<property name="entryPointClass" value="Examples.MainMenu.Program"/>
+    <property name="entryPointClass" value="Examples.MainMenu.Program"/>
     <property name="exampleName" value="MainMenu"/>
     <call target="build-examples-core"/>
 
-	<property name="entryPointClass" value="Examples.TreeView.Program"/>
+    <property name="entryPointClass" value="Examples.TreeView.Program"/>
     <property name="exampleName" value="TreeView"/>
     <call target="build-examples-core"/>
 
-	<property name="entryPointClass" value="Examples.RadioButtons.Program"/>
+    <property name="entryPointClass" value="Examples.RadioButtons.Program"/>
     <property name="exampleName" value="RadioButtons"/>
+    <call target="build-examples-core"/>
+    
+    <property name="entryPointClass" value="Examples.TabControl.Program"/>
+    <property name="exampleName" value="TabControl"/>
     <call target="build-examples-core"/>
   </target>
 
