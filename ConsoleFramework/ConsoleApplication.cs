@@ -723,10 +723,14 @@ namespace ConsoleFramework
 				inputRecord.MouseEvent.dwMousePosition = new COORD((short) (col - 1), (short) (line - 1));
 				if (ev == TermKeyMouseEvent.TERMKEY_MOUSE_RELEASE) {
 					inputRecord.MouseEvent.dwButtonState = 0;
-				} else if (ev == TermKeyMouseEvent.TERMKEY_MOUSE_DRAG) {
-					inputRecord.MouseEvent.dwButtonState = MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED;
-				} else if (ev == TermKeyMouseEvent.TERMKEY_MOUSE_PRESS) {
-					inputRecord.MouseEvent.dwButtonState = MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED;
+				} else if (ev == TermKeyMouseEvent.TERMKEY_MOUSE_DRAG || ev == TermKeyMouseEvent.TERMKEY_MOUSE_PRESS) {
+					if (1 == button) {
+						inputRecord.MouseEvent.dwButtonState = MOUSE_BUTTON_STATE.FROM_LEFT_1ST_BUTTON_PRESSED;
+					} else if (2 == button) {
+						inputRecord.MouseEvent.dwButtonState = MOUSE_BUTTON_STATE.FROM_LEFT_2ND_BUTTON_PRESSED;
+					} else if (3 == button) {
+						inputRecord.MouseEvent.dwButtonState = MOUSE_BUTTON_STATE.RIGHTMOST_BUTTON_PRESSED;
+					}
 				}
 				//
 				processInputEvent(inputRecord);
