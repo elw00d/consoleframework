@@ -1,6 +1,13 @@
-﻿<Window>
+﻿<Window Title="Main menu and context menu example" Height="7">
+  <Window.ContextMenu>
+    <ContextMenu>
+      <MenuItem Title="Show Message" Command="{Binding MyCommand, Mode=OneWay}"/>
+      <MenuItem Title="Submenu" Type="Submenu">
+        <MenuItem Title="Show Message" Command="{Binding MyCommand, Mode=OneWay}"/>
+      </MenuItem>
+    </ContextMenu>
+  </Window.ContextMenu>
   <Panel>
-    <CheckBox Name="checkbox" Caption="Check me" Checked="True"></CheckBox>
-    <CheckBox Name="checkbox" Caption="Check me too"></CheckBox>
+    <TextBlock>Press right mouse button to open the Context Menu</TextBlock>
   </Panel>
 </Window>

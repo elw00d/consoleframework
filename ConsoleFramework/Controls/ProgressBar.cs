@@ -1,4 +1,5 @@
-﻿using ConsoleFramework.Core;
+﻿using System;
+using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 
@@ -25,7 +26,7 @@ namespace ConsoleFramework.Controls
             Attr attr = Colors.Blend( Color.DarkCyan, Color.DarkBlue );
             buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, UnicodeTable.MediumShade, attr);
             int filled = ( int ) ( ActualWidth*( Percent*0.01 ) );
-            buffer.FillRectangle(0, 0, filled, ActualHeight, UnicodeTable.DarkShade, attr);
+            buffer.FillRectangle(0, 0, Math.Min( filled, ActualWidth ), ActualHeight, UnicodeTable.DarkShade, attr);
         }
     }
 }

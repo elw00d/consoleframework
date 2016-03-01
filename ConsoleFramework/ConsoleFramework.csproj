@@ -61,6 +61,7 @@
     <Compile Include="Controls\ButtonBase.cs" />
     <Compile Include="Controls\CheckBox.cs" />
     <Compile Include="Controls\ComboBox.cs" />
+    <Compile Include="Controls\ContextMenu.cs" />
     <Compile Include="Controls\Grid.cs" />
     <Compile Include="Controls\GroupBox.cs" />
     <Compile Include="Controls\ListBox.cs" />
@@ -69,6 +70,7 @@
     <Compile Include="Controls\ProgressBar.cs" />
     <Compile Include="Controls\RadioButton.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
+    <Compile Include="Controls\TabControl.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Controls\TreeView.cs" />
     <Compile Include="Controls\UIElementCollection.cs" />

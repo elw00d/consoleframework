@@ -248,13 +248,18 @@ namespace ConsoleFramework.Events {
                     // вынуждены сохранять координаты, полученные при предыдущем событии мыши
                     rawPosition = lastMousePosition;
                 }
-                Control topMost = findSource(rawPosition, rootElement);
+
+                Control topMost = VisualTreeHelper.FindTopControlUnderMouse(rootElement,
+                    Control.TranslatePoint(null, rawPosition, rootElement));
 
                 // если мышь захвачена контролом, то события перемещения мыши доставляются только ему,
                 // события, связанные с нажатием мыши - тоже доставляются только ему, вместо того
                 // контрола, над которым событие было зарегистрировано. Такой механизм необходим,
                 // например, для корректной обработки перемещений окон (вверх или в стороны)
                 Control source = (inputCaptureStack.Count != 0) ? inputCaptureStack.Peek() : topMost;
+
+                // No sense to further process event with no source control
+                if ( source == null ) return;
                 
                 if (mouseEvent.dwEventFlags == MouseEventFlags.MOUSE_MOVED) {
                     MouseButtonState leftMouseButtonState = getLeftButtonState(mouseEvent.dwButtonState);
@@ -591,34 +596,6 @@ namespace ConsoleFramework.Events {
             }
 
             return args.Handled;
-        }
-
-        /// <summary>
-        /// Находит самый верхний элемент под указателем мыши с координатами rawPoint.
-        /// Учитывается прозрачность элементов - если пиксель, куда указывает мышь, отмечен как
-        /// прозрачный для событий мыши (opacity от 4 до 7), то они будут проходить насквозь,
-        /// к следующему контролу.
-        /// Так обрабатываются, например, тени окошек и прозрачные места контролов (первый столбец Combobox).
-        /// </summary>
-        /// <param name="rawPoint"></param>
-        /// <param name="control">RootElement для проверки всего визуального дерева.</param>
-        /// <returns></returns>
-        private Control findSource(Point rawPoint, Control control) {
-            if (control.Children.Count != 0) {
-                IList<Control> childrenOrderedByZIndex = control.GetChildrenOrderedByZIndex();
-                for (int i = childrenOrderedByZIndex.Count - 1; i >= 0; i--) {
-                    Control child = childrenOrderedByZIndex[i];
-                    if (Control.HitTest(rawPoint, control, child)) {
-                        Point childPoint = Control.TranslatePoint( null, rawPoint, child );
-                        int opacity = ConsoleApplication.Instance.Renderer.getControlOpacityAt( child, childPoint.X, childPoint.Y );
-                        if ( opacity >= 4 && opacity <= 7 ) {
-                            continue;
-                        }
-                        return findSource(rawPoint, child);
-                    }
-                }
-            }
-            return control;
         }
 
         /// <summary>

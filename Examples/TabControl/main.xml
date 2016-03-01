@@ -1,0 +1,20 @@
+﻿<Window Title="TabControl example">
+  <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <TabControl.TabDefinitions>
+      <TabDefinition Title="First"/>
+      <TabDefinition Title="Second"/>
+      <TabDefinition Title="Third"/>
+    </TabControl.TabDefinitions>
+    <CheckBox Name="checkbox" Caption="Check me" Checked="True"/>
+    <CheckBox Name="checkbox" Caption="Check me too"/>
+    <Panel>
+      <RadioGroup Name="radio">
+        <RadioButton Caption="Listen music" Checked="True"/>
+        <RadioButton Caption="Eat"/>
+        <RadioButton Caption="Read the newspaper"/>
+        <RadioButton Caption="Watch TV"/>
+      </RadioGroup>
+      <Button Caption="What am I want now?"/>
+    </Panel>
+  </TabControl>
+</Window>

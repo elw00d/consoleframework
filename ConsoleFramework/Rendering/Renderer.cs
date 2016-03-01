@@ -508,6 +508,12 @@ namespace ConsoleFramework.Rendering
         /// Это необходимо для определения контрола, который станет источником события мыши.
         /// </summary>
         internal int getControlOpacityAt( Control control, int x, int y ) {
+            // Если контрол, над которым водят мышью, имеет невидимых сыновей, которые ни разу
+            // не отрисовывались, то в словаре буферов для таких сыновей ничего не окажется.
+            // Возвращаем для таких детей 6 - как будто они полностью прозрачны
+            if ( !buffers.ContainsKey( control ) ) {
+                return 6;
+            }
             return buffers[ control ].GetOpacityAt( x, y );
         }
 

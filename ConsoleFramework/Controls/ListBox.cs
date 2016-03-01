@@ -21,7 +21,7 @@ namespace ConsoleFramework.Controls
         public int? PageSize { get; set; }
 
         private readonly ObservableList<string> items = new ObservableList<string>(new List<string>());
-        public IList<String>  Items {
+        public ObservableList<String>  Items {
             get { return items; }
         }
         

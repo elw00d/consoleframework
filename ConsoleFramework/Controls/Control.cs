@@ -230,9 +230,16 @@ namespace ConsoleFramework.Controls
         internal LayoutInfo layoutInfo = new LayoutInfo();
         internal LayoutInfo lastLayoutInfo = new LayoutInfo();
 
+        private Visibility visibility;
+
         public Visibility Visibility {
-            get;
-            set;
+            get { return visibility; }
+            set {
+                if ( visibility != value ) {
+                    visibility = value;
+                    Invalidate();
+                }
+            }
         }
 
         /// <summary>
@@ -1321,29 +1328,47 @@ namespace ConsoleFramework.Controls
 
         /// <summary>
         /// Определяет дочерний элемент, находящийся под курсором мыши,
-        /// и передаёт на него фокус, если он - Focusable и Visible.
+        /// и передаёт на него фокус, если он - Focusable. А если нажата правая кнопка мыши и у
+        /// контрола есть контекстное меню, активизирует его.
         /// </summary>
         protected void PassFocusToChildUnderPoint( MouseEventArgs args ) {
-            Control tofocus = null;
-            Control parent = this;
-            Control hitTested = null;
-            do
-            {
-                Point position = args.GetPosition(parent);
-                hitTested = parent.GetTopChildAtPoint(position);
-                if (null != hitTested)
-                {
-                    parent = hitTested;
-                    if (hitTested.Visibility == Visibility.Visible && hitTested.Focusable)
-                    {
-                        tofocus = hitTested;
+            Control topControl = VisualTreeHelper.FindTopControlUnderMouse( this, args.GetPosition( this ) );
+            if ( topControl != null ) {
+                if ( topControl.Focusable ) {
+                    ConsoleApplication.Instance.FocusManager.SetFocus(this, topControl);
+                }
+                if ( args.RightButton == MouseButtonState.Pressed ) {
+                    if ( topControl.ContextMenu != null ) {
+                        var windowsHost = VisualTreeHelper.FindClosestParent< WindowsHost >( this );
+                        topControl.ContextMenu.OpenMenu( windowsHost, args.GetPosition( windowsHost ) );
                     }
                 }
-            } while (hitTested != null);
-            if (tofocus != null)
-            {
-                ConsoleApplication.Instance.FocusManager.SetFocus(this, tofocus);
             }
+        }
+
+        /// <summary>
+        /// This method is called after control has been created and filled with children.
+        /// todo : think about avoiding reentrant Created() calls
+        /// </summary>
+        public void Created( ) {
+            foreach ( var child in Children ) {
+                child.Created(  );
+            }
+            OnCreated(  );
+        }
+
+        /// <summary>
+        /// This method is invoked after control has been created and all children
+        /// controls are created too (and children' OnCreated called). So, you can
+        /// find any child control in this method and subscribe for events.
+        /// </summary>
+        protected virtual void OnCreated( ) {
+        }
+
+        private ContextMenu contextMenu;
+        public ContextMenu ContextMenu {
+            get { return contextMenu; }
+            set { contextMenu = value; }
         }
     }
 }

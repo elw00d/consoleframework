@@ -20,7 +20,7 @@ namespace ConsoleFramework.Controls
 
         protected override Size MeasureOverride(Size availableSize) {
             if (!string.IsNullOrEmpty(caption)) {
-                Size minButtonSize = new Size(caption.Length + 14, 2);
+                Size minButtonSize = new Size(caption.Length + 10, 2);
                 return minButtonSize;
             } else return new Size(8, 2);
         }

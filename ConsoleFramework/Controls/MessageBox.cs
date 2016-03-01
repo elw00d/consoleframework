@@ -43,7 +43,9 @@ namespace ConsoleFramework.Controls
             messageBox.Title = title;
             messageBox.Text = text;
             messageBox.AddHandler( ClosedEvent, new EventHandler(( sender, args ) => {
-                onClosed(MessageBoxResult.Button1);
+                if ( null != onClosed ) {
+                    onClosed( MessageBoxResult.Button1 );
+                }
             }) );
             //messageBox.X =
             windowsHost.ShowModal( messageBox );
