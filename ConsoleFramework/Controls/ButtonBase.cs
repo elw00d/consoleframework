@@ -66,6 +66,9 @@ namespace ConsoleFramework.Controls
             if ( args.wVirtualKeyCode == VirtualKeys.Space
                 || args.wVirtualKeyCode == VirtualKeys.Return) {
                 RaiseEvent(ClickEvent, new RoutedEventArgs(this, ClickEvent));
+                if (command != null && command.CanExecute(CommandParameter)) {
+                    command.Execute(CommandParameter);
+                }
                 pressedUsingKeyboard = true;
                 Invalidate(  );
                 ConsoleApplication.Instance.Post( ( ) => {
