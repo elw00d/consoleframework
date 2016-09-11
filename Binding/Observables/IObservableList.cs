@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Binding.Observables {
 
@@ -24,7 +25,7 @@ namespace Binding.Observables {
 
     public class ListChangedEventArgs : EventArgs
     {
-        public ListChangedEventArgs(ListChangedEventType type, int index, int count, ArrayList removedItems) {
+		public ListChangedEventArgs(ListChangedEventType type, int index, int count, List<Object> removedItems) {
             this.Type = type;
             this.Index = index;
             this.Count = count;
@@ -34,7 +35,7 @@ namespace Binding.Observables {
         public readonly ListChangedEventType Type;
         public readonly int Index;
         public readonly int Count;
-        public readonly ArrayList RemovedItems;
+        public readonly List<Object> RemovedItems;
     }
     
 }

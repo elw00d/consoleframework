@@ -48,7 +48,7 @@ namespace ConsoleFramework.Native
         public static extern bool WriteConsoleOutputCore(IntPtr hConsoleOutput, CHAR_INFO[,] lpBuffer, COORD dwBufferSize,
                                                      COORD dwBufferCoord, ref SMALL_RECT lpWriteRegion);
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern int FormatMessage(int dwFlags, string lpSource, int dwMessageId, int dwLanguageId,
                                                StringBuilder lpBuffer, int nSize, string[] Arguments);
 

@@ -14,7 +14,7 @@ using Xaml;
 
 namespace Examples
 {
-    internal class Program
+    public class Program
     {
     class MyDataContext : INotifyPropertyChanged
         {
@@ -37,7 +37,7 @@ namespace Examples
             }
         }
 
-        private static void Main(string[] args) {
+        public static void Main(string[] args) {
 //            Control window = ConsoleApplication.LoadFromXaml( "ConsoleFramework.Layout.xml", null );
 ////            window.FindChildByName< TextBlock >( "text" ).MouseDown += ( sender, eventArgs ) => {
 ////                window.FindChildByName< TextBlock >( "text" ).Text = "F";
@@ -49,8 +49,10 @@ namespace Examples
 ////            };
 //            ConsoleApplication.Instance.Run( window );
 //            return;
+			Type type = typeof(Program);
+			TypeInfo typeInfo = type.GetTypeInfo ();
 
-            var assembly = Assembly.GetExecutingAssembly();
+			var assembly = typeInfo.Assembly;
             var resourceName = "Examples.GridTest.xml";
             Window createdFromXaml;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))

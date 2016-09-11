@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.ComponentModel;
 using Binding;
 using Binding.Converters;
@@ -36,10 +37,10 @@ namespace ConsoleFramework.Xaml
                 BindingMode mode = BindingMode.Default;
                 if ( Path != null ) {
                     Type enumType = typeof ( BindingMode );
-                    string[ ] enumNames = enumType.GetEnumNames( );
+					string[ ] enumNames = enumType.GetTypeInfo().GetEnumNames( );
                     for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
                         if ( enumNames[ i ] == Mode ) {
-                            mode = ( BindingMode ) Enum.ToObject( enumType, enumType.GetEnumValues( ).GetValue( i ) );
+							mode = ( BindingMode ) Enum.ToObject( enumType, enumType.GetTypeInfo().GetEnumValues( ).GetValue( i ) );
                             break;
                         }
                     }

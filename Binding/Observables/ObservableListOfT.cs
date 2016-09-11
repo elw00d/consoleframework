@@ -43,7 +43,7 @@ namespace Binding.Observables
 
         public void Clear() {
             int count = list.Count;
-            ArrayList removedItems = new ArrayList();
+			List<object> removedItems = new List<object>();
             foreach (T item in list) {
                 removedItems.Add(item);
             }
@@ -76,7 +76,7 @@ namespace Binding.Observables
             int index = list.IndexOf(item);
             list.Remove(item);
             if (-1 != index) {
-                raiseListElementsRemoved(index, 1, new ArrayList() { item });
+                raiseListElementsRemoved(index, 1, new List<object>() { item });
                 return true;
             }
             return false;
@@ -116,7 +116,7 @@ namespace Binding.Observables
         public void RemoveAt(int index) {
             T removedItem = list[index];
             list.RemoveAt(index);
-            raiseListElementsRemoved(index, 1, new ArrayList() { removedItem });
+            raiseListElementsRemoved(index, 1, new List<object>() { removedItem });
         }
 
         object IList.this[ int index ] {
@@ -131,7 +131,7 @@ namespace Binding.Observables
             set {
                 T removedItem = list[index];
                 list[index] = value;
-                raiseListElementReplaced(index, new ArrayList() { removedItem });
+                raiseListElementReplaced(index, new List<object>() { removedItem });
             }
         }
 
@@ -141,13 +141,13 @@ namespace Binding.Observables
             }
         }
 
-        private void raiseListElementsRemoved(int index, int length, ArrayList removedItems) {
+		private void raiseListElementsRemoved(int index, int length, List<object> removedItems) {
             if (null != ListChanged) {
                 ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemsRemoved, index, length, removedItems));
             }
         }
 
-        private void raiseListElementReplaced(int index, ArrayList removedItems) {
+        private void raiseListElementReplaced(int index, List<object> removedItems) {
             if (null != ListChanged) {
                 ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemReplaced, index, 1, removedItems));
             }

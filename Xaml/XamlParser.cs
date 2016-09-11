@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using JSIL.Meta;
 
 namespace Xaml
 {
@@ -221,7 +220,6 @@ namespace Xaml
         /// </summary>
         private readonly List< FixupToken > fixupTokens = new List< FixupToken >();
 
-        [JSReplacement("JSIL.XML.ReaderFromString($xml)")]
     public static XmlReader ReaderFromString (string xml) {
         var ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
         return XmlReader.Create(ms);
@@ -244,7 +242,7 @@ namespace Xaml
                         // explicit property syntax
                         if ( Top != null && name.StartsWith( Top.type.Name + "." ) ) {
                             if ( Top.currentProperty != null )
-                                throw new ApplicationException( "Illegal syntax in property value definition." );
+                                throw new Exception( "Illegal syntax in property value definition." );
                             string propertyName = name.Substring(Top.type.Name.Length + 1);
                             Top.currentProperty = propertyName;
                         } else {
@@ -334,7 +332,7 @@ namespace Xaml
             // todo : uncomment after JSIL will impelement ConstructorInfo.operator==
             //if (null == constructorInfo) {
             if (null == ((object) constructorInfo)) {
-                throw new ApplicationException(
+                throw new Exception(
                     String.Format("Type {0} has no default constructor.", type.FullName));
             }
             Object invoke = constructorInfo.Invoke(new object[0]);
@@ -378,7 +376,7 @@ namespace Xaml
         }
 
         private String getContentPropertyName( Type type ) {
-            object[] attributes = type.GetCustomAttributes(typeof(ContentPropertyAttribute), true);
+			object[] attributes = type.GetTypeInfo().GetCustomAttributes(typeof ( ContentPropertyAttribute ), true).ToArray();
             if ( attributes.Length == 0 ) return "Content";
             if (attributes.Length > 1)
                 throw new InvalidOperationException("Ambigious content property definition " +
@@ -449,8 +447,8 @@ namespace Xaml
 
                     // If parent object property is ICollection<T>,
                     // add current object into them as T (will conversion if need)
-                    PropertyInfo property = Top.type.GetProperty( propertyName );
-                    Type typeArg1 = property.PropertyType.IsGenericType
+                    PropertyInfo property = Top.type.GetProperty(propertyName );
+					Type typeArg1 = property.PropertyType.GetTypeInfo().IsGenericType
                                         ? property.PropertyType.GetGenericArguments( )[ 0 ]
                                         : null;
                     if ( null != typeArg1 &&
@@ -470,7 +468,7 @@ namespace Xaml
                             // If parent object property is IDictionary<string, T>,
                             // add current object into them (by x:Key value) 
                             // with conversion to T if need
-                            Type typeArg2 = property.PropertyType.IsGenericType &&
+							Type typeArg2 = property.PropertyType.GetTypeInfo().IsGenericType &&
                                             property.PropertyType.GetGenericArguments( ).Length > 1
                                                 ? property.PropertyType.GetGenericArguments( )[ 1 ]
                                                 : null;
@@ -558,14 +556,14 @@ namespace Xaml
 
             // Process enumerations
             // todo : add TypeConverterAttribute support on enum, and unit tests
-            if ( source == typeof ( String ) && dest.IsEnum ) {
+			if ( source == typeof ( String ) && dest.GetTypeInfo().IsEnum ) {
                 string[ ] enumNames = Enum.GetNames(dest);
                 for ( int i = 0, len = enumNames.Length; i < len; i++ ) {
                     if ( enumNames[i] == (String) value ) {
                         return Enum.GetValues(dest).GetValue(i);
                     }
                 }
-                throw new ApplicationException("Specified enum value not found.");
+                throw new Exception("Specified enum value not found.");
             }
 
             // todo : default converters for primitives
@@ -584,7 +582,7 @@ namespace Xaml
             //if ( Type.GetTypeCode( source ) == TypeCode.Object ) {
             //if (!source.IsPrimitive && source != typeof(String)) {
             {
-                object[ ] attributes = source.GetCustomAttributes( typeof ( TypeConverterAttribute ), true );
+				object[ ] attributes = source.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
                     throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
                 if ( attributes.Length == 1 ) {
@@ -605,7 +603,7 @@ namespace Xaml
             //if ( Type.GetTypeCode( dest ) == TypeCode.Object ) {
             //if (!dest.IsPrimitive && dest != typeof(String)) {
             {
-                object[ ] attributes = dest.GetCustomAttributes( typeof ( TypeConverterAttribute ), true );
+				object[ ] attributes = dest.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
                     throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
                 if ( attributes.Length == 1 ) {
@@ -639,10 +637,10 @@ namespace Xaml
                 string namespaceName = matchCollection[ 0 ].Groups[ 1 ].Value;
                 string assemblyName = matchCollection[ 0 ].Groups[ 2 ].Value;
 
-                Assembly assembly = Assembly.Load( assemblyName );
+				Assembly assembly = Assembly.Load( new AssemblyName( assemblyName ) );
                 List< Type > types = assembly.GetTypes( ).Where( type => {
                     if (type.Namespace != namespaceName) return false;
-                    object[ ] attributes = type.GetCustomAttributes( typeof ( MarkupExtensionAttribute ), true );
+					object[ ] attributes = type.GetTypeInfo().GetCustomAttributes( typeof ( MarkupExtensionAttribute ), true ).ToArray();
                     return ( attributes.Any( o => ( ( MarkupExtensionAttribute ) o ).Name == bindingName ) );
                 } ).ToList( );
 
@@ -684,7 +682,7 @@ namespace Xaml
                 string namespaceName = matchCollection[ 0 ].Groups[ 1 ].Value;
                 string assemblyName = matchCollection[ 0 ].Groups[ 2 ].Value;
 
-                Assembly assembly = Assembly.Load( assemblyName );
+				Assembly assembly = Assembly.Load( new AssemblyName(assemblyName) );
                 List< Type > types = assembly.GetTypes( ).Where( type => type.Namespace == namespaceName
                     && type.Name == typeName ).ToList( );
                 if (types.Count > 1)

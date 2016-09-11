@@ -138,7 +138,7 @@ namespace Binding
         /// </summary>
         public void UpdateTarget() {
             if (realMode != BindingMode.OneTime && realMode != BindingMode.OneWay && realMode != BindingMode.TwoWay)
-                throw new ApplicationException( String.Format( "Cannot update target in {0} binding mode.", realMode ) );
+                throw new Exception( String.Format( "Cannot update target in {0} binding mode.", realMode ) );
             ignoreTargetListener = true;
             try {
                 Object sourceValue = sourcePropertyInfo.GetGetMethod().Invoke( 
@@ -250,7 +250,7 @@ namespace Binding
         /// </summary>
         public void UpdateSource() {
             if (realMode != BindingMode.OneWayToSource && realMode != BindingMode.TwoWay)
-                throw new ApplicationException( String.Format( "Cannot update source in {0} binding mode.", realMode ) );
+                throw new Exception( String.Format( "Cannot update source in {0} binding mode.", realMode ) );
             ignoreSourceListener = true;
             try {
                 Object targetValue;

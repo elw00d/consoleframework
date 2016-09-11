@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Binding.Observables {
     /// <summary>
@@ -30,7 +31,10 @@ namespace Binding.Observables {
 
         public void Clear() {
             int count = list.Count;
-            ArrayList removedItems = new ArrayList(list);
+			List<object> removedItems = new List<object>();
+			foreach (object item in list) {
+				removedItems.Add(item);
+			}
             list.Clear();
 
             raiseListElementsRemoved(0, count, removedItems);
@@ -48,7 +52,7 @@ namespace Binding.Observables {
             int index = list.IndexOf(item);
             list.Remove(item);
             if (-1 != index)
-                raiseListElementsRemoved(index, 1, new ArrayList() { item });
+                raiseListElementsRemoved(index, 1, new List<Object>() { item });
         }
 
         public void CopyTo(Array array, int index) {
@@ -97,7 +101,7 @@ namespace Binding.Observables {
         public void RemoveAt(int index) {
             object removedItem = list[index];
             list.RemoveAt(index);
-            raiseListElementsRemoved(index, 1, new ArrayList() { removedItem });
+            raiseListElementsRemoved(index, 1, new List<object>() { removedItem });
         }
 
         public Object this[int index] {
@@ -107,7 +111,7 @@ namespace Binding.Observables {
             set {
                 object removedItem = list[index];
                 list[index] = value;
-                raiseListElementReplaced(index, new ArrayList() { removedItem });
+                raiseListElementReplaced(index, new List<object>() { removedItem });
             }
         }
 
@@ -117,13 +121,13 @@ namespace Binding.Observables {
             }
         }
 
-        private void raiseListElementsRemoved(int index, int length, ArrayList removedItems) {
+        private void raiseListElementsRemoved(int index, int length, List<object> removedItems) {
             if (null != ListChanged) {
                 ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemsRemoved, index, length, removedItems));
             }
         }
 
-        private void raiseListElementReplaced(int index, ArrayList removedItems) {
+        private void raiseListElementReplaced(int index, List<object> removedItems) {
             if (null != ListChanged) {
                 ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemReplaced, index, 1, removedItems));
             }

@@ -32,13 +32,13 @@ namespace Binding
         public void AddAdapter(IBindingAdapter adapter) {
             Type targetClazz = adapter.TargetType;
             if ( adapters.ContainsKey( targetClazz ))
-                throw new ApplicationException( String.Format( "Adapter for class {0} is already registered.", targetClazz.Name ) );
+                throw new Exception( String.Format( "Adapter for class {0} is already registered.", targetClazz.Name ) );
             adapters.Add( targetClazz, adapter );
         }
 
         public IBindingAdapter GetAdapterFor(Type clazz) {
             IBindingAdapter adapter = adapters[ clazz ];
-            if (null == adapter) throw new ApplicationException(String.Format("Adapter for class {0} not found.", clazz.Name));
+            if (null == adapter) throw new Exception(String.Format("Adapter for class {0} not found.", clazz.Name));
             return adapter;
         }
 
@@ -53,7 +53,7 @@ namespace Binding
             if (converters.ContainsKey( first )) {
                 Dictionary< Type, IBindingConverter > firstClassConverters = converters[ first ];
                 if (firstClassConverters.ContainsKey( second )) {
-                    throw new ApplicationException( String.Format( "Converter for {0} -> {1} classes is already registered.", first.Name, second.Name ) );
+                    throw new Exception( String.Format( "Converter for {0} -> {1} classes is already registered.", first.Name, second.Name ) );
                 }
                 firstClassConverters.Add( second, converter );
             } else {
