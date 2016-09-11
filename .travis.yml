@@ -1,0 +1,4 @@
+language: csharp
+solution: ConsoleFramework.sln
+script:
+  - xbuild /p:Configuration=DebugMono /p:Platform=x86 ConsoleFramework.sln
