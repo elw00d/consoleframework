@@ -10,8 +10,8 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 #if !WIN32
-using Mono.Unix;
-using Mono.Unix.Native;
+//using Mono.Unix;
+//using Mono.Unix.Native;
 #endif
 using Xaml;
 
@@ -210,7 +210,9 @@ namespace ConsoleFramework
                 usingJsil = true;
                 return;
             }
-
+#if DOTNETCORE
+			usingLinux = true;  // todo : use this API https://github.com/dotnet/corefx/issues/1017
+#else
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -221,18 +223,19 @@ namespace ConsoleFramework
                     break;
                 case PlatformID.Unix:
 					usingLinux = true;
-#if !WIN32
-					Utsname uname;
-					Syscall.uname(out uname);
-					if (uname.sysname == "Darwin") {
-						isDarwin = true;
-					}
-#endif
+	#if !WIN32
+					//Utsname uname;
+					//Syscall.uname(out uname);
+					//if (uname.sysname == "Darwin") {
+					//	isDarwin = true;
+					//}
+	#endif
                     break;
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
                     throw new NotSupportedException();
             }
+#endif
         }
 		
         private ConsoleApplication() {
@@ -472,20 +475,20 @@ namespace ConsoleFramework
 		        try {
 #if !WIN32
                     // Catch SIGWINCH to handle terminal resizing
-			        UnixSignal[] signals = new UnixSignal [] {
-			            new UnixSignal (Signum.SIGWINCH)
-			        };
-			        Thread signal_thread = new Thread (delegate () {
-				        while (true) {
+			        //UnixSignal[] signals = new UnixSignal [] {
+			        //    new UnixSignal (Signum.SIGWINCH)
+			        //};
+			        //Thread signal_thread = new Thread (delegate () {
+				    //    while (true) {
 					        // Wait for a signal to be delivered
-					        int index = UnixSignal.WaitAny (signals, -1);
-					        Signum signal = signals [index].Signum;
-					        Libc.writeInt64 (pipeFds[1], 2);
-				        }
-			        }
-			        );
-			        signal_thread.IsBackground = false;
-			        signal_thread.Start ();
+					//        int index = UnixSignal.WaitAny (signals, -1);
+					//        Signum signal = signals [index].Signum;
+					//        Libc.writeInt64 (pipeFds[1], 2);
+				    //    }
+			        //}
+			        //);
+			        //signal_thread.IsBackground = false;
+			        //signal_thread.Start ();
 #endif
 		            TermKeyKey key = new TermKeyKey( );
 					//
@@ -515,7 +518,7 @@ namespace ConsoleFramework
 		                    if ( u == 1 ) {
 		                        // Exit from application
 #if !WIN32
-						        signal_thread.Abort ();
+						        //signal_thread.Abort ();
 #endif
 		                        break;
 		                    }
@@ -731,6 +734,7 @@ namespace ConsoleFramework
 		}
 		
         private void runWindows(Control control) {
+#if !DOTNETCORE
             this.mainControl = control;
             //
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
@@ -840,6 +844,7 @@ namespace ConsoleFramework
             renderer.RootElement = null;
 
             // todo : restore attributes of console output
+#endif
         }
 
         private bool isAnyInvokeActions( ) {
