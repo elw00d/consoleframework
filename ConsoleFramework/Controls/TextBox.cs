@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;

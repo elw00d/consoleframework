@@ -17,6 +17,36 @@ using Xaml;
 
 namespace ConsoleFramework
 {
+
+    /// <summary>
+    /// Gets a pre-started window
+    /// </summary>
+    public static class EasyAPI
+    {
+        public struct CFCtl
+        {
+            public string Name { get; set; }
+            public object Type { get; set; }
+        }
+
+        public struct CFState
+        {
+            public WindowsHost WindowsHost { get; set; }
+            public Window Window { get; set; }
+            //public  Handles { get; set; }
+        }
+
+        public static CFState GetState(string xmlRes, [Optional] object dataContext)
+        {
+            if (dataContext == null)
+                dataContext = null;
+            var cfState = new CFState();
+            cfState.WindowsHost = new WindowsHost();
+            cfState.Window = (Window)ConsoleApplication.LoadFromXaml(xmlRes, dataContext);
+            return cfState;
+        }
+    }
+
     public class TerminalSizeChangedEventArgs : EventArgs
     {
         public readonly int Width;
@@ -48,6 +78,7 @@ namespace ConsoleFramework
             }
             return consoleWindowHwnd;
         }
+
 
         /// <summary>
         /// Maximizes the terminal window size and terminal buffer size.
