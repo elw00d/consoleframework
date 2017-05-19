@@ -7,9 +7,9 @@ using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {
-    public class PassWord : Control
+    public class PasswordBox : Control
     {
-        public PassWord()
+        public PasswordBox()
         {
             KeyDown += TextBox_KeyDown;
             MouseDown += OnMouseDown;

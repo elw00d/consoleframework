@@ -72,6 +72,7 @@
     <Compile Include="Controls\RadioButton.cs" />
     <Compile Include="Controls\ScrollViewer.cs" />
     <Compile Include="Controls\TabControl.cs" />
+    <Compile Include="Controls\TextArea.cs" />
     <Compile Include="Controls\TextBox.cs" />
     <Compile Include="Controls\TreeView.cs" />
     <Compile Include="Controls\UIElementCollection.cs" />

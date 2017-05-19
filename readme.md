@@ -1,7 +1,9 @@
-Console Framework
+#Console Framework#
 ==
 
 Console framework is cross-platform toolkit that allows to develop [TUI] applications using C# and based on WPF-like concepts.
+We have taken over the development of this library (not yet officialized)
+
 
 Features
 --------
@@ -13,12 +15,14 @@ Features
 - A lot of controls available (including Grid, ScrollViewer, ListBox, ComboBox)
 - Routed events system (compatible with WPF)
 - Windows, Mac OS X and any Linux (32-bit or 64-bit) support
+- Currently with 23 controlls more to be added
 
-![](http://gyazo.com/81e1ae92cfba8c7a1c2a98da7da75ad7.png)
+![]()
 
 License
 -------
 Copyright 2011-2014 I. Kostromin
+Copyright 2017 Matheus Silva and CodeAlkemy
 
 License: MIT/X11
 

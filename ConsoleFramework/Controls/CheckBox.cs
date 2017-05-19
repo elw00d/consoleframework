@@ -18,6 +18,8 @@ namespace ConsoleFramework.Controls
             Checked = !Checked;
         }
 
+        protected char checkedChar = 'X';
+
         private string caption;
         public string Caption {
             get {
@@ -45,6 +47,8 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public string CheckedChar { get => checkedChar.ToString(); set => checkedChar = char.Parse(value); }
+
         protected override Size MeasureOverride(Size availableSize) {
             if (!string.IsNullOrEmpty(caption)) {
                 Size minButtonSize = new Size(caption.Length + 4, 1);
@@ -66,7 +70,7 @@ namespace ConsoleFramework.Controls
             buffer.SetOpacityRect( 0, 0, ActualWidth, ActualHeight, 3 );
 
             buffer.SetPixel(0, 0, pressed ? '<' : '[', buttonAttrs);
-            buffer.SetPixel(1, 0, Checked ? 'X' : ' ', buttonAttrs);
+            buffer.SetPixel(1, 0, Checked ? checkedChar : ' ', buttonAttrs);
             buffer.SetPixel(2, 0, pressed ? '>' : ']', buttonAttrs);
             buffer.SetPixel(3, 0, ' ', buttonAttrs);
             if (null != caption)
