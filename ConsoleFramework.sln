@@ -1,6 +1,8 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual Studio 15
+VisualStudioVersion = 15.0.26114.2
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleFramework", "ConsoleFramework\ConsoleFramework.csproj", "{2A59C284-2995-4F37-8D65-411C25C85493}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject1", "TestProject1\TestProject1.csproj", "{1579CF00-4DFB-48E0-B6C0-098DA0FC9F41}"
@@ -109,8 +111,6 @@ Global
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|Mixed Platforms.Build.0 = Release|x86
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.ActiveCfg = Release|x86
 		{E1CD529B-E3F1-4660-AA4F-1670E0992553}.Release|x86.Build.0 = Release|x86
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Examples\Examples.csproj
