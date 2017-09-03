@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using ConsoleFramework.Core;
 using ConsoleFramework.Native;
 
@@ -185,8 +186,10 @@ namespace ConsoleFramework.Rendering
 							NCurses.attrset(
 								(int) NCurses.COLOR_PAIR(index));
 						}
+					    // TODO : optimize this
 						char outChar = buffer[y, x].UnicodeChar != '\0' ? (buffer[y, x].UnicodeChar) : ' ';
-						NCurses.mvaddstr(y, x, new string(outChar,1));
+					    var bytes = UTF8Encoding.UTF8.GetBytes(new char[] {outChar});
+					    NCurses.mvaddstr(y, x, bytes);
 					}
 				}
 				NCurses.refresh();

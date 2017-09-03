@@ -440,7 +440,13 @@ namespace ConsoleFramework
 			// This is magic workaround to avoid messing up terminal after program finish
 			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
 			bool ignored = Console.KeyAvailable;
-			
+
+	        // Because .NET Core runtime changes locale to something wrong on startup,
+	        // we have to change it to default system locale
+	        // See https://stackoverflow.com/a/6249265
+	        // And https://github.com/dotnet/coreclr/issues/1012
+	        Libc.setlocale(Libc.LC_ALL, "");
+		    
 			IntPtr stdscr = NCurses.initscr ();
 			NCurses.cbreak ();
 			NCurses.noecho ();

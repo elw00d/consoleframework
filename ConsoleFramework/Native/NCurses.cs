@@ -94,8 +94,9 @@ namespace ConsoleFramework.Native
 		[DllImport("libncursesw.so.5")]
 		internal static extern int addstr(string str);
 		
+		// Unfortunately there is no another way to marshal strings as UTF-8 in .NET Core
 		[DllImport("libncursesw.so.5")]
-		internal static extern int mvaddstr(int x, int y, string str);
+		internal static extern int mvaddstr(int x, int y, byte[] str);
 		
 		// doesn't work with UTF
 		[DllImport("libncursesw.so.5")]

@@ -9,11 +9,16 @@ namespace ConsoleFramework.Native
     /// </summary>
     public static class Libc
     {
+	    public const int LC_ALL = 0;
+	    
+	    [DllImport("libc.so.6", SetLastError = true)]
+	    public static extern string setlocale(int category, string locale);
+	    
         /// <summary>
 		/// See the &lt;sys/poll.h&gt; and &lt;bits/poll.h&gt;
 		/// </summary>
 		[DllImport("libc.so.6", SetLastError = true)]
-		public static extern int poll( pollfd[] fds, int fdsCount, int timeout);
+		public static extern int poll( [In, Out] pollfd[] fds, int fdsCount, int timeout);
 
 		/// <summary>
 		/// Creates a pipe object. fds must be initialized array of 2 items.
