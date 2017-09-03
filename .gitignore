@@ -15,3 +15,5 @@ ConsoleFramework.userprefs
 .idea.ConsoleFramework/riderModule.iml
 .vs/ConsoleFramework/v15/.suo
 ConsoleFramework.v12.suo
+
+*.user
