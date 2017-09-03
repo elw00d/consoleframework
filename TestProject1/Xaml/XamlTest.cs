@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using AgileObjects.NetStandardPolyfills;
 using Binding.Observables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xaml;
@@ -45,7 +46,7 @@ namespace TestProject1.Xaml
         [TestMethod]
         public void TestXamlObject1()
         {
-            var assembly = Assembly.GetExecutingAssembly();
+            var assembly = typeof(XamlTest).GetAssembly();
             const string resourceName = "TestProject1.Xaml.XamlObject1.xml";
             XamlObject createdFromXaml;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))

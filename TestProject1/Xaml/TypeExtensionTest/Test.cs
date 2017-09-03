@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using AgileObjects.NetStandardPolyfills;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Xaml;
 
@@ -19,8 +20,9 @@ namespace TestProject1.Xaml.TypeExtensionTest
     [TestClass]
     public class Test
     {
-        private string loadResource(string resourceName) {
-            var assembly = Assembly.GetExecutingAssembly();
+        private string loadResource(string resourceName)
+        {
+            var assembly = typeof(Test).GetAssembly();
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream)) {
                 return reader.ReadToEnd();
