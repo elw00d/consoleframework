@@ -10,8 +10,8 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 #if !WIN32
-using Mono.Unix;
-using Mono.Unix.Native;
+//using Mono.Unix;
+//using Mono.Unix.Native;
 #endif
 using Xaml;
 
@@ -210,7 +210,9 @@ namespace ConsoleFramework
                 usingJsil = true;
                 return;
             }
-
+#if DOTNETCORE
+	        usingLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#else
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -221,18 +223,19 @@ namespace ConsoleFramework
                     break;
                 case PlatformID.Unix:
 					usingLinux = true;
-#if !WIN32
-					Utsname uname;
-					Syscall.uname(out uname);
-					if (uname.sysname == "Darwin") {
-						isDarwin = true;
-					}
-#endif
+	#if !WIN32
+					//Utsname uname;
+					//Syscall.uname(out uname);
+					//if (uname.sysname == "Darwin") {
+					//	isDarwin = true;
+					//}
+	#endif
                     break;
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
                     throw new NotSupportedException();
             }
+#endif
         }
 		
         private ConsoleApplication() {
@@ -437,7 +440,13 @@ namespace ConsoleFramework
 			// This is magic workaround to avoid messing up terminal after program finish
 			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
 			bool ignored = Console.KeyAvailable;
-			
+
+	        // Because .NET Core runtime changes locale to something wrong on startup,
+	        // we have to change it to default system locale
+	        // See https://stackoverflow.com/a/6249265
+	        // And https://github.com/dotnet/coreclr/issues/1012
+	        Libc.setlocale(Libc.LC_ALL, "");
+		    
 			IntPtr stdscr = NCurses.initscr ();
 			NCurses.cbreak ();
 			NCurses.noecho ();
@@ -472,20 +481,20 @@ namespace ConsoleFramework
 		        try {
 #if !WIN32
                     // Catch SIGWINCH to handle terminal resizing
-			        UnixSignal[] signals = new UnixSignal [] {
-			            new UnixSignal (Signum.SIGWINCH)
-			        };
-			        Thread signal_thread = new Thread (delegate () {
-				        while (true) {
+			        //UnixSignal[] signals = new UnixSignal [] {
+			        //    new UnixSignal (Signum.SIGWINCH)
+			        //};
+			        //Thread signal_thread = new Thread (delegate () {
+				    //    while (true) {
 					        // Wait for a signal to be delivered
-					        int index = UnixSignal.WaitAny (signals, -1);
-					        Signum signal = signals [index].Signum;
-					        Libc.writeInt64 (pipeFds[1], 2);
-				        }
-			        }
-			        );
-			        signal_thread.IsBackground = false;
-			        signal_thread.Start ();
+					//        int index = UnixSignal.WaitAny (signals, -1);
+					//        Signum signal = signals [index].Signum;
+					//        Libc.writeInt64 (pipeFds[1], 2);
+				    //    }
+			        //}
+			        //);
+			        //signal_thread.IsBackground = false;
+			        //signal_thread.Start ();
 #endif
 		            TermKeyKey key = new TermKeyKey( );
 					//
@@ -515,7 +524,7 @@ namespace ConsoleFramework
 		                    if ( u == 1 ) {
 		                        // Exit from application
 #if !WIN32
-						        signal_thread.Abort ();
+						        //signal_thread.Abort ();
 #endif
 		                        break;
 		                    }
@@ -736,9 +745,9 @@ namespace ConsoleFramework
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
             IntPtr[] handles = new[] {
-                exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
+                exitWaitHandle.GetSafeWaitHandle().DangerousGetHandle(),
                 stdInputHandle,
-                invokeWaitHandle.SafeWaitHandle.DangerousGetHandle(  )
+                invokeWaitHandle.GetSafeWaitHandle().DangerousGetHandle(  )
             };
 
             // Set console mode to enable mouse and window resizing events

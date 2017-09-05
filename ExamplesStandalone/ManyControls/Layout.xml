@@ -1,0 +1,5 @@
+﻿<Window>
+<!--    <Button Name="btn" Margin="1" Caption="XXX"></Button>-->
+  <GroupBox Title="X" Margin="1"></GroupBox>
+<!--  <TextBlock Name="text" Text="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"></TextBlock>-->
+</Window>
