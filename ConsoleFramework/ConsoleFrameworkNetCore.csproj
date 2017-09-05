@@ -1,8 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard1.6</TargetFramework>
+    <DefineConstants>$(DefineConstants);DOTNETCORE</DefineConstants>
+    <DebugType>portable</DebugType>
     <AssemblyName>ConsoleFramework</AssemblyName>
-    <PackagingId>ConsoleFramework</PackagingId>
+    <PackageId>ConsoleFramework</PackageId>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -15,5 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Binding\BindingNetCore.csproj" />
     <ProjectReference Include="..\Xaml\XamlNetCore.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
   </ItemGroup>
 </Project>
