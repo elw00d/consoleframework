@@ -211,7 +211,7 @@ namespace ConsoleFramework
                 return;
             }
 #if DOTNETCORE
-			usingLinux = true;  // todo : use this API https://github.com/dotnet/corefx/issues/1017
+	        usingLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 #else
             switch (Environment.OSVersion.Platform)
             {
@@ -740,15 +740,14 @@ namespace ConsoleFramework
 		}
 		
         private void runWindows(Control control) {
-#if !DOTNETCORE
             this.mainControl = control;
             //
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
             IntPtr[] handles = new[] {
-                exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
+                exitWaitHandle.GetSafeWaitHandle().DangerousGetHandle(),
                 stdInputHandle,
-                invokeWaitHandle.SafeWaitHandle.DangerousGetHandle(  )
+                invokeWaitHandle.GetSafeWaitHandle().DangerousGetHandle(  )
             };
 
             // Set console mode to enable mouse and window resizing events
@@ -850,7 +849,6 @@ namespace ConsoleFramework
             renderer.RootElement = null;
 
             // todo : restore attributes of console output
-#endif
         }
 
         private bool isAnyInvokeActions( ) {
