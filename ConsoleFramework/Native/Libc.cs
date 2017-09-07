@@ -99,6 +99,11 @@ namespace ConsoleFramework.Native
             ioctl(STDIN_FILENO, isDarwin ? TIOCGWINSZ_DARWIN : TIOCGWINSZ_LINUX, out ws);
             return ws;
         }
+	    
+	    public delegate void SignalHandler(int arg);
+
+	    [DllImport("libc.so.6", SetLastError = true)]
+	    public static extern IntPtr signal(int signum, SignalHandler handler);
     }
 	
 	/// <summary>
