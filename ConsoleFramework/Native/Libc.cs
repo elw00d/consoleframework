@@ -104,7 +104,52 @@ namespace ConsoleFramework.Native
 
 	    [DllImport("libc.so.6", SetLastError = true)]
 	    public static extern IntPtr signal(int signum, SignalHandler handler);
+
+	    /// <summary>
+	    /// Retrieves terminal parameters into termios structure.
+	    /// </summary>
+	    [DllImport("libc.so.6", SetLastError = true)]
+	    public static extern int tcgetattr(int fd, [Out] out termios termios);
+	    
+	    /// <summary>
+	    /// Upon successful completion, the functions tcgetattr() and tcsetattr() 
+	    /// return a value of 0.  Otherwise, they return -1 and the global variable
+	    /// errno is set to indicate the error.
+	    /// </summary>
+	    [DllImport("libc.so.6", SetLastError = true)]
+	    public static extern int tcsetattr(int fd, int optional_actions, ref termios termios);
+	    
+		/// <summary>
+		/// The change occurs immediately.
+		/// </summary>
+	    public const Int32 TCSANOW = 0;
+	    
+	    /// <summary>
+	    /// The change occurs after all output written to fd has been transmitted.
+	    /// This function should be used when changing parameters that affect output.
+	    /// </summary>
+	    public const Int32 TCSADRAIN = 1;
+	    
+	    /// <summary>
+	    /// The change occurs after all output written to the object referred by fd has been transmitted,
+	    /// and all input that has been received but not read will be discarded before the change is made.
+	    /// </summary>
+	    public const Int32 TCSAFLUSH = 2;
     }
+    
+	[StructLayout(LayoutKind.Sequential)]
+	public struct termios
+	{
+		public UInt32 c_iflag;
+		public UInt32 c_oflag;
+		public UInt32 c_cflag;
+		public UInt32 c_lflag;
+		public Byte c_line;
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
+		public Byte[] c_cc;  // 32 items
+		public UInt32 c_ispeed;
+		public UInt32 c_ospeed;
+	}
 	
 	/// <summary>
 	/// Structure to retrieve terminal size.

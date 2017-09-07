@@ -453,7 +453,13 @@ namespace ConsoleFramework
 	        // See https://stackoverflow.com/a/6249265
 	        // And https://github.com/dotnet/coreclr/issues/1012
 	        Libc.setlocale(Libc.LC_ALL, "");
-		    
+
+			// Save all terminal properties
+			termios termios;
+			if (0 != Libc.tcgetattr(Libc.STDIN_FILENO, out termios)) {
+				throw new Exception(String.Format("Failed to call tcgetattr(). LastError is {0}", Marshal.GetLastWin32Error()));
+			}
+
 			IntPtr stdscr = NCurses.initscr ();
 			NCurses.cbreak ();
 			NCurses.noecho ();
@@ -467,12 +473,12 @@ namespace ConsoleFramework
 		        renderer.UpdateLayout( );
                 renderer.FinallyApplyChangesToCanvas(  );
 
-		        termkeyHandle = LibTermKey.termkey_new( 0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
+				termkeyHandle = LibTermKey.termkey_new( Libc.STDIN_FILENO, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
 
 		        // Setup the input mode
 		        Console.Write( "\x1B[?1002h" );
 		        pollfd fd = new pollfd( );
-		        fd.fd = 0;
+				fd.fd = Libc.STDIN_FILENO;
 		        fd.events = POLL_EVENTS.POLLIN;
 
 		        pollfd[ ] fds = new pollfd[ 2 ];
@@ -599,8 +605,14 @@ namespace ConsoleFramework
 		    } finally {
 		        // Restore cursor visibility before exit
 		        ShowCursor( );
-		        NCurses.endwin( );
-		    }
+			    
+				NCurses.endwin( );
+			    
+				// Restore all terminal parameters
+				if (0 != Libc.tcsetattr(Libc.STDIN_FILENO, Libc.TCSANOW, ref termios)) {
+					throw new Exception(String.Format("Failed to call tcsetattr(). LastError is {0}", Marshal.GetLastWin32Error()));
+				}
+		}
 
             renderer.RootElement = null;
         }
