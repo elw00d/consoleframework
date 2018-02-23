@@ -1,11 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard1.0</TargetFramework>
-    <DebugType>portable</DebugType>
-    <AssemblyName>Xaml</AssemblyName>
-    <PackageId>Xaml</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>ManyControls</AssemblyName>
+    <PackageId>ManyControls</PackageId>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -16,6 +14,7 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AgileObjects.NetStandardPolyfills" Version="0.2.1" />
+    <ProjectReference Include="..\..\ConsoleFramework\ConsoleFramework.csproj" />
+    <EmbeddedResource Include="GridTest.xml" LogicalName="ManyControls.GridTest.xml" />
   </ItemGroup>
 </Project>

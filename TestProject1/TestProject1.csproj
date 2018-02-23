@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TestProject1</RootNamespace>
     <AssemblyName>TestProject1</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkProfile />
@@ -57,6 +57,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Reflection.TypeExtensions, Version=4.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reflection.TypeExtensions.4.4.0\lib\net461\System.Reflection.TypeExtensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binding\AdapterTest.cs" />
@@ -75,20 +78,6 @@
     <Compile Include="Xaml\XamlTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Binding\Binding.csproj">
-      <Project>{E1CD529B-E3F1-4660-AA4F-1670E0992553}</Project>
-      <Name>Binding</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ConsoleFramework\ConsoleFramework.csproj">
-      <Project>{2A59C284-2995-4F37-8D65-411C25C85493}</Project>
-      <Name>ConsoleFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Xaml\Xaml.csproj">
-      <Project>{C6EDD03A-30BE-4EFE-8EE4-C1CD3212778B}</Project>
-      <Name>Xaml</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Xaml\XamlObject1.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +87,23 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Xaml\TypeExtensionTest\object.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Binding\Binding.csproj">
+      <Project>{8bf04644-0165-4f60-b30c-52f1c8f147ef}</Project>
+      <Name>Binding</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ConsoleFramework\ConsoleFramework.csproj">
+      <Project>{b1496225-e3ce-4fef-a7ba-8b6612de35da}</Project>
+      <Name>ConsoleFramework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Xaml\Xaml.csproj">
+      <Project>{b8c69ec3-3763-4da1-bab7-109a78d055dd}</Project>
+      <Name>Xaml</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
