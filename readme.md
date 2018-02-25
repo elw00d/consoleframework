@@ -12,23 +12,19 @@ Features
 - WPF-compatible simple and flexible layout system
 - A lot of controls available (including Grid, ScrollViewer, ListBox, ComboBox)
 - Routed events system (compatible with WPF)
-- Windows, Mac OS X and any Linux (32-bit or 64-bit) support
+- Windows, Mac OS X and Linux (64-bit) support
 
 ![](http://gyazo.com/81e1ae92cfba8c7a1c2a98da7da75ad7.png)
 
-License
--------
-Copyright 2011-2014 I. Kostromin
-
-License: MIT/X11
-
 Build from source
 --
-To build a library with examples you can use [NAnt]:
+To build a library with examples you can use standard dotnet tool:
+
 ```sh
-nant build
+dotnet build
 ```
-It works in all platforms.
+
+It should work in all platforms.
 
 Native dependencies
 --
@@ -56,19 +52,54 @@ Console Framework expects that libraries will be available strictly by these nam
 
 Running examples
 --
+In Windows
 
 ```sh
-mono Example_HelloWorld.exe
+dotnet run --project StandaloneExamples/ManyControls
+```
+
+In Linux
+
+```sh
+cd StandaloneExamples/ManyControls
+dotnet build
+
+# Copy native dependencies
+unzip ../../native/libtermkey-0.18-x86_64.zip -d bin/Debug/netcoreapp2.0/
+
+cd bin/Debug/netcoreapp2.0/
+dotnet ManyControls.dll
 ```
 
 Press Ctrl+D to exit application.
+
+Running unit tests
+--
+```sh
+cd Tests
+dotnet test
+```
+
+Development
+--
+There were two IDEs where I've worked with .NET Core project: Visual Studio 2017 Community and JetBrains Rider. Both of them works well with this source code.
+
+Mono support
+--
+Support of Mono runtime have been discontinued. If you need library for Mono, you can download previous releases. All further development will be continued for .NET Core runtime only.
+
 
 Terminal emulators in Mac OS X
 --
 Standard terminal emulator is not very good for console applications deals with mouse. My recommendation is to use [ITerm2]. ITerm2 provides a good emulation with mouse support. If you want to see how console framework renders in various Mac emulators, visit [http://elwood.su/2014/02/console-framework-on-mac/]
 
+License
+-------
+Copyright 2011-2018 I. Kostromin
+
+License: MIT/X11
+
 [TUI]:http://en.wikipedia.org/wiki/Text-based_user_interface
-[NAnt]:http://nant.sourceforge.net/
 [MacPorts]:http://www.macports.org/
 [ITerm2]:http://www.iterm2.com/#/section/home
 [http://elwood.su/2014/02/console-framework-on-mac/]:http://elwood.su/2014/02/console-framework-on-mac/
