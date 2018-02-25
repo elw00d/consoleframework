@@ -76,8 +76,7 @@ Press Ctrl+D to exit application.
 Running unit tests
 --
 ```sh
-cd Tests
-dotnet test
+dotnet test Tests
 ```
 
 Development
