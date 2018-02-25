@@ -1,0 +1,12 @@
+﻿<object TypeName="Tests.Xaml.XamlTest+XamlObject, Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null"
+        xmlns:x="http://consoleframework.org/xaml.xsd">
+  <!-- First ctor argument -->
+  <int x:Key="1">5</int>
+  <!-- StrProp property -->
+  <string x:Key="StrProp">str</string>
+  <!-- Content property - nested object -->
+  <object x:Key="Content" TypeName="Tests.Xaml.XamlTest+XamlObject, Tests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <!-- Syntax with empty element -->
+    <int x:Key="1" Content="10"/>
+  </object>
+</object>

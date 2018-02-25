@@ -1,13 +1,5 @@
-Binding/bin/
-Binding/obj/
-ConsoleFramework/bin/
-ConsoleFramework/obj/
-Examples/bin/
-Examples/obj/
-TestProject1/bin/
-TestProject1/obj/
-Xaml/bin/
-Xaml/obj/
+bin/
+obj/
 build/
 ConsoleFramework.suo
 .idea/
@@ -15,3 +7,7 @@ ConsoleFramework.userprefs
 .idea.ConsoleFramework/riderModule.iml
 .vs/ConsoleFramework/v15/.suo
 ConsoleFramework.v12.suo
+
+*.user
+/.vs/
+/packages/

@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if !WIN32 && !DOTNETCORE
+	#define MONO
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -9,7 +13,7 @@ using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
-#if !WIN32
+#if MONO
 using Mono.Unix;
 using Mono.Unix.Native;
 #endif
@@ -210,7 +214,10 @@ namespace ConsoleFramework
                 usingJsil = true;
                 return;
             }
-
+#if DOTNETCORE
+	        usingLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+	        isDarwin = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+#else
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -221,18 +228,19 @@ namespace ConsoleFramework
                     break;
                 case PlatformID.Unix:
 					usingLinux = true;
-#if !WIN32
+	#if MONO
 					Utsname uname;
 					Syscall.uname(out uname);
 					if (uname.sysname == "Darwin") {
 						isDarwin = true;
 					}
-#endif
+	#endif
                     break;
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
                     throw new NotSupportedException();
             }
+#endif
         }
 		
         private ConsoleApplication() {
@@ -433,11 +441,25 @@ namespace ConsoleFramework
 			mainControl.Invalidate ();
 			
 			// Terminal initialization sequence
-			
+
+#if MONO
 			// This is magic workaround to avoid messing up terminal after program finish
 			// The bug is described at https://bugzilla.xamarin.com/show_bug.cgi?id=15118
 			bool ignored = Console.KeyAvailable;
-			
+#endif
+
+	        // Because .NET Core runtime changes locale to something wrong on startup,
+	        // we have to change it to default system locale
+	        // See https://stackoverflow.com/a/6249265
+	        // And https://github.com/dotnet/coreclr/issues/1012
+	        Libc.setlocale(Libc.LC_ALL, "");
+
+			// Save all terminal properties
+			termios termios;
+			if (0 != Libc.tcgetattr(Libc.STDIN_FILENO, out termios)) {
+				throw new Exception(String.Format("Failed to call tcgetattr(). LastError is {0}", Marshal.GetLastWin32Error()));
+			}
+
 			IntPtr stdscr = NCurses.initscr ();
 			NCurses.cbreak ();
 			NCurses.noecho ();
@@ -451,12 +473,12 @@ namespace ConsoleFramework
 		        renderer.UpdateLayout( );
                 renderer.FinallyApplyChangesToCanvas(  );
 
-		        termkeyHandle = LibTermKey.termkey_new( 0, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
+				termkeyHandle = LibTermKey.termkey_new( Libc.STDIN_FILENO, TermKeyFlag.TERMKEY_FLAG_SPACESYMBOL );
 
 		        // Setup the input mode
 		        Console.Write( "\x1B[?1002h" );
 		        pollfd fd = new pollfd( );
-		        fd.fd = 0;
+				fd.fd = Libc.STDIN_FILENO;
 		        fd.events = POLL_EVENTS.POLLIN;
 
 		        pollfd[ ] fds = new pollfd[ 2 ];
@@ -470,14 +492,14 @@ namespace ConsoleFramework
 		        fds[ 1 ].events = POLL_EVENTS.POLLIN;
 
 		        try {
-#if !WIN32
+#if MONO
                     // Catch SIGWINCH to handle terminal resizing
 			        UnixSignal[] signals = new UnixSignal [] {
 			            new UnixSignal (Signum.SIGWINCH)
 			        };
 			        Thread signal_thread = new Thread (delegate () {
 				        while (true) {
-					        // Wait for a signal to be delivered
+					         Wait for a signal to be delivered
 					        int index = UnixSignal.WaitAny (signals, -1);
 					        Signum signal = signals [index].Signum;
 					        Libc.writeInt64 (pipeFds[1], 2);
@@ -486,6 +508,11 @@ namespace ConsoleFramework
 			        );
 			        signal_thread.IsBackground = false;
 			        signal_thread.Start ();
+#elif DOTNETCORE
+					Libc.signal(28, arg =>
+			        {
+				        Libc.writeInt64 (pipeFds[1], 2);
+			        });
 #endif
 		            TermKeyKey key = new TermKeyKey( );
 					//
@@ -514,7 +541,7 @@ namespace ConsoleFramework
 		                    Libc.readInt64( fds[ 1 ].fd, out u );
 		                    if ( u == 1 ) {
 		                        // Exit from application
-#if !WIN32
+#if MONO
 						        signal_thread.Abort ();
 #endif
 		                        break;
@@ -578,8 +605,14 @@ namespace ConsoleFramework
 		    } finally {
 		        // Restore cursor visibility before exit
 		        ShowCursor( );
-		        NCurses.endwin( );
-		    }
+			    
+				NCurses.endwin( );
+			    
+				// Restore all terminal parameters
+				if (0 != Libc.tcsetattr(Libc.STDIN_FILENO, Libc.TCSANOW, ref termios)) {
+					throw new Exception(String.Format("Failed to call tcsetattr(). LastError is {0}", Marshal.GetLastWin32Error()));
+				}
+		}
 
             renderer.RootElement = null;
         }
@@ -736,9 +769,9 @@ namespace ConsoleFramework
             stdInputHandle = Win32.GetStdHandle(StdHandleType.STD_INPUT_HANDLE);
             stdOutputHandle = Win32.GetStdHandle(StdHandleType.STD_OUTPUT_HANDLE);
             IntPtr[] handles = new[] {
-                exitWaitHandle.SafeWaitHandle.DangerousGetHandle(),
+                exitWaitHandle.GetSafeWaitHandle().DangerousGetHandle(),
                 stdInputHandle,
-                invokeWaitHandle.SafeWaitHandle.DangerousGetHandle(  )
+                invokeWaitHandle.GetSafeWaitHandle().DangerousGetHandle(  )
             };
 
             // Set console mode to enable mouse and window resizing events
