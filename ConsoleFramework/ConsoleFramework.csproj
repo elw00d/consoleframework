@@ -5,7 +5,6 @@
     <DebugType>portable</DebugType>
     <AssemblyName>ConsoleFramework</AssemblyName>
     <PackageId>ConsoleFramework</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
