@@ -1,6 +1,8 @@
 Console Framework
 ==
 
+![](https://travis-ci.org/elw00d/consoleframework.svg?branch=develop)
+
 Console framework is cross-platform toolkit that allows to develop [TUI] applications using C# and based on WPF-like concepts.
 
 Features
