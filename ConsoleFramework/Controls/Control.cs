@@ -860,7 +860,7 @@ namespace ConsoleFramework.Controls
 
         private Rect calculateLayoutClip() {
             Vector offset = computeAlignmentOffset();
-            Size clientSize = getClientSize();
+            Size clientSize = getClippedClientSize();
             return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
         }
 
@@ -906,6 +906,23 @@ namespace ConsoleFramework.Controls
 
             return new Size(Math.Max(0, renderSlotRect.Width - marginWidth),
                             Math.Max(0, renderSlotRect.Height - marginHeight));
+        }
+
+        /// <summary>
+        /// This method returns the size of layout slot computed with Max-constraints and
+        /// decreased by margins. This is the final size of layout slot that will be written
+        /// to layoutClipInfo.
+        /// </summary>
+        private Size getClippedClientSize() {
+            Thickness margin = Margin;
+            int marginWidth = margin.Left + margin.Right;
+            int marginHeight = margin.Top + margin.Bottom;
+
+            Rect renderSlotRect = RenderSlotRect;
+
+            // Take MaxWidth/MaxHeight into account when before applying margins
+            return new Size(Math.Max(0, Math.Min(renderSlotRect.Width, MaxWidth) - marginWidth),
+                Math.Max(0, Math.Min(renderSlotRect.Height, MaxHeight) - marginHeight));
         }
 
         private Vector computeAlignmentOffsetCore(Size clientSize, Size inkSize) {
