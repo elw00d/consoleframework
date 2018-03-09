@@ -860,9 +860,78 @@ namespace ConsoleFramework.Controls
 
         private Rect calculateLayoutClip() {
             Vector offset = computeAlignmentOffset();
-            Size clientSize = getClippedClientSize();
-            return new Rect(-offset.X, -offset.Y,
-                clientSize.Width+offset.X, clientSize.Height+offset.Y);
+            Size clientSize = getClientSize();
+            var layoutClip = new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+
+            // Если MaxWidth/Height не меньше текущей области, то дополнительных
+            // расчётов не требуется
+            var intersect = Rect.Intersect(new Rect(RenderSize), layoutClip);
+            if (intersect.Width <= MaxWidth && intersect.Height <= MaxHeight) {
+                return layoutClip;
+            }
+
+            // Теперь, если указаны MaxWidth/Height ограничения, то
+            // из видимой части layoutClip оставляем только то, что влезает в Max,
+            // с учётом выбранного Alignment
+            int x;
+            int width;
+            if (MaxWidth < intersect.Width) {
+                switch (HorizontalAlignment) {
+                    case HorizontalAlignment.Center:
+                    case HorizontalAlignment.Stretch: {
+                        x = (intersect.X + intersect.Width) / 2 - MaxWidth / 2;
+                        width = Math.Min(MaxWidth, intersect.Right - x);
+                        break;
+                    }
+                    case HorizontalAlignment.Left: {
+                        x = intersect.X;
+                        width = MaxWidth;
+                        break;
+                    }
+                    case HorizontalAlignment.Right: {
+                        x = intersect.X + intersect.Width - MaxWidth;
+                        width = MaxWidth;
+                        break;
+                    }
+                    default: {
+                        throw new InvalidOperationException();
+                    }
+                }
+            } else {
+                x = intersect.X;
+                width = intersect.Width;
+            }
+
+            int y;
+            int height;
+            if (MaxHeight < intersect.Height) {
+                switch (VerticalAlignment) {
+                    case VerticalAlignment.Center:
+                    case VerticalAlignment.Stretch: {
+                        y = (intersect.Y + intersect.Height) / 2 - MaxHeight / 2;
+                        height = Math.Min(MaxHeight, intersect.Bottom - y);
+                        break;
+                    }
+                    case VerticalAlignment.Top: {
+                        y = intersect.Y;
+                        height = MaxHeight;
+                        break;
+                    }
+                    case VerticalAlignment.Bottom: {
+                        y = intersect.Y + intersect.Height - MaxHeight;
+                        height = MaxHeight;
+                        break;
+                    }
+                    default: {
+                        throw new InvalidOperationException();
+                    }
+                }
+            } else {
+                y = intersect.Y;
+                height = intersect.Height;
+            }
+
+            return new Rect(new Point(x, y), new Size(width, height));
         }
 
         /// <summary>
@@ -909,24 +978,7 @@ namespace ConsoleFramework.Controls
                             Math.Max(0, renderSlotRect.Height - marginHeight));
         }
 
-        /// <summary>
-        /// This method returns the size of layout slot computed with Max-constraints and
-        /// decreased by margins. This is the final size of layout slot that will be written
-        /// to layoutClipInfo.
-        /// </summary>
-        private Size getClippedClientSize() {
-            Thickness margin = Margin;
-            int marginWidth = margin.Left + margin.Right;
-            int marginHeight = margin.Top + margin.Bottom;
-
-            Rect renderSlotRect = RenderSlotRect;
-
-            // Take MaxWidth/MaxHeight into account when before applying margins
-            return new Size(Math.Max(0, Math.Min(renderSlotRect.Width, MaxWidth) - marginWidth),
-                Math.Max(0, Math.Min(renderSlotRect.Height, MaxHeight) - marginHeight));
-        }
-
-        private Vector computeAlignmentOffsetCore(Size clientSize, Size inkSize) {
+        internal Vector computeAlignmentOffsetCore(Size clientSize, Size inkSize) {
             Vector offset = new Vector();
 
             HorizontalAlignment ha = HorizontalAlignment;
