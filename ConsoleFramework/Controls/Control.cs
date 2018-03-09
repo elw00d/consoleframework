@@ -861,7 +861,8 @@ namespace ConsoleFramework.Controls
         private Rect calculateLayoutClip() {
             Vector offset = computeAlignmentOffset();
             Size clientSize = getClippedClientSize();
-            return new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+            return new Rect(-offset.X, -offset.Y,
+                clientSize.Width+offset.X, clientSize.Height+offset.Y);
         }
 
         /// <summary>
