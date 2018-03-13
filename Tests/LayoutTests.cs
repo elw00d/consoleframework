@@ -166,7 +166,7 @@ namespace Tests
             Assert.Equal(new Vector(-50, 21), finalControl.ActualOffset);
             Assert.Equal(new Size(100, 20), finalControl.RenderSize);
             Assert.Equal(new Size(70, 17), finalControl.DesiredSize);
-            Assert.Equal(new Rect(60, -31, 40, 83), finalControl.LayoutClip);
+            Assert.Equal(new Rect(60, 0, 40, 20), finalControl.LayoutClip);
             Assert.Equal(new Size(70, 80), finalControl.MeasureArgument);
             Assert.Equal(new Size(100, 20), finalControl.LastMeasureOverrideArgument); // because Width/Height
             Assert.Equal(new Size(0, 0), finalControl.LastMeasureOverrideResult);

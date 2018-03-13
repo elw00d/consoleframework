@@ -862,76 +862,20 @@ namespace ConsoleFramework.Controls
             Vector offset = computeAlignmentOffset();
             Size clientSize = getClientSize();
             var layoutClip = new Rect(-offset.X, -offset.Y, clientSize.Width, clientSize.Height);
+            return applyMaxConstraints(layoutClip);
+        }
 
-            // Если MaxWidth/Height не меньше текущей области, то дополнительных
-            // расчётов не требуется
-            var intersect = Rect.Intersect(new Rect(RenderSize), layoutClip);
-            if (intersect.Width <= MaxWidth && intersect.Height <= MaxHeight) {
-                return layoutClip;
-            }
-
-            // Теперь, если указаны MaxWidth/Height ограничения, то
-            // из видимой части layoutClip оставляем только то, что влезает в Max,
-            // с учётом выбранного Alignment
-            int x;
-            int width;
-            if (MaxWidth < intersect.Width) {
-                switch (HorizontalAlignment) {
-                    case HorizontalAlignment.Center:
-                    case HorizontalAlignment.Stretch: {
-                        x = (intersect.X + intersect.Width) / 2 - MaxWidth / 2;
-                        width = Math.Min(MaxWidth, intersect.Right - x);
-                        break;
-                    }
-                    case HorizontalAlignment.Left: {
-                        x = intersect.X;
-                        width = MaxWidth;
-                        break;
-                    }
-                    case HorizontalAlignment.Right: {
-                        x = intersect.X + intersect.Width - MaxWidth;
-                        width = MaxWidth;
-                        break;
-                    }
-                    default: {
-                        throw new InvalidOperationException();
-                    }
-                }
-            } else {
-                x = intersect.X;
-                width = intersect.Width;
-            }
-
-            int y;
-            int height;
-            if (MaxHeight < intersect.Height) {
-                switch (VerticalAlignment) {
-                    case VerticalAlignment.Center:
-                    case VerticalAlignment.Stretch: {
-                        y = (intersect.Y + intersect.Height) / 2 - MaxHeight / 2;
-                        height = Math.Min(MaxHeight, intersect.Bottom - y);
-                        break;
-                    }
-                    case VerticalAlignment.Top: {
-                        y = intersect.Y;
-                        height = MaxHeight;
-                        break;
-                    }
-                    case VerticalAlignment.Bottom: {
-                        y = intersect.Y + intersect.Height - MaxHeight;
-                        height = MaxHeight;
-                        break;
-                    }
-                    default: {
-                        throw new InvalidOperationException();
-                    }
-                }
-            } else {
-                y = intersect.Y;
-                height = intersect.Height;
-            }
-
-            return new Rect(new Point(x, y), new Size(width, height));
+        internal Rect applyMaxConstraints(Rect layoutClip) {
+            // Если указаны MaxWidth/Height ограничения, то из видимой части layoutClip
+            // оставляем в углу TopLeft только то, что влезает в Max. TopLeft выбран потому,
+            // что при вычислении в computeAlignmentOffset() мы уже подразумевали такой исход
+            // (см. комментарий внутри computeAlignmentOffset)
+            var visibleLayoutClip = Rect.Intersect(new Rect(RenderSize), layoutClip);
+            MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Width, Height);
+            
+            return new Rect(visibleLayoutClip.TopLeft, new Size(
+                Math.Min(visibleLayoutClip.Width, mm.maxWidth),
+                Math.Min(visibleLayoutClip.Height, mm.maxHeight)));
         }
 
         /// <summary>
