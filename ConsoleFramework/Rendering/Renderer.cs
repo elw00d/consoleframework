@@ -428,7 +428,6 @@ namespace ConsoleFramework.Rendering
             control.Measure(lastLayoutInfo.measureArgument);
             control.Arrange(lastLayoutInfo.renderSlotRect);
             // if lastLayoutInfo eq layoutInfo we can use last rendered buffer
-//            if (layoutInfo.Equals(lastLayoutInfo) && lastLayoutInfo.validity == LayoutValidity.Render) {
             if (checkRenderingWasNotChangedRecursively(control)) {
                 if (control.SetValidityToRender()) {
                     revalidatedControls.Add(control);

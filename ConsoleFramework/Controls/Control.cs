@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
@@ -77,10 +76,17 @@ namespace ConsoleFramework.Controls
             this.validity = LayoutValidity.Nothing;
         }
 
+        // All members except 'validity'
         public bool Equals(LayoutInfo other) {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return other.measureArgument.Equals(measureArgument) && other.unclippedDesiredSize.Equals(unclippedDesiredSize) && other.desiredSize.Equals(desiredSize) && other.renderSlotRect.Equals(renderSlotRect) && other.renderSize.Equals(renderSize) && other.layoutClip.Equals(layoutClip) && other.actualOffset.Equals(actualOffset);
+            return other.measureArgument.Equals(measureArgument)
+                   && other.unclippedDesiredSize.Equals(unclippedDesiredSize)
+                   && other.desiredSize.Equals(desiredSize)
+                   && other.renderSlotRect.Equals(renderSlotRect)
+                   && other.renderSize.Equals(renderSize)
+                   && other.layoutClip.Equals(layoutClip)
+                   && other.actualOffset.Equals(actualOffset);
         }
 
         public override bool Equals(object obj) {
@@ -136,48 +142,48 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent GotKeyboardFocusEvent = EventManager.RegisterRoutedEvent("GotKeyboardFocus", RoutingStrategy.Bubble, typeof(KeyboardFocusChangedEventHandler), typeof(Control));
 
         public event MouseEventHandler MouseMove {
-            add { AddHandler(MouseMoveEvent, value); }
-            remove { RemoveHandler(MouseMoveEvent, value); }
+            add => AddHandler(MouseMoveEvent, value);
+            remove => RemoveHandler(MouseMoveEvent, value);
         }
 
         public event MouseButtonEventHandler MouseDown {
-            add { AddHandler(MouseDownEvent, value); }
-            remove { RemoveHandler(MouseDownEvent, value); }
+            add => AddHandler(MouseDownEvent, value);
+            remove => RemoveHandler(MouseDownEvent, value);
         }
 
         public event MouseButtonEventHandler MouseUp {
-            add { AddHandler(MouseUpEvent, value); }
-            remove { RemoveHandler(MouseUpEvent, value); }
+            add => AddHandler(MouseUpEvent, value);
+            remove => RemoveHandler(MouseUpEvent, value);
         }
 
         public event MouseEventHandler MouseEnter {
-            add { AddHandler(MouseEnterEvent, value); }
-            remove { RemoveHandler(MouseEnterEvent, value); }
+            add => AddHandler(MouseEnterEvent, value);
+            remove => RemoveHandler(MouseEnterEvent, value);
         }
 
         public event MouseEventHandler MouseLeave {
-            add { AddHandler(MouseLeaveEvent, value); }
-            remove { RemoveHandler(MouseLeaveEvent, value); }
+            add => AddHandler(MouseLeaveEvent, value);
+            remove => RemoveHandler(MouseLeaveEvent, value);
         }
 
         public event KeyEventHandler KeyDown {
-            add { AddHandler(KeyDownEvent, value); }
-            remove { RemoveHandler(KeyDownEvent, value); }
+            add => AddHandler(KeyDownEvent, value);
+            remove => RemoveHandler(KeyDownEvent, value);
         }
 
         public event KeyEventHandler KeyUp {
-            add { AddHandler(KeyUpEvent, value); }
-            remove { RemoveHandler(KeyUpEvent, value); }
+            add => AddHandler(KeyUpEvent, value);
+            remove => RemoveHandler(KeyUpEvent, value);
         }
 
         public event KeyboardFocusChangedEventHandler LostKeyboardFocus {
-            add { AddHandler(LostKeyboardFocusEvent, value); }
-            remove { RemoveHandler(LostKeyboardFocusEvent, value); }
+            add => AddHandler(LostKeyboardFocusEvent, value);
+            remove => RemoveHandler(LostKeyboardFocusEvent, value);
         }
 
         public event KeyboardFocusChangedEventHandler GotKeyboardFocus {
-            add { AddHandler(GotKeyboardFocusEvent, value); }
-            remove { RemoveHandler(GotKeyboardFocusEvent, value); }
+            add => AddHandler(GotKeyboardFocusEvent, value);
+            remove => RemoveHandler(GotKeyboardFocusEvent, value);
         }
 
 //        public void SetFocus() {
@@ -482,39 +488,21 @@ namespace ConsoleFramework.Controls
         /// </summary>
         public event EventHandler LayoutRevalidated;
 
-        public int ActualWidth {
-            get {
-                return RenderSize.Width;
-            }
-        }
+        public int ActualWidth => RenderSize.Width;
 
-        public int ActualHeight {
-            get {
-                return RenderSize.Height;
-            }
-        }
+        public int ActualHeight => RenderSize.Height;
 
         public int MinWidth {
             get;
             set;
         }
 
-        private int maxWidth = int.MaxValue;
-        public int MaxWidth {
-            get {
-                return maxWidth;
-            }
-            set {
-                maxWidth = value;
-            }
-        }
+        public int MaxWidth { get; set; } = int.MaxValue;
 
         public int MinHeight {
             get;
             set;
         }
-
-        private int maxHeight = int.MaxValue;
 
         /// <summary>
         /// Shows whether control can handle keyboard input or can't.
@@ -538,14 +526,7 @@ namespace ConsoleFramework.Controls
         /// </summary>
         public bool IsFocusScope { get; set; }
 
-        public int MaxHeight {
-            get {
-                return maxHeight;
-            }
-            set {
-                maxHeight = value;
-            }
-        }
+        public int MaxHeight { get; set; } = int.MaxValue;
 
         public int? Width {
             get;
@@ -563,12 +544,8 @@ namespace ConsoleFramework.Controls
         }
 
         public Size DesiredSize {
-            get {
-                return layoutInfo.desiredSize;
-            }
-            private set {
-                layoutInfo.desiredSize = value;
-            }
+            get => layoutInfo.desiredSize;
+            private set => layoutInfo.desiredSize = value;
         }
 
         private struct MinMax
@@ -837,12 +814,8 @@ namespace ConsoleFramework.Controls
         /// отведенные методом Arrange. Контрол будет обрезан лайаут-системой в соответствии с RenderSlotRect.
         /// </summary>
         public Size RenderSize {
-            get {
-                return layoutInfo.renderSize;
-            }
-            private set {
-                layoutInfo.renderSize = value;
-            }
+            get => layoutInfo.renderSize;
+            private set => layoutInfo.renderSize = value;
         }
 
         /// <summary>
@@ -850,12 +823,8 @@ namespace ConsoleFramework.Controls
         /// Задается аргументом при вызове <see cref="Arrange"/>.
         /// </summary>
         public Rect RenderSlotRect {
-            get {
-                return layoutInfo.renderSlotRect;
-            }
-            private set {
-                layoutInfo.renderSlotRect = value;
-            }
+            get => layoutInfo.renderSlotRect;
+            private set => layoutInfo.renderSlotRect = value;
         }
 
         private Rect calculateLayoutClip() {
@@ -883,11 +852,7 @@ namespace ConsoleFramework.Controls
         /// Все остальное будет обрезано в соответствии с установленными значениями свойств
         /// <see cref="Margin"/>, <see cref="HorizontalAlignment"/> и <see cref="VerticalAlignment"/>.
         /// </summary>
-        public Rect LayoutClip {
-            get {
-                return layoutInfo.layoutClip;
-            }
-        }
+        public Rect LayoutClip => layoutInfo.layoutClip;
 
         private Vector computeAlignmentOffset() {
             //
@@ -1275,9 +1240,7 @@ namespace ConsoleFramework.Controls
 
         private Point cursorPosition = new Point(0, 0);
         internal Point CursorPosition {
-            get {
-                return cursorPosition;
-            }
+            get => cursorPosition;
             set {
                 if (cursorPosition != value) {
                     cursorPosition = value;
@@ -1325,8 +1288,7 @@ namespace ConsoleFramework.Controls
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void RaisePropertyChanged( string propertyName ) {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if ( handler != null ) handler( this, new PropertyChangedEventArgs( propertyName ) );
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         protected static void assert( bool assertion ) {
@@ -1379,10 +1341,6 @@ namespace ConsoleFramework.Controls
         protected virtual void OnCreated( ) {
         }
 
-        private ContextMenu contextMenu;
-        public ContextMenu ContextMenu {
-            get { return contextMenu; }
-            set { contextMenu = value; }
-        }
+        public ContextMenu ContextMenu { get; set; }
     }
 }

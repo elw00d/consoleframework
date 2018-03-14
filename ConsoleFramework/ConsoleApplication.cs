@@ -184,7 +184,7 @@ namespace ConsoleFramework
             var assembly = Assembly.GetEntryAssembly();
             using ( Stream stream = assembly.GetManifestResourceStream( xamlResourceName ) ) {
                 if ( null == stream ) {
-                    throw new ArgumentException("Resource not found.", "xamlResourceName");
+                    throw new ArgumentException("Resource not found.", nameof(xamlResourceName));
                 }
                 using ( StreamReader reader = new StreamReader( stream ) ) {
                     string result = reader.ReadToEnd( );
