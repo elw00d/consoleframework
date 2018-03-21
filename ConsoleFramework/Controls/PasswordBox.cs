@@ -7,13 +7,13 @@ using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {
-    public class PasswordBox : Control
+    public class PasswordBox : TextBox
     {
 
         private string mask;
         private string text;
 
-        public string Text
+        public new string Text
         {
             get
             {
@@ -31,34 +31,22 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private char passChar = '*';
         public char PassChar
         {
             get
             {
-                return passChar;
+                return PassChar;
             }
             set
             {
-                passChar = value;
+                PassChar = value;
             }
         }
 
-        public int MaxLenght
-        {
-            get;
-            set;
-        }
-
-        public int? Size
-        {
-            get;
-            set;
-        }
 
         public PasswordBox()
         {
-            KeyDown += maskBox_KeyDown;
+            KeyDown += MaskBox_KeyDown;
             MouseDown += OnMouseDown;
             CursorVisible = true;
             CursorPosition = new Point(1, 0);
@@ -66,10 +54,10 @@ namespace ConsoleFramework.Controls
         }
         private void OnMouseDown(object sender, MouseButtonEventArgs args)
         {
-            Point point = args.GetPosition(this);
+            var point = args.GetPosition(this);
             if (point.X > 0 && point.X - 1 < getSize())
             {
-                int x = point.X - 1;
+                var x = point.X - 1;
                 if (!String.IsNullOrEmpty(mask))
                 {
                     if (x <= mask.Length)
@@ -84,10 +72,10 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        private void maskBox_KeyDown(object sender, KeyEventArgs args)
+        private void MaskBox_KeyDown(object sender, KeyEventArgs args)
         {
             // TODO : add right alt & ctrl support
-            ConsoleKeyInfo keyInfo = new ConsoleKeyInfo(args.UnicodeChar, (ConsoleKey)args.wVirtualKeyCode,
+            var keyInfo = new ConsoleKeyInfo(args.UnicodeChar, (ConsoleKey)args.wVirtualKeyCode,
                                                         (args.dwControlKeyState & ControlKeyState.SHIFT_PRESSED) ==
                                                         ControlKeyState.SHIFT_PRESSED,
                                                         (args.dwControlKeyState & ControlKeyState.LEFT_ALT_PRESSED) ==
@@ -127,11 +115,11 @@ namespace ConsoleFramework.Controls
                 {
                     if (!String.IsNullOrEmpty(mask) && displayOffset + cursorPosition < mask.Length)
                     {
-                        string leftPart = mask.Substring(0, cursorPosition + displayOffset);
-                        string rightPart = mask.Substring(cursorPosition + displayOffset + 1);
+                        var leftPart = mask.Substring(0, cursorPosition + displayOffset);
+                        var rightPart = mask.Substring(cursorPosition + displayOffset + 1);
                         mask = leftPart + rightPart;
-                        string aLeftPart = mask.Substring(0, cursorPosition + displayOffset);
-                        string aRightPart = mask.Substring(cursorPosition + displayOffset + 1);
+                        var aLeftPart = mask.Substring(0, cursorPosition + displayOffset);
+                        var aRightPart = mask.Substring(cursorPosition + displayOffset + 1);
                         Text = aLeftPart + aRightPart;
                     }
                     else
@@ -144,11 +132,11 @@ namespace ConsoleFramework.Controls
                     if (!String.IsNullOrEmpty(mask) && (displayOffset != 0 || cursorPosition != 0))
                     {
 
-                        string leftPart = mask.Substring(0, cursorPosition + displayOffset - 1);
-                        string rightPart = mask.Substring(cursorPosition + displayOffset);
+                        var leftPart = mask.Substring(0, cursorPosition + displayOffset - 1);
+                        var rightPart = mask.Substring(cursorPosition + displayOffset);
                         mask = leftPart + rightPart;
-                        string aLeftPart = mask.Substring(0, cursorPosition + displayOffset - 1);
-                        string aRightPart = mask.Substring(cursorPosition + displayOffset);
+                        var aLeftPart = mask.Substring(0, cursorPosition + displayOffset - 1);
+                        var aRightPart = mask.Substring(cursorPosition + displayOffset);
                         Text = aLeftPart + aRightPart;
                         if (displayOffset > 0)
                             displayOffset--;
@@ -246,7 +234,7 @@ namespace ConsoleFramework.Controls
 
         
 
-        private int getSize()
+        private int GetSize()
         {
             if (Size.HasValue) return Size.Value;
             return mask != null ? mask.Length + 1 : 1;
@@ -254,7 +242,7 @@ namespace ConsoleFramework.Controls
 
         protected override Size MeasureOverride(Size availableSize)
         {
-            Size desired = new Size(getSize() + 2, 1);
+            var desired = new Size(GetSize() + 2, 1);
             return new Size(
                 Math.Min(desired.Width, availableSize.Width),
                 Math.Min(desired.Height, availableSize.Height)
@@ -265,11 +253,10 @@ namespace ConsoleFramework.Controls
         private int displayOffset;
         private int cursorPosition;
         // -1 if no selection started
-        private int startSelection;
 
         public override void Render(RenderingBuffer buffer)
         {
-            Attr attr = Colors.Blend(Color.White, Color.DarkBlue);
+            var attr = Colors.Blend(Color.White, Color.DarkBlue);
             buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', attr);
             if (null != mask)
             {
@@ -281,7 +268,7 @@ namespace ConsoleFramework.Controls
                     }
                 }
             }
-            Attr arrowsAttr = Colors.Blend(Color.Green, Color.DarkBlue);
+            var arrowsAttr = Colors.Blend(Color.Green, Color.DarkBlue);
             if (displayOffset > 0)
                 buffer.SetPixel(0, 0, '<', arrowsAttr);
             if (!String.IsNullOrEmpty(mask) && ActualWidth - 2 + displayOffset < mask.Length)
