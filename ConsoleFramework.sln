@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleFramework", "Console
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyControls", "ExamplesStandalone\ManyControls\ManyControls.csproj", "{20E4164D-D86A-4042-B1BE-353E21CFDA06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{C19D960E-D8DC-442E-9BC4-8FB1085F72F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{C19D960E-D8DC-442E-9BC4-8FB1085F72F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextEditor", "ExamplesStandalone\TextEditor\TextEditor.csproj", "{44D5A702-72D9-4543-94C5-D9CC0BA12586}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,6 +52,12 @@ Global
 		{C19D960E-D8DC-442E-9BC4-8FB1085F72F5}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
 		{C19D960E-D8DC-442E-9BC4-8FB1085F72F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C19D960E-D8DC-442E-9BC4-8FB1085F72F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44D5A702-72D9-4543-94C5-D9CC0BA12586}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

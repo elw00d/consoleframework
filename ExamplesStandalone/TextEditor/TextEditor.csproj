@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="main.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="main.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ConsoleFramework\ConsoleFramework.csproj" />
+  </ItemGroup>
+
+</Project>

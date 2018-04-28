@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
@@ -35,14 +34,14 @@ namespace ConsoleFramework.Controls {
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs args) {
-            // todo : add right alt & ctrl support
-            ConsoleKeyInfo keyInfo = new ConsoleKeyInfo(args.UnicodeChar, (ConsoleKey) args.wVirtualKeyCode,
-                                                        (args.dwControlKeyState & ControlKeyState.SHIFT_PRESSED) ==
-                                                        ControlKeyState.SHIFT_PRESSED,
-                                                        (args.dwControlKeyState & ControlKeyState.LEFT_ALT_PRESSED) ==
-                                                        ControlKeyState.LEFT_ALT_PRESSED,
-                                                        (args.dwControlKeyState & ControlKeyState.LEFT_CTRL_PRESSED) ==
-                                                        ControlKeyState.LEFT_CTRL_PRESSED);
+            ConsoleKeyInfo keyInfo = new ConsoleKeyInfo(args.UnicodeChar,
+                (ConsoleKey) args.wVirtualKeyCode,
+                (args.dwControlKeyState & ControlKeyState.SHIFT_PRESSED) == ControlKeyState.SHIFT_PRESSED,
+                (args.dwControlKeyState & ControlKeyState.LEFT_ALT_PRESSED) == ControlKeyState.LEFT_ALT_PRESSED
+                    || (args.dwControlKeyState & ControlKeyState.RIGHT_ALT_PRESSED) == ControlKeyState.RIGHT_ALT_PRESSED,
+                (args.dwControlKeyState & ControlKeyState.LEFT_CTRL_PRESSED) == ControlKeyState.LEFT_CTRL_PRESSED
+                    || (args.dwControlKeyState & ControlKeyState.RIGHT_CTRL_PRESSED) == ControlKeyState.RIGHT_CTRL_PRESSED
+            );
             if (!char.IsControl(keyInfo.KeyChar)) {
                 // insert keychar into a text string according to cursorPosition and offset
                 if (text != null) {
@@ -87,6 +86,10 @@ namespace ConsoleFramework.Controls {
                     }
                 }
                 if (keyInfo.Key == ConsoleKey.LeftArrow) {
+                    if ((keyInfo.Modifiers & ConsoleModifiers.Control) != 0)
+                    {
+                        // todo :
+                    }
                     if (!String.IsNullOrEmpty(text) && (displayOffset != 0 || cursorPosition != 0)) {
                         if (cursorPosition > 0) {
                             cursorPosition--;
