@@ -1,20 +1,8 @@
-﻿<Window>
-  <!--<Grid>
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"></ColumnDefinition>
-      <ColumnDefinition Width="*"></ColumnDefinition>
-      <ColumnDefinition Width="*"></ColumnDefinition>
-    </Grid.ColumnDefinitions>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>-->
-  <Panel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-    <Button Margin="1" MaxWidth="3" VerticalAlignment="Stretch" HorizontalAlignment="Right" Caption="btn1">
-    </Button>
-    <Button Margin="1" MaxWidth="4" VerticalAlignment="Stretch" HorizontalAlignment="Center" Caption="btn1">
-    </Button>
-    <Button Margin="1" MaxWidth="7" VerticalAlignment="Stretch" HorizontalAlignment="Center" Caption="btn1">
-    </Button>
-    <!--</Grid>-->
-  </Panel>
+﻿<Window MinHeight="10" MinWidth="25" >
+  <!--<Panel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">-->
+    <TextEditor VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                MaxHeight="30" MaxWidth="35">
+      
+    </TextEditor>
+  <!--</Panel>-->
 </Window>
