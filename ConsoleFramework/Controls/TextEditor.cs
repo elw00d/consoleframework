@@ -133,7 +133,7 @@ namespace ConsoleFramework.Controls {
 
             int? windowX = null;
             int? windowY = null;
-            
+
             if (cursor.X >= oldWindow.Width) {
                 // Move window 3px right if nextChar is outside the window after add char
                 windowX = oldWindow.X + cursor.X - oldWindow.Width + 3;
@@ -153,7 +153,7 @@ namespace ConsoleFramework.Controls {
                 controller.Window = new Rect(
                     new Point(windowX ?? oldWindow.X, windowY ?? oldWindow.Y), oldWindow.Size);
             }
-            
+
             // Actualize cursor position to new window
             Point cursorPos = textPosToCursorPos(cursorPosToTextPos(cursor, oldWindow), controller.Window);
             if (light) {
@@ -168,6 +168,28 @@ namespace ConsoleFramework.Controls {
             Down,
             Left,
             Right
+        }
+
+        public class TrySetCursorCmd : ICommand {
+            private readonly Point coord;
+
+            public TrySetCursorCmd(Point coord) {
+                this.coord = coord;
+            }
+
+            public bool Do(TextEditorController controller) {
+                if (!new Rect(new Point(), controller.Window.Size).Contains(coord)) {
+                    throw new ArgumentException("coord should be inside window");
+                }
+
+                Point desiredTextPos = cursorPosToTextPos(coord, controller.Window);
+                int y = Math.Min(desiredTextPos.Y, controller.textHolder.LinesCount - 1);
+                int x = Math.Min(desiredTextPos.X, controller.textHolder.Lines[y].Length);
+
+                moveWindowToCursor(textPosToCursorPos(new Point(x, y), controller.Window), controller);
+
+                return false;
+            }
         }
 
         public class MoveCursorCmd : ICommand {
@@ -440,7 +462,13 @@ namespace ConsoleFramework.Controls {
         }
 
         private void OnMouseDown(object sender, MouseButtonEventArgs mouseButtonEventArgs) {
-            //
+            Point position = mouseButtonEventArgs.GetPosition(this);
+            Point constrained = new Point(
+                Math.Max(0, Math.Min(controller.Window.Size.Width - 1, position.X)),
+                Math.Max(0, Math.Min(controller.Window.Size.Height - 1, position.Y))
+            );
+            applyCommand(new TextEditorController.TrySetCursorCmd(constrained));
+            mouseButtonEventArgs.Handled = true;
         }
 
         private void OnKeyDown(object sender, KeyEventArgs args) {

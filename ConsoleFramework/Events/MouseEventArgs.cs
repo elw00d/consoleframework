@@ -100,41 +100,27 @@ namespace ConsoleFramework.Events {
                               MouseButtonState leftButton, MouseButtonState middleButton, MouseButtonState rightButton)
             : base(source, routedEvent) {
             //
-            this.rawPosition = rawPosition;
-            this.LeftButton = leftButton;
-            this.MiddleButton = middleButton;
-            this.RightButton = rightButton;
+            RawPosition = rawPosition;
+            LeftButton = leftButton;
+            MiddleButton = middleButton;
+            RightButton = rightButton;
         }
 
-        private readonly Point rawPosition;
-        public Point RawPosition {
-            get {
-                return rawPosition;
-            }
-        }
+        public Point RawPosition { get; }
 
+        public MouseButtonState LeftButton { get; }
+
+        public MouseButtonState MiddleButton { get; }
+
+        public MouseButtonState RightButton { get; }
+        
         /// <summary>
-        /// Возвращает преобразованные координаты относительно указанного контрола.
-        /// Если контрол захватывает ввод, то получаемые таким образом координаты могут
-        /// выходить за пределы контрола (отрицательные или больше ActualWidth/ActualHeight).
+        /// Returns translated coords, relative to specified control.
+        /// Can return negative values (or greater than ActualWidth/ActualHeight)
+        /// if control is capturing mouse input.
         /// </summary>
         public Point GetPosition(Control relativeTo) {
-            return Control.TranslatePoint(null, rawPosition, relativeTo);
-        }
-
-        public MouseButtonState LeftButton {
-            get;
-            private set;
-        }
-
-        public MouseButtonState MiddleButton {
-            get;
-            private set;
-        }
-
-        public MouseButtonState RightButton {
-            get;
-            private set;
+            return Control.TranslatePoint(null, RawPosition, relativeTo);
         }
     }
 }
