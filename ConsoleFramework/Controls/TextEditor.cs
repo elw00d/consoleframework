@@ -25,7 +25,7 @@ namespace ConsoleFramework.Controls {
             get => cursorPos;
             set {
                 cursorPos = value;
-                lastCursorX = cursorPos.X;
+                lastTextPosX = cursorPosToTextPos(cursorPos, Window).X;
             }
         }
 
@@ -33,7 +33,7 @@ namespace ConsoleFramework.Controls {
         /// Stores the last X coord of cursor, before line was changed
         /// (when PageUp/PageDown/ArrowUp/ArrowDown pressed)
         /// </summary>
-        private int lastCursorX;
+        private int lastTextPosX;
 
         /// <summary>
         /// Changes cursor position without changing lastCursorX value
@@ -131,31 +131,29 @@ namespace ConsoleFramework.Controls {
             TextEditorController controller, bool light = false) {
             Rect oldWindow = controller.Window;
 
+            int? windowX = null;
+            int? windowY = null;
+            
             if (cursor.X >= oldWindow.Width) {
                 // Move window 3px right if nextChar is outside the window after add char
-                controller.Window =
-                    new Rect(oldWindow.X + cursor.X - oldWindow.Width + 3,
-                        oldWindow.Top, oldWindow.Width, oldWindow.Height);
+                windowX = oldWindow.X + cursor.X - oldWindow.Width + 3;
             } else if (cursor.X < 0) {
-                // Move window left if need
-                controller.Window =
-                    new Rect(Math.Max(0, oldWindow.X + cursor.X - 4),
-                        oldWindow.Top, oldWindow.Width, oldWindow.Height);
+                // Move window left if need (with 4px gap from left)
+                windowX = Math.Max(0, oldWindow.X + cursor.X - 4);
             }
 
             // Move window down if nextChar is outside the window
             if (cursor.Y >= controller.Window.Height) {
-                controller.Window =
-                    new Rect(
-                        controller.Window.Left,
-                        controller.Window.Top + cursor.Y - controller.Window.Height + 1,
-                        controller.Window.Width,
-                        controller.Window.Height);
+                windowY = controller.Window.Top + cursor.Y - controller.Window.Height + 1;
             } else if (cursor.Y < 0) {
-                controller.Window = new Rect(
-                    oldWindow.X, oldWindow.Y + cursor.Y, oldWindow.Width, oldWindow.Height);
+                windowY = controller.Window.Y + cursor.Y;
             }
 
+            if (windowX != null || windowY != null) {
+                controller.Window = new Rect(
+                    new Point(windowX ?? oldWindow.X, windowY ?? oldWindow.Y), oldWindow.Size);
+            }
+            
             // Actualize cursor position to new window
             Point cursorPos = textPosToCursorPos(cursorPosToTextPos(cursor, oldWindow), controller.Window);
             if (light) {
@@ -195,7 +193,7 @@ namespace ConsoleFramework.Controls {
                         } else {
                             string prevLine = controller.textHolder.Lines[oldTextPos.Y - 1];
                             textPos = new Point(
-                                Math.Min(controller.lastCursorX, prevLine.Length),
+                                Math.Min(controller.lastTextPosX, prevLine.Length),
                                 oldTextPos.Y - 1
                             );
                         }
@@ -216,12 +214,51 @@ namespace ConsoleFramework.Controls {
                         } else {
                             string nextLine = controller.textHolder.Lines[oldTextPos.Y + 1];
                             textPos = new Point(
-                                Math.Min(controller.lastCursorX, nextLine.Length),
+                                Math.Min(controller.lastTextPosX, nextLine.Length),
                                 oldTextPos.Y + 1
                             );
                         }
 
                         moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
+                        break;
+                    }
+                    case Direction.Left: {
+                        Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+                        Point textPos;
+                        if (oldTextPos.X == 0) {
+                            if (oldTextPos.Y == 0) {
+                                break;
+                            }
+
+                            string prevLine = controller.textHolder.Lines[oldTextPos.Y - 1];
+                            textPos = new Point(prevLine.Length, oldTextPos.Y - 1);
+                        } else {
+                            textPos = new Point(oldTextPos.X - 1, oldTextPos.Y);
+                        }
+
+                        moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller);
+                        break;
+                    }
+                    case Direction.Right: {
+                        Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+                        Point textPos;
+                        if (oldTextPos.Y == controller.textHolder.LinesCount - 1) {
+                            string lastLine = controller.textHolder.Lines[controller.textHolder.LinesCount - 1];
+                            if (oldTextPos.X == lastLine.Length) {
+                                break;
+                            }
+
+                            textPos = new Point(oldTextPos.X + 1, oldTextPos.Y);
+                        } else {
+                            string line = controller.textHolder.Lines[oldTextPos.Y];
+                            if (oldTextPos.X < line.Length) {
+                                textPos = new Point(oldTextPos.X + 1, oldTextPos.Y);
+                            } else {
+                                textPos = new Point(0, oldTextPos.Y + 1);
+                            }
+                        }
+
+                        moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller);
                         break;
                     }
                     // TODO : remaining directions
@@ -420,7 +457,7 @@ namespace ConsoleFramework.Controls {
             }
 
             if (keyInfo.Key == ConsoleKey.Enter) {
-                applyCommand(new TextEditorController.AppendStringCmd("\n"));
+                applyCommand(new TextEditorController.AppendStringCmd(Environment.NewLine));
             }
 
             if (keyInfo.Key == ConsoleKey.UpArrow) {
