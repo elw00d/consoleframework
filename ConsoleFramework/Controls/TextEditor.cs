@@ -128,7 +128,7 @@ namespace ConsoleFramework.Controls {
         /// TODO :
         /// </summary>
         static void moveWindowToCursor(Point cursor,
-            TextEditorController controller, bool light=false) {
+            TextEditorController controller, bool light = false) {
             Rect oldWindow = controller.Window;
 
             if (cursor.X >= oldWindow.Width) {
@@ -184,27 +184,44 @@ namespace ConsoleFramework.Controls {
                 var oldWindow = controller.Window;
                 switch (direction) {
                     case Direction.Up: {
-                        Point textPos = cursorPosToTextPos(oldCursorPos, oldWindow);
-                        if (textPos.Y == 0) {
-                            if (textPos.X == 0) {
+                        Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+                        Point textPos;
+                        if (oldTextPos.Y == 0) {
+                            if (oldTextPos.X == 0) {
                                 break;
                             }
 
-                            controller.setCursorPosLight(new Point(0, 0));
-                            controller.Window = new Rect(new Point(0, 0), oldWindow.Size);
-                            break;
+                            textPos = new Point(0, 0);
+                        } else {
+                            string prevLine = controller.textHolder.Lines[oldTextPos.Y - 1];
+                            textPos = new Point(
+                                Math.Min(controller.lastCursorX, prevLine.Length),
+                                oldTextPos.Y - 1
+                            );
                         }
 
-                        string prevLine = controller.textHolder.Lines[textPos.Y - 1];
-                        moveWindowToCursor(
-                            textPosToCursorPos(
-                                new Point(
-                                    Math.Min(controller.lastCursorX, prevLine.Length),
-                                    textPos.Y - 1
-                                ), oldWindow),
-                            controller,
-                            true
-                        );
+                        moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
+                        break;
+                    }
+                    case Direction.Down: {
+                        Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+                        Point textPos;
+                        if (oldTextPos.Y == controller.textHolder.LinesCount - 1) {
+                            string lastLine = controller.textHolder.Lines[controller.textHolder.LinesCount - 1];
+                            if (oldTextPos.X == lastLine.Length) {
+                                break;
+                            }
+
+                            textPos = new Point(lastLine.Length, controller.textHolder.LinesCount - 1);
+                        } else {
+                            string nextLine = controller.textHolder.Lines[oldTextPos.Y + 1];
+                            textPos = new Point(
+                                Math.Min(controller.lastCursorX, nextLine.Length),
+                                oldTextPos.Y + 1
+                            );
+                        }
+
+                        moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
                         break;
                     }
                     // TODO : remaining directions
