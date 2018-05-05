@@ -21,7 +21,26 @@ namespace ConsoleFramework.Controls {
         /// <summary>
         /// Logical cursor position (points to symbol in textItems, not to display coord)
         /// </summary>
-        public Point CursorPos { get; set; }
+        public Point CursorPos {
+            get => cursorPos;
+            set {
+                cursorPos = value;
+                lastCursorX = cursorPos.X;
+            }
+        }
+
+        /// <summary>
+        /// Stores the last X coord of cursor, before line was changed
+        /// (when PageUp/PageDown/ArrowUp/ArrowDown pressed)
+        /// </summary>
+        private int lastCursorX;
+
+        /// <summary>
+        /// Changes cursor position without changing lastCursorX value
+        /// </summary>
+        private void setCursorPosLight(Point cursorPos) {
+            this.cursorPos = cursorPos;
+        }
 
         /// <summary>
         /// Current display window
@@ -32,6 +51,8 @@ namespace ConsoleFramework.Controls {
         /// Current text in editor
         /// </summary>
         private TextHolder textHolder;
+
+        private Point cursorPos;
 
         public void WriteToWindow(char[,] buffer) {
             textHolder.WriteToWindow(Window.Left, Window.Top, Window.Width, Window.Height, buffer);
@@ -94,39 +115,102 @@ namespace ConsoleFramework.Controls {
                     controller.textHolder.Insert(textPos.Y, textPos.X, s);
 
                 // Move window to just edited place if need
-                var cursor = textPosToCursorPos(nextCharPos, controller.Window);
+                Point cursor = textPosToCursorPos(nextCharPos, controller.Window);
 
-                if (cursor.X >= controller.Window.Width) {
-                    // Move window right if nextChar is outside the window after add char
-                    controller.Window =
-                        new Rect(controller.Window.X +
-                                 cursor.X - controller.Window.Width + 3,
-                            controller.Window.Top,
-                            controller.Window.Width,
-                            controller.Window.Height);
-                } else if (cursor.X < 0) {
-                    // Move window left if need
-                    controller.Window =
-                        new Rect(controller.Window.X + cursor.X,
-                            controller.Window.Top,
-                            controller.Window.Width,
-                            controller.Window.Height);
-                }
-
-                // Move window down if nextChar is outside the window
-                if (cursor.Y >= controller.Window.Height) {
-                    controller.Window =
-                        new Rect(
-                            controller.Window.Left,
-                            controller.Window.Top + cursor.Y - controller.Window.Height + 1,
-                            controller.Window.Width,
-                            controller.Window.Height);
-                }
-
-                controller.CursorPos =
-                    textPosToCursorPos(nextCharPos, controller.Window);
+                moveWindowToCursor(cursor, controller);
 
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// Moves window to make the cursor visible in it
+        /// TODO :
+        /// </summary>
+        static void moveWindowToCursor(Point cursor,
+            TextEditorController controller, bool light=false) {
+            Rect oldWindow = controller.Window;
+
+            if (cursor.X >= oldWindow.Width) {
+                // Move window 3px right if nextChar is outside the window after add char
+                controller.Window =
+                    new Rect(oldWindow.X + cursor.X - oldWindow.Width + 3,
+                        oldWindow.Top, oldWindow.Width, oldWindow.Height);
+            } else if (cursor.X < 0) {
+                // Move window left if need
+                controller.Window =
+                    new Rect(Math.Max(0, oldWindow.X + cursor.X - 4),
+                        oldWindow.Top, oldWindow.Width, oldWindow.Height);
+            }
+
+            // Move window down if nextChar is outside the window
+            if (cursor.Y >= controller.Window.Height) {
+                controller.Window =
+                    new Rect(
+                        controller.Window.Left,
+                        controller.Window.Top + cursor.Y - controller.Window.Height + 1,
+                        controller.Window.Width,
+                        controller.Window.Height);
+            } else if (cursor.Y < 0) {
+                controller.Window = new Rect(
+                    oldWindow.X, oldWindow.Y + cursor.Y, oldWindow.Width, oldWindow.Height);
+            }
+
+            // Actualize cursor position to new window
+            Point cursorPos = textPosToCursorPos(cursorPosToTextPos(cursor, oldWindow), controller.Window);
+            if (light) {
+                controller.setCursorPosLight(cursorPos);
+            } else {
+                controller.CursorPos = cursorPos;
+            }
+        }
+
+        public enum Direction {
+            Up,
+            Down,
+            Left,
+            Right
+        }
+
+        public class MoveCursorCmd : ICommand {
+            private readonly Direction direction;
+
+            public MoveCursorCmd(Direction direction) {
+                this.direction = direction;
+            }
+
+            public bool Do(TextEditorController controller) {
+                var oldCursorPos = controller.CursorPos;
+                var oldWindow = controller.Window;
+                switch (direction) {
+                    case Direction.Up: {
+                        Point textPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+                        if (textPos.Y == 0) {
+                            if (textPos.X == 0) {
+                                break;
+                            }
+
+                            controller.setCursorPosLight(new Point(0, 0));
+                            controller.Window = new Rect(new Point(0, 0), oldWindow.Size);
+                            break;
+                        }
+
+                        string prevLine = controller.textHolder.Lines[textPos.Y - 1];
+                        moveWindowToCursor(
+                            textPosToCursorPos(
+                                new Point(
+                                    Math.Min(controller.lastCursorX, prevLine.Length),
+                                    textPos.Y - 1
+                                ), oldWindow),
+                            controller,
+                            true
+                        );
+                        break;
+                    }
+                    // TODO : remaining directions
+                }
+
+                return controller.Window != oldWindow;
             }
         }
     }
@@ -147,6 +231,8 @@ namespace ConsoleFramework.Controls {
             get => string.Join(Environment.NewLine, lines);
             set => setText(value);
         }
+
+        public IList<string> Lines => lines.AsReadOnly();
 
         public int LinesCount => lines.Count;
         public int ColumnsCount => lines.Max(it => it.Length);
@@ -178,8 +264,9 @@ namespace ConsoleFramework.Controls {
             } else {
                 lines[ln] = leftPart + linesToInsert[0];
                 lines.InsertRange(ln + 1, linesToInsert.Skip(1).Take(linesToInsert.Length - 1));
-                lines[ln + linesToInsert.Length - 1] = lines[ln + linesToInsert.Length - 1] + rightPart;
-                return new Point(lines[ln + linesToInsert.Length - 1].Length, ln + linesToInsert.Length - 1);
+                string lastStrLeftPart = lines[ln + linesToInsert.Length - 1];
+                lines[ln + linesToInsert.Length - 1] = lastStrLeftPart + rightPart;
+                return new Point(lastStrLeftPart.Length, ln + linesToInsert.Length - 1);
             }
         }
 
@@ -246,19 +333,24 @@ namespace ConsoleFramework.Controls {
             set {
                 if (value != controller.Text) {
                     controller.Text = value;
-                    invalidate();
+                    invalidate(true);
                 }
             }
         }
 
-        private void invalidate() {
+        private void invalidate(bool changeCursorPos = false) {
             CursorPosition = controller.CursorPos;
             Invalidate();
         }
 
         private void applyCommand(TextEditorController.ICommand cmd) {
+            var oldCursorPos = controller.CursorPos;
             if (cmd.Do(controller)) {
                 invalidate();
+            }
+
+            if (oldCursorPos != controller.CursorPos) {
+                CursorPosition = controller.CursorPos;
             }
         }
 
@@ -312,6 +404,22 @@ namespace ConsoleFramework.Controls {
 
             if (keyInfo.Key == ConsoleKey.Enter) {
                 applyCommand(new TextEditorController.AppendStringCmd("\n"));
+            }
+
+            if (keyInfo.Key == ConsoleKey.UpArrow) {
+                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Up));
+            }
+
+            if (keyInfo.Key == ConsoleKey.DownArrow) {
+                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Down));
+            }
+
+            if (keyInfo.Key == ConsoleKey.LeftArrow) {
+                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Left));
+            }
+
+            if (keyInfo.Key == ConsoleKey.RightArrow) {
+                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Right));
             }
         }
     }
