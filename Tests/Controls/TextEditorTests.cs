@@ -113,5 +113,28 @@ Line 5");
             };
             Assert.Equal(d, buf);
         }
+
+        [Fact]
+        public void TestDelete() {
+            TextHolder holder = new TextHolder(@"Line 1
+Line 2
+Line 3");
+            holder.Delete(0, 2, 0, 3);
+            Assert.Equal(3, holder.Lines.Count);
+            Assert.Equal("Lie 1", holder.Lines[0]);
+        }
+
+        [Fact]
+        public void TestDeleteLines() {
+            TextHolder holder = new TextHolder(@"Line 1
+Line 2
+Line 3
+Line 4
+Line 5");
+            holder.Delete(1, 2, 3, 1);
+            Assert.Equal(@"Line 1
+Liine 4
+Line 5", holder.Text);
+        }
     }
 }

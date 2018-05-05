@@ -125,14 +125,12 @@ namespace ConsoleFramework.Controls {
 
         /// <summary>
         /// Moves window to make the cursor visible in it
-        /// TODO :
         /// </summary>
-        static void moveWindowToCursor(Point cursor,
-            TextEditorController controller, bool light = false) {
+        static void moveWindowToCursor(Point cursor, TextEditorController controller, bool light = false) {
             Rect oldWindow = controller.Window;
 
-            int? windowX = null;
-            int? windowY = null;
+            int? windowX;
+            int? windowY;
 
             if (cursor.X >= oldWindow.Width) {
                 // Move window 3px right if nextChar is outside the window after add char
@@ -140,6 +138,8 @@ namespace ConsoleFramework.Controls {
             } else if (cursor.X < 0) {
                 // Move window left if need (with 4px gap from left)
                 windowX = Math.Max(0, oldWindow.X + cursor.X - 4);
+            } else {
+                windowX = null;
             }
 
             // Move window down if nextChar is outside the window
@@ -147,6 +147,8 @@ namespace ConsoleFramework.Controls {
                 windowY = controller.Window.Top + cursor.Y - controller.Window.Height + 1;
             } else if (cursor.Y < 0) {
                 windowY = controller.Window.Y + cursor.Y;
+            } else {
+                windowY = null;
             }
 
             if (windowX != null || windowY != null) {
@@ -170,6 +172,10 @@ namespace ConsoleFramework.Controls {
             Right
         }
 
+        /// <summary>
+        /// Command accepts coord from mouse and applies it to current text window,
+        /// don't allowing to set cursor out of filled text
+        /// </summary>
         public class TrySetCursorCmd : ICommand {
             private readonly Point coord;
 
@@ -189,6 +195,53 @@ namespace ConsoleFramework.Controls {
                 moveWindowToCursor(textPosToCursorPos(new Point(x, y), controller.Window), controller);
 
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Initiated with BackSpace key
+        /// </summary>
+        public class DeleteLeftSymbolCmd : ICommand {
+            public bool Do(TextEditorController controller) {
+                Point toTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
+                Point fromTextPos;
+                if (toTextPos.X == 0) {
+                    if (toTextPos.Y == 0) {
+                        return false;
+                    }
+                    fromTextPos = new Point(controller.textHolder.Lines[toTextPos.Y - 1].Length, toTextPos.Y - 1);
+                } else {
+                    fromTextPos = new Point(toTextPos.X - 1, toTextPos.Y);
+                }
+                
+                controller.textHolder.Delete(fromTextPos.Y, fromTextPos.X, toTextPos.Y, toTextPos.X);
+                moveWindowToCursor(textPosToCursorPos(fromTextPos, controller.Window), controller);
+                
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Initiated with Delete key
+        /// </summary>
+        public class DeleteRightSymbolCmd : ICommand {
+            public bool Do(TextEditorController controller) {
+                Point fromTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
+                Point toTextPos;
+                string line = controller.textHolder.Lines[fromTextPos.Y];
+                if (fromTextPos.X == line.Length) {
+                    if (fromTextPos.Y == controller.textHolder.LinesCount - 1) {
+                        return false;
+                    }
+                    toTextPos = new Point(0, fromTextPos.Y + 1);
+                } else {
+                    toTextPos = new Point(fromTextPos.X + 1, fromTextPos.Y);
+                }
+                
+                controller.textHolder.Delete(fromTextPos.Y, fromTextPos.X, toTextPos.Y, toTextPos.X);
+                moveWindowToCursor(textPosToCursorPos(fromTextPos, controller.Window), controller);
+                
+                return true;
             }
         }
 
@@ -283,7 +336,6 @@ namespace ConsoleFramework.Controls {
                         moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller);
                         break;
                     }
-                    // TODO : remaining directions
                 }
 
                 return controller.Window != oldWindow;
@@ -390,8 +442,19 @@ namespace ConsoleFramework.Controls {
             }
         }
 
-        public void Delete(int ln, int col, int count) {
+        /// <summary>
+        /// Deletes text from lnFrom+colFrom to lnTo+colTo (exclusive).
+        /// </summary>
+        public void Delete(int lnFrom, int colFrom, int lnTo, int colTo) {
+            if (lnFrom > lnTo) {
+                throw new ArgumentException("lnFrom should be <= lnTo");
+            }
+            if (lnFrom == lnTo && colFrom >= colTo) {
+                throw new ArgumentException("colFrom should be < colTo on the same line");
+            }
             //
+            lines[lnFrom] = lines[lnFrom].Substring(0, colFrom) + lines[lnTo].Substring(colTo);
+            lines.RemoveRange(lnFrom + 1, lnTo - lnFrom);
         }
     }
 
@@ -491,17 +554,21 @@ namespace ConsoleFramework.Controls {
             if (keyInfo.Key == ConsoleKey.UpArrow) {
                 applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Up));
             }
-
             if (keyInfo.Key == ConsoleKey.DownArrow) {
                 applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Down));
             }
-
             if (keyInfo.Key == ConsoleKey.LeftArrow) {
                 applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Left));
             }
-
             if (keyInfo.Key == ConsoleKey.RightArrow) {
                 applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Right));
+            }
+
+            if (keyInfo.Key == ConsoleKey.Backspace) {
+                applyCommand(new TextEditorController.DeleteLeftSymbolCmd());
+            }
+            if (keyInfo.Key == ConsoleKey.Delete) {
+                applyCommand(new TextEditorController.DeleteRightSymbolCmd());
             }
         }
     }
