@@ -7,7 +7,15 @@ using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 using Xaml;
 
-// TODO : move cursorPos + window to another class > ?
+// TODO : Autoindent
+// TODO : PageUp/PageDown/Home/End
+// TODO : Alt+Backspace deletes word
+// TODO : Shift+Delete deletes line
+// TODO : Scrollbars
+// TODO : Ctrl+arrows
+// TODO : Selection
+// TODO : Selection copy/paste/cut/delete
+// TODO : Undo/Redo, commands autogrouping
 namespace ConsoleFramework.Controls {
     /// <summary>
     /// Incapsulates text holder and all the data required to display the content
@@ -213,10 +221,10 @@ namespace ConsoleFramework.Controls {
                 } else {
                     fromTextPos = new Point(toTextPos.X - 1, toTextPos.Y);
                 }
-                
+
                 controller.textHolder.Delete(fromTextPos.Y, fromTextPos.X, toTextPos.Y, toTextPos.X);
                 moveWindowToCursor(textPosToCursorPos(fromTextPos, controller.Window), controller);
-                
+
                 return true;
             }
         }
@@ -237,10 +245,10 @@ namespace ConsoleFramework.Controls {
                 } else {
                     toTextPos = new Point(fromTextPos.X + 1, fromTextPos.Y);
                 }
-                
+
                 controller.textHolder.Delete(fromTextPos.Y, fromTextPos.X, toTextPos.Y, toTextPos.X);
                 moveWindowToCursor(textPosToCursorPos(fromTextPos, controller.Window), controller);
-                
+
                 return true;
             }
         }
@@ -384,7 +392,7 @@ namespace ConsoleFramework.Controls {
             string leftPart = currentLine.Substring(0, col);
             string rightPart = currentLine.Substring(col);
 
-            string[] linesToInsert = s.Split(new string[] {Environment.NewLine}, StringSplitOptions.None);
+            string[] linesToInsert = s.Split(new[] {Environment.NewLine}, StringSplitOptions.None);
 
             if (linesToInsert.Length == 1) {
                 lines[ln] = leftPart + linesToInsert[0] + rightPart;
@@ -466,6 +474,8 @@ namespace ConsoleFramework.Controls {
     public class TextEditor : Control {
         private TextEditorController controller;
         private char[,] buffer;
+        private ScrollBar horizontalScrollbar;
+        private ScrollBar verticalScrollbar;
 
         public string Text {
             get => controller.Text;
@@ -476,6 +486,8 @@ namespace ConsoleFramework.Controls {
                 }
             }
         }
+
+        // TODO : Scrollbars always visible
 
         private void invalidate(bool changeCursorPos = false) {
             CursorPosition = controller.CursorPos;
@@ -500,15 +512,64 @@ namespace ConsoleFramework.Controls {
             CursorVisible = true;
             CursorPosition = new Point(0, 0);
             Focusable = true;
+
+            horizontalScrollbar = new ScrollBar {
+                Orientation = Orientation.Horizontal,
+                Visibility = Visibility.Hidden
+            };
+            verticalScrollbar = new ScrollBar {
+                Orientation = Orientation.Vertical,
+                Visibility = Visibility.Hidden
+            };
+            AddChild(horizontalScrollbar);
+            AddChild(verticalScrollbar);
         }
 
         protected override Size MeasureOverride(Size availableSize) {
+            verticalScrollbar.Measure(new Size(1, availableSize.Height));
+            horizontalScrollbar.Measure(new Size(availableSize.Width, 1));
             return new Size(0, 0);
         }
 
         protected override Size ArrangeOverride(Size finalSize) {
-            controller.Window = new Rect(controller.Window.TopLeft, finalSize);
-            buffer = new char[finalSize.Height, finalSize.Width];
+            if (controller.LinesCount > finalSize.Height) {
+                verticalScrollbar.Visibility = Visibility.Visible;
+                verticalScrollbar.MaxValue = controller.LinesCount + 6 - controller.Window.Height;  // TODO : extract const
+                verticalScrollbar.Value = controller.Window.Top;
+                verticalScrollbar.Invalidate();
+            } else {
+                verticalScrollbar.Visibility = Visibility.Hidden;
+            }
+            if (controller.ColumnsCount >= finalSize.Width) {
+                horizontalScrollbar.Visibility = Visibility.Visible;
+                horizontalScrollbar.MaxValue = controller.ColumnsCount + 4 - controller.Window.Width;  // TODO : const ?
+                horizontalScrollbar.Value = controller.Window.Left;
+                horizontalScrollbar.Invalidate();
+            } else {
+                horizontalScrollbar.Visibility = Visibility.Hidden;
+            }
+            horizontalScrollbar.Arrange(new Rect(
+                0,
+                Math.Max(0, finalSize.Height - 1),
+                Math.Max(0, finalSize.Width -
+                            (verticalScrollbar.Visibility == Visibility.Visible
+                                || horizontalScrollbar.Visibility != Visibility.Visible ? 1 : 0)),
+                1
+            ));
+            verticalScrollbar.Arrange(new Rect(
+                Math.Max(0, finalSize.Width - 1),
+                0,
+                1,
+                Math.Max(0, finalSize.Height -
+                            (horizontalScrollbar.Visibility == Visibility.Visible
+                                || verticalScrollbar.Visibility != Visibility.Visible ? 1 : 0))
+            ));
+            Size contentSize = new Size(
+                finalSize.Width - (verticalScrollbar.Visibility == Visibility.Visible ? 1 : 0),
+                finalSize.Height - (horizontalScrollbar.Visibility == Visibility.Visible ? 1 : 0)
+            );
+            controller.Window = new Rect(controller.Window.TopLeft, contentSize);
+            buffer = new char[contentSize.Height, contentSize.Width];
             return finalSize;
         }
 
@@ -517,10 +578,18 @@ namespace ConsoleFramework.Controls {
             buffer.FillRectangle(0, 0, ActualWidth, ActualHeight, ' ', attrs);
 
             controller.WriteToWindow(this.buffer);
-            for (int y = 0; y < ActualHeight; y++) {
-                for (int x = 0; x < ActualWidth; x++) {
+            Size contentSize = controller.Window.Size;
+            for (int y = 0; y < contentSize.Height; y++) {
+                for (int x = 0; x < contentSize.Width; x++) {
                     buffer.SetPixel(x, y, this.buffer[y, x]);
                 }
+            }
+
+            if (verticalScrollbar.Visibility == Visibility.Visible
+                && horizontalScrollbar.Visibility == Visibility.Visible) {
+                buffer.SetPixel(buffer.Width - 1, buffer.Height - 1,
+                    UnicodeTable.SingleFrameBottomRightCorner,
+                    Colors.Blend(Color.DarkCyan, Color.DarkBlue));
             }
         }
 

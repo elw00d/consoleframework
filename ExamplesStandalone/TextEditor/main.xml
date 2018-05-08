@@ -1,8 +1,9 @@
 ﻿<Window MinHeight="10" MinWidth="25" >
-  <!--<Panel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">-->
-    <TextEditor VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                MaxHeight="30" MaxWidth="35">
+  <Panel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+    <TextEditor VerticalAlignment="Top" HorizontalAlignment="Left"
+                Height="10" Width="25">
       
     </TextEditor>
-  <!--</Panel>-->
+    <!--<ScrollBar Width="25" Height="1" Value="99"></ScrollBar>-->
+  </Panel>
 </Window>
