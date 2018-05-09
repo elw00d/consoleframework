@@ -31,9 +31,28 @@ namespace ConsoleFramework.Controls {
             }
         }
 
-        public int Value { get; set; } = 0;
+        private int value = 0;
+        public int Value {
+            get => value;
+            set {
+                if (value != this.value) {
+                    this.value = Math.Min(maxValue, value);
+                    Invalidate();
+                }
+            }
+        }
 
-        public int MaxValue { get; set; } = 100;
+        private int maxValue = 100;
+        public int MaxValue {
+            get => maxValue;
+            set {
+                if (value != maxValue) {
+                    maxValue = value;
+                    this.value = Math.Min(this.value, maxValue);
+                    Invalidate();
+                }
+            }
+        }
 
         public ScrollBar() {
             // Control doesn't work with another modes
@@ -43,7 +62,7 @@ namespace ConsoleFramework.Controls {
             HorizontalAlignment = HorizontalAlignment.Stretch;
             VerticalAlignment = VerticalAlignment.Stretch;
         }
-        
+
         public override void Render(RenderingBuffer buffer) {
             if (Orientation == Orientation.Horizontal) {
                 renderHorizontal(buffer);
