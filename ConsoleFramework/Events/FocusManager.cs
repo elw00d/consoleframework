@@ -264,6 +264,7 @@ namespace ConsoleFramework.Events
         private List<Control> getControlsInScope(Control scope)
         {
             List<Control> children;
+            List<Control> processed = new List<Control>();
             if ( scope.Focusable ) {
                 // Добавляем туда же и сам контрол, если он Focusable
                 // этот кейс может быть полезен, если у Focusable контрола, который является также и
@@ -302,8 +303,9 @@ namespace ConsoleFramework.Events
                 {
                     i++;
                 }
+                processed.Add(child);
             }
-            List<Control> focusableAndVisible = children.Where(
+            List<Control> focusableAndVisible = processed.Where(
                     c => c.Visibility == Visibility.Visible && c.Focusable
                 ).ToList();
             return focusableAndVisible;
