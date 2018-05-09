@@ -26,8 +26,23 @@ namespace ConsoleFramework.Controls {
     /// 3. Check the result state
     /// </summary>
     public class TextEditorController {
+        /// <summary>
+        /// Gap shown after scrolling to the very end of document
+        /// </summary>
         public const int LINES_BOTTOM_MAX_GAP = 4;
-        
+
+        /// <summary>
+        /// Gap shown after typing last character in line if there is no remaining space
+        /// (and when End key was pressed)
+        /// </summary>
+        public const int COLUMNS_RIGHT_MAX_GAP = 3;
+
+        /// <summary>
+        /// Gap to left char of line when returning to the line which was out of window
+        /// (if window moves from right to left)
+        /// </summary>
+        public const int COLUMNS_LEFT_GAP = 4;
+
         /// <summary>
         /// Logical cursor position (points to symbol in textItems, not to display coord)
         /// </summary>
@@ -98,8 +113,6 @@ namespace ConsoleFramework.Controls {
             /// (and therefore should be invalidated), false otherwise.
             /// </summary>
             bool Do(TextEditorController controller);
-
-            //void Undo();
         }
 
         static Point cursorPosToTextPos(Point cursorPos, Rect window) {
@@ -144,10 +157,10 @@ namespace ConsoleFramework.Controls {
 
             if (cursor.X >= oldWindow.Width) {
                 // Move window 3px right if nextChar is outside the window after add char
-                windowX = oldWindow.X + cursor.X - oldWindow.Width + 3;
+                windowX = oldWindow.X + cursor.X - oldWindow.Width + COLUMNS_RIGHT_MAX_GAP;
             } else if (cursor.X < 0) {
                 // Move window left if need (with 4px gap from left)
-                windowX = Math.Max(0, oldWindow.X + cursor.X - 4);
+                windowX = Math.Max(0, oldWindow.X + cursor.X - COLUMNS_LEFT_GAP);
             } else {
                 windowX = null;
             }
@@ -182,11 +195,43 @@ namespace ConsoleFramework.Controls {
             Right
         }
 
+        public class PageUpCmd : ICommand {
+            public bool Do(TextEditorController controller) {
+                Point oldTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
+
+                // Scroll window one page up
+                if (controller.Window.Y > 0) {
+                    int y = Math.Max(0, controller.Window.Y - controller.Window.Height);
+                    controller.Window = new Rect(new Point(controller.Window.X, y), controller.Window.Size);
+                }
+                
+                // Move cursor up too
+                Rect oldWindow = controller.Window;
+                Point textPos;
+                if (oldTextPos.Y == 0) {
+                    textPos = oldTextPos.X == 0 ? oldTextPos : new Point(0, 0);
+                } else {
+                    int lineIndex = Math.Max(0, oldTextPos.Y - oldWindow.Height);
+                    string line = controller.textHolder.Lines[lineIndex];
+                    int x;
+                    if (oldTextPos.Y - oldWindow.Height < 0) {
+                        x = 0;
+                    } else {
+                        x = Math.Min(controller.lastTextPosX, line.Length);
+                    }
+                    textPos = new Point(x, lineIndex);
+                }
+
+                // Actualize cursor
+                moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
+
+                return true;
+            }
+        }
+        
         public class PageDownCmd : ICommand {
             public bool Do(TextEditorController controller) {
-                Point oldCursorPos = controller.CursorPos;
-                
-                Point oldTextPos = cursorPosToTextPos(oldCursorPos, controller.Window);
+                Point oldTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
 
                 // Scroll window one page down
                 int maxWindowY = controller.textHolder.LinesCount + LINES_BOTTOM_MAX_GAP - controller.Window.Height;
@@ -206,17 +251,15 @@ namespace ConsoleFramework.Controls {
                         textPos = new Point(lastLine.Length, controller.textHolder.LinesCount - 1);
                     }
                 } else {
-                    int lineIndex = Math.Min(oldTextPos.Y + oldWindow.Height, controller.textHolder.LinesCount - 1);
-                    bool isLastLine = lineIndex == controller.textHolder.LinesCount - 1;
+                    int lineIndex = Math.Min(oldTextPos.Y + oldWindow.Height, controller.LinesCount - 1);
                     string line = controller.textHolder.Lines[lineIndex];
-                    int y = Math.Min(oldTextPos.Y + oldWindow.Height, controller.LinesCount - 1);
                     int x;
-                    if (isLastLine && oldTextPos.Y + oldWindow.Height > lineIndex) {
+                    if (oldTextPos.Y + oldWindow.Height > lineIndex) {
                         x = line.Length;
                     } else {
                         x = Math.Min(controller.lastTextPosX, line.Length);
                     }
-                    textPos = new Point(x, y);
+                    textPos = new Point(x, lineIndex);
                 }
 
                 // Actualize cursor
@@ -528,22 +571,18 @@ namespace ConsoleFramework.Controls {
             set {
                 if (value != controller.Text) {
                     controller.Text = value;
-                    invalidate(true);
+                    CursorPosition = controller.CursorPos;
+                    Invalidate();
                 }
             }
         }
 
         // TODO : Scrollbars always visible
 
-        private void invalidate(bool changeCursorPos = false) {
-            CursorPosition = controller.CursorPos;
-            Invalidate();
-        }
-
         private void applyCommand(TextEditorController.ICommand cmd) {
             var oldCursorPos = controller.CursorPos;
             if (cmd.Do(controller)) {
-                invalidate();
+                Invalidate();
             }
 
             if (oldCursorPos != controller.CursorPos) {
@@ -591,7 +630,8 @@ namespace ConsoleFramework.Controls {
             }
             if (controller.ColumnsCount >= finalSize.Width) {
                 horizontalScrollbar.Visibility = Visibility.Visible;
-                horizontalScrollbar.MaxValue = controller.ColumnsCount + 4 - controller.Window.Width; // TODO : const ?
+                horizontalScrollbar.MaxValue =
+                    controller.ColumnsCount + TextEditorController.COLUMNS_RIGHT_MAX_GAP - controller.Window.Width;
                 horizontalScrollbar.Value = controller.Window.Left;
                 horizontalScrollbar.Invalidate();
             } else {
@@ -671,32 +711,34 @@ namespace ConsoleFramework.Controls {
                 applyCommand(new TextEditorController.AppendStringCmd(new string(keyInfo.KeyChar, 1)));
             }
 
-            if (keyInfo.Key == ConsoleKey.Enter) {
-                applyCommand(new TextEditorController.AppendStringCmd(Environment.NewLine));
-            }
-
-            if (keyInfo.Key == ConsoleKey.UpArrow) {
-                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Up));
-            }
-            if (keyInfo.Key == ConsoleKey.DownArrow) {
-                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Down));
-            }
-            if (keyInfo.Key == ConsoleKey.LeftArrow) {
-                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Left));
-            }
-            if (keyInfo.Key == ConsoleKey.RightArrow) {
-                applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Right));
-            }
-
-            if (keyInfo.Key == ConsoleKey.Backspace) {
-                applyCommand(new TextEditorController.DeleteLeftSymbolCmd());
-            }
-            if (keyInfo.Key == ConsoleKey.Delete) {
-                applyCommand(new TextEditorController.DeleteRightSymbolCmd());
-            }
-
-            if (keyInfo.Key == ConsoleKey.PageDown) {
-                applyCommand(new TextEditorController.PageDownCmd());
+            switch (keyInfo.Key) {
+                case ConsoleKey.Enter:
+                    applyCommand(new TextEditorController.AppendStringCmd(Environment.NewLine));
+                    break;
+                case ConsoleKey.UpArrow:
+                    applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Up));
+                    break;
+                case ConsoleKey.DownArrow:
+                    applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Down));
+                    break;
+                case ConsoleKey.LeftArrow:
+                    applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Left));
+                    break;
+                case ConsoleKey.RightArrow:
+                    applyCommand(new TextEditorController.MoveCursorCmd(TextEditorController.Direction.Right));
+                    break;
+                case ConsoleKey.Backspace:
+                    applyCommand(new TextEditorController.DeleteLeftSymbolCmd());
+                    break;
+                case ConsoleKey.Delete:
+                    applyCommand(new TextEditorController.DeleteRightSymbolCmd());
+                    break;
+                case ConsoleKey.PageDown:
+                    applyCommand(new TextEditorController.PageDownCmd());
+                    break;
+                case ConsoleKey.PageUp:
+                    applyCommand(new TextEditorController.PageUpCmd());
+                    break;
             }
         }
     }

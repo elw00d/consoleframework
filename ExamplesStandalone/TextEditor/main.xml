@@ -1,9 +1,37 @@
 ﻿<Window MinHeight="10" MinWidth="25" >
   <Panel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
     <TextEditor VerticalAlignment="Top" HorizontalAlignment="Left"
-                Height="10" Width="25">
-      
-    </TextEditor>
+                Height="10" Width="25"
+>public delegate void ScrollBarValueChangedEventHandler(object sender, ScrollBarValueChanged args);
+
+// Auxiliary control only displaying the scroll bar.
+public class ScrollBar : Control {
+    public static RoutedEvent ScrollBarValueChangedEvent =
+        EventManager.RegisterRoutedEvent("ScrollBarValueChanged", RoutingStrategy.Bubble,
+            typeof(ScrollBarValueChangedEventHandler), typeof(ScrollBar));
+
+    private Orientation orientation = Orientation.Horizontal;
+    public Orientation Orientation {
+        get => orientation;
+        set {
+            if (orientation != value) {
+                orientation = value;
+                Invalidate();
+            }
+        }
+    }
+
+    private int value = 0;
+    public int Value {
+        get => value;
+        set {
+            if (value != this.value) {
+                this.value = Math.Min(maxValue, value);
+                Invalidate();
+            }
+        }
+    }
+}</TextEditor>
     <!--<ScrollBar Width="25" Height="1" Value="99"></ScrollBar>-->
   </Panel>
 </Window>
