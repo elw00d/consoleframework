@@ -8,14 +8,16 @@ using ConsoleFramework.Rendering;
 using Xaml;
 
 // TODO : Autoindent
-// TODO : PageUp/PageDown/Home/End
+// TODO : Ctrl+Home/Ctrl+End
 // TODO : Alt+Backspace deletes word
 // TODO : Shift+Delete deletes line
-// TODO : Scrollbars
+// TODO : Scrollbars full support
 // TODO : Ctrl+arrows
 // TODO : Selection
 // TODO : Selection copy/paste/cut/delete
 // TODO : Undo/Redo, commands autogrouping
+// TODO : Read only mode
+// TODO : Tabs (converting to spaces when loading?)
 namespace ConsoleFramework.Controls {
     /// <summary>
     /// Incapsulates text holder and all the data required to display the content
@@ -195,9 +197,62 @@ namespace ConsoleFramework.Controls {
             Right
         }
 
+        public class EndCommand : ICommand {
+            public bool Do(TextEditorController controller) {
+                Point oldCursorPos = controller.CursorPos;
+                Rect oldWindow = controller.Window;
+                Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+
+                string line = controller.textHolder.Lines[oldTextPos.Y];
+                Point textPos = new Point(line.Length, oldTextPos.Y);
+                
+                moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller);
+
+                return oldWindow != controller.Window || oldCursorPos != controller.CursorPos;
+            }
+        }
+        
+        public class HomeCommand : ICommand {
+            public bool Do(TextEditorController controller) {
+                Point oldCursorPos = controller.CursorPos;
+                Rect oldWindow = controller.Window;
+                Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
+
+                string line = controller.textHolder.Lines[oldTextPos.Y];
+                int homeIndex = homeOfLine(line);
+                int x;
+                if (oldTextPos.X == 0) {
+                    x = homeIndex;
+                } else {
+                    x = oldTextPos.X <= homeIndex ? 0 : homeIndex;
+                }
+                Point textPos = new Point(x, oldTextPos.Y);
+
+                moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller);
+
+                return oldWindow != controller.Window || oldCursorPos != controller.CursorPos;
+            }
+
+            /// <summary>
+            /// Returns index of first non-space symbol (or s.Length if there is no non-space symbols)
+            /// </summary>
+            private int homeOfLine(string s) {
+                for (int i = 0; i < s.Length; i++) {
+                    if (!char.IsWhiteSpace(s[i])) {
+                        return i;
+                    }
+                }
+                return s.Length;
+            }
+        }
+        
+        
+        
         public class PageUpCmd : ICommand {
             public bool Do(TextEditorController controller) {
-                Point oldTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
+                Point oldCursorPos = controller.CursorPos;
+                Rect oldWindow = controller.Window;
+                Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
 
                 // Scroll window one page up
                 if (controller.Window.Y > 0) {
@@ -206,15 +261,15 @@ namespace ConsoleFramework.Controls {
                 }
                 
                 // Move cursor up too
-                Rect oldWindow = controller.Window;
+                Rect window = controller.Window;
                 Point textPos;
                 if (oldTextPos.Y == 0) {
                     textPos = oldTextPos.X == 0 ? oldTextPos : new Point(0, 0);
                 } else {
-                    int lineIndex = Math.Max(0, oldTextPos.Y - oldWindow.Height);
+                    int lineIndex = Math.Max(0, oldTextPos.Y - window.Height);
                     string line = controller.textHolder.Lines[lineIndex];
                     int x;
-                    if (oldTextPos.Y - oldWindow.Height < 0) {
+                    if (oldTextPos.Y - window.Height < 0) {
                         x = 0;
                     } else {
                         x = Math.Min(controller.lastTextPosX, line.Length);
@@ -223,15 +278,17 @@ namespace ConsoleFramework.Controls {
                 }
 
                 // Actualize cursor
-                moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
+                moveWindowToCursor(textPosToCursorPos(textPos, window), controller, true);
 
-                return true;
+                return oldWindow != controller.Window || oldCursorPos != controller.CursorPos;
             }
         }
         
         public class PageDownCmd : ICommand {
             public bool Do(TextEditorController controller) {
-                Point oldTextPos = cursorPosToTextPos(controller.CursorPos, controller.Window);
+                Point oldCursorPos = controller.CursorPos;
+                Rect oldWindow = controller.Window;
+                Point oldTextPos = cursorPosToTextPos(oldCursorPos, oldWindow);
 
                 // Scroll window one page down
                 int maxWindowY = controller.textHolder.LinesCount + LINES_BOTTOM_MAX_GAP - controller.Window.Height;
@@ -241,7 +298,7 @@ namespace ConsoleFramework.Controls {
                 }
                 
                 // Move cursor down too
-                Rect oldWindow = controller.Window;
+                Rect window = controller.Window;
                 Point textPos;
                 if (oldTextPos.Y == controller.textHolder.LinesCount - 1) {
                     string lastLine = controller.textHolder.Lines[controller.textHolder.LinesCount - 1];
@@ -251,10 +308,10 @@ namespace ConsoleFramework.Controls {
                         textPos = new Point(lastLine.Length, controller.textHolder.LinesCount - 1);
                     }
                 } else {
-                    int lineIndex = Math.Min(oldTextPos.Y + oldWindow.Height, controller.LinesCount - 1);
+                    int lineIndex = Math.Min(oldTextPos.Y + window.Height, controller.LinesCount - 1);
                     string line = controller.textHolder.Lines[lineIndex];
                     int x;
-                    if (oldTextPos.Y + oldWindow.Height > lineIndex) {
+                    if (oldTextPos.Y + window.Height > lineIndex) {
                         x = line.Length;
                     } else {
                         x = Math.Min(controller.lastTextPosX, line.Length);
@@ -263,9 +320,9 @@ namespace ConsoleFramework.Controls {
                 }
 
                 // Actualize cursor
-                moveWindowToCursor(textPosToCursorPos(textPos, oldWindow), controller, true);
+                moveWindowToCursor(textPosToCursorPos(textPos, window), controller, true);
 
-                return true;
+                return oldWindow != controller.Window || oldCursorPos != controller.CursorPos;
             }
         }
 
@@ -738,6 +795,12 @@ namespace ConsoleFramework.Controls {
                     break;
                 case ConsoleKey.PageUp:
                     applyCommand(new TextEditorController.PageUpCmd());
+                    break;
+                case ConsoleKey.Home:
+                    applyCommand(new TextEditorController.HomeCommand());
+                    break;
+                case ConsoleKey.End:
+                    applyCommand(new TextEditorController.EndCommand());
                     break;
             }
         }
