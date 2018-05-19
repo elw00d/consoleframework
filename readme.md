@@ -18,6 +18,11 @@ Features
 
 ![](http://gyazo.com/81e1ae92cfba8c7a1c2a98da7da75ad7.png)
 
+Install from NuGet
+--
+
+NuGet package is available here [https://www.nuget.org/packages/Elwood.ConsoleFramework]
+
 Build from source
 --
 To build a library with examples you can use standard dotnet tool:
@@ -30,7 +35,7 @@ It should work in all platforms.
 
 Native dependencies
 --
-In Windows there are no native dependencies. But in Linux and Mac OS X environments you should prepare some native dependencies to be able to execute examples. Dependencies are:
+For Windows there are no native dependencies required. But in Linux and Mac OS X environments you should prepare some native dependencies to be able to execute examples. Dependencies are:
 
 - libtermkey
 - libc
@@ -104,3 +109,4 @@ License: MIT/X11
 [MacPorts]:http://www.macports.org/
 [ITerm2]:http://www.iterm2.com/#/section/home
 [http://elwood.su/2014/02/console-framework-on-mac/]:http://elwood.su/2014/02/console-framework-on-mac/
+[https://www.nuget.org/packages/Elwood.ConsoleFramework]:https://www.nuget.org/packages/Elwood.ConsoleFramework
