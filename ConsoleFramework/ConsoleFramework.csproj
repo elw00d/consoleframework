@@ -4,7 +4,7 @@
     <DefineConstants>$(DefineConstants);DOTNETCORE</DefineConstants>
     <DebugType>portable</DebugType>
     <AssemblyName>ConsoleFramework</AssemblyName>
-    <PackageId>ConsoleFramework</PackageId>
+    <PackageId>Elwood.ConsoleFramework</PackageId>
     <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
@@ -14,6 +14,11 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.0.3</Version>
+    <PackageProjectUrl>https://github.com/elw00d/consoleframework</PackageProjectUrl>
+    <PackageIconUrl>http://elw00d.github.io/consoleframework/favicon.png</PackageIconUrl>
+    <Authors />
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Binding\Binding.csproj" />
