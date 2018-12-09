@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ConsoleFramework.Core;
+using ConsoleFramework.Events;
 
 namespace ConsoleFramework.Controls
 {
@@ -22,11 +23,17 @@ namespace ConsoleFramework.Controls
             button.Margin = new Thickness(4, 0, 4, 0);
             button.HorizontalAlignment = HorizontalAlignment.Center;
             button.Caption = "OK";
+            button.OnClick+=CloseButtonOnClicked;
             panel.XChildren.Add( textBlock );
             panel.XChildren.Add( button );
             panel.HorizontalAlignment = HorizontalAlignment.Center;
             panel.VerticalAlignment = VerticalAlignment.Bottom;
             this.Content = panel;
+        }
+
+        protected virtual void CloseButtonOnClicked(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
 
         public string Text {
