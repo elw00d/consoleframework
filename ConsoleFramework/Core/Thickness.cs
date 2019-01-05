@@ -49,8 +49,8 @@ namespace ConsoleFramework.Core
             }
         }
 
-        public Thickness(int uniformLenght) {
-            left = top = right = bottom = uniformLenght;
+        public Thickness(int uniformLength) {
+            left = top = right = bottom = uniformLength;
         }
 
         public Thickness(int left, int top, int right, int bottom) {

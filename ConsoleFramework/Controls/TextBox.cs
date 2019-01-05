@@ -158,7 +158,7 @@ namespace ConsoleFramework.Controls {
             }
         }
 
-        public int MaxLenght {
+        public int MaxLength {
             get;
             set;
         }
