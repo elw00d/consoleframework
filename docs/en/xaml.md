@@ -74,7 +74,7 @@ Build-in type conversions are: strings to numbers, enumerations plus some build-
         <converters:StringToIntegerConverter x:Key="2" x:Id="str2int"></converters:StringToIntegerConverter>
     </Window.Resources>
     <Panel>
-        <TextBox MaxLenght="{Convert Converter={Ref str2int}, Value={Ref testStr}}"/>
+        <TextBox MaxLength="{Convert Converter={Ref str2int}, Value={Ref testStr}}"/>
     </Panel>
 </Window>
 ```
