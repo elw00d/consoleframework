@@ -233,32 +233,6 @@ namespace ConsoleFramework.Events
         }
 
         /// <summary>
-        /// Simple stable sorting implementation.
-        /// http://www.csharp411.com/c-stable-sort/
-        /// todo : remove after JSIL OrderBy linq will be implemented
-        /// </summary>
-        public static void InsertionSort<T>(IList<T> list, Comparison<T> comparison)
-        {
-            if (list == null)
-                throw new ArgumentNullException("list");
-            if (comparison == null)
-                throw new ArgumentNullException("comparison");
-
-            int count = list.Count;
-            for (int j = 1; j < count; j++)
-            {
-                T key = list[j];
-
-                int i = j - 1;
-                for (; i >= 0 && comparison(list[i], key) > 0; i--)
-                {
-                    list[i + 1] = list[i];
-                }
-                list[i + 1] = key;
-            }
-        }
-
-        /// <summary>
         /// returns visible and focusable childs of scope ordered by z-index
         /// </summary>
         private List<Control> getControlsInScope(Control scope)
@@ -285,14 +259,9 @@ namespace ConsoleFramework.Events
                 Control child = children[i];
                 List<Control> nested = new List< Control >(child.Children);
                 
-                // Using OrderBy instead List<T>.Sort() because the last one is unstable
+                // Using OrderBy instead of List<T>.Sort() because the last one is unstable
                 // and can reorder elements with equal keys
-
-                //nested = nested.OrderBy(control => control.TabOrder).ToList();
-                // todo : remove after JSIL OrderBy linq will be implemented
-                InsertionSort( nested, ( a, b ) => {
-                    return a.TabOrder.CompareTo( b.TabOrder );
-                } );
+                nested = nested.OrderBy(control => control.TabOrder).ToList();
                 
                 if (nested.Count > 0)
                 {

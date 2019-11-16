@@ -24,8 +24,8 @@ namespace ConsoleFramework.Controls
             button.HorizontalAlignment = HorizontalAlignment.Center;
             button.Caption = "OK";
             button.OnClick+=CloseButtonOnClicked;
-            panel.XChildren.Add( textBlock );
-            panel.XChildren.Add( button );
+            panel.Children.Add( textBlock );
+            panel.Children.Add( button );
             panel.HorizontalAlignment = HorizontalAlignment.Center;
             panel.VerticalAlignment = VerticalAlignment.Bottom;
             this.Content = panel;

@@ -22,12 +22,12 @@ namespace ConsoleFramework.Controls
 
         public RadioButton SelectedItem
         {
-            get { return selectedItemIndex.HasValue ? (RadioButton) Children[selectedItemIndex.Value] : null; }
+            get { return selectedItemIndex.HasValue ? (RadioButton) ((Control) this).Children[selectedItemIndex.Value] : null; }
         }
 
         public RadioGroup() {
-            XChildren.ControlAdded += onControlAdded;
-            XChildren.ControlRemoved -= onControlRemoved;
+            Children.ControlAdded += onControlAdded;
+            Children.ControlRemoved -= onControlRemoved;
         }
 
         private void onControlRemoved(Control control) {
@@ -40,18 +40,18 @@ namespace ConsoleFramework.Controls
             if (!(control is RadioButton)) return;
             var radioButton = (RadioButton) control;
             radioButton.OnClick += radioButton_OnClick;
-            int index = Children.IndexOf(radioButton);
+            int index = ((Control) this).Children.IndexOf(radioButton);
             radioButton.Checked = selectedItemIndex != null && (selectedItemIndex == index);
         }
 
         private void radioButton_OnClick(object sender, RoutedEventArgs args) {
-            foreach (var child in XChildren) {
+            foreach (var child in Children) {
                 if (child is RadioButton && child != sender) {
                     ((RadioButton) child).Checked = false;
                 }
             }
             ((RadioButton) sender).Checked = true;
-            int index = Children.IndexOf((Control) sender);
+            int index = ((Control) this).Children.IndexOf((Control) sender);
             SelectedItemIndex = index;
         }
     }

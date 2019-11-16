@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 2.1.4
+dotnet: 3.0.100
 install:
   - dotnet restore
 script:
@@ -9,5 +9,5 @@ script:
 matrix:
   include:
     - os: linux
-      dist: trusty
+      dist: bionic
     - os: osx

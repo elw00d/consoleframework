@@ -414,15 +414,12 @@ namespace ConsoleFramework.Controls
 
         public Control() {
             Children = children.AsReadOnly();
-            //MinWidth = 0;
+            MinWidth = 0;
             Focusable = false;
             IsFocusScope = false;
             Visibility = Visibility.Visible;
             AddHandler(GotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_GotKeyboardFocus));
             AddHandler(LostKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(Control_LostKeyboardFocus));
-            // todo : remove after issue https://github.com/sq/JSIL/issues/388 will be fixed
-            this.Width = null;
-            this.Height = null;
         }
         
         /// <summary>
@@ -1017,36 +1014,33 @@ namespace ConsoleFramework.Controls
         /// <param name="dest">Контрол, относительно которого необходимо вычислить координаты точки.</param>
         /// <returns></returns>
         public static Point TranslatePoint(Control source, Point point, Control dest) {
-            // todo : remove unnecessary copying after fixing
-            // https://github.com/sq/JSIL/issues/395
-            Point pointCopy = point;
             if (source == null || dest == null) {
                 if (source == null && dest != null) {
                     // translating raw point (absolute coords) into relative to dest control point
                     Control currentControl = dest;
                     for (;;) {
                         Vector actualOffset = currentControl.ActualOffset;
-                        pointCopy.Offset(-actualOffset.X, -actualOffset.y);
+                        point.Offset(-actualOffset.X, -actualOffset.y);
                         if (currentControl.Parent == null) {
                             break;
                         }
                         currentControl = currentControl.Parent;
                     }
-                    return pointCopy;
+                    return point;
                 } else if (source != null && dest == null) {
                     // translating point relative to source into absolute coords
                     Control currentControl = source;
                     for (;;) {
                         Vector actualOffset = currentControl.ActualOffset;
-                        pointCopy.Offset(actualOffset.X, actualOffset.y);
+                        point.Offset(actualOffset.X, actualOffset.y);
                         if (currentControl.Parent == null)
                             break;
                         currentControl = currentControl.Parent;
                     }
-                    return pointCopy;
+                    return point;
                 } else {
                     // both source and dest are null - we shouldn't to do anything
-                    return pointCopy;
+                    return point;
                 }
             } else {
                 // find common ancestor
@@ -1055,17 +1049,17 @@ namespace ConsoleFramework.Controls
                 Control currentControl = source;
                 while (currentControl != ancestor) {
                     Vector actualOffset = currentControl.ActualOffset;
-                    pointCopy.Offset(actualOffset.X, actualOffset.y);
+                    point.Offset(actualOffset.X, actualOffset.y);
                     currentControl = currentControl.Parent;
                 }
                 // traverse back from dest to common ancestor
                 currentControl = dest;
                 while (currentControl != ancestor) {
                     Vector actualOffset = currentControl.ActualOffset;
-                    pointCopy.Offset(-actualOffset.X, -actualOffset.y);
+                    point.Offset(-actualOffset.X, -actualOffset.y);
                     currentControl = currentControl.Parent;
                 }
-                return pointCopy;
+                return point;
             }
         }
 
