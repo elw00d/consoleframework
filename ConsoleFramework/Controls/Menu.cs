@@ -317,7 +317,7 @@ namespace ConsoleFramework.Controls
             /// It is necessary before reuse MenuItems in another Popup instance.
             /// </summary>
             public void DisconnectMenuItems( ) {
-                panel.XChildren.Clear();
+                panel.Children.Clear();
             }
 
             /// <summary>
@@ -334,7 +334,7 @@ namespace ConsoleFramework.Controls
                 panel = new Panel();
                 panel.Orientation = Orientation.Vertical;
                 foreach (MenuItemBase item in menuItems) {
-                    panel.XChildren.Add( item );
+                    panel.Children.Add( item );
                 }
                 Content = panel;
                 
@@ -668,13 +668,13 @@ namespace ConsoleFramework.Controls
                                 throw new InvalidOperationException("Separator cannot be added to root menu.");
                             if (((MenuItem)item).Type == MenuItemType.Submenu)
                                 ((MenuItem) item).Type = MenuItemType.RootSubmenu;
-                            stackPanel.XChildren.Insert( args.Index + i, item );
+                            stackPanel.Children.Insert( args.Index + i, item );
                         }
                         break;
                     }
                     case ListChangedEventType.ItemsRemoved:
                         for (int i = 0; i < args.Count; i++)
-                            stackPanel.XChildren.RemoveAt(args.Index);
+                            stackPanel.Children.RemoveAt(args.Index);
                         break;
                     case ListChangedEventType.ItemReplaced: {
                         MenuItemBase item = items[ args.Index ];
@@ -682,7 +682,7 @@ namespace ConsoleFramework.Controls
                             throw new InvalidOperationException("Separator cannot be added to root menu.");
                         if (((MenuItem)item).Type == MenuItemType.Submenu)
                             ((MenuItem)item).Type = MenuItemType.RootSubmenu;
-                        stackPanel.XChildren[args.Index] = item;
+                        stackPanel.Children[args.Index] = item;
                         break;
                     }
                 }
