@@ -220,11 +220,6 @@ namespace Xaml
         /// </summary>
         private readonly List< FixupToken > fixupTokens = new List< FixupToken >();
 
-    public static XmlReader ReaderFromString (string xml) {
-        var ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        return XmlReader.Create(ms);
-    }
-
         /// <summary>
         /// Creates the object graph using provided xaml.
         /// </summary>
@@ -234,7 +229,7 @@ namespace Xaml
         private object createFromXaml( string xaml, object dataContext ) {
             this.dataContext = dataContext;
             
-            using ( XmlReader xmlReader = ReaderFromString( xaml ) ) {
+            using (XmlReader xmlReader = XmlReader.Create(new StringReader(xaml))) {
                 while ( xmlReader.Read( ) ) {
                     if ( xmlReader.NodeType == XmlNodeType.Element ) {
                         String name = xmlReader.Name;
@@ -329,9 +324,7 @@ namespace Xaml
             Type type = aliases.ContainsKey(name) ? aliases[ name ] : resolveType( name );
 
             ConstructorInfo constructorInfo = type.GetConstructor(new Type[0]);
-            // todo : uncomment after JSIL will impelement ConstructorInfo.operator==
-            //if (null == constructorInfo) {
-            if (null == ((object) constructorInfo)) {
+            if (null == constructorInfo) {
                 throw new Exception(
                     String.Format("Type {0} has no default constructor.", type.FullName));
             }
@@ -358,9 +351,7 @@ namespace Xaml
             } else {
                 // Process attribute as property assignment
                 PropertyInfo propertyInfo = Top.type.GetProperty( attributeName );
-                // todo : uncomment after JSIL will implement PropertyInfo.operator==
-                //if ( null == propertyInfo ) {
-                if (object.ReferenceEquals(null, propertyInfo)) {
+                if (null == propertyInfo) {
                     throw new InvalidOperationException(string.Format("Property {0} not found.", attributeName));
                 }
                 Object value = processText( attributeValue, attributeName, Top.obj,
@@ -369,8 +360,7 @@ namespace Xaml
                     object convertedValue = ConvertValueIfNeed( value.GetType( ),
                                                                 propertyInfo.PropertyType,
                                                                 value );
-                    //propertyInfo.SetValue( Top.obj, convertedValue, null );
-                    propertyInfo.GetSetMethod().Invoke(Top.obj, new [] {convertedValue});
+                    propertyInfo.SetValue( Top.obj, convertedValue, null );
                 }
             }
         }
@@ -402,8 +392,7 @@ namespace Xaml
                 if ( value != null ) {
                     Object convertedValue = ConvertValueIfNeed( value.GetType( ),
                                                                 property.PropertyType, value );
-                    //property.SetValue( Top.obj, convertedValue, null );
-                    property.GetSetMethod().Invoke(Top.obj, new []{convertedValue});
+                    property.SetValue( Top.obj, convertedValue, null );
                 }
                 if ( Top.currentProperty != null ) {
                     Top.currentProperty = null;
@@ -453,16 +442,14 @@ namespace Xaml
                                         : null;
                     if ( null != typeArg1 &&
                             typeof ( ICollection< > ).MakeGenericType( typeArg1 ).IsAssignableFrom( property.PropertyType ) ) {
-                        //object collection = property.GetValue( Top.obj, null );
-                        object collection = property.GetGetMethod().Invoke(Top.obj, new object[]{});
+                        object collection = property.GetValue( Top.obj, null );
                         MethodInfo methodInfo = collection.GetType( ).GetMethod( "Add" );
                         object converted = ConvertValueIfNeed( initialized.obj.GetType( ), typeArg1, initialized.obj );
                         methodInfo.Invoke( collection, new[ ] { converted } );
                     } else {
                         // If parent object property is IList add current object into them without conversion
                         if (typeof (IList).IsAssignableFrom(property.PropertyType)) {
-                            //IList list = (IList) property.GetValue(Top.obj, null);
-                            IList list = (IList)property.GetGetMethod().Invoke(Top.obj, new object[] { });
+                            IList list = (IList) property.GetValue(Top.obj, null);
                             list.Add(initialized.obj);
                         } else {
                             // If parent object property is IDictionary<string, T>,
@@ -476,8 +463,7 @@ namespace Xaml
                                     && null != typeArg2 &&
                                     typeof ( IDictionary< , > ).MakeGenericType( typeArg1, typeArg2 )
                                                             .IsAssignableFrom( property.PropertyType ) ) {
-                                //object dictionary = property.GetValue( Top.obj, null );
-                                object dictionary = property.GetGetMethod().Invoke(Top.obj, new object[] {});
+                                object dictionary = property.GetValue( Top.obj, null );
                                 MethodInfo methodInfo = dictionary.GetType( ).GetMethod( "Add" );
                                 object converted = ConvertValueIfNeed( initialized.obj.GetType( ),
                                                                         typeArg2, initialized.obj );
@@ -487,13 +473,9 @@ namespace Xaml
                                 methodInfo.Invoke( dictionary, new[ ] { initialized.key, converted } );
                             } else {
                                 // Handle as property - call setter with conversion if need
-                                // todo : uncomment after fixing https://github.com/sq/JSIL/issues/558
-//                                property.SetValue( Top.obj, ConvertValueIfNeed(
-//                                    initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
-//                                                    null );
-                                property.GetSetMethod().Invoke(Top.obj, new [] { ConvertValueIfNeed(
-                                        initialized.obj.GetType(), property.PropertyType, initialized.obj)
-                                });
+                                property.SetValue( Top.obj, ConvertValueIfNeed(
+                                    initialized.obj.GetType( ), property.PropertyType, initialized.obj ),
+                                                    null );
                             }
                         }
                     }
@@ -532,8 +514,7 @@ namespace Xaml
                             object convertedValue = ConvertValueIfNeed(providedValue.GetType(),
                                                                         propertyInfo.PropertyType,
                                                                         providedValue);
-                            //propertyInfo.SetValue(token.Object, convertedValue, null);
-                            propertyInfo.GetSetMethod().Invoke(token.Object, new []{convertedValue});
+                            propertyInfo.SetValue(token.Object, convertedValue, null);
                         }
                     }
                 } else {
@@ -578,10 +559,7 @@ namespace Xaml
             }
 
             // Process TypeConverterAttribute attributes if exist
-            // todo : uncomment after fixing https://github.com/sq/JSIL/issues/559
-            //if ( Type.GetTypeCode( source ) == TypeCode.Object ) {
-            //if (!source.IsPrimitive && source != typeof(String)) {
-            {
+            if ( Type.GetTypeCode( source ) == TypeCode.Object ) {
 				object[ ] attributes = source.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
                     throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
@@ -599,10 +577,7 @@ namespace Xaml
                 }
             }
 
-            // todo : uncomment after fixing https://github.com/sq/JSIL/issues/559
-            //if ( Type.GetTypeCode( dest ) == TypeCode.Object ) {
-            //if (!dest.IsPrimitive && dest != typeof(String)) {
-            {
+            if ( Type.GetTypeCode( dest ) == TypeCode.Object ) {
 				object[ ] attributes = dest.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
                     throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");

@@ -203,17 +203,8 @@ namespace ConsoleFramework
 
 		private static readonly bool usingLinux;
 		private static readonly bool isDarwin;
-        private static readonly bool usingJsil;
-
-        public static bool IsRunningOnJsil() {
-            return Type.GetType("JSIL.Pointer") != null;
-        }
 
         static ConsoleApplication() {
-            if (IsRunningOnJsil()) {
-                usingJsil = true;
-                return;
-            }
 #if DOTNETCORE
 	        usingLinux = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 	        isDarwin = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
@@ -247,10 +238,8 @@ namespace ConsoleFramework
             eventManager = new EventManager();
             focusManager = new FocusManager(eventManager);
 
-            if (!usingJsil) {
-                exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-                invokeWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
-            }
+            exitWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
+            invokeWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
         }
 
         private static volatile ConsoleApplication instance;

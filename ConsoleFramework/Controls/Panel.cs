@@ -19,7 +19,7 @@ namespace ConsoleFramework.Controls
     /// Может быть самым первым контролом программы (окно не может, к примеру, оно может существовать
     /// только в рамках хоста окон).
     /// </summary>
-    [ContentProperty("XChildren")]
+    [ContentProperty("Children")]
     public class Panel : Control {
         public Panel() {
             children = new UIElementCollection(this);

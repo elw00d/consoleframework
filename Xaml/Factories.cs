@@ -58,32 +58,6 @@ namespace Xaml
             public Object obj;
         }
 
-        /// <summary>
-        /// Simple stable sorting implementation.
-        /// http://www.csharp411.com/c-stable-sort/
-        /// todo : remove after JSIL OrderBy linq will be implemented
-        /// </summary>
-        public static void InsertionSort<T>(IList<T> list, Comparison<T> comparison)
-        {
-            if (list == null)
-                throw new ArgumentNullException("list");
-            if (comparison == null)
-                throw new ArgumentNullException("comparison");
-
-            int count = list.Count;
-            for (int j = 1; j < count; j++)
-            {
-                T key = list[j];
-
-                int i = j - 1;
-                for (; i >= 0 && comparison(list[i], key) > 0; i--)
-                {
-                    list[i + 1] = list[i];
-                }
-                list[i + 1] = key;
-            }
-        }
-
         public object GetObject( ) {
             if (string.IsNullOrEmpty( TypeName ))
                 throw new InvalidOperationException("TypeName is not specified.");
@@ -109,11 +83,7 @@ namespace Xaml
 
             // Using OrderBy instead List<T>.Sort() because the last one is unstable
             // and can reorder elements with equal keys
-            //ctorArgs = ctorArgs.OrderBy(arg => arg.index).ToList();
-            // todo : remove after JSIL OrderBy linq will be implemented
-            InsertionSort(ctorArgs, (a, b) => {
-                return a.index.CompareTo(b.index);
-            });
+            ctorArgs = ctorArgs.OrderBy(arg => arg.index).ToList();
 
             ConstructorInfo[ ] constructors = type.GetConstructors( );
             ConstructorInfo ctorInfo = constructors.Single( ctor => ctor.GetParameters( ).Length == ctorArgs.Count );
