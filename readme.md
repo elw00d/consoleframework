@@ -35,6 +35,37 @@ dotnet build
 
 It should work in all platforms.
 
+Running examples
+--
+In Windows
+
+```sh
+dotnet run --project ExamplesStandalone/ManyControls
+```
+
+In Linux
+
+```sh
+# Copy native dependencies before run
+mkdir -p ExamplesStandalone/ManyControls/bin/Debug/netcoreapp3.0/
+unzip native/libtermkey-0.18-x86_64.zip -d ExamplesStandalone/ManyControls/bin/Debug/netcoreapp3.0/
+
+# Build and run project
+dotnet run --project ExamplesStandalone/ManyControls
+```
+
+Press Ctrl+D to exit application.
+
+Running unit tests
+--
+```sh
+dotnet test Tests
+```
+
+Development
+--
+There were two IDEs where I've worked with .NET Core project: Visual Studio 2017 Community and JetBrains Rider. Both of them works well with this source code.
+
 Native dependencies
 --
 For Windows there are no native dependencies required. But in Linux and Mac OS X environments you should prepare some native dependencies to be able to execute examples. Dependencies are:
@@ -58,39 +89,6 @@ brew install --universal libtermkey
 ```
 
 Console Framework expects that libraries will be available strictly by these names on Linux. If your system already has symlinks *libc.so.6* and *libncursesw.so.5*, you can skip this step.
-
-Running examples
---
-In Windows
-
-```sh
-dotnet run --project StandaloneExamples/ManyControls
-```
-
-In Linux
-
-```sh
-cd StandaloneExamples/ManyControls
-dotnet build
-
-# Copy native dependencies
-unzip ../../native/libtermkey-0.18-x86_64.zip -d bin/Debug/netcoreapp2.0/
-
-cd bin/Debug/netcoreapp2.0/
-dotnet ManyControls.dll
-```
-
-Press Ctrl+D to exit application.
-
-Running unit tests
---
-```sh
-dotnet test Tests
-```
-
-Development
---
-There were two IDEs where I've worked with .NET Core project: Visual Studio 2017 Community and JetBrains Rider. Both of them works well with this source code.
 
 Mono support
 --
