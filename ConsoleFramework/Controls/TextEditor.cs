@@ -85,15 +85,39 @@ namespace ConsoleFramework.Controls {
             textHolder.WriteToWindow(Window.Left, Window.Top, Window.Width, Window.Height, buffer);
         }
 
+        // TODO : property
+        private string newLine;
+
         public string Text {
             get => textHolder.Text;
             set {
                 if (textHolder.Text != value) {
-                    textHolder.Text = value;
+                    string newLineToUse;
+                    if (newLine == null) {
+                        // Auto-detect newline format
+                        newLineToUse = detectNewLine(value);
+                    } else {
+                        newLineToUse = newLine;
+                    }
+                    textHolder = new TextHolder(value, newLineToUse);
                     CursorPos = new Point();
                     Window = new Rect(new Point(), Window.Size);
                 }
             }
+        }
+
+        /// <summary>
+        /// Since XamlReader passes \n-delimited lines in all platforms
+        /// (without looking what really is in CDATA, for example), we should provide
+        /// auto-detection feature according to the principle of least astonishment.
+        /// Then, one xaml-file can be used in different platforms without changes.
+        /// </summary>
+        private string detectNewLine(string text) {
+            if (text.Contains("\r\n")) {
+                return "\r\n";
+            }
+
+            return "\n";
         }
 
         public int LinesCount => textHolder.LinesCount;
@@ -500,17 +524,23 @@ namespace ConsoleFramework.Controls {
     public class TextHolder {
         // TODO : change to more appropriate data structure
         private List<string> lines;
+        private readonly string newLine = Environment.NewLine;
+
+        public TextHolder(string text, string newLine) {
+            this.newLine = newLine;
+            setText(text);
+        }
 
         public TextHolder(string text) {
             setText(text);
         }
 
         private void setText(string text) {
-            lines = new List<string>(text.Split(new[] {Environment.NewLine}, StringSplitOptions.None));
+            lines = new List<string>(text.Split(new[] { newLine }, StringSplitOptions.None));
         }
 
         public string Text {
-            get => string.Join(Environment.NewLine, lines);
+            get => string.Join(newLine, lines);
             set => setText(value);
         }
 
