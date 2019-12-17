@@ -15,6 +15,7 @@ namespace ConsoleFramework.Controls
     {
         public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
+        public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(CancelEventHandler), typeof(Window));
         public static RoutedEvent ClosedEvent = EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
 
         public string ChildToFocus
@@ -246,14 +247,24 @@ namespace ConsoleFramework.Controls
         }
 
         public void Close( ) {
-            getWindowsHost(  ).CloseWindow( this );
+            this.handleClose();
+        }
+
+        protected void handleClose() {
+            CancelEventArgs args = new CancelEventArgs(this, ClosingEvent);
+            this.RaiseEvent(ClosingEvent, args);
+
+            if (args.Cancel)
+                return;
+
+            getWindowsHost().CloseWindow(this);
         }
 
         public void Window_OnMouseUp(object sender, MouseButtonEventArgs args) {
             if (closing) {
                 Point point = args.GetPosition(this);
                 if (point.x == 3 && point.y == 0) {
-                    getWindowsHost().CloseWindow(this);
+                    this.handleClose();
                 }
                 closing = false;
                 showClosingGlyph = false;
