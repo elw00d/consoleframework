@@ -136,6 +136,7 @@ namespace Examples
                                               {
                                                   Name = "WindowsHost"
                                               };
+
                 Window window1 = new Window {
                     X = 5,
                     Y = 4,
@@ -147,6 +148,7 @@ namespace Examples
                     Title = "Window1",
                     Content = panel
                 };
+
                 GroupBox groupBox = new GroupBox(  );
                 groupBox.Title = "Группа";
                 ScrollViewer scrollViewer = new ScrollViewer(  );
@@ -195,10 +197,40 @@ namespace Examples
                 //application.TerminalSizeChanged += ( sender, eventArgs ) => {
                 //    application.CanvasSize = new Size(eventArgs.Width, eventArgs.Height);
                 //   application.RootElementRect = new Rect(new Size(eventArgs.Width, eventArgs.Height));
-               // };
-				//windowsHost.Width = 80;
-				//windowsHost.Height = 20;
-				application.Run(windowsHost);//, new Size(80, 30), Rect.Empty);
+                // };
+                //windowsHost.Width = 80;
+                //windowsHost.Height = 20;
+
+                Window persistentWIndow = new Window
+                {
+                    X = 10,
+                    Y = 10,
+                    Title = "Persistent Window",
+                    Height = 14,
+                    Width = 50,
+                    Content = new Panel
+                    {
+                        Children =
+                        {
+                            new Button
+                            {
+                                Caption = "OK",
+                                Width = 30,
+                                Height = 8,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Center
+                            }
+                        }
+                    }
+                };
+
+                persistentWIndow.Closing += (sender, e) => {
+                    e.Handled = true;
+                };
+
+                windowsHost.Show(persistentWIndow);
+
+                application.Run(windowsHost);//, new Size(80, 30), Rect.Empty);
             }
         }
     }

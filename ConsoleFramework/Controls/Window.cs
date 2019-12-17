@@ -15,8 +15,8 @@ namespace ConsoleFramework.Controls
     {
         public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
-        public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(CancelEventHandler), typeof(Window));
         public static RoutedEvent ClosedEvent = EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
+        public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(Window));
 
         public string ChildToFocus
         {
@@ -247,14 +247,16 @@ namespace ConsoleFramework.Controls
         }
 
         public void Close( ) {
-            this.handleClose();
+            this.handleClosing();
         }
 
-        protected void handleClose() {
-            CancelEventArgs args = new CancelEventArgs(this, ClosingEvent);
-            this.RaiseEvent(ClosingEvent, args);
+        protected void handleClosing() {
+            var args = new RoutedEventArgs(this, ClosingEvent);
+            
+            ConsoleApplication.Instance.EventManager
+                .ProcessRoutedEvent(ClosingEvent, args);
 
-            if (args.Cancel)
+            if (args.Handled)
                 return;
 
             getWindowsHost().CloseWindow(this);
@@ -264,7 +266,7 @@ namespace ConsoleFramework.Controls
             if (closing) {
                 Point point = args.GetPosition(this);
                 if (point.x == 3 && point.y == 0) {
-                    this.handleClose();
+                    this.handleClosing();
                 }
                 closing = false;
                 showClosingGlyph = false;
@@ -332,6 +334,16 @@ namespace ConsoleFramework.Controls
                     Invalidate();
                 args.Handled = true;
             }
+        }
+
+        public event RoutedEventHandler Closing {
+            add => AddHandler(ClosingEvent, value);
+            remove => RemoveHandler(ClosingEvent, value);
+        }
+
+        public event EventHandler Closed {
+            add => AddHandler(ClosedEvent, value);
+            remove => RemoveHandler(ClosedEvent, value);
         }
     }
 }
