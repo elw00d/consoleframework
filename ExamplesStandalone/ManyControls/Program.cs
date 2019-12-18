@@ -201,7 +201,7 @@ namespace Examples
                 //windowsHost.Width = 80;
                 //windowsHost.Height = 20;
 
-                Window persistentWIndow = new Window
+                Window persistentWindow = new Window
                 {
                     X = 10,
                     Y = 10,
@@ -224,11 +224,11 @@ namespace Examples
                     }
                 };
 
-                persistentWIndow.Closing += (sender, e) => {
-                    e.Handled = true;
+                persistentWindow.Closing += (sender, e) => {
+                    e.Cancel = true;
                 };
 
-                windowsHost.Show(persistentWIndow);
+                windowsHost.Show(persistentWindow);
 
                 application.Run(windowsHost);//, new Size(80, 30), Rect.Empty);
             }

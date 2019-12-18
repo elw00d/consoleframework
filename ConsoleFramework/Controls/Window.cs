@@ -16,7 +16,7 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent ClosedEvent = EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
-        public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(Window));
+        public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(CancelEventHandler), typeof(Window));
 
         public string ChildToFocus
         {
@@ -251,12 +251,12 @@ namespace ConsoleFramework.Controls
         }
 
         protected void handleClosing() {
-            var args = new RoutedEventArgs(this, ClosingEvent);
+            var args = new CancelEventArgs(this, ClosingEvent);
             
             ConsoleApplication.Instance.EventManager
                 .ProcessRoutedEvent(ClosingEvent, args);
 
-            if (args.Handled)
+            if (args.Cancel)
                 return;
 
             getWindowsHost().CloseWindow(this);
@@ -336,7 +336,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public event RoutedEventHandler Closing {
+        public event CancelEventHandler Closing {
             add => AddHandler(ClosingEvent, value);
             remove => RemoveHandler(ClosingEvent, value);
         }
