@@ -201,19 +201,15 @@ namespace Examples
                 //windowsHost.Width = 80;
                 //windowsHost.Height = 20;
 
-                Window persistentWindow = new Window
-                {
+                Window persistentWindow = new Window {
                     X = 10,
                     Y = 10,
                     Title = "Persistent Window",
                     Height = 14,
                     Width = 50,
-                    Content = new Panel
-                    {
-                        Children =
-                        {
-                            new Button
-                            {
+                    Content = new Panel {
+                        Children = {
+                            new Button {
                                 Caption = "OK",
                                 Width = 30,
                                 Height = 8,
@@ -230,7 +226,7 @@ namespace Examples
 
                 windowsHost.Show(persistentWindow);
 
-                application.Run(windowsHost);//, new Size(80, 30), Rect.Empty);
+                application.Run(windowsHost);
             }
         }
     }

@@ -18,8 +18,7 @@ namespace ConsoleFramework.Controls
         public static RoutedEvent ClosedEvent = EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent ClosingEvent = EventManager.RegisterRoutedEvent("Closing", RoutingStrategy.Direct, typeof(CancelEventHandler), typeof(Window));
 
-        public string ChildToFocus
-        {
+        public string ChildToFocus {
             get; set;
         }
 
@@ -84,8 +83,7 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        protected WindowsHost getWindowsHost()
-        {
+        protected WindowsHost getWindowsHost() {
             return (WindowsHost) Parent;
         }
 
@@ -247,26 +245,24 @@ namespace ConsoleFramework.Controls
         }
 
         public void Close( ) {
-            this.handleClosing();
+            this.HandleClosing();
         }
 
-        protected void handleClosing() {
+        protected void HandleClosing() {
             var args = new CancelEventArgs(this, ClosingEvent);
             
-            ConsoleApplication.Instance.EventManager
-                .ProcessRoutedEvent(ClosingEvent, args);
+            ConsoleApplication.Instance.EventManager.ProcessRoutedEvent(ClosingEvent, args);
 
-            if (args.Cancel)
-                return;
-
-            getWindowsHost().CloseWindow(this);
+            if (!args.Cancel) {
+                getWindowsHost().CloseWindow(this);
+            }
         }
 
         public void Window_OnMouseUp(object sender, MouseButtonEventArgs args) {
             if (closing) {
                 Point point = args.GetPosition(this);
                 if (point.x == 3 && point.y == 0) {
-                    this.handleClosing();
+                    this.HandleClosing();
                 }
                 closing = false;
                 showClosingGlyph = false;

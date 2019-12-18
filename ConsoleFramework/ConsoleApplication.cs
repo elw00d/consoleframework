@@ -486,7 +486,7 @@ namespace ConsoleFramework
 			        };
 			        Thread signal_thread = new Thread (delegate () {
 				        while (true) {
-					         Wait for a signal to be delivered
+					        // Wait for a signal to be delivered
 					        int index = UnixSignal.WaitAny (signals, -1);
 					        Signum signal = signals [index].Signum;
 					        Libc.writeInt64 (pipeFds[1], 2);
