@@ -586,7 +586,7 @@ namespace ConsoleFramework.Controls
 
         /// <summary>
         /// Get the sum of a and b, but
-        /// traits int.MaxValue as PositiveInf, and int.MinValue as NegativeInf
+        /// treats int.MaxValue as PositiveInf, and int.MinValue as NegativeInf
         /// 
         /// int.MaxValue + const = int.MaxValue
         /// int.MinValue + const = int.MinValue
@@ -609,7 +609,7 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// Gets the -v but traits int.MaxValue as PositiveInf and int.MinValue as NegativeInf respectively.
+        /// Gets the -v but treats int.MaxValue as PositiveInf and int.MinValue as NegativeInf respectively.
         /// Throws exception if v == -int.MinValue (doesn't return int.MaxValue in this case)
         /// </summary>
         /// <param name="v"></param>
