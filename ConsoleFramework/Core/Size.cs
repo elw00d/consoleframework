@@ -33,64 +33,47 @@ namespace ConsoleFramework.Core {
         }
 
         public override int GetHashCode() {
-            if (this.IsEmpty) {
+            if (IsEmpty) {
                 return 0;
             }
-            return (this.Width.GetHashCode() ^ this.Height.GetHashCode());
+            return Width.GetHashCode() ^ Height.GetHashCode();
         }
 
         public Size(int width, int height) {
-            if ((width < 0) || (height < 0)) {
-                throw new ArgumentException("Size_WidthAndHeightCannotBeNegative");
+            if (width < 0 || height < 0) {
+                throw new ArgumentException("Width and height cannot be negative");
             }
             this.width = width;
             this.height = height;
         }
 
-        private static readonly Size max_size  = new Size(int.MaxValue, int.MaxValue);
-        public static Size MaxSize {
-            get {
-                return max_size;
-            }
-        }
+        public static Size MaxSize { get; } = new Size(int.MaxValue, int.MaxValue);
 
-        public static Size Empty {
-            get {
-                return CreateEmptySize(  );
-            }
-        }
+        public static Size Empty => CreateEmptySize();
 
-        public bool IsEmpty {
-            get {
-                return (this.width <= 0);
-            }
-        }
+        public bool IsEmpty => width <= 0;
 
         public int Width {
-            get {
-                return this.width;
-            }
+            get => width;
             set {
                 //if (this.IsEmpty) {
                 //    throw new InvalidOperationException("Size_CannotModifyEmptySize");
                 //}
                 if (value < 0) {
-                    throw new ArgumentException("Size_WidthCannotBeNegative");
+                    throw new ArgumentException("Width cannot be negative");
                 }
-                this.width = value;
+                width = value;
             }
         }
 
         public int Height {
-            get {
-                return this.height;
-            }
+            get => this.height;
             set {
                 //if (this.IsEmpty) {
                 //    throw new InvalidOperationException("Size_CannotModifyEmptySize");
                 //}
                 if (value < 0) {
-                    throw new ArgumentException("Size_HeightCannotBeNegative");
+                    throw new ArgumentException("Height cannot be negative");
                 }
                 this.height = value;
             }
@@ -105,15 +88,14 @@ namespace ConsoleFramework.Core {
         }
 
         private static Size CreateEmptySize() {
-            Size size = new Size {
+            return new Size {
                 width = 0,
                 height = 0
             };
-            return size;
         }
 
         public override string ToString() {
-            return string.Format("Size: {0};{1}", Width, Height);
+            return $"Size: {Width};{Height}";
         }
     }
 }

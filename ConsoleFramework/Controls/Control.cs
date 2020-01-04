@@ -584,8 +584,57 @@ namespace ConsoleFramework.Controls
             internal readonly int maxHeight;
         }
 
+        /// <summary>
+        /// Get the sum of a and b, but
+        /// traits int.MaxValue as PositiveInf, and int.MinValue as NegativeInf
+        /// 
+        /// int.MaxValue + const = int.MaxValue
+        /// int.MinValue + const = int.MinValue
+        /// int.MaxValue + int.MaxValue = int.MaxValue
+        /// int.MaxValue + int.MinValue = Exception
+        /// </summary>
+        public static int SumWithInf(int a, int b) {
+            if (a == int.MaxValue || a == int.MinValue) {
+                assert(b != MinusWithInf(a));
+                return a;
+            }
+            if (b == int.MaxValue || b == int.MinValue) {
+                assert(a != MinusWithInf(b));
+                return a;
+            }
+            int result = a + b;
+            // Check case when sum transforms into one of the "special" values
+            assert(result != int.MinValue && result != int.MaxValue);
+            return result;
+        }
+
+        /// <summary>
+        /// Gets the -v but traits int.MaxValue as PositiveInf and int.MinValue as NegativeInf respectively.
+        /// Throws exception if v == -int.MinValue (doesn't return int.MaxValue in this case)
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static int MinusWithInf(int v) {
+            switch (v) {
+                case int.MaxValue:
+                    return int.MinValue;
+                case int.MinValue:
+                    return int.MaxValue;
+                default:
+                    int result = -v;
+                    // Check case when -v transforms into one of the "special" values
+                    assert(result != int.MinValue && result != int.MaxValue);
+                    return result;
+            }
+        }
+
         public void Measure(Size availableSize) {
-            if (layoutInfo.validity != LayoutValidity.Nothing) return;
+            if (availableSize.Width < 0 || availableSize.Height < 0) {
+                throw new ArgumentException("Negative width/height is not allowed");
+            }
+            if (layoutInfo.validity != LayoutValidity.Nothing) {
+                return;
+            }
 
             layoutInfo.measureArgument = availableSize;
 
@@ -602,8 +651,8 @@ namespace ConsoleFramework.Controls
 
             //  parent size is what parent want us to be
             Size frameworkAvailableSize = new Size(
-                Math.Max(availableSize.Width - marginWidth, 0),
-                Math.Max(availableSize.Height - marginHeight, 0));
+                Math.Max(SumWithInf(availableSize.Width, -marginWidth), 0),
+                Math.Max(SumWithInf(availableSize.Height, -marginHeight), 0));
 
             // apply min/max/currentvalue constraints
             MinMax mm = new MinMax(MinHeight, MaxHeight, MinWidth, MaxWidth, Width, Height);
@@ -661,6 +710,10 @@ namespace ConsoleFramework.Controls
             layoutInfo.unclippedDesiredSize = unclippedDesiredSize;
 
             DesiredSize = new Size(Math.Max(0, clippedDesiredWidth), Math.Max(0, clippedDesiredHeight));
+
+            if (DesiredSize.Width == int.MaxValue || DesiredSize.Height == int.MaxValue) {
+                throw new Exception("Desired size cannot have int.MaxValue width/height");
+            }
         }
         
         /// <summary>

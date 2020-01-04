@@ -59,7 +59,7 @@ namespace Tests
         private class TestFinalControl : Control {
             protected override Size MeasureOverride(Size availableSize) {
                 LastMeasureOverrideArgument = availableSize;
-                Size res = base.MeasureOverride(availableSize); //new Size(100, 100);
+                Size res = base.MeasureOverride(availableSize);
                 LastMeasureOverrideResult = res;
                 return res;
             }
@@ -146,6 +146,21 @@ namespace Tests
             Assert.Equal(new Size(100, 20), finalControl.LastArrangeOverrideResult);
         }
 
+        [Fact]
+        public void TestMaxIntWithMarginMeasure() {
+            var contentControl = new TestContentControl();
+            var finalControl = new TestFinalControl() {
+                Margin = new Thickness(1)
+            };
+            contentControl.Content = finalControl;
+            contentControl.Measure(new Size(int.MaxValue, int.MaxValue));
+            
+            // Margin should not reduce measure argument by 1,
+            // MaxValue should be treated like PositiveInf in doubles arithmetic
+            Assert.Equal(new Size(int.MaxValue, int.MaxValue), finalControl.LastMeasureOverrideArgument);
+            Assert.Equal(new Size(0, 0), finalControl.LastMeasureOverrideResult);
+        }
+        
         [Fact]
         public void TestNormalMeasure3() {
             TestContentControl contentControl = new TestContentControl();
