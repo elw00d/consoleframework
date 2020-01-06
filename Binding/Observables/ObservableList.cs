@@ -31,10 +31,10 @@ namespace Binding.Observables {
 
         public void Clear() {
             int count = list.Count;
-			List<object> removedItems = new List<object>();
-			foreach (object item in list) {
-				removedItems.Add(item);
-			}
+            List<object> removedItems = new List<object>();
+            foreach (object item in list) {
+                removedItems.Add(item);
+            }
             list.Clear();
 
             raiseListElementsRemoved(0, count, removedItems);

@@ -43,7 +43,7 @@ namespace Binding.Observables
 
         public void Clear() {
             int count = list.Count;
-			List<object> removedItems = new List<object>();
+            List<object> removedItems = new List<object>();
             foreach (T item in list) {
                 removedItems.Add(item);
             }
@@ -141,7 +141,7 @@ namespace Binding.Observables
             }
         }
 
-		private void raiseListElementsRemoved(int index, int length, List<object> removedItems) {
+        private void raiseListElementsRemoved(int index, int length, List<object> removedItems) {
             if (null != ListChanged) {
                 ListChanged.Invoke(this, new ListChangedEventArgs(ListChangedEventType.ItemsRemoved, index, length, removedItems));
             }

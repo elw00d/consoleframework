@@ -9,82 +9,82 @@ namespace ConsoleFramework.Native
     /// </summary>
     public static class LibTermKey
     {
-		[DllImport( "libtermkey.so" )]
+        [DllImport( "libtermkey.so" )]
         public static extern IntPtr termkey_new( int fd, TermKeyFlag flags );
-		
-		public static TermKeyResult termkey_getkey(IntPtr termKey, ref TermKeyKey key) {
-			if (IntPtr.Size == 4) {
-				TermKeyKey32 temp = new TermKeyKey32();
-				TermKeyResult result = termkey_getkey32(termKey, ref temp);
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				return result;
-			} else {
-				TermKeyKey64 temp = new TermKeyKey64();
-				TermKeyResult result = termkey_getkey64(termKey, ref temp);
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				return result;
-			}
-		}
-		
+        
+        public static TermKeyResult termkey_getkey(IntPtr termKey, ref TermKeyKey key) {
+            if (IntPtr.Size == 4) {
+                TermKeyKey32 temp = new TermKeyKey32();
+                TermKeyResult result = termkey_getkey32(termKey, ref temp);
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                return result;
+            } else {
+                TermKeyKey64 temp = new TermKeyKey64();
+                TermKeyResult result = termkey_getkey64(termKey, ref temp);
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                return result;
+            }
+        }
+        
         [DllImport( "libtermkey.so", EntryPoint="termkey_getkey" )]
         private static extern TermKeyResult termkey_getkey32( IntPtr termKey, ref TermKeyKey32 key );
-		
+        
         [DllImport( "libtermkey.so", EntryPoint="termkey_getkey" )]
         private static extern TermKeyResult termkey_getkey64( IntPtr termKey, ref TermKeyKey64 key );
 
-		public static TermKeyResult termkey_getkey_force(IntPtr termKey, ref TermKeyKey key) {
-			if (IntPtr.Size == 4) {
-				TermKeyKey32 temp = new TermKeyKey32();
-				TermKeyResult result = termkey_getkey_force32(termKey, ref temp);
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				return result;
-			} else {
-				TermKeyKey64 temp = new TermKeyKey64();
-				TermKeyResult result = termkey_getkey_force64(termKey, ref temp);
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				return result;
-			}
-		}
+        public static TermKeyResult termkey_getkey_force(IntPtr termKey, ref TermKeyKey key) {
+            if (IntPtr.Size == 4) {
+                TermKeyKey32 temp = new TermKeyKey32();
+                TermKeyResult result = termkey_getkey_force32(termKey, ref temp);
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                return result;
+            } else {
+                TermKeyKey64 temp = new TermKeyKey64();
+                TermKeyResult result = termkey_getkey_force64(termKey, ref temp);
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                return result;
+            }
+        }
 
-		[DllImport( "libtermkey.so", EntryPoint="termkey_getkey_force" )]
+        [DllImport( "libtermkey.so", EntryPoint="termkey_getkey_force" )]
         private static extern TermKeyResult termkey_getkey_force32( IntPtr termKey, ref TermKeyKey32 key );
-		
+        
         [DllImport( "libtermkey.so", EntryPoint="termkey_getkey_force" )]
         private static extern TermKeyResult termkey_getkey_force64( IntPtr termKey, ref TermKeyKey64 key );
 
@@ -96,77 +96,77 @@ namespace ConsoleFramework.Native
 
         [DllImport( "libtermkey.so" )]
         public static extern void termkey_destroy( IntPtr termkey );
-		
-		public static TermKeyResult termkey_interpret_mouse(IntPtr termKey, ref TermKeyKey key,
+        
+        public static TermKeyResult termkey_interpret_mouse(IntPtr termKey, ref TermKeyKey key,
                                                                     out TermKeyMouseEvent ev,
                                                                     out int button,
                                                                     out int line,
                                                                     out int col) {
-			if (IntPtr.Size == 4) {
-				TermKeyKey32 temp = new TermKeyKey32();
-				temp.type = key.type;
-				temp.code = key.code;
-				temp.modifiers = key.modifiers;
-				temp.utf8_0 = key.utf8_0;
-				temp.utf8_1 = key.utf8_1;
-				temp.utf8_2 = key.utf8_2;
-				temp.utf8_3 = key.utf8_3;
-				temp.utf8_4 = key.utf8_4;
-				temp.utf8_5 = key.utf8_5;
-				temp.utf8_6 = key.utf8_6;
-				
-				TermKeyResult result = termkey_interpret_mouse32(termKey, ref temp, out ev, out button, out line, out col);
-				
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				
-				return result;
-			} else {
-				TermKeyKey64 temp = new TermKeyKey64();
-				temp.type = key.type;
-				temp.code = key.code;
-				temp.modifiers = key.modifiers;
-				temp.utf8_0 = key.utf8_0;
-				temp.utf8_1 = key.utf8_1;
-				temp.utf8_2 = key.utf8_2;
-				temp.utf8_3 = key.utf8_3;
-				temp.utf8_4 = key.utf8_4;
-				temp.utf8_5 = key.utf8_5;
-				temp.utf8_6 = key.utf8_6;
-				
-				TermKeyResult result = termkey_interpret_mouse64(termKey, ref temp, out ev, out button, out line, out col);
-				
-				key.type = temp.type;
-				key.code = temp.code;
-				key.modifiers = temp.modifiers;
-				key.utf8_0 = temp.utf8_0;
-				key.utf8_1 = temp.utf8_1;
-				key.utf8_2 = temp.utf8_2;
-				key.utf8_3 = temp.utf8_3;
-				key.utf8_4 = temp.utf8_4;
-				key.utf8_5 = temp.utf8_5;
-				key.utf8_6 = temp.utf8_6;
-				
-				return result;
-			}
-		}
-		
+            if (IntPtr.Size == 4) {
+                TermKeyKey32 temp = new TermKeyKey32();
+                temp.type = key.type;
+                temp.code = key.code;
+                temp.modifiers = key.modifiers;
+                temp.utf8_0 = key.utf8_0;
+                temp.utf8_1 = key.utf8_1;
+                temp.utf8_2 = key.utf8_2;
+                temp.utf8_3 = key.utf8_3;
+                temp.utf8_4 = key.utf8_4;
+                temp.utf8_5 = key.utf8_5;
+                temp.utf8_6 = key.utf8_6;
+                
+                TermKeyResult result = termkey_interpret_mouse32(termKey, ref temp, out ev, out button, out line, out col);
+                
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                
+                return result;
+            } else {
+                TermKeyKey64 temp = new TermKeyKey64();
+                temp.type = key.type;
+                temp.code = key.code;
+                temp.modifiers = key.modifiers;
+                temp.utf8_0 = key.utf8_0;
+                temp.utf8_1 = key.utf8_1;
+                temp.utf8_2 = key.utf8_2;
+                temp.utf8_3 = key.utf8_3;
+                temp.utf8_4 = key.utf8_4;
+                temp.utf8_5 = key.utf8_5;
+                temp.utf8_6 = key.utf8_6;
+                
+                TermKeyResult result = termkey_interpret_mouse64(termKey, ref temp, out ev, out button, out line, out col);
+                
+                key.type = temp.type;
+                key.code = temp.code;
+                key.modifiers = temp.modifiers;
+                key.utf8_0 = temp.utf8_0;
+                key.utf8_1 = temp.utf8_1;
+                key.utf8_2 = temp.utf8_2;
+                key.utf8_3 = temp.utf8_3;
+                key.utf8_4 = temp.utf8_4;
+                key.utf8_5 = temp.utf8_5;
+                key.utf8_6 = temp.utf8_6;
+                
+                return result;
+            }
+        }
+        
         [DllImport( "libtermkey.so", EntryPoint="termkey_interpret_mouse" )]
         private static extern TermKeyResult termkey_interpret_mouse32( IntPtr termKey, ref TermKeyKey32 key,
                                                                     out TermKeyMouseEvent ev,
                                                                     out int button,
                                                                     out int line,
                                                                     out int col );
-		
-		[DllImport( "libtermkey.so", EntryPoint="termkey_interpret_mouse" )]
+        
+        [DllImport( "libtermkey.so", EntryPoint="termkey_interpret_mouse" )]
         private static extern TermKeyResult termkey_interpret_mouse64( IntPtr termKey, ref TermKeyKey64 key,
                                                                     out TermKeyMouseEvent ev,
                                                                     out int button,
@@ -304,9 +304,9 @@ namespace ConsoleFramework.Native
         [FieldOffset( 2 )] public byte mouse2;
         [FieldOffset( 3 )] public byte mouse3;
     }
-	
-	// use this layout if using 32-bit version of libtermkey.so
-	
+    
+    // use this layout if using 32-bit version of libtermkey.so
+    
     [StructLayout( LayoutKind.Explicit )]
     public struct TermKeyKey32
     {
@@ -324,12 +324,12 @@ namespace ConsoleFramework.Native
         [FieldOffset( 12 + 4 )] public byte utf8_4;
         [FieldOffset( 12 + 5 )] public byte utf8_5;
         [FieldOffset( 12 + 6 )] public byte utf8_6;
-    }	
-	
-	
-	// this layout is actual for 64-bit version of libtermkey.so
-	
-	[StructLayout( LayoutKind.Explicit )]
+    }    
+    
+    
+    // this layout is actual for 64-bit version of libtermkey.so
+    
+    [StructLayout( LayoutKind.Explicit )]
     public struct TermKeyKey64
     {
         [FieldOffset( 0 )] public TermKeyType type;
@@ -347,17 +347,17 @@ namespace ConsoleFramework.Native
         [FieldOffset( 20 + 5 )] public byte utf8_5;
         [FieldOffset( 20 + 6 )] public byte utf8_6;
     }
-	
-	public struct TermKeyKey {
-		public TermKeyType type;
-		public code code;
-		public int modifiers;
-		public byte utf8_0;
-		public byte utf8_1;
-		public byte utf8_2;
-		public byte utf8_3;
-		public byte utf8_4;
-		public byte utf8_5;
-		public byte utf8_6;		
-	}
+    
+    public struct TermKeyKey {
+        public TermKeyType type;
+        public code code;
+        public int modifiers;
+        public byte utf8_0;
+        public byte utf8_1;
+        public byte utf8_2;
+        public byte utf8_3;
+        public byte utf8_4;
+        public byte utf8_5;
+        public byte utf8_6;        
+    }
 }
