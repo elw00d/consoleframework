@@ -12,12 +12,12 @@ namespace ConsoleFramework.Rendering
     /// </summary>
     public class PhysicalCanvas {
         private readonly IntPtr stdOutputHandle = IntPtr.Zero;
-		
-		public PhysicalCanvas(int width, int height) {
-			this.size = new Size(width, height);
-			this.buffer = new CHAR_INFO[height, width];
-		}
-		
+        
+        public PhysicalCanvas(int width, int height) {
+            this.size = new Size(width, height);
+            this.buffer = new CHAR_INFO[height, width];
+        }
+        
         public PhysicalCanvas(int width, int height, IntPtr stdOutputHandle) {
             this.size = new Size(width, height);
             this.stdOutputHandle = stdOutputHandle;
@@ -161,39 +161,39 @@ namespace ConsoleFramework.Rendering
         /// Writes collected data to console screen buffer, but paints specified rect only.
         /// </summary>
         public virtual void Flush(Rect affectedRect) {
-			if (stdOutputHandle != IntPtr.Zero) {
-				// we are in windows environment
-	            SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
-	                (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
-	            if (!Win32.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) size.Width, (short) size.Height),
-	                new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
-	                throw new InvalidOperationException(string.Format("Cannot write to console : {0}", Win32.GetLastErrorMessage()));
-	            }
-			} else {
-				// we are in linux
-				for (int i = 0; i < affectedRect.width; i++) {
-					int x = i + affectedRect.x;
-					for (int j = 0; j < affectedRect.height; j++) {
-						int y = j + affectedRect.y;
-						// todo : convert attributes and optimize rendering
-						bool fgIntensity;
-						short index = NCurses.winAttrsToNCursesAttrs(buffer[y, x].Attributes,
-							out fgIntensity);
-						if (fgIntensity) {
-							NCurses.attrset(
-								(int) (NCurses.COLOR_PAIR(index) | NCurses.A_BOLD));
-						} else {
-							NCurses.attrset(
-								(int) NCurses.COLOR_PAIR(index));
-						}
-					    // TODO : optimize this
-						char outChar = buffer[y, x].UnicodeChar != '\0' ? (buffer[y, x].UnicodeChar) : ' ';
-					    var bytes = UTF8Encoding.UTF8.GetBytes(new char[] {outChar});
-					    NCurses.mvaddstr(y, x, bytes);
-					}
-				}
-				NCurses.refresh();
-			}
+            if (stdOutputHandle != IntPtr.Zero) {
+                // we are in windows environment
+                SMALL_RECT rect = new SMALL_RECT((short) affectedRect.x, (short) affectedRect.y,
+                    (short) (affectedRect.width + affectedRect.x), (short) (affectedRect.height + affectedRect.y));
+                if (!Win32.WriteConsoleOutputCore(stdOutputHandle, buffer, new COORD((short) size.Width, (short) size.Height),
+                    new COORD((short) affectedRect.x, (short) affectedRect.y), ref rect)) {
+                    throw new InvalidOperationException(string.Format("Cannot write to console : {0}", Win32.GetLastErrorMessage()));
+                }
+            } else {
+                // we are in linux
+                for (int i = 0; i < affectedRect.width; i++) {
+                    int x = i + affectedRect.x;
+                    for (int j = 0; j < affectedRect.height; j++) {
+                        int y = j + affectedRect.y;
+                        // todo : convert attributes and optimize rendering
+                        bool fgIntensity;
+                        short index = NCurses.winAttrsToNCursesAttrs(buffer[y, x].Attributes,
+                            out fgIntensity);
+                        if (fgIntensity) {
+                            NCurses.attrset(
+                                (int) (NCurses.COLOR_PAIR(index) | NCurses.A_BOLD));
+                        } else {
+                            NCurses.attrset(
+                                (int) NCurses.COLOR_PAIR(index));
+                        }
+                        // TODO : optimize this
+                        char outChar = buffer[y, x].UnicodeChar != '\0' ? (buffer[y, x].UnicodeChar) : ' ';
+                        var bytes = UTF8Encoding.UTF8.GetBytes(new char[] {outChar});
+                        NCurses.mvaddstr(y, x, bytes);
+                    }
+                }
+                NCurses.refresh();
+            }
         }
     }
 }

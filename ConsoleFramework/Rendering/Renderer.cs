@@ -97,9 +97,9 @@ namespace ConsoleFramework.Rendering
                 Rect currentAffectedRect = applyChangesToCanvas(control, new Rect(new Point(0, 0), control.RenderSize));
                 affectedRect.Union(currentAffectedRect);
             }
-			if ( forceRepaintAll ) {
-			    affectedRect = new Rect( rootElementRect.Size );
-			}
+            if ( forceRepaintAll ) {
+                affectedRect = new Rect( rootElementRect.Size );
+            }
 
             // Flush stored image (with this.RootElementRect offset)
             if (!affectedRect.IsEmpty) {
