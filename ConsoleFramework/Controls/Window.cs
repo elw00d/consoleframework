@@ -7,9 +7,10 @@ using ConsoleFramework.Rendering;
 namespace ConsoleFramework.Controls
 {
     /// <summary>
-    /// Представляет собой элемент управления, который может содержать только 1 дочерний элемент.
-    /// Как правило, в роли дочернего элемента будут использоваться менеджеры размещения.
-    /// Window должно знать о хосте, в контексте которого оно располагается и уметь с ним взаимодействовать.
+    /// Window is a control that can hold one child only.
+    /// Usually a child is some panel or grid (or another layout control)
+    /// Window exists in WindowsHost instance, so Window should be aware about WindowsHost
+    /// and should be able to interoperate with it.
     /// </summary>
     public class Window : Control
     {
@@ -36,8 +37,8 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// По клику мышки ищет конечный Focusable контрол, который размещён 
-        /// на месте нажатия и устанавливает на нём фокус.
+        /// Handles the mouse click: founds the end Focusable element which
+        /// is placed under mouse and sets the focus to it.
         /// </summary>
         private void Window_OnPreviewMouseDown(object sender, MouseButtonEventArgs e) {
             PassFocusToChildUnderPoint( e );
@@ -51,8 +52,7 @@ namespace ConsoleFramework.Controls
         }
 
         /// <summary>
-        /// Координаты в рамках WindowsHost. По сути - костыль вместо
-        /// отсутствующих пока Attached properties.
+        /// Window coords in WindowsHost. In fact it is poor man attached properties.
         /// </summary>
         public int? X { get; set; }
         public int? Y { get; set; }
@@ -90,19 +90,23 @@ namespace ConsoleFramework.Controls
         public static Size EMPTY_WINDOW_SIZE = new Size(12, 3);
 
         protected override Size MeasureOverride(Size availableSize) {
-            if ( Content == null )
+            if (Content == null) {
                 return new Size(
-                    Math.Min(availableSize.Width ,EMPTY_WINDOW_SIZE.Width + 4),
-                    Math.Min(availableSize.Height, EMPTY_WINDOW_SIZE.Height + 3));
-            if ( availableSize.Width != int.MaxValue && availableSize.Height != int.MaxValue ) {
-                // reserve 2 pixels for frame and 2/1 pixels for shadow
-                Content.Measure( new Size( availableSize.width - 4, availableSize.height - 3 ) );
-            } else {
-                int width = availableSize.Width != int.MaxValue ? availableSize.Width - 4 : int.MaxValue;
-                int height = availableSize.Height != int.MaxValue ? availableSize.Height - 3 : int.MaxValue;
-                Content.Measure( new Size(width, height));
+                    Math.Min(availableSize.Width, EMPTY_WINDOW_SIZE.Width + 4),
+                    Math.Min(availableSize.Height, EMPTY_WINDOW_SIZE.Height + 3)
+                );
             }
-            var result = new Size(Content.DesiredSize.width + 4, Content.DesiredSize.height + 3);
+
+            // Reserve 2 pixels for frame and 2/1 pixels for shadow
+            int width = availableSize.Width != int.MaxValue ? Math.Max(4, availableSize.Width) - 4 : int.MaxValue;
+            int height = availableSize.Height != int.MaxValue ? Math.Max(3, availableSize.Height) - 3 : int.MaxValue;
+            Content.Measure(new Size(width, height));
+
+            // Avoid int overflow. Additional -1 to avoid returning int.MaxValue from MeasureOverride (by contract)
+            var result = new Size(
+                Math.Min(int.MaxValue - 4 - 1, Content.DesiredSize.Width) + 4,
+                Math.Min(int.MaxValue - 3 - 1, Content.DesiredSize.Height) + 3
+            );
             return result;
         }
 
@@ -110,8 +114,8 @@ namespace ConsoleFramework.Controls
         {
             if (Content != null) {
                 Content.Arrange(new Rect(1, 1, 
-                    finalSize.width - 4,
-                    finalSize.height - 3));
+                    Math.Max(4, finalSize.width) - 4,
+                    Math.Max(3, finalSize.height) - 3));
             }
             return finalSize;
         }
@@ -142,14 +146,18 @@ namespace ConsoleFramework.Controls
             }
         }
 
-        public override void Render(RenderingBuffer buffer)
-        {
+        public override void Render(RenderingBuffer buffer) {
             Attr borderAttrs = moving ? Colors.Blend(Color.Green, Color.Gray) : Colors.Blend(Color.White, Color.Gray);
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
             // Borders
-            RenderBorders(buffer, new Point(0, 0), new Point(ActualWidth - 3, ActualHeight - 2),
-                this.moving || this.resizing, borderAttrs);
+            Point bottomRight = new Point(ActualWidth - 3, ActualHeight - 2);
+            RenderBorders(buffer, new Point(0, 0), bottomRight, this.moving || this.resizing, borderAttrs);
+            // Additional green right bottom corner if resizing
+            if (resizing) {
+                buffer.SetPixel(bottomRight.X, bottomRight.Y, UnicodeTable.SingleFrameBottomRightCorner,
+                    Colors.Blend(Color.Green, Color.Gray));
+            }
             // close button
             if (ActualWidth > 4) {
                 buffer.SetPixel(2, 0, '[');
@@ -210,7 +218,7 @@ namespace ConsoleFramework.Controls
         private Point resizingStartPoint;
         
         public void Window_OnMouseDown(object sender, MouseButtonEventArgs args) {
-            // перемещение можно начинать только когда окно не ресайзится и наоборот
+            // Moving is enabled only when windows is not resizing, and vice versa
             if (!moving && !resizing && !closing) {
                 Point point = args.GetPosition(this);
                 Point parentPoint = args.GetPosition(getWindowsHost());

@@ -747,8 +747,8 @@ namespace ConsoleFramework.Controls {
                                 : 0))
             ));
             Size contentSize = new Size(
-                finalSize.Width - (verticalScrollbar.Visibility == Visibility.Visible ? 1 : 0),
-                finalSize.Height - (horizontalScrollbar.Visibility == Visibility.Visible ? 1 : 0)
+                Math.Max(0, finalSize.Width - (verticalScrollbar.Visibility == Visibility.Visible ? 1 : 0)),
+                Math.Max(0, finalSize.Height - (horizontalScrollbar.Visibility == Visibility.Visible ? 1 : 0))
             );
             controller.Window = new Rect(controller.Window.TopLeft, contentSize);
             buffer = new char[contentSize.Height, contentSize.Width];
