@@ -239,7 +239,7 @@ namespace Xaml
                 throw new InvalidOperationException("No suitable constructor");
             }
             if ( constructorInfos.Count > 1 ) {
-                throw new InvalidOperationException("Ambigious constructor call");
+                throw new InvalidOperationException("Ambiguous constructor call");
             }
             ConstructorInfo ctor = constructorInfos[ 0 ];
             ParameterInfo[] parameters = ctor.GetParameters( );
