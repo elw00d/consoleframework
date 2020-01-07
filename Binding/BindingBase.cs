@@ -353,10 +353,17 @@ namespace Binding
             // We need converter if data will flow from non-observable property to property of another class
             if (targetPropertyClass != sourcePropertyInfo.PropertyType) {
                 bool needConverter = false;
-                if (realMode == BindingMode.OneTime || realMode == BindingMode.OneWay || realMode == BindingMode.TwoWay)
-                    needConverter |= !sourceIsObservable;
-                if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay)
-                    needConverter |= !targetIsObservable;
+                if (realMode == BindingMode.OneTime || realMode == BindingMode.OneWay ||
+                    realMode == BindingMode.TwoWay) {
+                    if (!sourceIsObservable) {
+                        needConverter |= !targetPropertyClass.IsAssignableFrom(sourcePropertyInfo.PropertyType);
+                    }
+                }
+                if (realMode == BindingMode.OneWayToSource || realMode == BindingMode.TwoWay) {
+                    if (!targetIsObservable) {
+                        needConverter |= !sourcePropertyInfo.PropertyType.IsAssignableFrom(targetPropertyClass);
+                    }
+                }
                 //
                 if (needConverter) {
                     if ( converter == null )

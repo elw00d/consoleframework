@@ -6,6 +6,7 @@ using ConsoleFramework.Core;
 using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
+using Xaml;
 
 namespace ConsoleFramework.Controls
 {
@@ -100,6 +101,7 @@ namespace ConsoleFramework.Controls
     /// <summary>
     /// Base class for all controls.
     /// </summary>
+    [DataContextProperty("DataContext")]
     public partial class Control : INotifyPropertyChanged {
 
         /// <summary>

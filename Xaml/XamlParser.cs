@@ -166,7 +166,7 @@ namespace Xaml
         /// {}, то остаток строки возвращается просто строкой.
         /// </summary>
         private Object processText( String text,
-            String currentProperty, object currentObject, object dataContext ) {
+            String currentProperty, object currentObject, object rootDataContext ) {
             if ( String.IsNullOrEmpty( text ) ) return String.Empty;
 
             if ( text[ 0 ] != '{' ) {
@@ -179,7 +179,7 @@ namespace Xaml
                 MarkupExtensionsParser markupExtensionsParser = new MarkupExtensionsParser(
                     new MarkupExtensionsResolver( this ), text );
                 MarkupExtensionContext context = new MarkupExtensionContext(
-                    this, text, currentProperty, currentObject, dataContext);
+                    this, text, currentProperty, currentObject, findClosestDataContext() ?? rootDataContext);
                 object providedValue = markupExtensionsParser.ProcessMarkupExtension( context );
                 if ( providedValue is IFixupToken ) {
                     fixupTokens.Add( ( FixupToken ) providedValue );
@@ -188,6 +188,39 @@ namespace Xaml
                 }
                 return providedValue;
             }
+        }
+
+        /// <summary>
+        /// Tries to find the closest object in the stack with not null DataContext property.
+        /// Returns first found data context object or null if no suitable objects found.
+        /// </summary>
+        private object findClosestDataContext() {
+            foreach (var objectInfo in objects) {
+                Type type = objectInfo.obj.GetType();
+                PropertyInfo dataContextProp = type.GetProperty(getDataContextPropertyName(type));
+                if (dataContextProp == null) {
+                    continue;
+                }
+                object dataContextValue = dataContextProp.GetValue(objectInfo.obj);
+                if (dataContextValue != null) {
+                    return dataContextValue;
+                }
+            }
+            return null;
+        }
+
+        private string getDataContextPropertyName(Type type) {
+            object[] attributes = type.GetTypeInfo()
+                .GetCustomAttributes(typeof(DataContextPropertyAttribute), true).ToArray();
+            if (attributes.Length == 0) {
+                // Default value
+                return "DataContext";
+            }
+            if (attributes.Length > 1) {
+                throw new InvalidOperationException("Ambiguous data context property definition " +
+                                                    "- more than one DataContextPropertyAttribute found.");
+            }
+            return ((DataContextPropertyAttribute) attributes[0]).Name;
         }
 
         // { prefix -> namespace }
@@ -369,7 +402,7 @@ namespace Xaml
             object[] attributes = type.GetTypeInfo().GetCustomAttributes(typeof ( ContentPropertyAttribute ), true).ToArray();
             if ( attributes.Length == 0 ) return "Content";
             if (attributes.Length > 1)
-                throw new InvalidOperationException("Ambigious content property definition " +
+                throw new InvalidOperationException("Ambiguous content property definition " +
                                                     "- more than one ContentPropertyAttribute found.");
             return ( ( ContentPropertyAttribute ) attributes[ 0 ] ).Name;
         }
@@ -562,14 +595,14 @@ namespace Xaml
             if ( Type.GetTypeCode( source ) == TypeCode.Object ) {
                 object[ ] attributes = source.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
-                    throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
+                    throw new InvalidOperationException("Ambiguous attribute: more than one TypeConverterAttribute");
                 if ( attributes.Length == 1 ) {
                     TypeConverterAttribute attribute = ( TypeConverterAttribute ) attributes[ 0 ];
                     Type typeConverterType = attribute.Type;
                     ConstructorInfo ctor = typeConverterType.GetConstructor( new Type[0] );
-                    if (null == ctor)
-                        throw new InvalidOperationException(
-                            string.Format("No default constructor in {0} type", typeConverterType.Name));
+                    if (null == ctor) {
+                        throw new InvalidOperationException($"No default constructor in {typeConverterType.Name} type");
+                    }
                     ITypeConverter converter = ( ITypeConverter ) ctor.Invoke( new object[ 0 ] );
                     if ( converter.CanConvertTo( dest ) ) {
                         return converter.ConvertTo( value, dest );
@@ -580,7 +613,7 @@ namespace Xaml
             if ( Type.GetTypeCode( dest ) == TypeCode.Object ) {
                 object[ ] attributes = dest.GetTypeInfo().GetCustomAttributes( typeof ( TypeConverterAttribute ), true ).ToArray();
                 if (attributes.Length > 1)
-                    throw new InvalidOperationException("Ambigious attribute: more than one TypeConverterAttribute");
+                    throw new InvalidOperationException("Ambiguous attribute: more than one TypeConverterAttribute");
                 if ( attributes.Length == 1 ) {
                     TypeConverterAttribute attribute = (TypeConverterAttribute)attributes[0];
                     Type typeConverterType = attribute.Type;
