@@ -48,19 +48,20 @@ namespace Xaml
         private class ObjectInfo
         {
             /// <summary>
-            /// Тип конструируемого объекта.
+            /// Type of constructing object.
             /// </summary>
             public Type type;
             /// <summary>
-            /// Объект (или null если создаётся String).
+            /// Object instance (or null if String is created).
             /// </summary>
             public object obj;
             /// <summary>
-            /// Текущее свойство, которое задаётся тегом с точкой в имени.
+            /// Current property that defined using tag with dot in name.
+            /// &lt;Window.Resources&gt; for example
             /// </summary>
             public string currentProperty;
             /// <summary>
-            /// Задаётся при парсинге тегов, содержимое которых - текст.
+            /// For tags which content is text.
             /// </summary>
             public string currentPropertyText;
             /// <summary>
@@ -268,10 +269,17 @@ namespace Xaml
                         String name = xmlReader.Name;
                         
                         // explicit property syntax
-                        if ( Top != null && name.StartsWith( Top.type.Name + "." ) ) {
-                            if ( Top.currentProperty != null )
-                                throw new Exception( "Illegal syntax in property value definition." );
-                            string propertyName = name.Substring(Top.type.Name.Length + 1);
+                        if (Top != null && name.Contains(".")) {
+                            // type may be qualified with xmlns namespace
+                            string typePrefix = name.Substring(0, name.IndexOf('.'));
+                            Type type = resolveType(typePrefix);
+                            if (type != Top.type) {
+                                throw new Exception($"Property {name} doesn't match current object {Top.type}");
+                            }
+                            if (Top.currentProperty != null) {
+                                throw new Exception("Illegal syntax in property value definition");
+                            }
+                            string propertyName = name.Substring(name.IndexOf('.') + 1);
                             Top.currentProperty = propertyName;
                         } else {
                             bool processingRootObject = (objects.Count == 0);
