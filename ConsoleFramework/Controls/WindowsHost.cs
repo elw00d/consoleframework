@@ -38,7 +38,7 @@ namespace ConsoleFramework.Controls
             AddHandler( PreviewKeyDownEvent, new KeyEventHandler(onPreviewKeyDown) );
             AddHandler( PreviewMouseWheelEvent, new MouseWheelEventHandler(onPreviewMouseWheel) );
         }
-
+        
         /// <summary>
         /// Interrupts wheel event propagation if its source window is not on top now.
         /// </summary>
@@ -259,6 +259,7 @@ namespace ConsoleFramework.Controls
             showCore( window, false, false );
         }
 
+        public Window TopWindow => getTopWindow();
         private Window getTopWindow( ) {
             int windowsStartIndex = 0;
             if ( mainMenu != null ) {

@@ -6,13 +6,13 @@ using ConsoleFramework.Rendering;
 
 namespace ConsoleFramework.Controls
 {
-    /// <summary>
-    /// Window is a control that can hold one child only.
-    /// Usually a child is some panel or grid (or another layout control)
-    /// Window exists in WindowsHost instance, so Window should be aware about WindowsHost
-    /// and should be able to interoperate with it.
-    /// </summary>
-    public class Window : Control
+  /// <summary>
+  /// Window is a control that can hold one child only.
+  /// Usually a child is some panel or grid (or another layout control)
+  /// Window exists in WindowsHost instance, so Window should be aware about WindowsHost
+  /// and should be able to interoperate with it.
+  /// </summary>
+  public class Window : Control
     {
         public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
@@ -34,6 +34,8 @@ namespace ConsoleFramework.Controls
             AddHandler(MouseUpEvent, new MouseButtonEventHandler(Window_OnMouseUp));
             AddHandler(MouseMoveEvent, new MouseEventHandler(Window_OnMouseMove));
             AddHandler(PreviewKeyDownEvent, new KeyEventHandler(OnPreviewKeyDown));
+            AddHandler(ActivatedEvent, new EventHandler(Window_OnActivated));
+            AddHandler(DeactivatedEvent, new EventHandler(Window_OnDeactivated));
         }
 
         /// <summary>
@@ -148,6 +150,10 @@ namespace ConsoleFramework.Controls
 
         public override void Render(RenderingBuffer buffer) {
             Attr borderAttrs = moving ? Colors.Blend(Color.Green, Color.Gray) : Colors.Blend(Color.White, Color.Gray);
+            if (getWindowsHost().TopWindow == this)
+            {
+              borderAttrs = Colors.Blend(Color.DarkBlue, Color.Gray);
+            }
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);
             // Borders
@@ -338,6 +344,14 @@ namespace ConsoleFramework.Controls
                     Invalidate();
                 args.Handled = true;
             }
+        }
+
+        public void Window_OnActivated(object sender, EventArgs args) {
+            Invalidate();
+        }
+
+        public void Window_OnDeactivated(object sender, EventArgs args) {
+            Invalidate();
         }
 
         public event CancelEventHandler Closing {
