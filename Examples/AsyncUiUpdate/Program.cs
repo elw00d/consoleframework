@@ -19,7 +19,7 @@ namespace Examples.AsyncUiUpdate
                         textBlock.Text = i.ToString();
                     }) );
                     Thread.Sleep( 1000 );
-					i++;
+                    i++;
                 }
             } );
             thread.IsBackground = true;
