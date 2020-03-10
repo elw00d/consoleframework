@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Binding\Binding.csproj" />
+    <ProjectReference Include="..\..\Xaml\Xaml.csproj" />
+    <ProjectReference Include="..\..\ConsoleFramework\ConsoleFramework.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="main.xml" LogicalName="Examples.MainMenu.main.xml" />
+    <EmbeddedResource Include="windows-host.xml" LogicalName="Examples.MainMenu.windows-host.xml" />
+  </ItemGroup>
+
+</Project>

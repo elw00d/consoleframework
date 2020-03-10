@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Binding\Binding.csproj" />
+    <ProjectReference Include="..\..\Xaml\Xaml.csproj" />
+    <ProjectReference Include="..\..\ConsoleFramework\ConsoleFramework.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="GridTest.xml" LogicalName="Examples.GridTest.xml" />
+    <EmbeddedResource Include="MainWindow.xml" LogicalName="Examples.MainWindow.xml" />
+    <EmbeddedResource Include="Layout.xml" LogicalName="Examples.Layout.xml" />
+  </ItemGroup>
+
+</Project>
