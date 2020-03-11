@@ -1,5 +1,5 @@
-﻿<WindowsHost>
-  <WindowsHost.MainMenu>
+﻿<MainMenuWindowHost>
+  <MainMenuWindowHost.MainMenu>
     <Menu HorizontalAlignment="Center">
       <Menu.Items>
         <MenuItem Title="_File" Type="Submenu" Gesture="Alt+F">
@@ -34,7 +34,10 @@
           <MenuItem Title="Cop_y to Windows"/>
           <MenuItem Title="Copy from _Windows"/>
         </MenuItem>
-        <MenuItem Type="Submenu" Title="_Options">
+        <MenuItem Title="_Windows" Type="Submenu">
+          
+        </MenuItem>
+        <MenuItem Title="_Options" Type="Submenu">
           <MenuItem.Items>
             <MenuItem Title="Mode..." TitleRight="Debug"></MenuItem>
             <MenuItem Title="_Compiler..."></MenuItem>
@@ -62,5 +65,5 @@
         <MenuItem Title="Go"/>
       </Menu.Items>
     </Menu>
-  </WindowsHost.MainMenu>
-</WindowsHost>
+  </MainMenuWindowHost.MainMenu>
+</MainMenuWindowHost>
