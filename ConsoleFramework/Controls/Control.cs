@@ -96,6 +96,19 @@ namespace ConsoleFramework.Controls
             if (obj.GetType() != typeof (LayoutInfo)) return false;
             return Equals((LayoutInfo) obj);
         }
+
+        public override int GetHashCode(){
+            int hashCode = -474869825;
+            hashCode = hashCode * -1521134295 + measureArgument.GetHashCode();
+            hashCode = hashCode * -1521134295 + unclippedDesiredSize.GetHashCode();
+            hashCode = hashCode * -1521134295 + desiredSize.GetHashCode();
+            hashCode = hashCode * -1521134295 + renderSlotRect.GetHashCode();
+            hashCode = hashCode * -1521134295 + renderSize.GetHashCode();
+            hashCode = hashCode * -1521134295 + layoutClip.GetHashCode();
+            hashCode = hashCode * -1521134295 + actualOffset.GetHashCode();
+            hashCode = hashCode * -1521134295 + validity.GetHashCode();
+            return hashCode;
+        }
     }
 
     /// <summary>
