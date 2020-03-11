@@ -123,10 +123,10 @@ namespace ConsoleFramework.Controls
         /// Делает указанное окно активным. Если оно до этого не было активным, то
         /// по Z-индексу оно будет перемещено на самый верх, и получит клавиатурный фокус ввода.
         /// </summary>
-        private void activateWindow(Window window) {
+        public void ActivateWindow(Window window) {
             int index = Children.IndexOf( window );
             if (-1 == index)
-                throw new InvalidOperationException("Assertion failed.");
+                throw new InvalidOperationException("Could not find window");
             //
             Control oldTopWindow = Children[Children.Count - 1];
             for (int i = index; i < Children.Count - 1; i++) {
@@ -211,7 +211,7 @@ namespace ConsoleFramework.Controls
             if (handle && (eventType == 0 || eventType == 2 && args.LeftButton == MouseButtonState.Pressed)) {
                 Window windowClicked = VisualTreeHelper.FindClosestParent< Window >( ( Control ) args.Source );
                 if ( null != windowClicked ) {
-                    activateWindow( windowClicked );
+                    ActivateWindow( windowClicked );
                 } else {
                     Menu menu = VisualTreeHelper.FindClosestParent< Menu >( ( Control ) args.Source );
                     if ( null != menu ) {
