@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -188,12 +189,19 @@ namespace ConsoleFramework
                 }
                 using ( StreamReader reader = new StreamReader( stream ) ) {
                     string result = reader.ReadToEnd( );
-                    Control control = XamlParser.CreateFromXaml<Control>(result, dataContext, new List<string>()
-                    {
-                        "clr-namespace:Xaml;assembly=Xaml",
-                        "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
-                        "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
-                    });
+                    var namespaces = new List<string>()
+                     {
+                         "clr-namespace:Xaml;assembly=Xaml",
+                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
+                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
+                     };
+                    var assyNamespaces = assembly
+                        .GetTypes()
+                        .Select(t => t.Namespace)
+                        .Distinct()
+                        .Select(x => $"clr-namespace:{x};assembly={assembly.GetName().Name}");
+                    namespaces.AddRange(assyNamespaces);
+                    Control control = XamlParser.CreateFromXaml<Control>(result, dataContext, namespaces);
                     control.DataContext = dataContext;
                     control.Created( );
                     return control;
