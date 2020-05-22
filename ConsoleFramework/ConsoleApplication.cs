@@ -764,9 +764,13 @@ namespace ConsoleFramework
             // Set console mode to enable mouse and window resizing events
             const uint ENABLE_WINDOW_INPUT = 0x0008;
             const uint ENABLE_MOUSE_INPUT = 0x0010;
+            const uint ENABLE_EXTENDED_FLAGS = 0x0080;
+            const uint ENABLE_QUICK_EDIT_MODE = 0x0040;
             uint consoleMode;
             Win32.GetConsoleMode( stdInputHandle, out consoleMode );
-            Win32.SetConsoleMode(stdInputHandle, consoleMode | ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
+            Win32.SetConsoleMode(stdInputHandle, 
+                (consoleMode | ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT | ENABLE_EXTENDED_FLAGS)
+                & ~ENABLE_QUICK_EDIT_MODE);
 
             // Get console screen buffer size
             CONSOLE_SCREEN_BUFFER_INFO screenBufferInfo;
