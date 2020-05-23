@@ -297,6 +297,9 @@ namespace Xaml
                                         // in namespaces dictionary
                                         if (attributePrefix == "xmlns") {
                                             namespaces.Add(attributeName, attributeValue);
+                                        } else if (attributePrefix == "" && attributeName == "xmlns") {
+                                            // xmlns="" syntax support
+                                            defaultNamespaces.Add(attributeValue);
                                         }
                                         //
                                     }
@@ -314,9 +317,12 @@ namespace Xaml
                                     string attributeName = xmlReader.LocalName;
                                     string attributeValue = xmlReader.Value;
 
-                                    // Skip xmls attributes of root object
-                                    if (attributePrefix == "xmlns" && processingRootObject)
+                                    // Skip xmlns attributes of root object
+                                    if ((attributePrefix == "xmlns" ||
+                                        attributePrefix == "" && attributeName == "xmlns")
+                                        && processingRootObject) {
                                         continue;
+                                    }
 
                                     processAttribute( attributePrefix, attributeName, attributeValue );
                                     //

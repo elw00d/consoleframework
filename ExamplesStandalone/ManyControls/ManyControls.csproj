@@ -15,6 +15,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ConsoleFramework\ConsoleFramework.csproj" />
-    <EmbeddedResource Include="GridTest.xml" LogicalName="ManyControls.GridTest.xml" />
+    <EmbeddedResource Include="GridTest.xaml">
+      <LogicalName>ManyControls.GridTest.xaml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

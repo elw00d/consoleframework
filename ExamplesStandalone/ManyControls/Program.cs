@@ -53,7 +53,7 @@ namespace Examples
 			TypeInfo typeInfo = type.GetTypeInfo ();
 
 			var assembly = typeInfo.Assembly;
-            var resourceName = "ManyControls.GridTest.xml";
+            var resourceName = "ManyControls.GridTest.xaml";
             Window createdFromXaml;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
             using (StreamReader reader = new StreamReader(stream))
