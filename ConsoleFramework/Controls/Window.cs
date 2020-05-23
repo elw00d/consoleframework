@@ -4,16 +4,14 @@ using ConsoleFramework.Events;
 using ConsoleFramework.Native;
 using ConsoleFramework.Rendering;
 
-namespace ConsoleFramework.Controls
-{
-  /// <summary>
-  /// Window is a control that can hold one child only.
-  /// Usually a child is some panel or grid (or another layout control)
-  /// Window exists in WindowsHost instance, so Window should be aware about WindowsHost
-  /// and should be able to interoperate with it.
-  /// </summary>
-  public class Window : Control
-    {
+namespace ConsoleFramework.Controls {
+    /// <summary>
+    /// Window is a control that can hold one child only.
+    /// Usually a child is some panel or grid (or another layout control)
+    /// Window exists in WindowsHost instance, so Window should be aware about WindowsHost
+    /// and should be able to interoperate with it.
+    /// </summary>
+    public class Window : Control {
         public static RoutedEvent ActivatedEvent = EventManager.RegisterRoutedEvent("Activated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent DeactivatedEvent = EventManager.RegisterRoutedEvent("Deactivated", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
         public static RoutedEvent ClosedEvent = EventManager.RegisterRoutedEvent("Closed", RoutingStrategy.Direct, typeof(EventHandler), typeof(Window));
@@ -84,6 +82,20 @@ namespace ConsoleFramework.Controls
                 }
             }
         }
+        
+        private ColorPair activeBorderColors;
+        /// <summary>
+        /// Special colors for active window. Not set by default.
+        /// </summary>
+        public ColorPair ActiveBorderColors {
+            get => activeBorderColors;
+            set {
+                if (!Equals(activeBorderColors, value)) {
+                    activeBorderColors = value;
+                    Invalidate();
+                }
+            }
+        }
 
         protected WindowsHost getWindowsHost() {
             return (WindowsHost) Parent;
@@ -148,11 +160,14 @@ namespace ConsoleFramework.Controls
             }
         }
 
+        public bool IsActiveWindow() {
+            return getWindowsHost().TopWindow == this;
+        }
+
         public override void Render(RenderingBuffer buffer) {
             Attr borderAttrs = moving ? Colors.Blend(Color.Green, Color.Gray) : Colors.Blend(Color.White, Color.Gray);
-            if (getWindowsHost().TopWindow == this)
-            {
-              borderAttrs = Colors.Blend(Color.DarkBlue, Color.Gray);
+            if (ActiveBorderColors != null && IsActiveWindow()) {
+                borderAttrs = Colors.Blend(ActiveBorderColors.ForegroundColor, ActiveBorderColors.BackgroundColor);
             }
             // background
             buffer.FillRectangle(0, 0, this.ActualWidth, this.ActualHeight, ' ', borderAttrs);

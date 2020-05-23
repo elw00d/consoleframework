@@ -3,7 +3,8 @@
         xmlns:my="clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework"
         xmlns:converters="clr-namespace:Binding.Converters;assembly=Binding"
         xmlns:xaml="clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework"
-        MinWidth="10" MinHeight="10"   >
+        MinWidth="10" MinHeight="10"
+        ActiveBorderColors="DarkBlue on Gray">
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="15"></ColumnDefinition>
