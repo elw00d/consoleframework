@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Binding", "Binding\Binding.csproj", "{8BF04644-0165-4F60-B30C-52F1C8F147EF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xaml", "Xaml\Xaml.csproj", "{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleFramework", "ConsoleFramework\ConsoleFramework.csproj", "{B1496225-E3CE-4FEF-A7BA-8B6612DE35DA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManyControls", "ExamplesStandalone\ManyControls\ManyControls.csproj", "{20E4164D-D86A-4042-B1BE-353E21CFDA06}"
@@ -22,18 +18,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BF04644-0165-4F60-B30C-52F1C8F147EF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.DebugMono|Any CPU.Build.0 = Debug|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8C69EC3-3763-4DA1-BAB7-109A78D055DD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B1496225-E3CE-4FEF-A7BA-8B6612DE35DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B1496225-E3CE-4FEF-A7BA-8B6612DE35DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1496225-E3CE-4FEF-A7BA-8B6612DE35DA}.DebugMono|Any CPU.ActiveCfg = Debug|Any CPU

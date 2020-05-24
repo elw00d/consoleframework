@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="xaml"
+    targetNamespace="http://consoleframework.org/xaml.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://consoleframework.org/xaml.xsd"
+    xmlns:mstns="http://consoleframework.org/xaml.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:attribute name="Key" type="xs:string"></xs:attribute>
+  <xs:attribute name="Id" type="xs:string"></xs:attribute>
+</xs:schema>

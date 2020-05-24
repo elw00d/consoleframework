@@ -39,7 +39,7 @@ namespace Tests.Xaml {
 ",
                 rootContext,
                 new List<string> {
-                    "clr-namespace:Xaml;assembly=Xaml",
+                    "clr-namespace:Xaml;assembly=ConsoleFramework",
                     "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework"
                 });
             // Value is bound from parent data context instead of root context

@@ -190,7 +190,7 @@ namespace ConsoleFramework
                     string result = reader.ReadToEnd( );
                     Control control = XamlParser.CreateFromXaml<Control>(result, dataContext, new List<string>()
                     {
-                        "clr-namespace:Xaml;assembly=Xaml",
+                        "clr-namespace:Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                     });

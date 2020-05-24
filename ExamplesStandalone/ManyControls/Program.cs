@@ -63,7 +63,7 @@ namespace Examples
                 dataContext.Str = "Введите заголовок";
                 createdFromXaml = XamlParser.CreateFromXaml<Window>(result, dataContext, new List<string>()
                     {
-                        "clr-namespace:Xaml;assembly=Xaml",
+                        "clr-namespace:Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Xaml;assembly=ConsoleFramework",
                         "clr-namespace:ConsoleFramework.Controls;assembly=ConsoleFramework",
                     });
