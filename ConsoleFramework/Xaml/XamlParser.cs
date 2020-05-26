@@ -597,6 +597,10 @@ namespace Xaml {
             if (source == typeof(string) && dest == typeof(int?)) {
                 return int.Parse((string) value);
             }
+            if (source == typeof(string) && dest == typeof(char?))
+            {
+                return string.IsNullOrEmpty((string) value) ? (char?) null : ((string) value)[0];
+            }
 
             // Process TypeConverterAttribute attributes if exist
             if (Type.GetTypeCode(source) == TypeCode.Object) {
