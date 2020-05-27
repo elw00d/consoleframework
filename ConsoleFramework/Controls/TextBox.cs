@@ -168,6 +168,8 @@ namespace ConsoleFramework.Controls {
             set;
         }
 
+        public char? PasswordChar { get; set; }
+
         private int getSize( ) {
             if ( Size.HasValue ) return Size.Value;
             return text != null ? text.Length + 1 : 1;
@@ -193,7 +195,7 @@ namespace ConsoleFramework.Controls {
             if (null != text) {
                 for (int i = displayOffset; i < text.Length; i++) {
                     if (i - displayOffset < ActualWidth - 2 && i - displayOffset >= 0) {
-                        buffer.SetPixel(1 + i - displayOffset, 0, text[i]);
+                        buffer.SetPixel(1 + i - displayOffset, 0, PasswordChar.HasValue ? PasswordChar.Value : text[i]);
                     }
                 }
             }
