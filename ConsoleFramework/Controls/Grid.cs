@@ -162,16 +162,28 @@ namespace ConsoleFramework.Controls
             children = new UIElementCollection(this);
         }
 
-        protected override Size MeasureOverride( Size availableSize ) {
-            if ( ColumnDefinitions.Count == 0 || RowDefinitions.Count == 0 )
-                return Size.Empty;
-            Control[ , ] matrix = new Control[ ColumnDefinitions.Count,RowDefinitions.Count ];
-            for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                    if ( Children.Count > y*ColumnDefinitions.Count + x ) {
-                        matrix[ x, y ] = Children[ y*ColumnDefinitions.Count + x ];
-                    } else {
-                        matrix[ x, y ] = null;
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            List<ColumnDefinition> columns = new List<ColumnDefinition>(ColumnDefinitions);
+            List<RowDefinition> rows = new List<RowDefinition>(RowDefinitions);
+            if (rows.Count == 0)
+                rows.Add(new RowDefinition());
+            if (columns.Count == 0)
+                columns.Add(new ColumnDefinition());
+            //if (columns.Count == 0 || rows.Count == 0 )
+            //    return Size.Empty;
+            Control[,] matrix = new Control[columns.Count, rows.Count];
+            for (int x = 0; x < columns.Count; x++)
+            {
+                for (int y = 0; y < rows.Count; y++)
+                {
+                    if (Children.Count > y * columns.Count + x)
+                    {
+                        matrix[x, y] = Children[y * columns.Count + x];
+                    }
+                    else
+                    {
+                        matrix[x, y] = null;
                     }
                 }
             }
@@ -181,32 +193,34 @@ namespace ConsoleFramework.Controls
                                        || availableSize.Height == int.MaxValue;
 
             // Сначала выполняем Measure всех контролов с учётом ограничений,
-            // определённых в ColumnDefinitions и RowDefinitions
-            for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                ColumnDefinition columnDefinition = ColumnDefinitions[ x ];
+            // определённых в columns и rows
+            for (int x = 0; x < columns.Count; x++)
+            {
+                ColumnDefinition columnDefinition = columns[x];
 
-                int width = columnDefinition.Width.GridUnitType == GridUnitType.Pixel 
+                int width = columnDefinition.Width.GridUnitType == GridUnitType.Pixel
                     ? columnDefinition.Width.Value : int.MaxValue;
 
-                for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                    RowDefinition rowDefinition = RowDefinitions[ y ];
+                for (int y = 0; y < rows.Count; y++)
+                {
+                    RowDefinition rowDefinition = rows[y];
 
                     int height = rowDefinition.Height.GridUnitType == GridUnitType.Pixel
                         ? rowDefinition.Height.Value : int.MaxValue;
 
                     // Apply min-max constraints
-                    if ( columnDefinition.MinWidth != null && width < columnDefinition.MinWidth.Value )
+                    if (columnDefinition.MinWidth != null && width < columnDefinition.MinWidth.Value)
                         width = columnDefinition.MinWidth.Value;
-                    if ( columnDefinition.MaxWidth != null && width > columnDefinition.MaxWidth.Value )
+                    if (columnDefinition.MaxWidth != null && width > columnDefinition.MaxWidth.Value)
                         width = columnDefinition.MaxWidth.Value;
 
-                    if ( rowDefinition.MinHeight != null && height < rowDefinition.MinHeight.Value )
+                    if (rowDefinition.MinHeight != null && height < rowDefinition.MinHeight.Value)
                         height = rowDefinition.MinHeight.Value;
-                    if ( rowDefinition.MaxHeight != null && height > rowDefinition.MaxHeight.Value )
+                    if (rowDefinition.MaxHeight != null && height > rowDefinition.MaxHeight.Value)
                         height = rowDefinition.MaxHeight.Value;
 
-                    if ( matrix[ x, y ] != null )
-                        matrix[ x, y ].Measure( new Size( width, height ) );
+                    if (matrix[x, y] != null)
+                        matrix[x, y].Measure(new Size(width, height));
                 }
             }
 
@@ -214,89 +228,105 @@ namespace ConsoleFramework.Controls
             // каждой строки - максимальный Height - эти значения и станут соответственно
             // шириной и высотой ячеек, определяемых координатами строки и столбца
 
-            columnsWidths = new int[ ColumnDefinitions.Count ];
+            columnsWidths = new int[columns.Count];
 
-            for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                if ( ColumnDefinitions[ x ].Width.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    int maxWidth = ColumnDefinitions[ x ].Width.GridUnitType == GridUnitType.Pixel
-                                       ? ColumnDefinitions[ x ].Width.Value
+            for (int x = 0; x < columns.Count; x++)
+            {
+                if (columns[x].Width.GridUnitType != GridUnitType.Star || interpretStarAsAuto)
+                {
+                    int maxWidth = columns[x].Width.GridUnitType == GridUnitType.Pixel
+                                       ? columns[x].Width.Value
                                        : 0;
                     // Учитываем MinWidth. MaxWidth учитывать специально не нужно, поскольку мы это
                     // уже сделали при первом Measure, и DesiredSize не может быть больше MaxWidth
-                    if ( ColumnDefinitions[ x ].MinWidth != null && maxWidth < ColumnDefinitions[ x ].MinWidth.Value )
-                        maxWidth = ColumnDefinitions[ x ].MinWidth.Value;
-                    for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                        if ( matrix[ x, y ] != null )
-                            if ( matrix[ x, y ].DesiredSize.Width > maxWidth )
-                                maxWidth = matrix[ x, y ].DesiredSize.Width;
+                    if (columns[x].MinWidth != null && maxWidth < columns[x].MinWidth.Value)
+                        maxWidth = columns[x].MinWidth.Value;
+                    for (int y = 0; y < rows.Count; y++)
+                    {
+                        if (matrix[x, y] != null)
+                            if (matrix[x, y].DesiredSize.Width > maxWidth)
+                                maxWidth = matrix[x, y].DesiredSize.Width;
                     }
-                    columnsWidths[ x ] = maxWidth;
+                    columnsWidths[x] = maxWidth;
                 }
             }
 
-            rowsHeights = new int[ RowDefinitions.Count ];
+            rowsHeights = new int[rows.Count];
 
-            for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                if ( RowDefinitions[ y ].Height.GridUnitType != GridUnitType.Star || interpretStarAsAuto ) {
-                    int maxHeight = RowDefinitions[ y ].Height.GridUnitType == GridUnitType.Pixel
-                                        ? RowDefinitions[ y ].Height.Value
+            for (int y = 0; y < rows.Count; y++)
+            {
+                if (rows[y].Height.GridUnitType != GridUnitType.Star || interpretStarAsAuto)
+                {
+                    int maxHeight = rows[y].Height.GridUnitType == GridUnitType.Pixel
+                                        ? rows[y].Height.Value
                                         : 0;
-                    if ( RowDefinitions[ y ].MinHeight != null && maxHeight < RowDefinitions[ y ].MinHeight.Value )
-                        maxHeight = RowDefinitions[ y ].MinHeight.Value;
-                    for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                        if ( matrix[ x, y ] != null )
-                            if ( matrix[ x, y ].DesiredSize.Height > maxHeight )
-                                maxHeight = matrix[ x, y ].DesiredSize.Height;
+                    if (rows[y].MinHeight != null && maxHeight < rows[y].MinHeight.Value)
+                        maxHeight = rows[y].MinHeight.Value;
+                    for (int x = 0; x < columns.Count; x++)
+                    {
+                        if (matrix[x, y] != null)
+                            if (matrix[x, y].DesiredSize.Height > maxHeight)
+                                maxHeight = matrix[x, y].DesiredSize.Height;
                     }
-                    rowsHeights[ y ] = maxHeight;
+                    rowsHeights[y] = maxHeight;
                 }
             }
 
             // Теперь вычислим размеры Star-столбцов и Star-строк
-            if ( !interpretStarAsAuto ) {
+            if (!interpretStarAsAuto)
+            {
                 int totalWidthStars = 0;
-                foreach ( var columnDefinition in ColumnDefinitions ) {
-                    if ( columnDefinition.Width.GridUnitType == GridUnitType.Star ) {
+                foreach (var columnDefinition in columns)
+                {
+                    if (columnDefinition.Width.GridUnitType == GridUnitType.Star)
+                    {
                         totalWidthStars += columnDefinition.Width.Value;
                     }
                 }
-                int remainingWidth = Math.Max( 0, availableSize.Width - columnsWidths.Sum( ) );
-                for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                    ColumnDefinition columnDefinition = ColumnDefinitions[ x ];
-                    if ( columnDefinition.Width.GridUnitType == GridUnitType.Star ) {
-                        columnsWidths[ x ] = remainingWidth*columnDefinition.Width.Value/totalWidthStars;
+                int remainingWidth = Math.Max(0, availableSize.Width - columnsWidths.Sum());
+                for (int x = 0; x < columns.Count; x++)
+                {
+                    ColumnDefinition columnDefinition = columns[x];
+                    if (columnDefinition.Width.GridUnitType == GridUnitType.Star)
+                    {
+                        columnsWidths[x] = remainingWidth * columnDefinition.Width.Value / totalWidthStars;
                     }
                 }
 
                 int totalHeightStars = 0;
-                foreach ( var rowDefinition in RowDefinitions ) {
-                    if ( rowDefinition.Height.GridUnitType == GridUnitType.Star ) {
+                foreach (var rowDefinition in rows)
+                {
+                    if (rowDefinition.Height.GridUnitType == GridUnitType.Star)
+                    {
                         totalHeightStars += rowDefinition.Height.Value;
                     }
                 }
-                int remainingHeight = Math.Max( 0, availableSize.Height - rowsHeights.Sum( ) );
-                for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                    RowDefinition rowDefinition = RowDefinitions[ y ];
-                    if ( rowDefinition.Height.GridUnitType == GridUnitType.Star ) {
-                        rowsHeights[ y ] = remainingHeight*rowDefinition.Height.Value/totalHeightStars;
+                int remainingHeight = Math.Max(0, availableSize.Height - rowsHeights.Sum());
+                for (int y = 0; y < rows.Count; y++)
+                {
+                    RowDefinition rowDefinition = rows[y];
+                    if (rowDefinition.Height.GridUnitType == GridUnitType.Star)
+                    {
+                        rowsHeights[y] = remainingHeight * rowDefinition.Height.Value / totalHeightStars;
                     }
                 }
             }
 
             // Окончательный повторный вызов Measure для всех детей с уже определёнными размерами,
             // теми, которые будут использоваться при размещении
-            for ( int x = 0; x < ColumnDefinitions.Count; x++ ) {
-                int width = columnsWidths[ x ];
-                for ( int y = 0; y < RowDefinitions.Count; y++ ) {
-                    int height = rowsHeights[ y ];
-                    if ( matrix[ x, y ] != null )
-                        matrix[ x, y ].Measure( new Size( width, height ) );
+            for (int x = 0; x < columns.Count; x++)
+            {
+                int width = columnsWidths[x];
+                for (int y = 0; y < rows.Count; y++)
+                {
+                    int height = rowsHeights[y];
+                    if (matrix[x, y] != null)
+                        matrix[x, y].Measure(new Size(width, height));
                 }
             }
 
-            return new Size( columnsWidths.Sum( ), rowsHeights.Sum( ) );
+            return new Size(columnsWidths.Sum(), rowsHeights.Sum());
         }
-
         protected override Size ArrangeOverride( Size finalSize ) {
             int currentX = 0;
             for ( int x = 0; x < columnsWidths.Length; x++ ) {
